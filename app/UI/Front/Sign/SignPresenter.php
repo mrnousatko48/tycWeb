@@ -55,7 +55,7 @@ final class SignPresenter extends Nette\Application\UI\Presenter
 
             // Handle simplified backlinks
             $redirectMap = [
-                'repair' => ':Front:Repair:default',
+            
                 'dashboard' => ':Admin:AdminDashboard:default',
             ];
 

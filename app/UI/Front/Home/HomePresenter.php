@@ -15,4 +15,9 @@ final class HomePresenter extends Nette\Application\UI\Presenter
     {
         // Flash messages are displayed automatically in Latte templates
     }
+
+    public function renderDetail(): void
+    {
+        
+    }
 }
