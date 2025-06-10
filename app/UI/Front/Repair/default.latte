@@ -1,0 +1,64 @@
+{block content}
+
+<style>
+        .card {
+            border-radius: 8px;
+        }
+        h1 {
+            font-weight: bold;
+            color: #343a40;
+        }
+    </style>
+
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Formulář</h1>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h5 class="card-title text-center mb-3">Vyberte možnosti</h5>
+            <div class="form-group">
+                {control form}
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<script>
+// Najdeme na stránce všechny podřízené selectboxy
+document.querySelectorAll('select[data-depends]').forEach((childSelect) => {
+    let parentSelect = childSelect.form[childSelect.dataset.depends]; // Nadřízený <select>
+    let url = childSelect.dataset.url; // Atribut data-url
+    let items = JSON.parse(childSelect.dataset.items || 'null'); // Atribut data-items
+
+    // Když uživatel změní vybranou položku v nadřízeném selectu...
+    parentSelect.addEventListener('change', () => {
+        // Pokud existuje atribut data-items...
+        if (items) {
+            // Nahrajeme rovnou do podřízeného selectboxu nové položky
+            updateSelectbox(childSelect, items[parentSelect.value]);
+        }
+
+        // Pokud existuje atribut data-url...
+        if (url) {
+            // Uděláme AJAXový požadavek na endpoint s vybranou položkou místo placeholderu
+            fetch(url.replace(encodeURIComponent('#'), encodeURIComponent(parentSelect.value)))
+                .then((response) => response.json())
+                // A nahrajeme do podřízeného selectboxu nové položky
+                .then((data) => updateSelectbox(childSelect, data));
+        }
+    });
+});
+
+// Přepíše <options> v <select>
+function updateSelectbox(select, items) {
+    select.innerHTML = '<option value="">----</option>'; // Odstraníme vše a přidáme defaultní položku
+    for (let id in items) { // Vložíme nové
+        let el = document.createElement('option');
+        el.setAttribute('value', id);
+        el.innerText = items[id];
+        select.appendChild(el);
+    }
+}
+</script>
+{/block}
