@@ -2,17 +2,9 @@
 
 declare(strict_types=1);
 
-// Load the Composer autoloader
-if (@!include __DIR__ . '/../vendor/autoload.php') {
-	die('Install Nette using `composer update`');
-}
+require __DIR__ . '/../vendor/autoload.php';
 
-// Initialize the application environment
-$configurator = App\Bootstrap::boot();
-
-// Create the Dependency Injection container
-$container = $configurator->createContainer();
-
-// Start the application and handle the incoming request
+$bootstrap = new App\Bootstrap;
+$container = $bootstrap->bootWebApplication();
 $application = $container->getByType(Nette\Application\Application::class);
 $application->run();

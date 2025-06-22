@@ -1,127 +1,17 @@
 <!DOCTYPE html>
-<html lang="cs">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{block title}Mobilní Kryty{/block}</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-        }
-    </style>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width">
+
+	<title>{ifset title}{include title|stripHtml} | {/ifset}Nette Web</title>
+
+	{asset? 'main.js'}
 </head>
-<body class="bg-gray-50">
-    <!-- Navigace -->
-    <nav class="bg-white shadow-sm">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center h-16">
-                <!-- Logo -->
-                <div class="flex items-center">
-                    <a n:href="Home:default" class="text-2xl font-semibold text-gray-900">Mobilní Kryty</a>
-                </div>
 
-                <!-- Desktop menu -->
-                <div class="hidden md:flex items-center space-x-4">
-                    <ul class="flex space-x-6">
-                        <li><a n:href="Home:default" class="text-gray-600 hover:text-gray-900">Domů</a></li>
-                        <li><a n:href="Home:about" class="text-gray-600 hover:text-gray-900">O nás</a></li>
-                        <li><a n:href="Home:contact" class="text-gray-600 hover:text-gray-900">Kontakt</a></li>
-                    </ul>
-                    <div n:if="$user->isLoggedIn()" class="relative">
-                        <button class="flex items-center space-x-2 text-gray-600 hover:text-gray-900" onclick="toggleDropdown()">
-                            <img src="{$basePath}/{$user->identity->image|default:'https://via.placeholder.com/30'}" alt="Profilový obrázek" class="w-8 h-8 rounded-full">
-                            <span>{$user->identity->username}</span>
-                        </button>
-                        <div id="userDropdown" class="hidden absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-10">
-                            <a n:href="Dashboard:default" class="block px-4 py-2 text-gray-600 hover:bg-gray-100">Mé objednávky</a>
-                            <a n:href=":Admin:User:edit, $user->getIdentity()->id" class="block px-4 py-2 text-gray-600 hover:bg-gray-100">Účet</a>
-                            <a n:href="Sign:out" class="block px-4 py-2 text-red-600 hover:bg-gray-100">Odhlásit se</a>
-                        </div>
-                    </div>
-                    <div n:if="!$user->isLoggedIn()">
-                        <a n:href="Sign:in" class="text-white bg-black px-4 py-2 rounded-lg hover:bg-gray-800">Přihlásit se</a>
-                    </div>
-                </div>
+<body>
+	<div n:foreach="$flashes as $flash" n:class="flash, $flash->type">{$flash->message}</div>
 
-                <!-- Mobilní menu tlačítko -->
-                <div class="md:hidden flex items-center">
-                    <button onclick="toggleMobileMenu()" class="text-gray-600 hover:text-gray-900">
-                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-
-            <!-- Mobilní menu -->
-            <div id="mobileMenu" class="hidden md:hidden bg-white shadow-sm">
-                <ul class="flex flex-col space-y-2 px-4 py-4">
-                    <li><a n:href="Home:default" class="text-gray-600 hover:text-gray-900">Domů</a></li>
-                    <li><a n:href="Home:about" class="text-gray-600 hover:text-gray-900">O nás</a></li>
-                    <li><a n:href="Home:contact" class="text-gray-600 hover:text-gray-900">Kontakt</a></li>
-                    <li n:if="$user->isLoggedIn()">
-                        <div class="flex items-center space-x-2">
-                            <img src="{$basePath}/{$user->identity->image|default:'https://via.placeholder.com/30'}" alt="Profilový obrázek" class="w-8 h-8 rounded-full">
-                            <span class="text-gray-600">{$user->identity->username}</span>
-                        </div>
-                        <ul class="pl-4 mt-2 space-y-2">
-                            <li><a n:href="Dashboard:default" class="text-gray-600 hover:text-gray-900">Mé objednávky</a></li>
-                            <li><a n:href=":Admin:User:edit, $user->getIdentity()->id" class="text-gray-600 hover:text-gray-900">Účet</a></li>
-                            <li><a n:href="Sign:out" class="text-red-600 hover:text-red-800">Odhlásit se</a></li>
-                        </ul>
-                    </li>
-                    <li n:if="!$user->isLoggedIn()">
-                        <a n:href="Sign:in" class="text-white bg-black px-4 py-2 rounded-lg hover:bg-gray-800">Přihlásit se</a>
-                    </li>
-                </ul>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Hlavní obsah -->
-    <main class="min-h-screen">
-        {include content}
-    </main>
-
-    <!-- Patička -->
-    <footer class="bg-gray-800 text-white py-8">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
-                <div>
-                    <h3 class="text-lg font-semibold">Mobilní Kryty</h3>
-                    <p class="mt-2 text-gray-400">3D tisknuté kryty na telefony s jedinečným designem.</p>
-                </div>
-                <div>
-                    <h3 class="text-lg font-semibold">Odkazy</h3>
-                    <ul class="mt-2 space-y-2">
-                        <li><a n:href="Home:default" class="text-gray-400 hover:text-white">Domů</a></li>
-                        <li><a n:href="Home:about" class="text-gray-400 hover:text-white">O nás</a></li>
-                        <li><a n:href="Home:contact" class="text-gray-400 hover:text-white">Kontakt</a></li>
-                    </ul>
-                </div>
-                <div>
-                    <h3 class="text-lg font-semibold">Kontakt</h3>
-                    <p class="mt-2 text-gray-400">Email: info@mobilnikryty.cz</p>
-                    <p class="text-gray-400">Telefon: +420 123 456 789</p>
-                </div>
-            </div>
-            <div class="mt-8 text-center text-gray-400">
-                <p>© 2025 Mobilní Kryty. Všechna práva vyhrazena.</p>
-            </div>
-        </div>
-    </footer>
-
-    <script>
-        function toggleDropdown() {
-            const dropdown = document.getElementById('userDropdown');
-            dropdown.classList.toggle('hidden');
-        }
-
-        function toggleMobileMenu() {
-            const mobileMenu = document.getElementById('mobileMenu');
-            mobileMenu.classList.toggle('hidden');
-        }
-    </script>
+	{include content}
 </body>
 </html>

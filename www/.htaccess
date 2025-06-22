@@ -23,7 +23,7 @@ Require all granted
 	RewriteRule ^\.well-known/.* - [L]
 
 	# Block access to hidden files (starting with a dot) and URLs resembling WordPress admin paths
-	RewriteRule /\.|^\.|^wp- - [F]
+	RewriteRule /\.|^\.|^wp-(login|admin|includes|content) - [F]
 
 	# Return 404 for missing files with specific extensions (images, scripts, styles, archives)
 	RewriteCond %{REQUEST_FILENAME} !-f
