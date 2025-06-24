@@ -6,6 +6,7 @@ namespace Nette\Assets;
 
 use Nette\Utils\FileSystem;
 use Nette\Utils\Json;
+use function array_filter, array_values, is_array, preg_match, str_starts_with;
 
 
 /**
@@ -40,39 +41,13 @@ class ViteMapper implements Mapper
 		Helpers::checkOptions($options);
 
 		if ($this->devServer) {
-			return preg_match('~\.(js|mjs|ts)$~i', $reference)
-				? new EntryAsset(
-					url: $this->devServer . '/' . $reference,
-					imports: [new ScriptAsset($this->devServer . '/@vite/client', type: 'module')],
-				)
-				: Helpers::createAssetFromUrl($this->devServer . '/' . $reference);
+			return $this->createDevelopmentAsset($reference);
 		}
 
 		$this->chunks ??= $this->readChunks();
-		$chunk = $this->chunks[$reference] ?? null;
 
-		if ($chunk) {
-			$entry = isset($chunk['isEntry']) || isset($chunk['isDynamicEntry']);
-			if (str_starts_with($reference, '_') && !$entry) {
-				throw new AssetNotFoundException("Cannot directly access internal chunk '$reference'");
-			}
-
-			$dependencies = $this->collectDependencies($reference);
-			unset($dependencies[$chunk['file']]);
-
-			return $dependencies
-				? new EntryAsset(
-					url: $this->baseUrl . '/' . $chunk['file'],
-					file: $this->basePath . '/' . $chunk['file'],
-					imports: array_values(array_filter($dependencies, fn($asset) => $asset instanceof StyleAsset)),
-					preloads: array_values(array_filter($dependencies, fn($asset) => $asset instanceof ScriptAsset)),
-					crossorigin: true,
-				)
-				: Helpers::createAssetFromUrl(
-					$this->baseUrl . '/' . $chunk['file'],
-					$this->basePath . '/' . $chunk['file'],
-					['crossorigin' => true],
-				);
+		if (isset($this->chunks[$reference])) {
+			return $this->createProductionAsset($reference);
 
 		} elseif ($this->publicMapper) {
 			return $this->publicMapper->getAsset($reference);
@@ -80,6 +55,47 @@ class ViteMapper implements Mapper
 		} else {
 			throw new AssetNotFoundException("File '$reference' not found in Vite manifest");
 		}
+	}
+
+
+	private function createProductionAsset(string $reference): Asset
+	{
+		$chunk = $this->chunks[$reference];
+		$entry = isset($chunk['isEntry']) || isset($chunk['isDynamicEntry']);
+		if (str_starts_with($reference, '_') && !$entry) {
+			throw new AssetNotFoundException("Cannot directly access internal chunk '$reference'");
+		}
+
+		$dependencies = $this->collectDependencies($reference);
+		unset($dependencies[$chunk['file']]);
+
+		return $dependencies
+			? new EntryAsset(
+				url: $this->baseUrl . '/' . $chunk['file'],
+				file: $this->basePath . '/' . $chunk['file'],
+				imports: array_values(array_filter($dependencies, fn($asset) => $asset instanceof StyleAsset)),
+				preloads: array_values(array_filter($dependencies, fn($asset) => $asset instanceof ScriptAsset)),
+				crossorigin: true,
+			)
+			: Helpers::createAssetFromUrl(
+				$this->baseUrl . '/' . $chunk['file'],
+				$this->basePath . '/' . $chunk['file'],
+				['crossorigin' => true],
+			);
+	}
+
+
+	private function createDevelopmentAsset(string $reference): Asset
+	{
+		$url = $this->devServer . '/' . $reference;
+		return match (1) {
+			preg_match('~\.(jsx?|mjs|tsx?)$~i', $reference) => new EntryAsset(
+				url: $url,
+				imports: [new ScriptAsset($this->devServer . '/@vite/client', type: 'module')],
+			),
+			preg_match('~\.(sass|scss)$~i', $reference) => new StyleAsset($url),
+			default => Helpers::createAssetFromUrl($url),
+		};
 	}
 
 

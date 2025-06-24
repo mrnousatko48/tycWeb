@@ -2,6 +2,11 @@
 return array (
   0 => 
   array (
+    'App\\UI\\Admin\\User\\UserPresenter' => 
+    array (
+      0 => '/Users/dostals/tycWeb-1/app/UI/Admin/User/UserPresenter.php',
+      1 => 1750794613,
+    ),
     'App\\UI\\Admin\\Dashboard\\DashboardPresenter' => 
     array (
       0 => '/Users/dostals/tycWeb-1/app/UI/Admin/Dashboard/DashboardPresenter.php',
@@ -30,12 +35,17 @@ return array (
     'App\\UI\\Front\\Sign\\SignPresenter' => 
     array (
       0 => '/Users/dostals/tycWeb-1/app/UI/Front/Sign/SignPresenter.php',
-      1 => 1750792898,
+      1 => 1750793318,
     ),
     'App\\Core\\RouterFactory' => 
     array (
       0 => '/Users/dostals/tycWeb-1/app/Core/RouterFactory.php',
       1 => 1750754830,
+    ),
+    'App\\MailSender\\MailSender' => 
+    array (
+      0 => '/Users/dostals/tycWeb-1/app/Mailer/MailSender.php',
+      1 => 1750793234,
     ),
     'App\\Bootstrap' => 
     array (
@@ -55,17 +65,12 @@ return array (
     'App\\Model\\UserFacade' => 
     array (
       0 => '/Users/dostals/tycWeb-1/app/Model/UserFacade.php',
-      1 => 1750777282,
+      1 => 1750794623,
     ),
     'App\\Model\\DuplicateNameException' => 
     array (
       0 => '/Users/dostals/tycWeb-1/app/Model/UserFacade.php',
-      1 => 1750777282,
-    ),
-    'App\\MailSender\\MailSender' => 
-    array (
-      0 => '/Users/dostals/tycWeb-1/app/Mailer/MailSender.php',
-      1 => 1750793234,
+      1 => 1750794623,
     ),
   ),
   1 => 
@@ -97,9 +102,14 @@ return array (
     'App\\UI\\Front\\Home\\HomeCaseTemplate' => 3,
     'App\\UI\\Front\\Cart\\CartCreateOrderTemplate' => 3,
     'App\\UI\\Front\\Adnin\\AdninPresenter' => 3,
+    'App\\Presenters\\UserPresenter' => 2,
+    'App\\UI\\Admin\\User\\UserDefaultTemplate' => 3,
+    'App\\UI\\Admin\\User\\UserTemplate' => 3,
+    'Ublaboo\\DataGrid\\DataGridTemplate' => 3,
+    'Ublaboo\\DataGrid\\Components\\DataGridPaginator\\DataGridPaginatorTemplate' => 3,
+    'App\\UI\\Admin\\User\\UserEditTemplate' => 3,
   ),
   2 => 
   array (
-    '/Users/dostals/tycWeb-1/app/UI/Admin/User/UserPresenter.php' => 1750775321,
   ),
 );

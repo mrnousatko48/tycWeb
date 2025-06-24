@@ -1,0 +1,32 @@
+{block content}
+<h1 class="text-2xl font-semibold mb-4">Upravit uživatele</h1>
+
+<div class="max-w-xl">
+    {form editUserForm}
+        <div class="mb-3">
+            {label username/} {input username class => 'form-control'}
+        </div>
+        <div class="mb-3">
+            {label firstname/} {input firstname class => 'form-control'}
+        </div>
+        <div class="mb-3">
+            {label lastname/} {input lastname class => 'form-control'}
+        </div>
+        <div class="mb-3">
+            {label email/} {input email class => 'form-control'}
+        </div>
+        <div class="mb-3">
+            {label address/} {input address class => 'form-control'}
+        </div>
+        <div class="mb-3">
+            {label city/} {input city class => 'form-control'}
+        </div>
+        <div class="mb-3">
+            {label role/} {input role class => 'form-select'}
+        </div>
+        <div>
+            {input submit class => 'btn btn-primary'}
+        </div>
+    {/form}
+</div>
+{/block}

@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 namespace App\Model;
+
 use Nette\Database\Explorer;
 use Nette\Security\Passwords;
 use Nette\Security\Identity;
@@ -23,7 +24,7 @@ final class UserFacade implements Authenticator
         $this->database = $database;
     }
 
-    
+
     /**
      * Adds a new user or throws exception if duplicate.
      *
@@ -40,7 +41,7 @@ final class UserFacade implements Authenticator
         $existing = $this->database->table('users')
             ->where('username = ? OR email = ?', $username, $email)
             ->fetch();
-    
+
         if ($existing) {
             if ($existing->username === $username) {
                 throw new DuplicateNameException('Uživatelské jméno již existuje.');
@@ -49,7 +50,7 @@ final class UserFacade implements Authenticator
                 throw new DuplicateNameException('Email již existuje.');
             }
         }
-    
+
         $this->database->table('users')->insert([
             'username' => $username,
             'firstname' => $firstname,
@@ -59,21 +60,21 @@ final class UserFacade implements Authenticator
             'role' => $role,
         ]);
     }
-    
+
     public function authenticate(string $username, string $password): Identity
     {
         $row = $this->database->table('users')
             ->where('username', $username)
             ->fetch();
-    
+
         if (!$row) {
             throw new AuthenticationException('Uživatel neexistuje.');
         }
-    
+
         if (!$this->passwords->verify($password, $row->password)) {
             throw new AuthenticationException('Nesprávné heslo.');
         }
-    
+
         return new Identity(
             $row->id,
             $row->role,
@@ -85,10 +86,22 @@ final class UserFacade implements Authenticator
             ]
         );
     }
-    
+    public function getUsers(): \Nette\Database\Table\Selection
+    {
+        return $this->database->table('users');
+    }
+
+    public function getUserById(int $id): ?\Nette\Database\Table\ActiveRow
+    {
+        return $this->database->table('users')->get($id);
+    }
+
+    public function updateUser(int $id, \Nette\Utils\ArrayHash $values): void
+    {
+        $this->database->table('users')->get($id)->update((array) $values);
+    }
 }
 
 class DuplicateNameException extends \Exception
 {
 }
-
