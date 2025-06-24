@@ -1,17 +1,48 @@
 <!DOCTYPE html>
-<html>
+<html lang="cs">
 <head>
 	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-	<title>{ifset title}{include title|stripHtml} | {/ifset}Nette Web</title>
+	<title>
+		{ifset title}
+			{block title}{/block} | 
+		{/ifset}
+		3D Kryty
+	</title>
 
-	{asset? 'main.js'}
+	<link rel="stylesheet" href="{$basePath}/assets/style.css">
+	<script src="{$basePath}/assets/main.js" defer></script>
 </head>
 
 <body>
-	<div n:foreach="$flashes as $flash" n:class="flash, $flash->type">{$flash->message}</div>
+	<header>
+		<div class="container">
+			<h1><a href="{$basePath}/">3D Kryty</a></h1>
+			<nav>
+				<ul>
+					<li><a n:href="Home:default">Domů</a></li>
+					<li><a href="#">Produkty</a></li>
+					<li><a href="#">O nás</a></li>
+					<li><a href="#">Kontakt</a></li>
 
-	{include content}
+					{if $user->isLoggedIn()}
+						<li><a n:href="Sign:out">Odhlásit se</a></li>
+					{else}
+						<li><a n:href="Sign:in">Přihlášení</a></li>
+					{/if}
+				</ul>
+			</nav>
+		</div>
+	</header>
+
+	<main class="container">
+		{foreach $flashes as $flash}
+			<div n:class="flash, $flash->type">{$flash->message}</div>
+		{/foreach}
+
+		{include content}
+	</main>
+
 </body>
 </html>

@@ -1,13 +1,14 @@
 <?php
-// source: /root/tycWeb/config/common.neon
-// source: /root/tycWeb/config/services.neon
+// source: /Users/dostals/tycWeb-1/config/common.neon
+// source: /Users/dostals/tycWeb-1/config/services.neon
+// source: /Users/dostals/tycWeb-1/config/local.neon
 // source: array
 
 /** @noinspection PhpParamsInspection,PhpMethodMayBeStaticInspection */
 
 declare(strict_types=1);
 
-class Container_1258fd7f57 extends Nette\DI\Container
+class Container_0159e7c4e2 extends Nette\DI\Container
 {
 	protected array $tags = [
 		'nette.inject' => [
@@ -22,8 +23,13 @@ class Container_1258fd7f57 extends Nette\DI\Container
 	protected array $aliases = [
 		'application' => 'application.application',
 		'cacheStorage' => 'cache.storage',
+		'database.default' => 'database.default.connection',
+		'database.default.context' => 'database.default.explorer',
 		'httpRequest' => 'http.request',
 		'httpResponse' => 'http.response',
+		'nette.cacheJournal' => 'cache.journal',
+		'nette.database.default' => 'database.default',
+		'nette.database.default.context' => 'database.default.explorer',
 		'nette.httpRequestFactory' => 'http.requestFactory',
 		'nette.latteFactory' => 'latte.latteFactory',
 		'nette.mailer' => 'mail.mailer',
@@ -40,7 +46,14 @@ class Container_1258fd7f57 extends Nette\DI\Container
 		'Nette\Application\IPresenterFactory' => [['application.presenterFactory']],
 		'Nette\Application\LinkGenerator' => [['application.linkGenerator']],
 		'Nette\Assets\Registry' => [['assets.registry']],
+		'Nette\Caching\Storages\Journal' => [['cache.journal']],
 		'Nette\Caching\Storage' => [['cache.storage']],
+		'Nette\Database\Connection' => [['database.default.connection']],
+		'Nette\Database\IStructure' => [['database.default.structure']],
+		'Nette\Database\Structure' => [['database.default.structure']],
+		'Nette\Database\Conventions' => [['database.default.conventions']],
+		'Nette\Database\Conventions\DiscoveredConventions' => [['database.default.conventions']],
+		'Nette\Database\Explorer' => [['database.default.explorer']],
 		'Nette\Http\RequestFactory' => [['http.requestFactory']],
 		'Nette\Http\IRequest' => [['http.request']],
 		'Nette\Http\Request' => [['http.request']],
@@ -59,26 +72,30 @@ class Container_1258fd7f57 extends Nette\DI\Container
 		'Tracy\Bar' => [['tracy.bar']],
 		'Nette\Routing\RouteList' => [['01']],
 		'Nette\Routing\Router' => [['01']],
-		'ArrayAccess' => [2 => ['01', 'application.1', 'application.3']],
+		'ArrayAccess' => [2 => ['01', 'application.1', 'application.2', 'application.3']],
 		'Nette\Application\Routers\RouteList' => [['01']],
-		'Nette\Application\UI\Presenter' => [2 => ['application.1', 'application.3']],
-		'Nette\Application\UI\Control' => [2 => ['application.1', 'application.3']],
-		'Nette\Application\UI\Component' => [2 => ['application.1', 'application.3']],
-		'Nette\ComponentModel\Container' => [2 => ['application.1', 'application.3']],
-		'Nette\ComponentModel\Component' => [2 => ['application.1', 'application.3']],
+		'Nette\Application\UI\Presenter' => [2 => ['application.1', 'application.2', 'application.3']],
+		'Nette\Application\UI\Control' => [2 => ['application.1', 'application.2', 'application.3']],
+		'Nette\Application\UI\Component' => [2 => ['application.1', 'application.2', 'application.3']],
+		'Nette\ComponentModel\Container' => [2 => ['application.1', 'application.2', 'application.3']],
+		'Nette\ComponentModel\Component' => [2 => ['application.1', 'application.2', 'application.3']],
 		'Nette\Application\IPresenter' => [
 			2 => ['application.1', 'application.2', 'application.3', 'application.4', 'application.5'],
 		],
-		'Nette\Application\UI\Renderable' => [2 => ['application.1', 'application.3']],
-		'Nette\Application\UI\StatePersistent' => [2 => ['application.1', 'application.3']],
-		'Nette\Application\UI\SignalReceiver' => [2 => ['application.1', 'application.3']],
-		'Nette\ComponentModel\IContainer' => [2 => ['application.1', 'application.3']],
-		'Nette\ComponentModel\IComponent' => [2 => ['application.1', 'application.3']],
-		'App\UI\Front\Home\HomePresenter' => [2 => ['application.1']],
-		'App\Presentation\Error\Error5xx\Error5xxPresenter' => [2 => ['application.2']],
-		'App\Presentation\Error\Error4xx\Error4xxPresenter' => [2 => ['application.3']],
+		'Nette\Application\UI\Renderable' => [2 => ['application.1', 'application.2', 'application.3']],
+		'Nette\Application\UI\StatePersistent' => [2 => ['application.1', 'application.2', 'application.3']],
+		'Nette\Application\UI\SignalReceiver' => [2 => ['application.1', 'application.2', 'application.3']],
+		'Nette\ComponentModel\IContainer' => [2 => ['application.1', 'application.2', 'application.3']],
+		'Nette\ComponentModel\IComponent' => [2 => ['application.1', 'application.2', 'application.3']],
+		'App\UI\Admin\Dashboard\DashboardPresenter' => [2 => ['application.1']],
+		'App\UI\Front\Home\HomePresenter' => [2 => ['application.2']],
+		'App\UI\Front\Sign\SignPresenter' => [2 => ['application.3']],
 		'NetteModule\ErrorPresenter' => [2 => ['application.4']],
 		'NetteModule\MicroPresenter' => [2 => ['application.5']],
+		'App\UI\Accessory\FormFactory' => [['02']],
+		'Nette\Security\Authenticator' => [['03']],
+		'Nette\Security\IAuthenticator' => [['03']],
+		'App\Model\UserFacade' => [['03']],
 	];
 
 
@@ -94,7 +111,36 @@ class Container_1258fd7f57 extends Nette\DI\Container
 	}
 
 
-	public function createServiceApplication__1(): App\UI\Front\Home\HomePresenter
+	public function createService02(): App\UI\Accessory\FormFactory
+	{
+		return new App\UI\Accessory\FormFactory($this->getService('security.user'));
+	}
+
+
+	public function createService03(): App\Model\UserFacade
+	{
+		return new App\Model\UserFacade($this->getService('security.passwords'), $this->getService('database.default.explorer'));
+	}
+
+
+	public function createServiceApplication__1(): App\UI\Admin\Dashboard\DashboardPresenter
+	{
+		$service = new App\UI\Admin\Dashboard\DashboardPresenter;
+		$service->injectPrimary(
+			$this->getService('http.request'),
+			$this->getService('http.response'),
+			$this->getService('application.presenterFactory'),
+			$this->getService('01'),
+			$this->getService('session.session'),
+			$this->getService('security.user'),
+			$this->getService('latte.templateFactory'),
+		);
+		$service->invalidLinkMode = 5;
+		return $service;
+	}
+
+
+	public function createServiceApplication__2(): App\UI\Front\Home\HomePresenter
 	{
 		$service = new App\UI\Front\Home\HomePresenter;
 		$service->injectPrimary(
@@ -111,15 +157,9 @@ class Container_1258fd7f57 extends Nette\DI\Container
 	}
 
 
-	public function createServiceApplication__2(): App\Presentation\Error\Error5xx\Error5xxPresenter
+	public function createServiceApplication__3(): App\UI\Front\Sign\SignPresenter
 	{
-		return new App\Presentation\Error\Error5xx\Error5xxPresenter($this->getService('tracy.logger'));
-	}
-
-
-	public function createServiceApplication__3(): App\Presentation\Error\Error4xx\Error4xxPresenter
-	{
-		$service = new App\Presentation\Error\Error4xx\Error4xxPresenter;
+		$service = new App\UI\Front\Sign\SignPresenter($this->getService('03'), $this->getService('02'));
 		$service->injectPrimary(
 			$this->getService('http.request'),
 			$this->getService('http.response'),
@@ -179,7 +219,11 @@ class Container_1258fd7f57 extends Nette\DI\Container
 
 	public function createServiceApplication__presenterFactory(): Nette\Application\IPresenterFactory
 	{
-		$service = new Nette\Application\PresenterFactory(new Nette\Bridges\ApplicationDI\PresenterFactoryCallback($this, 5, '/root/tycWeb/temp/cache/nette.application/touch'));
+		$service = new Nette\Application\PresenterFactory(new Nette\Bridges\ApplicationDI\PresenterFactoryCallback(
+			$this,
+			5,
+			'/Users/dostals/tycWeb-1/temp/cache/nette.application/touch',
+		));
 		$service->setMapping(['*' => 'App\UI\*\**Presenter']);
 		return $service;
 	}
@@ -193,7 +237,7 @@ class Container_1258fd7f57 extends Nette\DI\Container
 			'default',
 			new Nette\Assets\FilesystemMapper(
 			rtrim($baseUrl->resolve('assets')->getAbsoluteUrl(), '/'),
-			rtrim(Nette\Utils\FileSystem::resolvePath('/root/tycWeb/www', 'assets'), '\/'),
+			rtrim(Nette\Utils\FileSystem::resolvePath('/Users/dostals/tycWeb-1/www', 'assets'), '\/'),
 			[],
 			true,
 		),
@@ -202,15 +246,64 @@ class Container_1258fd7f57 extends Nette\DI\Container
 	}
 
 
+	public function createServiceCache__journal(): Nette\Caching\Storages\Journal
+	{
+		return new Nette\Caching\Storages\SQLiteJournal('/Users/dostals/tycWeb-1/temp/cache/journal.s3db');
+	}
+
+
 	public function createServiceCache__storage(): Nette\Caching\Storage
 	{
-		return new Nette\Caching\Storages\FileStorage('/root/tycWeb/temp/cache');
+		return new Nette\Caching\Storages\FileStorage('/Users/dostals/tycWeb-1/temp/cache', $this->getService('cache.journal'));
 	}
 
 
 	public function createServiceContainer(): Nette\DI\Container
 	{
 		return $this;
+	}
+
+
+	public function createServiceDatabase__default__connection(): Nette\Database\Connection
+	{
+		$service = new Nette\Database\Connection(
+			'mysql:host=127.0.0.1;dbname=tycweb',
+			/*sensitive{*/'root'/*}*/,
+			/*sensitive{*/'root'/*}*/,
+			[],
+		);
+		Nette\Bridges\DatabaseTracy\ConnectionPanel::initialize(
+			$service,
+			true,
+			'default',
+			true,
+			$this->getService('tracy.bar'),
+			$this->getService('tracy.blueScreen'),
+		);
+		return $service;
+	}
+
+
+	public function createServiceDatabase__default__conventions(): Nette\Database\Conventions\DiscoveredConventions
+	{
+		return new Nette\Database\Conventions\DiscoveredConventions($this->getService('database.default.structure'));
+	}
+
+
+	public function createServiceDatabase__default__explorer(): Nette\Database\Explorer
+	{
+		return new Nette\Database\Explorer(
+			$this->getService('database.default.connection'),
+			$this->getService('database.default.structure'),
+			$this->getService('database.default.conventions'),
+			$this->getService('cache.storage'),
+		);
+	}
+
+
+	public function createServiceDatabase__default__structure(): Nette\Database\Structure
+	{
+		return new Nette\Database\Structure($this->getService('database.default.connection'), $this->getService('cache.storage'));
 	}
 
 
@@ -240,7 +333,7 @@ class Container_1258fd7f57 extends Nette\DI\Container
 	{
 		return new class ($this) implements Nette\Bridges\ApplicationLatte\LatteFactory {
 			public function __construct(
-				private Container_1258fd7f57 $container,
+				private Container_0159e7c4e2 $container,
 			) {
 			}
 
@@ -248,7 +341,7 @@ class Container_1258fd7f57 extends Nette\DI\Container
 			public function create(): Latte\Engine
 			{
 				$service = new Latte\Engine;
-				$service->setTempDirectory('/root/tycWeb/temp/cache/latte');
+				$service->setTempDirectory('/Users/dostals/tycWeb-1/temp/cache/latte');
 				$service->setAutoRefresh(true);
 				$service->setStrictTypes(false);
 				$service->setStrictParsing(false);
@@ -280,7 +373,17 @@ class Container_1258fd7f57 extends Nette\DI\Container
 
 	public function createServiceMail__mailer(): Nette\Mail\Mailer
 	{
-		return new Nette\Mail\SendmailMailer;
+		return new Nette\Mail\SmtpMailer(
+			'smtp.seznam.cz',
+			'email@seznam.cz',
+			/*sensitive{*/'heslo'/*}*/,
+			465,
+			'ssl',
+			false,
+			20,
+			null,
+			null,
+		);
 	}
 
 
@@ -292,7 +395,7 @@ class Container_1258fd7f57 extends Nette\DI\Container
 
 	public function createServiceSecurity__user(): Nette\Security\User
 	{
-		$service = new Nette\Security\User($this->getService('security.userStorage'));
+		$service = new Nette\Security\User($this->getService('security.userStorage'), $this->getService('03'));
 		$this->getService('tracy.bar')->addPanel(new Nette\Bridges\SecurityTracy\UserPanel($service));
 		return $service;
 	}
@@ -367,14 +470,14 @@ class Container_1258fd7f57 extends Nette\DI\Container
 	protected function getStaticParameters(): array
 	{
 		return [
-			'appDir' => '/root/tycWeb/app',
-			'wwwDir' => '/root/tycWeb/www',
-			'vendorDir' => '/root/tycWeb/vendor',
-			'rootDir' => '/root/tycWeb',
+			'appDir' => '/Users/dostals/tycWeb-1/app',
+			'wwwDir' => '/Users/dostals/tycWeb-1/www',
+			'vendorDir' => '/Users/dostals/tycWeb-1/vendor',
+			'rootDir' => '/Users/dostals/tycWeb-1',
 			'debugMode' => true,
 			'productionMode' => false,
 			'consoleMode' => false,
-			'tempDir' => '/root/tycWeb/temp',
+			'tempDir' => '/Users/dostals/tycWeb-1/temp',
 		];
 	}
 

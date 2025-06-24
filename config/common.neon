@@ -1,8 +1,5 @@
-# Application parameters and settings. See https://doc.nette.org/configuring
-
 parameters:
-
+    appDir: %appDir%
 
 application:
-	# Presenter mapping pattern
-	mapping: App\UI\*\**Presenter
+    mapping: App\UI\*\**Presenter

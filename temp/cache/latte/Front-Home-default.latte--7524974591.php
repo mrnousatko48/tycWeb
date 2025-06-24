@@ -2,10 +2,10 @@
 
 use Latte\Runtime as LR;
 
-/** source: /Users/dostals/tycWeb/app/UI/Front/Home/default.latte */
-final class Template_e39c83e7a7 extends Latte\Runtime\Template
+/** source: /Users/dostals/tycWeb-1/app/UI/Front/Home/default.latte */
+final class Template_7524974591 extends Latte\Runtime\Template
 {
-	public const Source = '/Users/dostals/tycWeb/app/UI/Front/Home/default.latte';
+	public const Source = '/Users/dostals/tycWeb-1/app/UI/Front/Home/default.latte';
 
 	public const Blocks = [
 		['content' => 'blockContent'],
