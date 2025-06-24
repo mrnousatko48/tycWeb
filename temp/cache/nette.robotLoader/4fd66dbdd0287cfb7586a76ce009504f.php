@@ -5,12 +5,12 @@ return array (
     'App\\UI\\Admin\\User\\UserPresenter' => 
     array (
       0 => '/Users/dostals/tycWeb-1/app/UI/Admin/User/UserPresenter.php',
-      1 => 1750795188,
+      1 => 1750797276,
     ),
     'App\\UI\\Admin\\Dashboard\\DashboardPresenter' => 
     array (
       0 => '/Users/dostals/tycWeb-1/app/UI/Admin/Dashboard/DashboardPresenter.php',
-      1 => 1750784921,
+      1 => 1750797202,
     ),
     'App\\Presentation\\Accessory\\LatteExtension' => 
     array (
@@ -57,11 +57,6 @@ return array (
       0 => '/Users/dostals/tycWeb-1/app/Model/OrderFacade.php',
       1 => 1750795867,
     ),
-    'App\\UI\\Accessory\\RequireLoggedUser' => 
-    array (
-      0 => '/Users/dostals/tycWeb-1/app/Model/RequireLoggedUser.php',
-      1 => 1750761278,
-    ),
     'App\\Model\\UserFacade' => 
     array (
       0 => '/Users/dostals/tycWeb-1/app/Model/UserFacade.php',
@@ -75,39 +70,19 @@ return array (
   ),
   1 => 
   array (
-    'null' => 3,
+    'null' => 1,
+    'App\\UI\\Front\\Sign\\SignOutTemplate' => 3,
+    'App\\UI\\Front\\Sign\\SignTemplate' => 3,
     'App\\UI\\Front\\Home\\HomeDefaultTemplate' => 3,
     'App\\UI\\Front\\Home\\HomeTemplate' => 3,
     'App\\UI\\Front\\Sign\\SignInTemplate' => 3,
-    'App\\UI\\Front\\Sign\\SignTemplate' => 3,
-    'App\\UI\\Front\\Sign\\SignUpTemplate' => 3,
-    'App\\UI\\Front\\Homepage\\HomepagePresenter' => 1,
-    'App\\UI\\Front\\Sign\\SignOutTemplate' => 3,
-    'App\\UI\\Front\\Home\\HomeDetailTemplate' => 3,
-    'App\\UI\\Front\\Home\\HomeOrderTemplate' => 3,
     'App\\UI\\Admin\\Dashboard\\DashboardDefaultTemplate' => 3,
     'App\\UI\\Admin\\Dashboard\\DashboardTemplate' => 3,
-    'App\\UI\\Admin\\Order\\OrderPresenter' => 2,
-    'App\\UI\\Admin\\Home\\HomePresenter' => 2,
-    'App\\UI\\Home\\HomePresenter' => 1,
-    'App\\UI\\Admin\\Sign\\SignPresenter' => 3,
-    'App\\UI\\Front\\Order\\OrderDefaultTemplate' => 3,
-    'App\\UI\\Front\\Order\\OrderTemplate' => 3,
-    'App\\UI\\Front\\Order\\OrderPresenter' => 3,
-    'App\\UI\\Front\\Cart\\CartDefaultTemplate' => 3,
-    'App\\UI\\Front\\Cart\\CartTemplate' => 3,
-    'App\\UI\\FrontHome\\FrontHomePresenter' => 3,
-    'App\\UI\\Front\\Cart\\CartSendorderTemplate' => 1,
-    'App\\UI\\Front\\Cart\\CartOrderTemplate' => 3,
-    'App\\UI\\Front\\Home\\HomeCaseTemplate' => 3,
-    'App\\UI\\Front\\Cart\\CartCreateOrderTemplate' => 3,
-    'App\\UI\\Front\\Adnin\\AdninPresenter' => 3,
-    'App\\Presenters\\UserPresenter' => 2,
-    'App\\UI\\Admin\\User\\UserDefaultTemplate' => 3,
-    'App\\UI\\Admin\\User\\UserTemplate' => 3,
-    'Ublaboo\\DataGrid\\DataGridTemplate' => 3,
-    'Ublaboo\\DataGrid\\Components\\DataGridPaginator\\DataGridPaginatorTemplate' => 3,
-    'App\\UI\\Admin\\User\\UserEditTemplate' => 3,
+    'App\\UI\\Admin\\Sign\\SignPresenter' => 2,
+    'App\\UI\\Admin\\User\\UserDefaultTemplate' => 2,
+    'App\\UI\\Admin\\User\\UserTemplate' => 2,
+    'Ublaboo\\DataGrid\\DataGridTemplate' => 1,
+    'Ublaboo\\DataGrid\\Components\\DataGridPaginator\\DataGridPaginatorTemplate' => 1,
   ),
   2 => 
   array (

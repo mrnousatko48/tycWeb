@@ -20,6 +20,22 @@ final class DashboardPresenter extends Nette\Application\UI\Presenter
         $this->database = $database;
     }
 
+    protected function startup(): void
+    {
+        parent::startup();
+
+        if (!$this->getUser()->isLoggedIn()) {
+            $this->flashMessage('Nemáš oprávnění.', 'warning');
+            $this->redirect(':Front:Sign:in', ['backlink' => $this->storeRequest()]);
+        }
+
+        if (!$this->getUser()->isInRole('ADMIN')) {
+            $this->flashMessage('Nemáš oprávnění.', 'warning');
+            $this->redirect(':Front:Sign:in');
+        }
+    }
+
+
     public function renderDefault(): void
     {
         $orders = $this->orderFacade->getAllOrders();
@@ -29,11 +45,11 @@ final class DashboardPresenter extends Nette\Application\UI\Presenter
             $caseIds = $this->database->table('order_case')
                 ->where('order_id', $order->id)
                 ->fetchPairs(null, 'case_id');
-            
+
             $cases = $this->database->table('cases')
                 ->where('id', $caseIds)
                 ->fetchAll();
-        
+
             $user = $this->database->table('users')->get($order->user_id);
 
             $orderData[] = [
@@ -48,6 +64,5 @@ final class DashboardPresenter extends Nette\Application\UI\Presenter
 
     public function renderDetail(): void
     {
-
     }
 }

@@ -15,6 +15,22 @@ final class UserPresenter extends Presenter
     ) {
     }
 
+    protected function startup(): void
+    {
+        parent::startup();
+
+        if (!$this->getUser()->isLoggedIn()) {
+            $this->flashMessage('Nemáš oprávnění.', 'warning');
+            $this->redirect(':Front:Sign:in', ['backlink' => $this->storeRequest()]);
+        }
+
+        if (!$this->getUser()->isInRole('ADMIN')) {
+            $this->flashMessage('Nemáš oprávnění.', 'warning');
+            $this->redirect(':Front:Sign:in');
+        }
+    }
+
+
     public function renderDefault(): void
     {
         // Optional: add breadcrumbs, title, etc.

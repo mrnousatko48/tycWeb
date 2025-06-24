@@ -10,7 +10,7 @@ return array (
     'App\\UI\\Admin\\Dashboard\\DashboardPresenter' => 
     array (
       0 => '/Users/dostals/tycWeb-1/app/UI/Admin/Dashboard/DashboardPresenter.php',
-      1 => 1750784921,
+      1 => 1750796936,
     ),
     'App\\Presentation\\Accessory\\LatteExtension' => 
     array (
@@ -56,11 +56,6 @@ return array (
     array (
       0 => '/Users/dostals/tycWeb-1/app/Model/OrderFacade.php',
       1 => 1750795867,
-    ),
-    'App\\UI\\Accessory\\RequireLoggedUser' => 
-    array (
-      0 => '/Users/dostals/tycWeb-1/app/Model/RequireLoggedUser.php',
-      1 => 1750761278,
     ),
     'App\\Model\\UserFacade' => 
     array (
