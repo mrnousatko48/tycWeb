@@ -40,6 +40,19 @@ final class Template_678e0e5386 extends Latte\Runtime\Template
 		$ʟ_tmp->render() /* line 4 */;
 
 		echo '</div>
+
+<script>
+    document.addEventListener(\'DOMContentLoaded\', () => {
+        document.querySelectorAll(\'.clickable-row\').forEach(row => {
+            row.addEventListener(\'click\', () => {
+                const href = row.dataset.href;
+                if (href) {
+                    window.location.href = href;
+                }
+            });
+        });
+    });
+</script>
 ';
 	}
 }

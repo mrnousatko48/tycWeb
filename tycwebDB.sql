@@ -25,7 +25,7 @@ CREATE TABLE `cases` (
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`),
   CONSTRAINT `cases_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=16 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO `cases` (`id`, `manufacturer`, `model`, `color`, `port_cover`, `card_holder`, `state`, `user_id`, `created_at`) VALUES
 (3,	'samsung',	'a1',	'Černá',	1,	'1 slot',	'KOSIK',	NULL,	'2025-06-24 15:05:15'),
@@ -39,7 +39,7 @@ INSERT INTO `cases` (`id`, `manufacturer`, `model`, `color`, `port_cover`, `card
 (11,	'xiaomi',	'Redmi Note 8',	'Modrá',	0,	'2 sloty',	'OBJEDNANO',	3,	'2025-06-24 15:47:35'),
 (13,	'xiaomi',	'Lite 2',	'Černá',	1,	'2 sloty',	'OBJEDNANO',	2,	'2025-06-24 17:07:25'),
 (14,	'samsung',	'a',	'Černá',	0,	'Žádný',	'KOSIK',	2,	'2025-06-24 17:09:22'),
-(15,	'samsung',	'a',	'Černá',	1,	'2 sloty',	'KOSIK',	6,	'2025-06-24 19:29:58');
+(18,	'xiaomi',	'ssss',	'Černá',	1,	'Žádný',	'OBJEDNANO',	6,	'2025-06-24 20:12:08');
 
 DROP TABLE IF EXISTS `order_case`;
 CREATE TABLE `order_case` (
@@ -59,7 +59,8 @@ INSERT INTO `order_case` (`order_id`, `case_id`, `quantity`) VALUES
 (11,	7,	1),
 (11,	8,	1),
 (11,	9,	1),
-(12,	13,	1);
+(12,	13,	1),
+(13,	18,	2);
 
 DROP TABLE IF EXISTS `orders`;
 CREATE TABLE `orders` (
@@ -72,11 +73,12 @@ CREATE TABLE `orders` (
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=13 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO `orders` (`id`, `user_id`, `address`, `city`, `state`, `payment`, `created_at`) VALUES
 (11,	3,	'ulice 2',	'praha',	'OBJEDNANO',	NULL,	'2025-06-24 16:40:51'),
-(12,	2,	'prablova 921',	'Ostrava',	'OBJEDNANO',	NULL,	'2025-06-24 17:07:48');
+(12,	2,	'prablova 921',	'Ostrava',	'OBJEDNANO',	NULL,	'2025-06-24 17:07:48'),
+(13,	6,	'231',	'brno',	'OBJEDNANO',	NULL,	'2025-06-24 20:12:18');
 
 DROP TABLE IF EXISTS `users`;
 CREATE TABLE `users` (
@@ -97,8 +99,8 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`id`, `username`, `firstname`, `lastname`, `email`, `password`, `role`, `address`, `city`, `created_at`) VALUES
 (2,	'sima',	'simon',	'',	'mail@amail.com',	'$2y$10$RD/AXZzpkhbFElMayEVHse83fvmLFMHVFkPyuvCfDkZucTEFoZ6UC',	'UZIVATEL',	NULL,	NULL,	'2025-06-24 11:30:58'),
-(3,	'admin',	'',	'',	'admin@mail.com',	'$2y$10$5dUIUJioPW1aleFtwM.PiOIvdYUxIVq85Di4oDuOUzAgABF402auW',	'UZIVATEL',	NULL,	NULL,	'2025-06-24 11:43:46'),
+(3,	'admin',	'administrátor',	'veliký',	'admin@mail.com',	'$2y$10$5dUIUJioPW1aleFtwM.PiOIvdYUxIVq85Di4oDuOUzAgABF402auW',	'ADMIN',	'',	'',	'2025-06-24 11:43:46'),
 (6,	'dostals',	'',	'',	'dostals64@gmail.com',	'$2y$10$0D3LrJSeww8SWbYSCBhKSuNUH1TVHUY9c/ySD0E1jRNp.MUX8FAQS',	'UZIVATEL',	NULL,	NULL,	'2025-06-24 19:27:29'),
 (7,	'bakub',	'Kuba',	'Syč',	'bakua@mail.com',	'$2y$10$ZVF9RfycPsVhpryvQf50zePtoXVFCl4.6bUzZKxiSIdpdCguW4Eri',	'UZIVATEL',	NULL,	NULL,	'2025-06-24 19:29:28');
 
--- 2025-06-24 19:31:45
+-- 2025-06-24 20:12:40

@@ -115,4 +115,25 @@ final class OrderFacade
             ->where('id', $ids)
             ->fetchAll();
     }
+
+    public function removeCaseFromCart(\Nette\Http\Session $session, int $caseId): void
+    {
+        $orderSection = $session->getSection('order');
+        $quantities = $orderSection->quantities ?? [];
+
+        if (isset($quantities[$caseId])) {
+            unset($quantities[$caseId]);
+            $orderSection->quantities = $quantities;
+        }
+    }
+
+    public function removeCaseFromCartByUser(int $userId, int $caseId): void
+{
+    $this->database->table('cases')
+        ->where('id', $caseId)
+        ->where('user_id', $userId)
+        ->where('state', 'KOSIK')
+        ->delete(); // or delete() if you want to delete
+}
+
 }

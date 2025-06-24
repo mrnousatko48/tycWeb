@@ -139,5 +139,18 @@ final class CartPresenter extends Nette\Application\UI\Presenter
         $this->getSession('order')->quantities = $selected;
         $this->redirect('Cart:order');
     }
-    
+
+    public function handleRemoveCase(int $caseId): void
+{
+    $userId = (int) $this->getUser()->getId();
+    $this->orderFacade->removeCaseFromCartByUser($userId, $caseId);
+
+    // Also remove from session quantities if used
+    $session = $this->getSession();
+    $this->orderFacade->removeCaseFromCart($session, $caseId);
+
+    $this->flashMessage("Kryt byl odebrán z košíku.", 'info');
+    $this->redirect('this');
+}
+
 }

@@ -2,10 +2,10 @@
 
 use Latte\Runtime as LR;
 
-/** source: /Users/dostals/tycWeb-1/app/UI/Admin/@layout.latte */
-final class Template_0a61f20c73 extends Latte\Runtime\Template
+/** source: /Users/dostals/tycWeb-1/app/UI/Front/@layout.latte */
+final class Template_93a0152e76 extends Latte\Runtime\Template
 {
-	public const Source = '/Users/dostals/tycWeb-1/app/UI/Admin/@layout.latte';
+	public const Source = '/Users/dostals/tycWeb-1/app/UI/Front/@layout.latte';
 
 	public const Blocks = [
 		['title' => 'blockTitle'],
@@ -61,32 +61,39 @@ final class Template_0a61f20c73 extends Latte\Runtime\Template
 			<nav>
 				<ul class="nav">
 					<li class="nav-item"><a href="';
-		echo LR\Filters::escapeHtmlAttr($this->global->uiControl->link(':Front:Home:default')) /* line 30 */;
+		echo LR\Filters::escapeHtmlAttr($this->global->uiControl->link('Home:default')) /* line 30 */;
 		echo '" class="nav-link">Domů</a></li>
+					<li class="nav-item"><a href="';
+		echo LR\Filters::escapeHtmlAttr($this->global->uiControl->link('Home:case')) /* line 31 */;
+		echo '" class="nav-link">Objednat</a></li>
+					<li class="nav-item"><a href="';
+		echo LR\Filters::escapeHtmlAttr($this->global->uiControl->link('Cart:default')) /* line 32 */;
+		echo '" class="nav-link">Košík</a></li>
+					<li class="nav-item"><a href="#" class="nav-link">Kontakt</a></li>
 
 ';
-		if ($user->isLoggedIn()) /* line 32 */ {
+		if ($user->isLoggedIn()) /* line 35 */ {
 			echo '						<li class="nav-item d-flex align-items-center ms-3 text-muted">
 							Přihlášen jako 
 							<span class="ms-1 fw-semibold">
 ';
-			if (isset($user->identity->username)) /* line 36 */ {
+			if (isset($user->identity->username)) /* line 39 */ {
 				echo '									';
-				echo LR\Filters::escapeHtmlText($user->identity->username) /* line 37 */;
+				echo LR\Filters::escapeHtmlText($user->identity->username) /* line 40 */;
 				echo "\n";
-			} else /* line 38 */ {
+			} else /* line 41 */ {
 				echo '									(neznámý uživatel)
 ';
 			}
 			echo '							</span>
 						</li>
 						<li class="nav-item"><a href="';
-			echo LR\Filters::escapeHtmlAttr($this->global->uiControl->link(':Front:Sign:out')) /* line 43 */;
+			echo LR\Filters::escapeHtmlAttr($this->global->uiControl->link('Sign:out')) /* line 46 */;
 			echo '" class="nav-link text-danger ms-2">Odhlásit se</a></li>
 ';
-		} else /* line 44 */ {
+		} else /* line 47 */ {
 			echo '						<li class="nav-item"><a href="';
-			echo LR\Filters::escapeHtmlAttr($this->global->uiControl->link(':Front:Sign:in')) /* line 45 */;
+			echo LR\Filters::escapeHtmlAttr($this->global->uiControl->link('Sign:in')) /* line 48 */;
 			echo '" class="nav-link">Přihlášení</a></li>
 ';
 		}
@@ -97,32 +104,32 @@ final class Template_0a61f20c73 extends Latte\Runtime\Template
 
 	<main class="container mb-5">
 ';
-		foreach ($flashes as $flash) /* line 53 */ {
+		foreach ($flashes as $flash) /* line 56 */ {
 			echo '			<div class="alert alert-';
-			echo LR\Filters::escapeHtmlAttr($flash->type) /* line 54 */;
+			echo LR\Filters::escapeHtmlAttr($flash->type) /* line 57 */;
 			echo '">';
-			echo LR\Filters::escapeHtmlText($flash->message) /* line 54 */;
+			echo LR\Filters::escapeHtmlText($flash->message) /* line 57 */;
 			echo '</div>
 ';
 
 		}
 
 		echo "\n";
-		$this->renderBlock('content', [], 'html') /* line 57 */;
+		$this->renderBlock('content', [], 'html') /* line 60 */;
 		echo '	</main>
 
 	<footer class="bg-light text-center text-muted py-3 mt-auto">
 		<div class="container">
 			&copy; ';
-		echo LR\Filters::escapeHtmlText(date('Y')) /* line 62 */;
+		echo LR\Filters::escapeHtmlText(date('Y')) /* line 65 */;
 		echo ' 3D Kryty. Všechna práva vyhrazena.
 		</div>
 	</footer>
 
+	<!-- Bootstrap JS (optional) -->
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
-
 ';
 	}
 
@@ -132,7 +139,7 @@ final class Template_0a61f20c73 extends Latte\Runtime\Template
 		extract($this->params);
 
 		if (!$this->getReferringTemplate() || $this->getReferenceType() === 'extends') {
-			foreach (array_intersect_key(['flash' => '53'], $this->params) as $ʟ_v => $ʟ_l) {
+			foreach (array_intersect_key(['flash' => '56'], $this->params) as $ʟ_v => $ʟ_l) {
 				trigger_error("Variable \$$ʟ_v overwritten in foreach on line $ʟ_l");
 			}
 		}

@@ -16,6 +16,7 @@
                 <th>Držák karet</th>
                 <th>Datum</th>
                 <th>Množství</th>
+                <th>Akce</th> {* <-- NEW column for actions *}
             </tr>
             </thead>
             <tbody>
@@ -30,6 +31,9 @@
                     <td>{$case->created_at|date:'j. n. Y H:i'}</td>
                     <td>
                         <input type="number" name="quantities[{$case->id}][amount]" value="1" min="1" class="form-control" style="width: 80px;">
+                    </td>
+                    <td>
+                        <a class="btn btn-danger btn-sm" href="{link removeCase! $case->id}" onclick="return confirm('Opravdu chcete odstranit tento kryt z košíku?')">Odstranit</a>
                     </td>
                 </tr>
             {/foreach}

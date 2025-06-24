@@ -39,7 +39,6 @@ final class UserPresenter extends Presenter
         ]);
         $grid->addColumnDateTime('created_at', 'Registrován dne')->setFormat('j. n. Y H:i');
     
-    // Make entire row clickable
     $grid->setRowCallback(function ($item, $tr) {
         $tr->addAttributes([
             'class' => 'clickable-row',
