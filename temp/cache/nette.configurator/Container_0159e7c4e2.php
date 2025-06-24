@@ -138,7 +138,7 @@ class Container_0159e7c4e2 extends Nette\DI\Container
 
 	public function createServiceApplication__1(): App\UI\Admin\Dashboard\DashboardPresenter
 	{
-		$service = new App\UI\Admin\Dashboard\DashboardPresenter($this->getService('03'));
+		$service = new App\UI\Admin\Dashboard\DashboardPresenter($this->getService('03'), $this->getService('database.default.explorer'));
 		$service->injectPrimary(
 			$this->getService('http.request'),
 			$this->getService('http.response'),

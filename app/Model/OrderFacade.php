@@ -14,21 +14,11 @@ final class OrderFacade
         $this->database = $database;
     }
 
-    /**
-     * Create a new order and assign all user's cart cases to it
-     */
-    /**
-     * Create a new order and assign selected cases to it via order_case table
-     */
-    /**
-     * Create a new order and assign selected cases to it via order_case table
-     */
     public function createOrder(int $userId, string $address, string $city, array $caseQuantities): ActiveRow
     {
         $this->database->beginTransaction();
 
         try {
-            // Create the order
             $order = $this->database->table('orders')->insert([
                 'user_id' => $userId,
                 'address' => $address,
@@ -44,7 +34,6 @@ final class OrderFacade
                     'quantity' => $quantity,
                 ]);
 
-                // Update case state to prevent reuse in cart
                 $this->database->table('cases')
                     ->where('id', $caseId)
                     ->where('user_id', $userId)
@@ -62,11 +51,6 @@ final class OrderFacade
         }
     }
 
-
-
-    /**
-     * Return all orders, newest first
-     */
     public function getAllOrders(): iterable
     {
         return $this->database->table('orders')
@@ -74,9 +58,6 @@ final class OrderFacade
             ->fetchAll();
     }
 
-    /**
-     * Return all cases, newest first
-     */
     public function getAllCases(): iterable
     {
         return $this->database->table('cases')
@@ -84,9 +65,14 @@ final class OrderFacade
             ->fetchAll();
     }
 
-    /**
-     * Get user's orders (used in cart history or admin)
-     */
+    public function getOrderCases(int $orderId): iterable
+    {
+        return $this->database->table('order_case')
+            ->where('order_id', $orderId)
+            ->select('cases.*')
+            ->fetchAll();
+    }
+
     public function getOrdersByUserId(int $userId): \Nette\Database\Table\Selection
     {
         return $this->database->table('orders')

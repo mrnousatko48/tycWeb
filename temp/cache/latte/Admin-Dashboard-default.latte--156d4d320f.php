@@ -30,7 +30,7 @@ final class Template_156d4d320f extends Latte\Runtime\Template
 		extract($this->params);
 
 		if (!$this->getReferringTemplate() || $this->getReferenceType() === 'extends') {
-			foreach (array_intersect_key(['order' => '22'], $this->params) as $ʟ_v => $ʟ_l) {
+			foreach (array_intersect_key(['orderData' => '18', 'case' => '27'], $this->params) as $ʟ_v => $ʟ_l) {
 				trigger_error("Variable \$$ʟ_v overwritten in foreach on line $ʟ_l");
 			}
 		}
@@ -55,54 +55,73 @@ final class Template_156d4d320f extends Latte\Runtime\Template
 			echo '<table class="min-w-full table-auto border-collapse border border-gray-300">
     <thead>
         <tr>
-            <th class="border border-gray-300 px-4 py-2">ID</th>
+            <th class="border border-gray-300 px-4 py-2">ID objednávky</th>
             <th class="border border-gray-300 px-4 py-2">Uživatel</th>
-            <th class="border border-gray-300 px-4 py-2">Výrobce</th>
-            <th class="border border-gray-300 px-4 py-2">Model</th>
-            <th class="border border-gray-300 px-4 py-2">Barva</th>
-            <th class="border border-gray-300 px-4 py-2">Krytka portu</th>
-            <th class="border border-gray-300 px-4 py-2">Držák karet</th>
+            <th class="border border-gray-300 px-4 py-2">Pouzdra</th>
             <th class="border border-gray-300 px-4 py-2">Adresa</th>
             <th class="border border-gray-300 px-4 py-2">Datum objednávky</th>
         </tr>
     </thead>
     <tbody>
 ';
-			foreach ($orders as $order) /* line 22 */ {
+			foreach ($orders as $orderData) /* line 18 */ {
 				echo '        <tr>
             <td class="border border-gray-300 px-4 py-2">';
-				echo LR\Filters::escapeHtmlText($order->id) /* line 24 */;
+				echo LR\Filters::escapeHtmlText($orderData['order']->id) /* line 20 */;
 				echo '</td>
-            <td class="border border-gray-300 px-4 py-2">';
-				echo LR\Filters::escapeHtmlText($order->user_id) /* line 25 */;
-				echo '</td>
-            <td class="border border-gray-300 px-4 py-2">';
-				echo LR\Filters::escapeHtmlText($order->manufacturer) /* line 26 */;
-				echo '</td>
-            <td class="border border-gray-300 px-4 py-2">';
-				echo LR\Filters::escapeHtmlText($order->model) /* line 27 */;
-				echo '</td>
-            <td class="border border-gray-300 px-4 py-2">';
-				echo LR\Filters::escapeHtmlText($order->color) /* line 28 */;
-				echo '</td>
-            <td class="border border-gray-300 px-4 py-2">';
-				if ($order->port_cover) /* line 29 */ {
-					echo 'Ano';
-				} else /* line 29 */ {
-					echo 'Ne';
+            <td class="border border-gray-300 px-4 py-2">
+                ';
+				echo LR\Filters::escapeHtmlText($orderData['user']?->email ?? $orderData['order']->user_id) /* line 22 */;
+				echo '
+            </td>
+            <td class="border border-gray-300 px-4 py-2">
+';
+				if (count($orderData['cases']) > 0) /* line 25 */ {
+					echo '                    <ul class="list-disc pl-5">
+';
+					foreach ($orderData['cases'] as $case) /* line 27 */ {
+						echo '                            <li>
+                                ';
+						echo LR\Filters::escapeHtmlText($case->manufacturer) /* line 29 */;
+						echo ' ';
+						echo LR\Filters::escapeHtmlText($case->model) /* line 29 */;
+						echo ' (';
+						echo LR\Filters::escapeHtmlText($case->color) /* line 29 */;
+						echo ')
+                                ';
+						if ($case->port_cover) /* line 30 */ {
+							echo '(Krytka portu)';
+						}
+						echo '
+                                ';
+						if ($case->card_holder) /* line 31 */ {
+							echo '(Držák karet)';
+						}
+						echo '
+                            </li>
+';
+
+					}
+
+					echo '                    </ul>
+';
+				} else /* line 35 */ {
+					echo '                    Žádné pouzdra
+';
 				}
-				echo '</td>
-            <td class="border border-gray-300 px-4 py-2">';
-				echo LR\Filters::escapeHtmlText($order->card_holder) /* line 30 */;
-				echo '</td>
-            <td class="border border-gray-300 px-4 py-2">';
-				echo LR\Filters::escapeHtmlText($order->address) /* line 31 */;
-				echo ' ';
-				echo LR\Filters::escapeHtmlText($order->city) /* line 31 */;
-				echo '</td>
-            <td class="border border-gray-300 px-4 py-2">';
-				echo LR\Filters::escapeHtmlText(($this->filters->date)($order->created_at, 'j. n. Y H:i')) /* line 32 */;
-				echo '</td>
+				echo '            </td>
+            <td class="border border-gray-300 px-4 py-2">
+                ';
+				echo LR\Filters::escapeHtmlText($orderData['order']->address) /* line 40 */;
+				echo ', ';
+				echo LR\Filters::escapeHtmlText($orderData['order']->city) /* line 40 */;
+				echo '
+            </td>
+            <td class="border border-gray-300 px-4 py-2">
+                ';
+				echo LR\Filters::escapeHtmlText(($this->filters->date)($orderData['order']->created_at, 'j. n. Y H:i')) /* line 43 */;
+				echo '
+            </td>
         </tr>
 ';
 

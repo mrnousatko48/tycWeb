@@ -20,7 +20,7 @@ final class HomePresenter extends Nette\Application\UI\Presenter
 
     public function renderDefault(): void
     {
-        // Form will be rendered automatically via {form orderForm} in the Latte template
+       
     }
 
     protected function createComponentCaseForm(): Form
@@ -76,16 +76,17 @@ final class HomePresenter extends Nette\Application\UI\Presenter
         $userId = (int) $this->getUser()->getId();
     
         $this->orderFacade->createCase([
-            'user_id' => $userId, // <-- ADD THIS LINE
+            'user_id' => $userId,
             'manufacturer' => $values->manufacturer,
             'model' => $values->model,
             'color' => $values->color,
             'port_cover' => (bool) $values->port_cover,
             'card_holder' => $values->card_holder,
-            'created_at' => new \DateTime(), // optional, in case your DB doesn't default it
+            'STATE' => "KOSIK",
+            'created_at' => new \DateTime(),
         ]);
     
-        $this->flashMessage('Objednávka byla úspěšně odeslána.', 'success');
+        $this->flashMessage('Kryt byl uložen do Vašeho košíku.', 'success');
         $this->redirect('this');
     }
     

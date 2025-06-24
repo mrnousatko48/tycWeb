@@ -7,29 +7,41 @@
 <table class="min-w-full table-auto border-collapse border border-gray-300">
     <thead>
         <tr>
-            <th class="border border-gray-300 px-4 py-2">ID</th>
+            <th class="border border-gray-300 px-4 py-2">ID objednávky</th>
             <th class="border border-gray-300 px-4 py-2">Uživatel</th>
-            <th class="border border-gray-300 px-4 py-2">Výrobce</th>
-            <th class="border border-gray-300 px-4 py-2">Model</th>
-            <th class="border border-gray-300 px-4 py-2">Barva</th>
-            <th class="border border-gray-300 px-4 py-2">Krytka portu</th>
-            <th class="border border-gray-300 px-4 py-2">Držák karet</th>
+            <th class="border border-gray-300 px-4 py-2">Pouzdra</th>
             <th class="border border-gray-300 px-4 py-2">Adresa</th>
             <th class="border border-gray-300 px-4 py-2">Datum objednávky</th>
         </tr>
     </thead>
     <tbody>
-        {foreach $orders as $order}
+        {foreach $orders as $orderData}
         <tr>
-            <td class="border border-gray-300 px-4 py-2">{$order->id}</td>
-            <td class="border border-gray-300 px-4 py-2">{$order->user_id}</td>
-            <td class="border border-gray-300 px-4 py-2">{$order->manufacturer}</td>
-            <td class="border border-gray-300 px-4 py-2">{$order->model}</td>
-            <td class="border border-gray-300 px-4 py-2">{$order->color}</td>
-            <td class="border border-gray-300 px-4 py-2">{if $order->port_cover}Ano{else}Ne{/if}</td>
-            <td class="border border-gray-300 px-4 py-2">{$order->card_holder}</td>
-            <td class="border border-gray-300 px-4 py-2">{$order->address} {$order->city}</td>
-            <td class="border border-gray-300 px-4 py-2">{$order->created_at|date:'j. n. Y H:i'}</td>
+            <td class="border border-gray-300 px-4 py-2">{$orderData['order']->id}</td>
+            <td class="border border-gray-300 px-4 py-2">
+                {$orderData['user']?->email ?? $orderData['order']->user_id}
+            </td>
+            <td class="border border-gray-300 px-4 py-2">
+                {if count($orderData['cases']) > 0}
+                    <ul class="list-disc pl-5">
+                        {foreach $orderData['cases'] as $case}
+                            <li>
+                                {$case->manufacturer} {$case->model} ({$case->color})
+                                {if $case->port_cover}(Krytka portu){/if}
+                                {if $case->card_holder}(Držák karet){/if}
+                            </li>
+                        {/foreach}
+                    </ul>
+                {else}
+                    Žádné pouzdra
+                {/if}
+            </td>
+            <td class="border border-gray-300 px-4 py-2">
+                {$orderData['order']->address}, {$orderData['order']->city}
+            </td>
+            <td class="border border-gray-300 px-4 py-2">
+                {$orderData['order']->created_at|date:'j. n. Y H:i'}
+            </td>
         </tr>
         {/foreach}
     </tbody>
