@@ -17,6 +17,16 @@ final class CartPresenter extends Nette\Application\UI\Presenter
         $this->orderFacade = $orderFacade;
     }
 
+    protected function startup(): void
+    {
+        parent::startup();
+
+        if (!$this->getUser()->isLoggedIn()) {
+            $this->flashMessage('Pro zobrazení košíku se musíte přihlásit.', 'warning');
+            $this->redirect('Sign:in', ['backlink' => $this->storeRequest()]);
+        }
+    }
+
     public function renderDefault(): void
     {
         $userId = (int) $this->getUser()->getId();

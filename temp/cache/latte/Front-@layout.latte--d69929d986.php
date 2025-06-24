@@ -38,52 +38,63 @@ final class Template_d69929d986 extends Latte\Runtime\Template
 		echo '		3D Kryty
 	</title>
 
+	<!-- Bootstrap CSS -->
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+
 	<link rel="stylesheet" href="';
-		echo LR\Filters::escapeHtmlAttr(LR\Filters::safeUrl($basePath)) /* line 14 */;
+		echo LR\Filters::escapeHtmlAttr(LR\Filters::safeUrl($basePath)) /* line 17 */;
 		echo '/assets/style.css">
 	<script src="';
-		echo LR\Filters::escapeHtmlAttr(LR\Filters::safeUrl($basePath)) /* line 15 */;
+		echo LR\Filters::escapeHtmlAttr(LR\Filters::safeUrl($basePath)) /* line 18 */;
 		echo '/assets/main.js" defer></script>
 </head>
 
-<body>
-	<header>
+<body class="d-flex flex-column min-vh-100">
+	<header class="bg-light shadow-sm py-3 mb-4">
 		<div class="container d-flex justify-content-between align-items-center">
-			<h1><a href="';
-		echo LR\Filters::escapeHtmlAttr(LR\Filters::safeUrl($basePath)) /* line 21 */;
-		echo '/">3D Kryty</a></h1>
+			<h1 class="h4 mb-0">
+				<a href="';
+		echo LR\Filters::escapeHtmlAttr(LR\Filters::safeUrl($basePath)) /* line 25 */;
+		echo '/" class="text-decoration-none text-dark">3D Kryty</a>
+			</h1>
+
 			<nav>
-				<ul class="d-flex list-unstyled mb-0 align-items-center">
-					<li><a href="';
-		echo LR\Filters::escapeHtmlAttr($this->global->uiControl->link('Home:default')) /* line 24 */;
-		echo '" class="me-3">Domů</a></li>
-					<li><a href="#" class="me-3">Produkty</a></li>
-					<li><a href="#" class="me-3">O nás</a></li>
-					<li><a href="#" class="me-3">Kontakt</a></li>
+				<ul class="nav">
+					<li class="nav-item"><a href="';
+		echo LR\Filters::escapeHtmlAttr($this->global->uiControl->link('Home:default')) /* line 30 */;
+		echo '" class="nav-link">Domů</a></li>
+					<li class="nav-item"><a href="';
+		echo LR\Filters::escapeHtmlAttr($this->global->uiControl->link('Home:order')) /* line 31 */;
+		echo '" class="nav-link">Objednat</a></li>
+					<li class="nav-item"><a href="';
+		echo LR\Filters::escapeHtmlAttr($this->global->uiControl->link('Cart:default')) /* line 32 */;
+		echo '" class="nav-link">Košík</a></li>
+					<li class="nav-item"><a href="#" class="nav-link">Kontakt</a></li>
 
 ';
-		if ($user->isLoggedIn()) /* line 29 */ {
-			echo '						<li class="me-3 text-muted">
+		if ($user->isLoggedIn()) /* line 35 */ {
+			echo '						<li class="nav-item d-flex align-items-center ms-3 text-muted">
 							Přihlášen jako 
+							<span class="ms-1 fw-semibold">
 ';
-			if (isset($user->identity->username)) /* line 32 */ {
-				echo '								<strong>';
-				echo LR\Filters::escapeHtmlText($user->identity->username) /* line 33 */;
-				echo '</strong>
-';
-			} else /* line 34 */ {
-				echo '								<strong>(neznámý uživatel)</strong>
+			if (isset($user->identity->username)) /* line 39 */ {
+				echo '									';
+				echo LR\Filters::escapeHtmlText($user->identity->username) /* line 40 */;
+				echo "\n";
+			} else /* line 41 */ {
+				echo '									(neznámý uživatel)
 ';
 			}
-			echo '						</li>
-						<li><a href="';
-			echo LR\Filters::escapeHtmlAttr($this->global->uiControl->link('Sign:out')) /* line 38 */;
-			echo '">Odhlásit se</a></li>
+			echo '							</span>
+						</li>
+						<li class="nav-item"><a href="';
+			echo LR\Filters::escapeHtmlAttr($this->global->uiControl->link('Sign:out')) /* line 46 */;
+			echo '" class="nav-link text-danger ms-2">Odhlásit se</a></li>
 ';
-		} else /* line 39 */ {
-			echo '						<li><a href="';
-			echo LR\Filters::escapeHtmlAttr($this->global->uiControl->link('Sign:in')) /* line 40 */;
-			echo '">Přihlášení</a></li>
+		} else /* line 47 */ {
+			echo '						<li class="nav-item"><a href="';
+			echo LR\Filters::escapeHtmlAttr($this->global->uiControl->link('Sign:in')) /* line 48 */;
+			echo '" class="nav-link">Přihlášení</a></li>
 ';
 		}
 		echo '				</ul>
@@ -91,23 +102,32 @@ final class Template_d69929d986 extends Latte\Runtime\Template
 		</div>
 	</header>
 
-
-	<main class="container">
+	<main class="container mb-5">
 ';
-		foreach ($flashes as $flash) /* line 49 */ {
-			echo '			<div';
-			echo ($ʟ_tmp = array_filter(['flash', $flash->type])) ? ' class="' . LR\Filters::escapeHtmlAttr(implode(" ", array_unique($ʟ_tmp))) . '"' : "" /* line 50 */;
-			echo '>';
-			echo LR\Filters::escapeHtmlText($flash->message) /* line 50 */;
+		foreach ($flashes as $flash) /* line 56 */ {
+			echo '			<div class="alert alert-';
+			echo LR\Filters::escapeHtmlAttr($flash->type) /* line 57 */;
+			echo '">';
+			echo LR\Filters::escapeHtmlText($flash->message) /* line 57 */;
 			echo '</div>
 ';
 
 		}
 
 		echo "\n";
-		$this->renderBlock('content', [], 'html') /* line 53 */;
+		$this->renderBlock('content', [], 'html') /* line 60 */;
 		echo '	</main>
 
+	<footer class="bg-light text-center text-muted py-3 mt-auto">
+		<div class="container">
+			&copy; ';
+		echo LR\Filters::escapeHtmlText(date('Y')) /* line 65 */;
+		echo ' 3D Kryty. Všechna práva vyhrazena.
+		</div>
+	</footer>
+
+	<!-- Bootstrap JS (optional) -->
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
 ';
@@ -119,7 +139,7 @@ final class Template_d69929d986 extends Latte\Runtime\Template
 		extract($this->params);
 
 		if (!$this->getReferringTemplate() || $this->getReferenceType() === 'extends') {
-			foreach (array_intersect_key(['flash' => '49'], $this->params) as $ʟ_v => $ʟ_l) {
+			foreach (array_intersect_key(['flash' => '56'], $this->params) as $ʟ_v => $ʟ_l) {
 				trigger_error("Variable \$$ʟ_v overwritten in foreach on line $ʟ_l");
 			}
 		}
