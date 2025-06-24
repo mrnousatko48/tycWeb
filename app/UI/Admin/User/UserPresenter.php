@@ -34,15 +34,21 @@ final class UserPresenter extends Presenter
         $grid->addColumnText('address', 'Adresa')->setFilterText();
         $grid->addColumnText('city', 'Město')->setFilterText();
         $grid->addColumnText('role', 'Role')->setFilterMultiSelect([
-            'admin' => 'admin',
-            'user' => 'user',
+            'ADMIN' => 'Admin',
+            'UZIVATEL' => 'Uživatel',
         ]);
         $grid->addColumnDateTime('created_at', 'Registrován dne')->setFormat('j. n. Y H:i');
-
-        $grid->addAction('edit', 'Upravit', 'edit')
-            ->setIcon('edit')
-            ->setTitle('Upravit uživatele')
-            ->setClass('btn btn-sm btn-outline-primary');
+    
+    // Make entire row clickable
+    $grid->setRowCallback(function ($item, $tr) {
+        $tr->addAttributes([
+            'class' => 'clickable-row',
+            'data-href' => $this->link('edit', ['id' => $item->id]),
+            'style' => 'cursor: pointer;',
+        ]);
+        return $tr;
+    });
+    
 
         return $grid;
     }

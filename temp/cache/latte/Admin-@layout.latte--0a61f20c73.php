@@ -123,6 +123,19 @@ final class Template_0a61f20c73 extends Latte\Runtime\Template
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
+
+<script>
+    document.addEventListener(\'DOMContentLoaded\', () => {
+        document.querySelectorAll(\'.clickable-row\').forEach(row => {
+            row.addEventListener(\'click\', () => {
+                const href = row.dataset.href;
+                if (href) {
+                    window.location.href = href;
+                }
+            });
+        });
+    });
+</script>
 ';
 	}
 
