@@ -1,12 +1,12 @@
 {block content}
+<h1>Košík</h1>
 
-<h1>Moje objednávky</h1>
-
-{if !$orders || $orders->count() === 0}
-    <p>Nemáte žádné objednávky.</p>
+{if !$cases || $cases->count() === 0}
+    <p>Nemáte žádné kryty v košíku.</p>
 {else}
-    <table class="table table-striped">
-        <thead>
+    <form action="{$presenter->link('CreateOrder')}" method="post">
+        <table class="table table-striped">
+            <thead>
             <tr>
                 <th>ID</th>
                 <th>Výrobce</th>
@@ -14,22 +14,28 @@
                 <th>Barva</th>
                 <th>Krytka portu</th>
                 <th>Držák karet</th>
-                <th>Datum objednávky</th>
+                <th>Datum</th>
+                <th>Množství</th>
             </tr>
-        </thead>
-        <tbody>
-            {foreach $orders as $order}
+            </thead>
+            <tbody>
+            {foreach $cases as $case}
                 <tr>
-                    <td>{$order->id}</td>
-                    <td>{$order->manufacturer}</td>
-                    <td>{$order->model}</td>
-                    <td>{$order->color}</td>
-                    <td>{if $order->port_cover}Ano{else}Ne{/if}</td>
-                    <td>{$order->card_holder}</td>
-                    <td>{$order->created_at->format('j. n. Y H:i')}</td>
+                    <td>{$case->id}</td>
+                    <td>{$case->manufacturer}</td>
+                    <td>{$case->model}</td>
+                    <td>{$case->color}</td>
+                    <td>{if $case->port_cover}Ano{else}Ne{/if}</td>
+                    <td>{if $case->card_holder}Ano{else}Ne{/if}</td>
+                    <td>{$case->created_at|date:'j. n. Y H:i'}</td>
+                    <td>
+                        <input type="number" name="quantities[{$case->id}][amount]" value="1" min="1" class="form-control" style="width: 80px;">
+                    </td>
                 </tr>
             {/foreach}
-        </tbody>
-    </table>
+            </tbody>
+        </table>
+        <button type="submit" class="btn btn-success">Pokračovat k objednávce</button>
+    </form>
 {/if}
 {/block}

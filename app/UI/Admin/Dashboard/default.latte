@@ -8,11 +8,13 @@
     <thead>
         <tr>
             <th class="border border-gray-300 px-4 py-2">ID</th>
+            <th class="border border-gray-300 px-4 py-2">Uživatel</th>
             <th class="border border-gray-300 px-4 py-2">Výrobce</th>
             <th class="border border-gray-300 px-4 py-2">Model</th>
             <th class="border border-gray-300 px-4 py-2">Barva</th>
             <th class="border border-gray-300 px-4 py-2">Krytka portu</th>
             <th class="border border-gray-300 px-4 py-2">Držák karet</th>
+            <th class="border border-gray-300 px-4 py-2">Adresa</th>
             <th class="border border-gray-300 px-4 py-2">Datum objednávky</th>
         </tr>
     </thead>
@@ -20,11 +22,13 @@
         {foreach $orders as $order}
         <tr>
             <td class="border border-gray-300 px-4 py-2">{$order->id}</td>
+            <td class="border border-gray-300 px-4 py-2">{$order->user_id}</td>
             <td class="border border-gray-300 px-4 py-2">{$order->manufacturer}</td>
             <td class="border border-gray-300 px-4 py-2">{$order->model}</td>
             <td class="border border-gray-300 px-4 py-2">{$order->color}</td>
             <td class="border border-gray-300 px-4 py-2">{if $order->port_cover}Ano{else}Ne{/if}</td>
             <td class="border border-gray-300 px-4 py-2">{$order->card_holder}</td>
+            <td class="border border-gray-300 px-4 py-2">{$order->address} {$order->city}</td>
             <td class="border border-gray-300 px-4 py-2">{$order->created_at|date:'j. n. Y H:i'}</td>
         </tr>
         {/foreach}

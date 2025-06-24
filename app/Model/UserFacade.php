@@ -50,7 +50,6 @@ final class UserFacade implements Authenticator
             }
         }
     
-        // Ulož do databáze
         $this->database->table('users')->insert([
             'username' => $username,
             'firstname' => $firstname,

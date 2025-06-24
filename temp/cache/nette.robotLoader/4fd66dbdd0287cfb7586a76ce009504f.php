@@ -5,7 +5,7 @@ return array (
     'App\\UI\\Admin\\Dashboard\\DashboardPresenter' => 
     array (
       0 => '/Users/dostals/tycWeb-1/app/UI/Admin/Dashboard/DashboardPresenter.php',
-      1 => 1750771341,
+      1 => 1750776283,
     ),
     'App\\Presentation\\Accessory\\LatteExtension' => 
     array (
@@ -20,12 +20,12 @@ return array (
     'App\\UI\\Front\\Home\\HomePresenter' => 
     array (
       0 => '/Users/dostals/tycWeb-1/app/UI/Front/Home/HomePresenter.php',
-      1 => 1750773458,
+      1 => 1750779032,
     ),
     'App\\UI\\Front\\Cart\\CartPresenter' => 
     array (
       0 => '/Users/dostals/tycWeb-1/app/UI/Front/Cart/CartPresenter.php',
-      1 => 1750772178,
+      1 => 1750782959,
     ),
     'App\\UI\\Front\\Sign\\SignPresenter' => 
     array (
@@ -50,7 +50,7 @@ return array (
     'App\\Model\\OrderFacade' => 
     array (
       0 => '/Users/dostals/tycWeb-1/app/Model/OrderFacade.php',
-      1 => 1750773463,
+      1 => 1750782876,
     ),
     'App\\UI\\Accessory\\RequireLoggedUser' => 
     array (
@@ -60,12 +60,12 @@ return array (
     'App\\Model\\UserFacade' => 
     array (
       0 => '/Users/dostals/tycWeb-1/app/Model/UserFacade.php',
-      1 => 1750773035,
+      1 => 1750777282,
     ),
     'App\\Model\\DuplicateNameException' => 
     array (
       0 => '/Users/dostals/tycWeb-1/app/Model/UserFacade.php',
-      1 => 1750773035,
+      1 => 1750777282,
     ),
   ),
   1 => 
@@ -83,16 +83,22 @@ return array (
     'App\\UI\\Admin\\Dashboard\\DashboardDefaultTemplate' => 3,
     'App\\UI\\Admin\\Dashboard\\DashboardTemplate' => 3,
     'App\\UI\\Admin\\Order\\OrderPresenter' => 2,
-    'App\\UI\\Admin\\Home\\HomePresenter' => 1,
+    'App\\UI\\Admin\\Home\\HomePresenter' => 2,
     'App\\UI\\Home\\HomePresenter' => 1,
-    'App\\UI\\Admin\\Sign\\SignPresenter' => 1,
+    'App\\UI\\Admin\\Sign\\SignPresenter' => 2,
     'App\\UI\\Front\\Order\\OrderDefaultTemplate' => 3,
     'App\\UI\\Front\\Order\\OrderTemplate' => 3,
     'App\\UI\\Front\\Order\\OrderPresenter' => 3,
     'App\\UI\\Front\\Cart\\CartDefaultTemplate' => 3,
     'App\\UI\\Front\\Cart\\CartTemplate' => 3,
+    'App\\UI\\FrontHome\\FrontHomePresenter' => 3,
+    'App\\UI\\Front\\Cart\\CartSendorderTemplate' => 1,
+    'App\\UI\\Front\\Cart\\CartOrderTemplate' => 3,
+    'App\\UI\\Front\\Home\\HomeCaseTemplate' => 3,
+    'App\\UI\\Front\\Cart\\CartCreateOrderTemplate' => 3,
   ),
   2 => 
   array (
+    '/Users/dostals/tycWeb-1/app/UI/Admin/User/UserPresenter.php' => 1750775321,
   ),
 );

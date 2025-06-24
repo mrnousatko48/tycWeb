@@ -64,7 +64,7 @@ final class Template_d69929d986 extends Latte\Runtime\Template
 		echo LR\Filters::escapeHtmlAttr($this->global->uiControl->link('Home:default')) /* line 30 */;
 		echo '" class="nav-link">Domů</a></li>
 					<li class="nav-item"><a href="';
-		echo LR\Filters::escapeHtmlAttr($this->global->uiControl->link('Home:order')) /* line 31 */;
+		echo LR\Filters::escapeHtmlAttr($this->global->uiControl->link('Home:case')) /* line 31 */;
 		echo '" class="nav-link">Objednat</a></li>
 					<li class="nav-item"><a href="';
 		echo LR\Filters::escapeHtmlAttr($this->global->uiControl->link('Cart:default')) /* line 32 */;

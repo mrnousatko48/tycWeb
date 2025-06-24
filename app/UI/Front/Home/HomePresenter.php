@@ -23,7 +23,7 @@ final class HomePresenter extends Nette\Application\UI\Presenter
         // Form will be rendered automatically via {form orderForm} in the Latte template
     }
 
-    protected function createComponentOrderForm(): Form
+    protected function createComponentCaseForm(): Form
     {
         $form = new Form;
 
@@ -61,12 +61,12 @@ final class HomePresenter extends Nette\Application\UI\Presenter
 
         $form->addSubmit('submit', 'Přidat do košíku');
 
-        $form->onSuccess[] = [$this, 'orderFormSucceeded'];
+        $form->onSuccess[] = [$this, 'caseFormSucceeded'];
 
         return $form;
     }
 
-    public function orderFormSucceeded(Form $form, \stdClass $values): void
+    public function CaseFormSucceeded(Form $form, \stdClass $values): void
     {
         if (!$this->getUser()->isLoggedIn()) {
             $this->flashMessage('Pro zadání objednávky se musíte přihlásit.', 'danger');
@@ -75,7 +75,7 @@ final class HomePresenter extends Nette\Application\UI\Presenter
     
         $userId = (int) $this->getUser()->getId();
     
-        $this->orderFacade->createOrder([
+        $this->orderFacade->createCase([
             'user_id' => $userId, // <-- ADD THIS LINE
             'manufacturer' => $values->manufacturer,
             'model' => $values->model,

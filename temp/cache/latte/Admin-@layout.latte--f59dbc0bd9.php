@@ -24,8 +24,8 @@ final class Template_f59dbc0bd9 extends Latte\Runtime\Template
 		echo '<!DOCTYPE html>
 <html lang="cs">
 <head>
-	<meta charset="utf-8" />
-	<meta name="viewport" content="width=device-width, initial-scale=1" />
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 	<title>
 ';
@@ -38,94 +38,89 @@ final class Template_f59dbc0bd9 extends Latte\Runtime\Template
 		echo '		3D Kryty
 	</title>
 
-	<!-- Bootstrap CSS (CDN) -->
-	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet" />
+	<!-- Bootstrap CSS -->
+	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
 
 	<link rel="stylesheet" href="';
 		echo LR\Filters::escapeHtmlAttr(LR\Filters::safeUrl($basePath)) /* line 17 */;
-		echo '/assets/style.css" />
+		echo '/assets/style.css">
 	<script src="';
 		echo LR\Filters::escapeHtmlAttr(LR\Filters::safeUrl($basePath)) /* line 18 */;
 		echo '/assets/main.js" defer></script>
 </head>
 
-<body>
-	<header>
-		<nav class="navbar navbar-expand-lg navbar-light bg-light shadow-sm">
-			<div class="container">
-				<a class="navbar-brand fw-bold" href="';
+<body class="d-flex flex-column min-vh-100">
+	<header class="bg-light shadow-sm py-3 mb-4">
+		<div class="container d-flex justify-content-between align-items-center">
+			<h1 class="h4 mb-0">
+				<a href="';
 		echo LR\Filters::escapeHtmlAttr(LR\Filters::safeUrl($basePath)) /* line 25 */;
-		echo '/">3D Kryty</a>
-				<button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" 
-				        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-					<span class="navbar-toggler-icon"></span>
-				</button>
+		echo '/" class="text-decoration-none text-dark">3D Kryty</a>
+			</h1>
 
-				<div class="collapse navbar-collapse" id="navbarNav">
-					<ul class="navbar-nav me-auto mb-2 mb-lg-0">
-						<li class="nav-item">
-							<a href="';
-		echo LR\Filters::escapeHtmlAttr($this->global->uiControl->link(':Front:Home:default')) /* line 34 */;
-		echo '" class="nav-link">Domů</a>
-						</li>
-						<li class="nav-item">
-							<a class="nav-link" href="#">Produkty</a>
-						</li>
-						<li class="nav-item">
-							<a class="nav-link" href="#">O nás</a>
-						</li>
-						<li class="nav-item">
-							<a class="nav-link" href="#">Kontakt</a>
-						</li>
-					</ul>
+			<nav>
+				<ul class="nav">
+					<li class="nav-item"><a href="';
+		echo LR\Filters::escapeHtmlAttr($this->global->uiControl->link(':Front:Home:default')) /* line 30 */;
+		echo '" class="nav-link">Domů</a></li>
 
-					<ul class="navbar-nav mb-2 mb-lg-0">
 ';
-		if ($user->isLoggedIn()) /* line 48 */ {
-			echo '							<li class="nav-item">
-								<span class="navbar-text me-3">Přihlášen jako: <strong>';
-			echo LR\Filters::escapeHtmlText($user->identity->username) /* line 50 */;
-			echo '</strong></span>
-							</li>
-							<li class="nav-item">
-								<a href="';
-			echo LR\Filters::escapeHtmlAttr($this->global->uiControl->link(':Front:Sign:out')) /* line 53 */;
-			echo '" class="nav-link">Odhlásit se</a>
-							</li>
+		if ($user->isLoggedIn()) /* line 32 */ {
+			echo '						<li class="nav-item d-flex align-items-center ms-3 text-muted">
+							Přihlášen jako 
+							<span class="ms-1 fw-semibold">
 ';
-		} else /* line 55 */ {
-			echo '							<li class="nav-item">
-								<a href="';
-			echo LR\Filters::escapeHtmlAttr($this->global->uiControl->link(':Front:Sign:in')) /* line 57 */;
-			echo '" class="nav-link">Přihlášení</a>
-							</li>
+			if (isset($user->identity->username)) /* line 36 */ {
+				echo '									';
+				echo LR\Filters::escapeHtmlText($user->identity->username) /* line 37 */;
+				echo "\n";
+			} else /* line 38 */ {
+				echo '									(neznámý uživatel)
+';
+			}
+			echo '							</span>
+						</li>
+						<li class="nav-item"><a href="';
+			echo LR\Filters::escapeHtmlAttr($this->global->uiControl->link(':Front:Sign:out')) /* line 43 */;
+			echo '" class="nav-link text-danger ms-2">Odhlásit se</a></li>
+';
+		} else /* line 44 */ {
+			echo '						<li class="nav-item"><a href="';
+			echo LR\Filters::escapeHtmlAttr($this->global->uiControl->link(':Front:Sign:in')) /* line 45 */;
+			echo '" class="nav-link">Přihlášení</a></li>
 ';
 		}
-		echo '					</ul>
-				</div>
-			</div>
-		</nav>
+		echo '				</ul>
+			</nav>
+		</div>
 	</header>
 
-	<main class="container my-4">
+	<main class="container mb-5">
 ';
-		foreach ($flashes as $flash) /* line 67 */ {
+		foreach ($flashes as $flash) /* line 53 */ {
 			echo '			<div class="alert alert-';
-			echo LR\Filters::escapeHtmlAttr($flash->type) /* line 68 */;
+			echo LR\Filters::escapeHtmlAttr($flash->type) /* line 54 */;
 			echo '">';
-			echo LR\Filters::escapeHtmlText(!$flash->message) /* line 68 */;
+			echo LR\Filters::escapeHtmlText($flash->message) /* line 54 */;
 			echo '</div>
 ';
 
 		}
 
 		echo "\n";
-		$this->renderBlock('content', [], 'html') /* line 71 */;
+		$this->renderBlock('content', [], 'html') /* line 57 */;
 		echo '	</main>
 
-	<!-- Bootstrap JS (Popper + Bootstrap) -->
-	<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.7/dist/umd/popper.min.js"></script>
-	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+	<footer class="bg-light text-center text-muted py-3 mt-auto">
+		<div class="container">
+			&copy; ';
+		echo LR\Filters::escapeHtmlText(date('Y')) /* line 62 */;
+		echo ' 3D Kryty. Všechna práva vyhrazena.
+		</div>
+	</footer>
+
+	<!-- Bootstrap JS (optional) -->
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
 ';
@@ -137,7 +132,7 @@ final class Template_f59dbc0bd9 extends Latte\Runtime\Template
 		extract($this->params);
 
 		if (!$this->getReferringTemplate() || $this->getReferenceType() === 'extends') {
-			foreach (array_intersect_key(['flash' => '67'], $this->params) as $ʟ_v => $ʟ_l) {
+			foreach (array_intersect_key(['flash' => '53'], $this->params) as $ʟ_v => $ʟ_l) {
 				trigger_error("Variable \$$ʟ_v overwritten in foreach on line $ʟ_l");
 			}
 		}
