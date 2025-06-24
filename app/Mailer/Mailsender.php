@@ -1,128 +1,68 @@
 <?php
+
 namespace App\MailSender;
 
 use Nette\Mail\Message;
 use Nette\Mail\Mailer;
 use Latte\Engine;
-use App\Model\EmailFacade;
 
 class MailSender
 {
-    private Mailer $mailer;
-    private EmailFacade $EmailFacade;
-
     public function __construct(
-        Mailer $mailer,
-        EmailFacade $EmailFacade
+        private Mailer $mailer
     ) {
-        $this->mailer = $mailer;
-        $this->EmailFacade = $EmailFacade;
     }
 
-    private function createAdminRegistrationEmail(
-        string $userEmail,
-        string $name,
-        string $courseName,
-        string $userAddress, // Adresa uživatele
-        string $userPhone,
-        string $registrationDate
-    ): Message {
+    public function createRegistrationEmail(string $email, string $username): Message
+    {
         $latte = new Engine();
-        $params = [
-            'userEmail' => $userEmail,
-            'name' => $name,
-            'courseName' => $courseName,
-            'userAddress' => $userAddress, // Adresa uživatele pro admina
-            'userPhone' => $userPhone, 
-            'registrationDate' => $registrationDate, 
-        ]; 
- 
-        $template = $this->EmailFacade->getTemplateByName('admin_notification'); 
-        if (!$template) { 
-            throw new \Exception('Šablona admin_notification nebyla nalezena v databázi.'); 
-        } 
- 
-        $adminEmail = $template['recipient_email']; 
-        if (!$adminEmail) { 
-            throw new \Exception('Email příjemce pro admin_notification není nastaven v datab ázi.');
-        } 
- 
-        $latte->setLoader(new \Latte\Loaders\StringLoader()); 
-        $subject = $latte->renderToString($template['subject'], $params); 
-        $html = $latte->renderToString($template['body'], $params); 
- 
         $mail = new Message;
-        $mail->setFrom('autoskolaprima@email.cz')
-             ->addTo($adminEmail)
-             ->setSubject($subject)
-             ->setHtmlBody($html);
+    
+        $params = [
+            'email' => $email,
+            'username' => $username,
+        ];
+    
+        $html = $latte->renderToString(__DIR__ . '/registration.latte', $params);
+    
+        $mail->setFrom('okurkyvmalinovce@seznam.cz')
+            ->addTo($email)
+            ->setSubject('Vítejte! Registrace byla úspěšná')
+            ->setHtmlBody($html);
+    
+        return $mail;
+    }
+
+    public function createNewUserEmail(string $email, string $username): Message
+    {
+        $latte = new Engine();
+        $mail = new Message;
+
+        $params = [
+            'email' => $email,
+            'username' => $username,
+        ];
+
+        $html = $latte->renderToString(__DIR__ . '/newUser.latte', $params);
+
+        $mail->setFrom('okurkyvmalinovce@seznam.cz')
+            ->addTo('okurkyvmalinovce@seznam.cz')
+            ->setSubject('Nová registrace uživatele')
+            ->setHtmlBody($html);
 
         return $mail;
     }
 
-    private function createUserConfirmationEmail(
-    string $userEmail,
-    string $name,
-    string $courseName,
-    string $courseLocation,
-    string $courseStartDate
-): Message {
-    $latte = new Engine();
-    $template = $this->EmailFacade->getTemplateByName('usr_confirmation');
-    if (!$template) {
-        throw new \Exception('Šablona usr_confirmation nebyla nalezena v databázi.');
+    public function sendRegistrationEmail(string $email, string $username): void
+    {
+        $mail = $this->createRegistrationEmail($email, $username);
+        $this->mailer->send($mail);
+    }
+
+    public function sendNewUserEmail(string $email, string $username): void
+    {
+        $mail = $this->createNewUserEmail($email, $username);
+        $this->mailer->send($mail);
     }
     
-    $params = [
-        'name' => $name,
-        'courseName' => $courseName,
-        'courseLocation' => $courseLocation,
-        'adminPhone' => $template['admin_phone'] ?? 'Není zadán telefon',
-        'courseStartDate' => $courseStartDate,
-    ];
-    
-    $latte->setLoader(new \Latte\Loaders\StringLoader());
-    $subject = $latte->renderToString($template['subject'], $params);
-    $html = $latte->renderToString($template['body'], $params);
-    
-    $mail = new Message;
-    $mail->setFrom('autoskolaprima@email.cz')
-         ->addTo($userEmail)
-         ->setSubject($subject)
-         ->setHtmlBody($html);
-
-    return $mail;
-}
-
-
-    public function sendRegistrationEmail(
-        string $userEmail,
-        string $name,
-        string $courseName,
-        string $userAddress,    // Adresa uživatele
-        string $courseLocation, // Místo konání kurzu
-        string $userPhone,
-        string $registrationDate,
-        string $courseStartDate
-    ): void {
-        $adminMail = $this->createAdminRegistrationEmail(
-            $userEmail,
-            $name,
-            $courseName,
-            $userAddress,    // Adresa uživatele pro admina
-            $userPhone,
-            $registrationDate
-        );
-        
-        $userMail = $this->createUserConfirmationEmail(
-            $userEmail,
-            $name,
-            $courseName,
-            $courseLocation, // Místo konání kurzu pro uživatele
-            $courseStartDate
-        );
-
-        $this->mailer->send($adminMail);
-        $this->mailer->send($userMail);
-    }
 }

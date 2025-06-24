@@ -9,6 +9,7 @@ use App\Model\UserFacade;
 use App\UI\Accessory\FormFactory;
 use Nette\Application\UI\Form;
 use App\Model\DuplicateNameException;
+use App\MailSender\MailSender;
 
 final class SignPresenter extends Nette\Application\UI\Presenter
 {
@@ -17,6 +18,7 @@ final class SignPresenter extends Nette\Application\UI\Presenter
 	public function __construct(
 		private UserFacade $userFacade,
 		private FormFactory $formFactory,
+		private MailSender $mailSender,
 	) {
 	}
 	
@@ -75,12 +77,16 @@ final class SignPresenter extends Nette\Application\UI\Presenter
 			try {
 				$this->userFacade->add(
 					username: $data->username,
-					firstname: '',
-					lastname: '',
+					firstname: $data->firstname,
+					lastname: $data->lastname,
 					email: $data->email,
 					password: $data->password,
 					role: 'UZIVATEL'
 				);
+				
+				$this->mailSender->sendRegistrationEmail($data->email, $data->username);
+				$this->mailSender->sendNewUserEmail($data->email, $data->username);
+
 				$this->flashMessage('Registrace byla úspěšná. Nyní se můžete přihlásit.', 'success');
 				$this->redirect('Sign:in');
 			} catch (DuplicateNameException $e) {

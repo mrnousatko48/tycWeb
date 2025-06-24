@@ -75,6 +75,7 @@ class Container_0159e7c4e2 extends Nette\DI\Container
 		'Nette\Routing\Router' => [['01']],
 		'ArrayAccess' => [2 => ['01', 'application.1', 'application.2', 'application.3', 'application.4']],
 		'Nette\Application\Routers\RouteList' => [['01']],
+		'App\MailSender\MailSender' => [['02']],
 		'Nette\Application\UI\Presenter' => [2 => ['application.1', 'application.2', 'application.3', 'application.4']],
 		'Nette\Application\UI\Control' => [2 => ['application.1', 'application.2', 'application.3', 'application.4']],
 		'Nette\Application\UI\Component' => [2 => ['application.1', 'application.2', 'application.3', 'application.4']],
@@ -98,11 +99,11 @@ class Container_0159e7c4e2 extends Nette\DI\Container
 		'App\UI\Front\Sign\SignPresenter' => [2 => ['application.4']],
 		'NetteModule\ErrorPresenter' => [2 => ['application.5']],
 		'NetteModule\MicroPresenter' => [2 => ['application.6']],
-		'App\UI\Accessory\FormFactory' => [['02']],
-		'App\Model\OrderFacade' => [['03']],
-		'Nette\Security\Authenticator' => [['04']],
-		'Nette\Security\IAuthenticator' => [['04']],
-		'App\Model\UserFacade' => [['04']],
+		'App\UI\Accessory\FormFactory' => [['03']],
+		'App\Model\OrderFacade' => [['04']],
+		'Nette\Security\Authenticator' => [['05']],
+		'Nette\Security\IAuthenticator' => [['05']],
+		'App\Model\UserFacade' => [['05']],
 	];
 
 
@@ -118,19 +119,25 @@ class Container_0159e7c4e2 extends Nette\DI\Container
 	}
 
 
-	public function createService02(): App\UI\Accessory\FormFactory
+	public function createService02(): App\MailSender\MailSender
+	{
+		return new App\MailSender\MailSender($this->getService('mail.mailer'));
+	}
+
+
+	public function createService03(): App\UI\Accessory\FormFactory
 	{
 		return new App\UI\Accessory\FormFactory($this->getService('security.user'));
 	}
 
 
-	public function createService03(): App\Model\OrderFacade
+	public function createService04(): App\Model\OrderFacade
 	{
 		return new App\Model\OrderFacade($this->getService('database.default.explorer'));
 	}
 
 
-	public function createService04(): App\Model\UserFacade
+	public function createService05(): App\Model\UserFacade
 	{
 		return new App\Model\UserFacade($this->getService('security.passwords'), $this->getService('database.default.explorer'));
 	}
@@ -138,7 +145,7 @@ class Container_0159e7c4e2 extends Nette\DI\Container
 
 	public function createServiceApplication__1(): App\UI\Admin\Dashboard\DashboardPresenter
 	{
-		$service = new App\UI\Admin\Dashboard\DashboardPresenter($this->getService('03'), $this->getService('database.default.explorer'));
+		$service = new App\UI\Admin\Dashboard\DashboardPresenter($this->getService('04'), $this->getService('database.default.explorer'));
 		$service->injectPrimary(
 			$this->getService('http.request'),
 			$this->getService('http.response'),
@@ -155,7 +162,7 @@ class Container_0159e7c4e2 extends Nette\DI\Container
 
 	public function createServiceApplication__2(): App\UI\Front\Home\HomePresenter
 	{
-		$service = new App\UI\Front\Home\HomePresenter($this->getService('03'));
+		$service = new App\UI\Front\Home\HomePresenter($this->getService('04'));
 		$service->injectPrimary(
 			$this->getService('http.request'),
 			$this->getService('http.response'),
@@ -172,7 +179,7 @@ class Container_0159e7c4e2 extends Nette\DI\Container
 
 	public function createServiceApplication__3(): App\UI\Front\Cart\CartPresenter
 	{
-		$service = new App\UI\Front\Cart\CartPresenter($this->getService('03'));
+		$service = new App\UI\Front\Cart\CartPresenter($this->getService('04'));
 		$service->injectPrimary(
 			$this->getService('http.request'),
 			$this->getService('http.response'),
@@ -189,7 +196,7 @@ class Container_0159e7c4e2 extends Nette\DI\Container
 
 	public function createServiceApplication__4(): App\UI\Front\Sign\SignPresenter
 	{
-		$service = new App\UI\Front\Sign\SignPresenter($this->getService('04'), $this->getService('02'));
+		$service = new App\UI\Front\Sign\SignPresenter($this->getService('05'), $this->getService('03'), $this->getService('02'));
 		$service->injectPrimary(
 			$this->getService('http.request'),
 			$this->getService('http.response'),
@@ -405,8 +412,8 @@ class Container_0159e7c4e2 extends Nette\DI\Container
 	{
 		return new Nette\Mail\SmtpMailer(
 			'smtp.seznam.cz',
-			'email@seznam.cz',
-			/*sensitive{*/'heslo'/*}*/,
+			'okurkyvmalinovce@seznam.cz',
+			/*sensitive{*/'SecretHeslo123'/*}*/,
 			465,
 			'ssl',
 			false,
@@ -425,7 +432,7 @@ class Container_0159e7c4e2 extends Nette\DI\Container
 
 	public function createServiceSecurity__user(): Nette\Security\User
 	{
-		$service = new Nette\Security\User($this->getService('security.userStorage'), $this->getService('04'));
+		$service = new Nette\Security\User($this->getService('security.userStorage'), $this->getService('05'));
 		$this->getService('tracy.bar')->addPanel(new Nette\Bridges\SecurityTracy\UserPanel($service));
 		return $service;
 	}
