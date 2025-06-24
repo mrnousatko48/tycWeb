@@ -1,0 +1,35 @@
+{block content}
+
+<h1>Moje objednávky</h1>
+
+{if !$orders || $orders->count() === 0}
+    <p>Nemáte žádné objednávky.</p>
+{else}
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Výrobce</th>
+                <th>Model</th>
+                <th>Barva</th>
+                <th>Krytka portu</th>
+                <th>Držák karet</th>
+                <th>Datum objednávky</th>
+            </tr>
+        </thead>
+        <tbody>
+            {foreach $orders as $order}
+                <tr>
+                    <td>{$order->id}</td>
+                    <td>{$order->manufacturer}</td>
+                    <td>{$order->model}</td>
+                    <td>{$order->color}</td>
+                    <td>{if $order->port_cover}Ano{else}Ne{/if}</td>
+                    <td>{$order->card_holder}</td>
+                    <td>{$order->created_at->format('j. n. Y H:i')}</td>
+                </tr>
+            {/foreach}
+        </tbody>
+    </table>
+{/if}
+{/block}

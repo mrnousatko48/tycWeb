@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-namespace App\UI\Admin\Dashboard;
+namespace App\UI\Front\Cart;
 
 use Nette;
 use App\Model\OrderFacade;
 
-final class DashboardPresenter extends Nette\Application\UI\Presenter
+final class CartPresenter extends Nette\Application\UI\Presenter
 {
     private OrderFacade $orderFacade;
 
@@ -19,13 +19,12 @@ final class DashboardPresenter extends Nette\Application\UI\Presenter
 
     public function renderDefault(): void
     {
-        $orders = $this->orderFacade->getAllOrders(); // or whatever method
+        $userId = (int) $this->getUser()->getId();
+        $orders = $this->orderFacade->getOrdersByUserId($userId);
         $this->template->orders = $orders;
     }
 
-
     public function renderDetail(): void
     {
-        // Detail view logic if needed
     }
 }

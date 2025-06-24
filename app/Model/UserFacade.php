@@ -63,26 +63,30 @@ final class UserFacade implements Authenticator
     
     public function authenticate(string $username, string $password): Identity
     {
-        // Najdi uživatele v databázi
         $row = $this->database->table('users')
             ->where('username', $username)
             ->fetch();
-
+    
         if (!$row) {
             throw new AuthenticationException('Uživatel neexistuje.');
         }
-
+    
         if (!$this->passwords->verify($password, $row->password)) {
             throw new AuthenticationException('Nesprávné heslo.');
         }
-
+    
         return new Identity(
-            $row->username,
+            $row->id,
             $row->role,
-            ['email' => $row->email]
+            [
+                'username' => $row->username,
+                'email' => $row->email,
+                'firstname' => $row->firstname,
+                'lastname' => $row->lastname,
+            ]
         );
     }
-
+    
 }
 
 class DuplicateNameException extends \Exception
