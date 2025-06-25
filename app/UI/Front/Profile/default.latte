@@ -1,0 +1,24 @@
+{block content}
+  <dl>
+    <dt>Uživatelské jméno:</dt>
+    <dd>{$profileUser->username}</dd>
+
+    <dt>Jméno:</dt>
+    <dd>{$profileUser->firstname}</dd>
+
+    <dt>Příjmení:</dt>
+    <dd>{$profileUser->lastname}</dd>
+
+    <dt>Email:</dt>
+    <dd>{$profileUser->email}</dd>
+
+    <dt>Adresa:</dt>
+    <dd>{$profileUser->address}</dd>
+
+    <dt>Město:</dt>
+    <dd>{$profileUser->city}</dd>
+</dl>
+
+
+    {control editProfileForm}
+{/block}

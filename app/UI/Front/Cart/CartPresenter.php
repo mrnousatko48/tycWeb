@@ -7,15 +7,18 @@ namespace App\UI\Front\Cart;
 use Nette;
 use App\Model\OrderFacade;
 use Nette\Application\UI\Form;
+use Nette\Database\Explorer;
 
 final class CartPresenter extends Nette\Application\UI\Presenter
 {
     private OrderFacade $orderFacade;
+    private Explorer $database;
 
-    public function __construct(OrderFacade $orderFacade)
+    public function __construct(OrderFacade $orderFacade, Explorer $database)
     {
         parent::__construct();
         $this->orderFacade = $orderFacade;
+        $this->database = $database;
     }
 
     protected function startup(): void
@@ -50,10 +53,21 @@ final class CartPresenter extends Nette\Application\UI\Presenter
 
         $form->addSubmit('submit', 'Dokončit objednávku');
 
+        $userId = (int) $this->getUser()->getId();
+        $user = $this->database->table('users')->get($userId);
+
+        if ($user) {
+            $form->setDefaults([
+                'address' => $user->address ?? '',
+                'city' => $user->city ?? '',
+            ]);
+        }
+
         $form->onSuccess[] = [$this, 'sendOrderFormSucceeded'];
 
         return $form;
     }
+
 
     public function sendOrderFormSucceeded(Form $form, \stdClass $values): void
     {
@@ -141,16 +155,15 @@ final class CartPresenter extends Nette\Application\UI\Presenter
     }
 
     public function handleRemoveCase(int $caseId): void
-{
-    $userId = (int) $this->getUser()->getId();
-    $this->orderFacade->removeCaseFromCartByUser($userId, $caseId);
+    {
+        $userId = (int) $this->getUser()->getId();
+        $this->orderFacade->removeCaseFromCartByUser($userId, $caseId);
 
-    // Also remove from session quantities if used
-    $session = $this->getSession();
-    $this->orderFacade->removeCaseFromCart($session, $caseId);
+        // Also remove from session quantities if used
+        $session = $this->getSession();
+        $this->orderFacade->removeCaseFromCart($session, $caseId);
 
-    $this->flashMessage("Kryt byl odebrán z košíku.", 'info');
-    $this->redirect('this');
-}
-
+        $this->flashMessage("Kryt byl odebrán z košíku.", 'info');
+        $this->redirect('this');
+    }
 }

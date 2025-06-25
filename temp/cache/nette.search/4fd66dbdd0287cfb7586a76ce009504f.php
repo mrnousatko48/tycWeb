@@ -5,12 +5,12 @@ return array (
     'App\\UI\\Admin\\User\\UserPresenter' => 
     array (
       0 => '/Users/dostals/tycWeb-1/app/UI/Admin/User/UserPresenter.php',
-      1 => 1750795188,
+      1 => 1750797283,
     ),
     'App\\UI\\Admin\\Dashboard\\DashboardPresenter' => 
     array (
       0 => '/Users/dostals/tycWeb-1/app/UI/Admin/Dashboard/DashboardPresenter.php',
-      1 => 1750796936,
+      1 => 1750797287,
     ),
     'App\\Presentation\\Accessory\\LatteExtension' => 
     array (
@@ -27,10 +27,15 @@ return array (
       0 => '/Users/dostals/tycWeb-1/app/UI/Front/Home/HomePresenter.php',
       1 => 1750784905,
     ),
+    'App\\UI\\Front\\Profile\\ProfilePresenter' => 
+    array (
+      0 => '/Users/dostals/tycWeb-1/app/UI/Front/Profile/ProfilePresenter.php',
+      1 => 1750852666,
+    ),
     'App\\UI\\Front\\Cart\\CartPresenter' => 
     array (
       0 => '/Users/dostals/tycWeb-1/app/UI/Front/Cart/CartPresenter.php',
-      1 => 1750795841,
+      1 => 1750852998,
     ),
     'App\\UI\\Front\\Sign\\SignPresenter' => 
     array (

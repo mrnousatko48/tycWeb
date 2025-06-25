@@ -5,12 +5,12 @@ return array (
     'App\\UI\\Admin\\User\\UserPresenter' => 
     array (
       0 => '/Users/dostals/tycWeb-1/app/UI/Admin/User/UserPresenter.php',
-      1 => 1750797276,
+      1 => 1750797283,
     ),
     'App\\UI\\Admin\\Dashboard\\DashboardPresenter' => 
     array (
       0 => '/Users/dostals/tycWeb-1/app/UI/Admin/Dashboard/DashboardPresenter.php',
-      1 => 1750797202,
+      1 => 1750797287,
     ),
     'App\\Presentation\\Accessory\\LatteExtension' => 
     array (
@@ -27,10 +27,15 @@ return array (
       0 => '/Users/dostals/tycWeb-1/app/UI/Front/Home/HomePresenter.php',
       1 => 1750784905,
     ),
+    'App\\UI\\Front\\Profile\\ProfilePresenter' => 
+    array (
+      0 => '/Users/dostals/tycWeb-1/app/UI/Front/Profile/ProfilePresenter.php',
+      1 => 1750852666,
+    ),
     'App\\UI\\Front\\Cart\\CartPresenter' => 
     array (
       0 => '/Users/dostals/tycWeb-1/app/UI/Front/Cart/CartPresenter.php',
-      1 => 1750795841,
+      1 => 1750852998,
     ),
     'App\\UI\\Front\\Sign\\SignPresenter' => 
     array (
@@ -70,7 +75,7 @@ return array (
   ),
   1 => 
   array (
-    'null' => 1,
+    'null' => 3,
     'App\\UI\\Front\\Sign\\SignOutTemplate' => 3,
     'App\\UI\\Front\\Sign\\SignTemplate' => 3,
     'App\\UI\\Front\\Home\\HomeDefaultTemplate' => 3,
@@ -83,6 +88,13 @@ return array (
     'App\\UI\\Admin\\User\\UserTemplate' => 2,
     'Ublaboo\\DataGrid\\DataGridTemplate' => 1,
     'Ublaboo\\DataGrid\\Components\\DataGridPaginator\\DataGridPaginatorTemplate' => 1,
+    'App\\UI\\Front\\Home\\HomeCaseTemplate' => 3,
+    'App\\UI\\Front\\Cart\\CartDefaultTemplate' => 3,
+    'App\\UI\\Front\\Cart\\CartTemplate' => 3,
+    'App\\UI\\Front\\Profile\\ProfileDeleteTemplate' => 1,
+    'App\\UI\\Front\\Profile\\ProfileTemplate' => 3,
+    'App\\UI\\Front\\Profile\\ProfileDefaultTemplate' => 3,
+    'App\\UI\\Front\\Cart\\CartOrderTemplate' => 3,
   ),
   2 => 
   array (
