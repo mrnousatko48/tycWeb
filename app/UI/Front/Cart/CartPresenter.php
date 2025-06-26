@@ -34,8 +34,7 @@ final class CartPresenter extends Nette\Application\UI\Presenter
     public function renderDefault(): void
     {
         $userId = (int) $this->getUser()->getId();
-        // Fetch all available cases or only cart cases, depending on your logic
-        $cases = $this->orderFacade->getCartCasesByUserId($userId); // Or getAllCases() for a catalog
+        $cases = $this->orderFacade->getCartCasesByUserId($userId);
 
         $this->template->cases = $cases;
     }
@@ -51,6 +50,9 @@ final class CartPresenter extends Nette\Application\UI\Presenter
         $form->addText('city', 'Město:')
             ->setRequired('Zadejte město');
 
+        $form->addText('psc', 'PSČ:')
+            ->setRequired('Zadejte PSČ');
+
         $form->addSubmit('submit', 'Dokončit objednávku');
 
         $userId = (int) $this->getUser()->getId();
@@ -60,6 +62,7 @@ final class CartPresenter extends Nette\Application\UI\Presenter
             $form->setDefaults([
                 'address' => $user->address ?? '',
                 'city' => $user->city ?? '',
+                'psc' => $user->psc ?? '',
             ]);
         }
 
@@ -80,7 +83,7 @@ final class CartPresenter extends Nette\Application\UI\Presenter
         }
 
         $userId = (int) $this->getUser()->getId();
-        $order = $this->orderFacade->createOrder($userId, $values->address, $values->city, $quantities);
+        $order = $this->orderFacade->createOrder($userId, $values->address, $values->city, $values->psc, $quantities);
 
         unset($session->quantities);
 

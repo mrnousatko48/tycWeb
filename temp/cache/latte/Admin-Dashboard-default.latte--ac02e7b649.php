@@ -115,6 +115,8 @@ final class Template_ac02e7b649 extends Latte\Runtime\Template
 				echo LR\Filters::escapeHtmlText($orderData['order']->address) /* line 40 */;
 				echo ', ';
 				echo LR\Filters::escapeHtmlText($orderData['order']->city) /* line 40 */;
+				echo ', ';
+				echo LR\Filters::escapeHtmlText($orderData['order']->psc) /* line 40 */;
 				echo '
             </td>
             <td class="border border-gray-300 px-4 py-2">

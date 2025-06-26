@@ -62,9 +62,15 @@ final class Template_557a6bf09f extends Latte\Runtime\Template
     <dd>';
 		echo LR\Filters::escapeHtmlText($profileUser->city) /* line 19 */;
 		echo '</dd>
+      
+    <dt>PSČ:</dt>
+    <dd>';
+		echo LR\Filters::escapeHtmlText($profileUser->psc) /* line 22 */;
+		echo '</dd>
+
 </dl>
 <a href="';
-		echo LR\Filters::escapeHtmlAttr($this->global->uiControl->link('edit')) /* line 21 */;
+		echo LR\Filters::escapeHtmlAttr($this->global->uiControl->link('edit')) /* line 25 */;
 		echo '" class="btn btn-outline-success">Upravit profil</a>
 
   

@@ -14,7 +14,7 @@ final class OrderFacade
         $this->database = $database;
     }
 
-    public function createOrder(int $userId, string $address, string $city, array $caseQuantities): ActiveRow
+    public function createOrder(int $userId, string $address, string $city, string $psc, array $caseQuantities): ActiveRow
     {
         $this->database->beginTransaction();
 
@@ -23,6 +23,7 @@ final class OrderFacade
                 'user_id' => $userId,
                 'address' => $address,
                 'city' => $city,
+                'psc' => $psc,
                 'state' => 'OBJEDNANO',
                 'created_at' => new \DateTime(),
             ]);
@@ -80,9 +81,6 @@ final class OrderFacade
             ->order('created_at DESC');
     }
 
-    /**
-     * Get user's cases (cart or full order items)
-     */
     public function getCasesByUserId(int $userId): \Nette\Database\Table\Selection
     {
         return $this->database->table('cases')
@@ -90,9 +88,6 @@ final class OrderFacade
             ->order('created_at DESC');
     }
 
-    /**
-     * Get user's current cart cases (not yet in an order)
-     */
     public function getCartCasesByUserId(int $userId): \Nette\Database\Table\Selection
     {
         return $this->database->table('cases')
@@ -133,7 +128,7 @@ final class OrderFacade
         ->where('id', $caseId)
         ->where('user_id', $userId)
         ->where('state', 'KOSIK')
-        ->delete(); // or delete() if you want to delete
+        ->delete();
 }
 
 }

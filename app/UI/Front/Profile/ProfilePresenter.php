@@ -41,7 +41,6 @@ final class ProfilePresenter extends Nette\Application\UI\Presenter
         }
 
         $this->template->profileUser = $userRow;
-
     }
 
     protected function createComponentEditProfileForm(): Form
@@ -65,6 +64,10 @@ final class ProfilePresenter extends Nette\Application\UI\Presenter
 
         $form->addText('city', 'Město:')
             ->setNullable();
+
+        $form->addText('psc', 'PSČ:') // Přidáno pole PSČ
+            ->setNullable()
+            ->addRule($form::PATTERN, 'Zadejte platné PSČ (např. 12345 nebo 123 45)', '^\d{3}\s?\d{2}$');
 
         $form->addSubmit('save', 'Uložit změny');
 
@@ -92,6 +95,7 @@ final class ProfilePresenter extends Nette\Application\UI\Presenter
                 'email' => $values->email,
                 'address' => $values->address,
                 'city' => $values->city,
+                'psc' => $values->psc, // Uložení PSČ
             ]);
 
         $this->flashMessage('Profil byl úspěšně aktualizován.', 'success');

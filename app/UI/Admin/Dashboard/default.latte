@@ -37,7 +37,7 @@
                 {/if}
             </td>
             <td class="border border-gray-300 px-4 py-2">
-                {$orderData['order']->address}, {$orderData['order']->city}
+                {$orderData['order']->address}, {$orderData['order']->city}, {$orderData['order']->psc}
             </td>
             <td class="border border-gray-300 px-4 py-2">
                 {$orderData['order']->created_at|date:'j. n. Y H:i'}

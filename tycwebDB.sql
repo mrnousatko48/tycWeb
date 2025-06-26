@@ -7,10 +7,6 @@ SET sql_mode = 'NO_AUTO_VALUE_ON_ZERO';
 
 SET NAMES utf8mb4;
 
-DROP DATABASE IF EXISTS `tycweb`;
-CREATE DATABASE `tycweb` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
-USE `tycweb`;
-
 DROP TABLE IF EXISTS `cases`;
 CREATE TABLE `cases` (
   `id` int NOT NULL AUTO_INCREMENT,
@@ -25,7 +21,7 @@ CREATE TABLE `cases` (
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`),
   CONSTRAINT `cases_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO `cases` (`id`, `manufacturer`, `model`, `color`, `port_cover`, `card_holder`, `state`, `user_id`, `created_at`) VALUES
 (3,	'samsung',	'a1',	'Černá',	1,	'1 slot',	'KOSIK',	NULL,	'2025-06-24 15:05:15'),
@@ -70,15 +66,16 @@ CREATE TABLE `orders` (
   `city` varchar(255) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `state` enum('KOSIK','OBJEDNANO','DORUCENO') COLLATE utf8mb4_unicode_ci NOT NULL,
   `payment` enum('KARTA','PREVOD','HOTOVE') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `psc` varchar(16) COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-INSERT INTO `orders` (`id`, `user_id`, `address`, `city`, `state`, `payment`, `created_at`) VALUES
-(11,	3,	'ulice 2',	'praha',	'OBJEDNANO',	NULL,	'2025-06-24 16:40:51'),
-(12,	2,	'prablova 921',	'Ostrava',	'OBJEDNANO',	NULL,	'2025-06-24 17:07:48'),
-(13,	6,	'231',	'brno',	'OBJEDNANO',	NULL,	'2025-06-24 20:12:18');
+INSERT INTO `orders` (`id`, `user_id`, `address`, `city`, `state`, `payment`, `psc`, `created_at`) VALUES
+(11,	3,	'ulice 2',	'praha',	'OBJEDNANO',	NULL,	NULL,	'2025-06-24 16:40:51'),
+(12,	2,	'prablova 921',	'Ostrava',	'OBJEDNANO',	NULL,	NULL,	'2025-06-24 17:07:48'),
+(13,	6,	'231',	'brno',	'OBJEDNANO',	NULL,	NULL,	'2025-06-24 20:12:18');
 
 DROP TABLE IF EXISTS `users`;
 CREATE TABLE `users` (
@@ -91,16 +88,17 @@ CREATE TABLE `users` (
   `role` enum('UZIVATEL','ADMIN') COLLATE utf8mb4_czech_ci NOT NULL DEFAULT 'UZIVATEL',
   `address` varchar(255) COLLATE utf8mb4_czech_ci DEFAULT NULL,
   `city` varchar(100) COLLATE utf8mb4_czech_ci DEFAULT NULL,
+  `psc` varchar(16) COLLATE utf8mb4_czech_ci DEFAULT NULL,
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `username` (`username`),
   UNIQUE KEY `email` (`email`)
-) ENGINE=InnoDB AUTO_INCREMENT=8 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_czech_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_czech_ci;
 
-INSERT INTO `users` (`id`, `username`, `firstname`, `lastname`, `email`, `password`, `role`, `address`, `city`, `created_at`) VALUES
-(2,	'sima',	'simon',	'',	'mail@amail.com',	'$2y$10$RD/AXZzpkhbFElMayEVHse83fvmLFMHVFkPyuvCfDkZucTEFoZ6UC',	'UZIVATEL',	NULL,	NULL,	'2025-06-24 11:30:58'),
-(3,	'admin',	'administrátor',	'veliký',	'admin@mail.com',	'$2y$10$5dUIUJioPW1aleFtwM.PiOIvdYUxIVq85Di4oDuOUzAgABF402auW',	'ADMIN',	'',	'',	'2025-06-24 11:43:46'),
-(6,	'dostals',	'',	'',	'dostals64@gmail.com',	'$2y$10$0D3LrJSeww8SWbYSCBhKSuNUH1TVHUY9c/ySD0E1jRNp.MUX8FAQS',	'UZIVATEL',	NULL,	NULL,	'2025-06-24 19:27:29'),
-(7,	'bakub',	'Kuba',	'Syč',	'bakua@mail.com',	'$2y$10$ZVF9RfycPsVhpryvQf50zePtoXVFCl4.6bUzZKxiSIdpdCguW4Eri',	'UZIVATEL',	NULL,	NULL,	'2025-06-24 19:29:28');
+INSERT INTO `users` (`id`, `username`, `firstname`, `lastname`, `email`, `password`, `role`, `address`, `city`, `psc`, `created_at`) VALUES
+(2,	'sima',	'simon',	'látsod',	'mail@amail.com',	'$2y$10$RD/AXZzpkhbFElMayEVHse83fvmLFMHVFkPyuvCfDkZucTEFoZ6UC',	'UZIVATEL',	'Pražská 281',	'Kolín',	NULL,	'2025-06-24 11:30:58'),
+(3,	'admin',	'administrátorec',	'veliký',	'admin@mail.com',	'$2y$10$5dUIUJioPW1aleFtwM.PiOIvdYUxIVq85Di4oDuOUzAgABF402auW',	'ADMIN',	'Nádražní 23',	'Praha',	NULL,	'2025-06-24 11:43:46'),
+(6,	'dostals',	'',	'',	'dostals64@gmail.com',	'$2y$10$0D3LrJSeww8SWbYSCBhKSuNUH1TVHUY9c/ySD0E1jRNp.MUX8FAQS',	'ADMIN',	NULL,	NULL,	NULL,	'2025-06-24 19:27:29'),
+(7,	'bakub',	'Kuba',	'Syč',	'bakua@mail.com',	'$2y$10$ZVF9RfycPsVhpryvQf50zePtoXVFCl4.6bUzZKxiSIdpdCguW4Eri',	'UZIVATEL',	NULL,	NULL,	NULL,	'2025-06-24 19:29:28');
 
--- 2025-06-24 20:12:40
+-- 2025-06-26 08:41:30
