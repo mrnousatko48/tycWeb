@@ -84,10 +84,10 @@ return array (
     'App\\UI\\Admin\\Dashboard\\DashboardDefaultTemplate' => 3,
     'App\\UI\\Admin\\Dashboard\\DashboardTemplate' => 3,
     'App\\UI\\Admin\\Sign\\SignPresenter' => 2,
-    'App\\UI\\Admin\\User\\UserDefaultTemplate' => 2,
-    'App\\UI\\Admin\\User\\UserTemplate' => 2,
-    'Ublaboo\\DataGrid\\DataGridTemplate' => 1,
-    'Ublaboo\\DataGrid\\Components\\DataGridPaginator\\DataGridPaginatorTemplate' => 1,
+    'App\\UI\\Admin\\User\\UserDefaultTemplate' => 3,
+    'App\\UI\\Admin\\User\\UserTemplate' => 3,
+    'Ublaboo\\DataGrid\\DataGridTemplate' => 3,
+    'Ublaboo\\DataGrid\\Components\\DataGridPaginator\\DataGridPaginatorTemplate' => 3,
     'App\\UI\\Front\\Home\\HomeCaseTemplate' => 3,
     'App\\UI\\Front\\Cart\\CartDefaultTemplate' => 3,
     'App\\UI\\Front\\Cart\\CartTemplate' => 3,
@@ -99,6 +99,8 @@ return array (
     'App\\UI\\Front\\Sign\\SignUpTemplate' => 1,
     'App\\UI\\Front\\Amin\\AminPresenter' => 2,
     'App\\UI\\Front\\Home\\HomeDetailTemplate' => 1,
+    'App\\UI\\Admin\\Home\\HomePresenter' => 1,
+    'App\\UI\\Admin\\User\\UserEditTemplate' => 2,
   ),
   2 => 
   array (
