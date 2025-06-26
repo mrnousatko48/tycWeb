@@ -129,7 +129,6 @@ final class Template_93a0152e76 extends Latte\Runtime\Template
 		</div>
 	</footer>
 
-	<!-- Bootstrap JS (optional) -->
 	<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>
