@@ -30,7 +30,7 @@ return array (
     'App\\UI\\Front\\Profile\\ProfilePresenter' => 
     array (
       0 => '/Users/dostals/tycWeb-1/app/UI/Front/Profile/ProfilePresenter.php',
-      1 => 1750852666,
+      1 => 1750926661,
     ),
     'App\\UI\\Front\\Cart\\CartPresenter' => 
     array (
@@ -40,7 +40,7 @@ return array (
     'App\\UI\\Front\\Sign\\SignPresenter' => 
     array (
       0 => '/Users/dostals/tycWeb-1/app/UI/Front/Sign/SignPresenter.php',
-      1 => 1750793318,
+      1 => 1750926583,
     ),
     'App\\Core\\RouterFactory' => 
     array (
@@ -95,6 +95,9 @@ return array (
     'App\\UI\\Front\\Profile\\ProfileTemplate' => 3,
     'App\\UI\\Front\\Profile\\ProfileDefaultTemplate' => 3,
     'App\\UI\\Front\\Cart\\CartOrderTemplate' => 3,
+    'App\\UI\\Front\\Profile\\ProfileEditTemplate' => 3,
+    'App\\UI\\Front\\Sign\\SignUpTemplate' => 1,
+    'App\\UI\\Front\\Amin\\AminPresenter' => 2,
   ),
   2 => 
   array (

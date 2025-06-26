@@ -70,7 +70,6 @@ final class ProfilePresenter extends Nette\Application\UI\Presenter
 
         $form->onSuccess[] = [$this, 'editProfileFormSucceeded'];
 
-        // load defaults
         $userId = $this->user->getId();
         $userRow = $this->database->table('users')->get($userId);
         if ($userRow) {
@@ -96,6 +95,6 @@ final class ProfilePresenter extends Nette\Application\UI\Presenter
             ]);
 
         $this->flashMessage('Profil byl úspěšně aktualizován.', 'success');
-        $this->redirect('this');
+        $this->redirect('default');
     }
 }

@@ -53,21 +53,21 @@ final class SignPresenter extends Nette\Application\UI\Presenter
 	{
 		$form = $this->formFactory->create();
 
-		$form->addText('username', 'Uživatelské jméno:')
+		$form->addText('username', '*Uživatelské jméno:')
 			->setRequired('Zadejte uživatelské jméno');
 
 		$form->addText('firstname', 'Křestní jméno:');
 		
 		$form->addText('lastname', 'Příjmení:');
 
-		$form->addEmail('email', 'Email:')
+		$form->addEmail('email', '*Email:')
 			->setRequired('Zadejte e-mailovou adresu');
 
-		$form->addPassword('password', 'Heslo:')
+		$form->addPassword('password', '*Heslo:')
 			->setRequired('Zadejte heslo')
 			->addRule($form::MinLength, 'Heslo musí mít alespoň %d znaků.', $this->userFacade::PasswordMinLength);
 
-		$form->addPassword('confirmPassword', 'Potvrzení hesla:')
+		$form->addPassword('confirmPassword', '*Potvrzení hesla:')
 			->setRequired('Zadejte heslo znovu')
 			->addRule($form::EQUAL, 'Hesla se neshodují', $form['password']);
 

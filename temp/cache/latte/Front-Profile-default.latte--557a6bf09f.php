@@ -63,11 +63,11 @@ final class Template_557a6bf09f extends Latte\Runtime\Template
 		echo LR\Filters::escapeHtmlText($profileUser->city) /* line 19 */;
 		echo '</dd>
 </dl>
+<a href="';
+		echo LR\Filters::escapeHtmlAttr($this->global->uiControl->link('edit')) /* line 21 */;
+		echo '" class="btn btn-outline-success">Upravit profil</a>
 
-
+  
 ';
-		$ʟ_tmp = $this->global->uiControl->getComponent('editProfileForm');
-		if ($ʟ_tmp instanceof Nette\Application\UI\Renderable) $ʟ_tmp->redrawControl(null, false);
-		$ʟ_tmp->render() /* line 23 */;
 	}
 }
