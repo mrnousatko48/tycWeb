@@ -91,12 +91,15 @@ final class Template_93a0152e76 extends Latte\Runtime\Template
 			echo LR\Filters::escapeHtmlAttr($this->global->uiControl->link('Profile:default')) /* line 46 */;
 			echo '" class="nav-link">Profil</a></li>
 						<li class="nav-item"><a href="';
-			echo LR\Filters::escapeHtmlAttr($this->global->uiControl->link('Sign:out')) /* line 47 */;
+			echo LR\Filters::escapeHtmlAttr($this->global->uiControl->link('Profile:history')) /* line 47 */;
+			echo '" class="nav-link">Historie</a></li>
+						<li class="nav-item"><a href="';
+			echo LR\Filters::escapeHtmlAttr($this->global->uiControl->link('Sign:out')) /* line 48 */;
 			echo '" class="nav-link text-danger ms-2">Odhlásit se</a></li>
 ';
-		} else /* line 48 */ {
+		} else /* line 49 */ {
 			echo '						<li class="nav-item"><a href="';
-			echo LR\Filters::escapeHtmlAttr($this->global->uiControl->link('Sign:in')) /* line 49 */;
+			echo LR\Filters::escapeHtmlAttr($this->global->uiControl->link('Sign:in')) /* line 50 */;
 			echo '" class="nav-link">Přihlášení</a></li>
 ';
 		}
@@ -107,24 +110,24 @@ final class Template_93a0152e76 extends Latte\Runtime\Template
 
 	<main class="container mb-5">
 ';
-		foreach ($flashes as $flash) /* line 57 */ {
+		foreach ($flashes as $flash) /* line 58 */ {
 			echo '			<div class="alert alert-';
-			echo LR\Filters::escapeHtmlAttr($flash->type) /* line 58 */;
+			echo LR\Filters::escapeHtmlAttr($flash->type) /* line 59 */;
 			echo '">';
-			echo LR\Filters::escapeHtmlText($flash->message) /* line 58 */;
+			echo LR\Filters::escapeHtmlText($flash->message) /* line 59 */;
 			echo '</div>
 ';
 
 		}
 
 		echo "\n";
-		$this->renderBlock('content', [], 'html') /* line 61 */;
+		$this->renderBlock('content', [], 'html') /* line 62 */;
 		echo '	</main>
 
 	<footer class="bg-light text-center text-muted py-3 mt-auto">
 		<div class="container">
 			&copy; ';
-		echo LR\Filters::escapeHtmlText(date('Y')) /* line 66 */;
+		echo LR\Filters::escapeHtmlText(date('Y')) /* line 67 */;
 		echo ' 3D Kryty. Všechna práva vyhrazena.
 		</div>
 	</footer>
@@ -141,7 +144,7 @@ final class Template_93a0152e76 extends Latte\Runtime\Template
 		extract($this->params);
 
 		if (!$this->getReferringTemplate() || $this->getReferenceType() === 'extends') {
-			foreach (array_intersect_key(['flash' => '57'], $this->params) as $ʟ_v => $ʟ_l) {
+			foreach (array_intersect_key(['flash' => '58'], $this->params) as $ʟ_v => $ʟ_l) {
 				trigger_error("Variable \$$ʟ_v overwritten in foreach on line $ʟ_l");
 			}
 		}

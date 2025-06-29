@@ -1,0 +1,46 @@
+{block content}
+<h1>Historie objednávek</h1>
+
+{if !$orders || count($orders) === 0}
+    <p>Nemáte žádné objednávky.</p>
+{else}
+    <table class="table table-bordered table-striped">
+        <thead class="table-light">
+        <tr>
+            <th>ID objednávky</th>
+            <th>Adresa</th>
+            <th>Stav</th>
+            <th>Platba</th>
+            <th>Datum</th>
+            <th>Položky</th>
+        </tr>
+        </thead>
+        <tbody>
+        {foreach $orders as $orderData}
+            <tr>
+                <td>{$orderData['order']->id}</td>
+                <td>{$orderData['order']->address}, {$orderData['order']->city}, {$orderData['order']->psc}</td>
+                <td>{$orderData['order']->state}</td>
+                <td>{$orderData['order']->payment ?? '—'}</td>
+                <td>{$orderData['order']->created_at|date:'j. n. Y H:i'}</td>
+                <td>
+                    {if count($orderData['cases']) > 0}
+                        <ul class="mb-0 ps-3">
+                            {foreach $orderData['cases'] as $case}
+                                <li>
+                                    {$case->manufacturer} {$case->model} ({$case->color})
+                                    {if $case->port_cover} – Krytka portu{/if}
+                                    {if $case->card_holder} – Držák karet{/if}
+                                </li>
+                            {/foreach}
+                        </ul>
+                    {else}
+                        Žádné položky
+                    {/if}
+                </td>
+            </tr>
+        {/foreach}
+        </tbody>
+    </table>
+{/if}
+{/block}

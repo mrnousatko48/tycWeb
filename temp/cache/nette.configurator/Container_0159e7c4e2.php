@@ -238,6 +238,7 @@ class Container_0159e7c4e2 extends Nette\DI\Container
 		$service = new App\UI\Front\Profile\ProfilePresenter(
 			$this->getService('database.default.explorer'),
 			$this->getService('security.user'),
+			$this->getService('04'),
 		);
 		$service->injectPrimary(
 			$this->getService('http.request'),

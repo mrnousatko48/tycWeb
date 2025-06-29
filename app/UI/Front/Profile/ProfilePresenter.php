@@ -8,17 +8,20 @@ use Nette;
 use Nette\Application\UI\Form;
 use Nette\Database\Explorer;
 use Nette\Security\User;
+use App\Model\OrderFacade;
 
 final class ProfilePresenter extends Nette\Application\UI\Presenter
 {
     private Explorer $database;
     private User $user;
-
-    public function __construct(Explorer $database, User $user)
+    private OrderFacade $orderFacade;
+    
+    public function __construct(Explorer $database, User $user, OrderFacade $orderFacade)
     {
         parent::__construct();
         $this->database = $database;
         $this->user = $user;
+        $this->orderFacade = $orderFacade;
     }
 
     protected function startup(): void
@@ -95,10 +98,38 @@ final class ProfilePresenter extends Nette\Application\UI\Presenter
                 'email' => $values->email,
                 'address' => $values->address,
                 'city' => $values->city,
-                'psc' => $values->psc, // Uložení PSČ
+                'psc' => $values->psc,
             ]);
 
         $this->flashMessage('Profil byl úspěšně aktualizován.', 'success');
         $this->redirect('default');
     }
+
+    public function renderHistory(): void
+    {
+        $userId = $this->user->getId();
+
+        $orders = $this->orderFacade->getOrdersByUserId($userId);
+
+        $orderData = [];
+        foreach ($orders as $order) {
+            // Získat ID všech case v objednávce z tabulky order_case
+            $caseIds = $this->database->table('order_case')
+                ->where('order_id', $order->id)
+                ->fetchPairs(null, 'case_id');
+
+            // Načíst case podle získaných ID
+            $cases = $this->database->table('cases')
+                ->where('id', $caseIds)
+                ->fetchAll();
+
+            $orderData[] = [
+                'order' => $order,
+                'cases' => $cases,
+            ];
+        }
+
+        $this->template->orders = $orderData;
+    }
+
 }
