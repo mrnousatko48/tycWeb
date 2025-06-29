@@ -98,7 +98,7 @@ return array (
     'App\\UI\\Front\\Profile\\ProfileEditTemplate' => 3,
     'App\\UI\\Front\\Sign\\SignUpTemplate' => 1,
     'App\\UI\\Front\\Amin\\AminPresenter' => 2,
-    'App\\UI\\Front\\Home\\HomeDetailTemplate' => 1,
+    'App\\UI\\Front\\Home\\HomeDetailTemplate' => 2,
     'App\\UI\\Admin\\Home\\HomePresenter' => 1,
     'App\\UI\\Admin\\User\\UserEditTemplate' => 3,
     'App\\UI\\Admin\\Profile\\ProfilePresenter' => 1,
