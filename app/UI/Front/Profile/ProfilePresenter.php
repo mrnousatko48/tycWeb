@@ -15,7 +15,7 @@ final class ProfilePresenter extends Nette\Application\UI\Presenter
     private Explorer $database;
     private User $user;
     private OrderFacade $orderFacade;
-    
+
     public function __construct(Explorer $database, User $user, OrderFacade $orderFacade)
     {
         parent::__construct();
@@ -113,12 +113,10 @@ final class ProfilePresenter extends Nette\Application\UI\Presenter
 
         $orderData = [];
         foreach ($orders as $order) {
-            // Získat ID všech case v objednávce z tabulky order_case
             $caseIds = $this->database->table('order_case')
                 ->where('order_id', $order->id)
                 ->fetchPairs(null, 'case_id');
 
-            // Načíst case podle získaných ID
             $cases = $this->database->table('cases')
                 ->where('id', $caseIds)
                 ->fetchAll();
@@ -132,4 +130,65 @@ final class ProfilePresenter extends Nette\Application\UI\Presenter
         $this->template->orders = $orderData;
     }
 
+    protected function createComponentChangePasswordForm(): Form
+    {
+        $form = new Form;
+
+        $form->addPassword('currentPassword', 'Aktuální heslo:')
+            ->setRequired('Zadejte aktuální heslo.');
+
+        $form->addPassword('newPassword', 'Nové heslo:')
+            ->setRequired('Zadejte nové heslo.')
+            ->addRule($form::MIN_LENGTH, 'Heslo musí mít alespoň %d znaků.', 6);
+
+        $form->addPassword('newPasswordConfirm', 'Potvrďte nové heslo:')
+            ->setRequired('Potvrďte nové heslo.')
+            ->addRule($form::EQUAL, 'Hesla se musí shodovat.', $form['newPassword']);
+
+        $form->addSubmit('save', 'Změnit heslo');
+
+        $form->onSuccess[] = [$this, 'changePasswordFormSucceeded'];
+
+        return $form;
+    }
+
+    public function changePasswordFormSucceeded(Form $form, \stdClass $values): void
+    {
+        $userId = $this->user->getId();
+
+        // Načti uživatele z DB
+        $userRow = $this->database->table('users')->get($userId);
+        if (!$userRow) {
+            $this->error('Uživatel nebyl nalezen.');
+        }
+
+        // Ověření aktuálního hesla
+        $passwords = $this->user->getAuthenticator();
+        $identity = $this->user->getIdentity();
+
+        // Pokud používáte Nette\Security\Passwords pro hashování:
+        $passwords = new \Nette\Security\Passwords();
+
+        if (!$passwords->verify($values->currentPassword, $userRow->password)) {
+            $form->addError('Aktuální heslo je nesprávné.');
+            return;
+        }
+
+        // Pokud je hash starší, rehashuj
+        if ($passwords->needsRehash($userRow->password)) {
+            $newHash = $passwords->hash($values->newPassword);
+        } else {
+            $newHash = $passwords->hash($values->newPassword);
+        }
+
+        // Ulož nové heslo do DB
+        $this->database->table('users')
+            ->where('id', $userId)
+            ->update([
+                'password' => $newHash,
+            ]);
+
+        $this->flashMessage('Heslo bylo úspěšně změněno.', 'success');
+        $this->redirect('this');
+    }
 }

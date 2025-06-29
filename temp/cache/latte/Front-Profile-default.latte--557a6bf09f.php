@@ -71,8 +71,10 @@ final class Template_557a6bf09f extends Latte\Runtime\Template
 </dl>
 <a href="';
 		echo LR\Filters::escapeHtmlAttr($this->global->uiControl->link('edit')) /* line 25 */;
-		echo '" class="btn btn-outline-success">Upravit profil</a>
-
+		echo '" class="btn btn-primary">Upravit profil</a>
+<a href="';
+		echo LR\Filters::escapeHtmlAttr($this->global->uiControl->link('changePassword')) /* line 26 */;
+		echo '" class="btn btn-outline-primary">Změna hesla</a>
   
 ';
 	}

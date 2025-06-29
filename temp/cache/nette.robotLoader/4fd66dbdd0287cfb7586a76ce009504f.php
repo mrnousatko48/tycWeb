@@ -30,7 +30,7 @@ return array (
     'App\\UI\\Front\\Profile\\ProfilePresenter' => 
     array (
       0 => '/Users/dostals/tycWeb-1/app/UI/Front/Profile/ProfilePresenter.php',
-      1 => 1751206143,
+      1 => 1751206466,
     ),
     'App\\UI\\Front\\Cart\\CartPresenter' => 
     array (
@@ -103,6 +103,7 @@ return array (
     'App\\UI\\Admin\\User\\UserEditTemplate' => 3,
     'App\\UI\\Admin\\Profile\\ProfilePresenter' => 1,
     'App\\UI\\Front\\Profile\\ProfileHistoryTemplate' => 3,
+    'App\\UI\\Front\\Profile\\ProfileChangePasswordTemplate' => 3,
   ),
   2 => 
   array (
