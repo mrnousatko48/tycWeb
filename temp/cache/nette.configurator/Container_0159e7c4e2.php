@@ -256,7 +256,11 @@ class Container_0159e7c4e2 extends Nette\DI\Container
 
 	public function createServiceApplication__5(): App\UI\Front\Cart\CartPresenter
 	{
-		$service = new App\UI\Front\Cart\CartPresenter($this->getService('04'), $this->getService('database.default.explorer'));
+		$service = new App\UI\Front\Cart\CartPresenter(
+			$this->getService('04'),
+			$this->getService('database.default.explorer'),
+			$this->getService('02'),
+		);
 		$service->injectPrimary(
 			$this->getService('http.request'),
 			$this->getService('http.response'),

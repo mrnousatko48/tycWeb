@@ -14,7 +14,7 @@ final class OrderFacade
         $this->database = $database;
     }
 
-    public function createOrder(int $userId, string $firstname, string $lastname, string $address, string $city, string $psc, array $caseQuantities): ActiveRow
+    public function createOrder(int $userId, string $firstname, string $lastname, string $email, string $address, string $city, string $psc, array $caseQuantities): ActiveRow
     {
         $this->database->beginTransaction();
     
@@ -23,6 +23,7 @@ final class OrderFacade
                 'user_id' => $userId,
                 'firstname' => $firstname,
                 'lastname' => $lastname,
+                'email' => $email,
                 'address' => $address,
                 'city' => $city,
                 'psc' => $psc,
@@ -182,4 +183,12 @@ final class OrderFacade
             ->delete();
     }
 
+    public function getOrderItems(int $orderId): array
+    {
+        return $this->database->table('order_case')
+            ->where('order_id', $orderId)
+            ->fetchAll();
+    }
+
+    
 }

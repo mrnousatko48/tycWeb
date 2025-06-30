@@ -6,6 +6,7 @@ $vendorDir = dirname(__DIR__);
 $baseDir = dirname($vendorDir);
 
 return array(
+    'setasign\\Fpdi\\' => array($vendorDir . '/setasign/fpdi/src'),
     'Ublaboo\\DataGrid\\' => array($vendorDir . '/ublaboo/datagrid/src'),
     'Tester\\' => array($vendorDir . '/nette/tester/src'),
     'Symfony\\Thanks\\' => array($vendorDir . '/symfony/thanks/src'),
@@ -17,10 +18,16 @@ return array(
     'Symfony\\Component\\String\\' => array($vendorDir . '/symfony/string'),
     'Symfony\\Component\\PropertyInfo\\' => array($vendorDir . '/symfony/property-info'),
     'Symfony\\Component\\PropertyAccess\\' => array($vendorDir . '/symfony/property-access'),
+    'Psr\\Log\\' => array($vendorDir . '/psr/log/src'),
+    'Psr\\Http\\Message\\' => array($vendorDir . '/psr/http-message/src'),
     'Psr\\Container\\' => array($vendorDir . '/psr/container/src'),
     'PHPStan\\' => array($vendorDir . '/phpstan/phpstan-nette/src'),
     'Nette\\' => array($vendorDir . '/nette/assets/src'),
+    'Mpdf\\PsrLogAwareTrait\\' => array($vendorDir . '/mpdf/psr-log-aware-trait/src'),
+    'Mpdf\\PsrHttpMessageShim\\' => array($vendorDir . '/mpdf/psr-http-message-shim/src'),
+    'Mpdf\\' => array($vendorDir . '/mpdf/mpdf/src'),
     'Latte\\' => array($vendorDir . '/latte/latte/src'),
+    'DeepCopy\\' => array($vendorDir . '/myclabs/deep-copy/src/DeepCopy'),
     'Contributte\\Application\\' => array($vendorDir . '/contributte/application/src'),
     'App\\' => array($baseDir . '/app'),
 );

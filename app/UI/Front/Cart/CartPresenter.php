@@ -8,17 +8,20 @@ use Nette;
 use App\Model\OrderFacade;
 use Nette\Application\UI\Form;
 use Nette\Database\Explorer;
+use App\MailSender\MailSender;
 
 final class CartPresenter extends Nette\Application\UI\Presenter
 {
     private OrderFacade $orderFacade;
     private Explorer $database;
+    private MailSender $mailSender;
 
-    public function __construct(OrderFacade $orderFacade, Explorer $database)
+    public function __construct(OrderFacade $orderFacade, Explorer $database, MailSender $mailSender)
     {
         parent::__construct();
         $this->orderFacade = $orderFacade;
         $this->database = $database;
+        $this->mailSender = $mailSender;
     }
 
     public function renderDefault(): void
@@ -43,8 +46,6 @@ final class CartPresenter extends Nette\Application\UI\Presenter
         }
     }
 
-
-
     protected function createComponentSendOrderForm(): Form
     {
         $form = new Form;
@@ -52,29 +53,26 @@ final class CartPresenter extends Nette\Application\UI\Presenter
         $userId = (int) $this->getUser()->getId();
         $user = $this->database->table('users')->get($userId);
 
-        $form->addText('firstname', 'Jméno:');
-        $form->addText('lastname', 'Příjmení:');
-
-        if (!$this->getUser()->isLoggedIn()) {
-            $form['firstname']->setRequired('Zadejte své jméno');
-            $form['lastname']->setRequired('Zadejte své příjmení');
-        }
-
+        $form->addText('firstname', 'Jméno:')
+            ->setRequired('Zadejte své jméno');
+        $form->addText('lastname', 'Příjmení:')
+            ->setRequired('Zadejte své příjmení');
+        $form->addText('email', 'E-mail:')
+            ->setRequired('Zadejte e-mail')
+            ->addRule(Form::EMAIL, 'Zadejte platný e-mail');
         $form->addText('address', 'Adresa:')
             ->setRequired('Zadejte svou adresu');
-
         $form->addText('city', 'Město:')
             ->setRequired('Zadejte město');
-
         $form->addText('psc', 'PSČ:')
             ->setRequired('Zadejte PSČ');
-
         $form->addSubmit('submit', 'Dokončit objednávku');
 
         if ($user) {
             $form->setDefaults([
                 'firstname' => $user->firstname ?? '',
                 'lastname' => $user->lastname ?? '',
+                'email' => $user->email ?? '',
                 'address' => $user->address ?? '',
                 'city' => $user->city ?? '',
                 'psc' => $user->psc ?? '',
@@ -82,11 +80,10 @@ final class CartPresenter extends Nette\Application\UI\Presenter
         }
 
         $form->onSuccess[] = [$this, 'sendOrderFormSucceeded'];
-
         return $form;
     }
 
-    public function sendOrderFormSucceeded(Form $form, \stdClass $values): void
+   public function sendOrderFormSucceeded(Form $form, \stdClass $values): void
     {
         $session = $this->getSession('order');
         $quantities = $session->quantities ?? [];
@@ -104,6 +101,7 @@ final class CartPresenter extends Nette\Application\UI\Presenter
                 (int)$userId,
                 $values->firstname,
                 $values->lastname,
+                $values->email,
                 $values->address,
                 $values->city,
                 $values->psc,
@@ -113,16 +111,20 @@ final class CartPresenter extends Nette\Application\UI\Presenter
             $order = $this->orderFacade->createGuestOrder(
                 $values->firstname,
                 $values->lastname,
+                $values->email,
                 $values->address,
                 $values->city,
                 $values->psc,
                 $quantities
             );
         }
+        $items = $this->orderFacade->getOrderItems($order->id);
+
+        $recipientName = $values->firstname . ' ' . $values->lastname;
+        $this->mailSender->sendInvoiceEmail($values->email, $recipientName, $order, $items);
 
         unset($session->quantities);
-
-        $this->flashMessage('Objednávka byla úspěšně dokončena.', 'success');
+        $this->flashMessage('Objednávka byla úspěšně dokončena a faktura odeslána.', 'success');
         $this->redirect('Home:default');
     }
 
