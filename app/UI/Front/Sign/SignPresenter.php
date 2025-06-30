@@ -145,7 +145,8 @@ final class SignPresenter extends Nette\Application\UI\Presenter
 		$form->elementPrototype->class[] = 'custom-form';
 
 		$form->addText('resetCode', 'Resetovací kód:')
-			->setRequired('Zadejte resetovací kód');
+			->setRequired('Zadejte resetovací kód')
+			->addRule(Form::MAX_LENGTH, 'Resetovací kód může mít maximálně %d znaků', 6);
 
 		$form->addPassword('newPassword', 'Nové heslo:')
 			->setRequired('Zadejte nové heslo')
