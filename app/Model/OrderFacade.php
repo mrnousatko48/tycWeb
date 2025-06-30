@@ -17,7 +17,7 @@ final class OrderFacade
     public function createOrder(int $userId, string $firstname, string $lastname, string $email, string $address, string $city, string $psc, array $caseQuantities): ActiveRow
     {
         $this->database->beginTransaction();
-    
+
         try {
             $order = $this->database->table('orders')->insert([
                 'user_id' => $userId,
@@ -30,14 +30,14 @@ final class OrderFacade
                 'state' => 'OBJEDNANO',
                 'created_at' => new \DateTime(),
             ]);
-    
+
             foreach ($caseQuantities as $caseId => $quantity) {
                 $this->database->table('order_case')->insert([
                     'order_id' => $order->id,
                     'case_id' => $caseId,
                     'quantity' => $quantity,
                 ]);
-    
+
                 $this->database->table('cases')
                     ->where('id', $caseId)
                     ->where('user_id', $userId)
@@ -46,7 +46,7 @@ final class OrderFacade
                         'state' => 'OBJEDNANO',
                     ]);
             }
-    
+
             $this->database->commit();
             return $order;
         } catch (\Throwable $e) {
@@ -54,11 +54,11 @@ final class OrderFacade
             throw $e;
         }
     }
-    
+
     public function createGuestOrder(string $firstname, string $lastname, string $address, string $city, string $psc, array $caseQuantities): ActiveRow
     {
         $this->database->beginTransaction();
-    
+
         try {
             $order = $this->database->table('orders')->insert([
                 'user_id' => null,
@@ -70,7 +70,7 @@ final class OrderFacade
                 'state' => 'OBJEDNANO',
                 'created_at' => new \DateTime(),
             ]);
-    
+
             foreach ($caseQuantities as $caseId => $quantity) {
                 $this->database->table('order_case')->insert([
                     'order_id' => $order->id,
@@ -78,7 +78,7 @@ final class OrderFacade
                     'quantity' => $quantity,
                 ]);
             }
-    
+
             $this->database->commit();
             return $order;
         } catch (\Throwable $e) {
@@ -86,7 +86,7 @@ final class OrderFacade
             throw $e;
         }
     }
-    
+
 
     public function getAllOrders(): iterable
     {
@@ -149,19 +149,19 @@ final class OrderFacade
     {
         $data['user_id'] = $userId;
         $data['state'] = 'KOSIK';
-    
+
         $case = $this->database->table('cases')->insert($data);
-    
+
         if ($userId === null && $session !== null) {
             $orderSection = $session->getSection('order');
             $quantities = $orderSection->quantities ?? [];
             $quantities[$case->id] = 1;
             $orderSection->quantities = $quantities;
         }
-    
+
         return $case;
     }
-    
+
 
     public function removeCaseFromCart(\Nette\Http\Session $session, int $caseId): void
     {
@@ -185,10 +185,26 @@ final class OrderFacade
 
     public function getOrderItems(int $orderId): array
     {
-        return $this->database->table('order_case')
+        $orderCases = $this->database->table('order_case')
             ->where('order_id', $orderId)
             ->fetchAll();
-    }
 
-    
+        $result = [];
+        foreach ($orderCases as $orderCase) {
+            $case = $this->database->table('cases')->get($orderCase->case_id);
+            if ($case) {
+                $result[] = (object) [
+                    'id' => $case->id,
+                    'manufacturer' => $case->manufacturer,
+                    'model' => $case->model,
+                    'color' => $case->color,
+                    'port_cover' => $case->port_cover,
+                    'card_holder' => $case->card_holder,
+                    'quantity' => $orderCase->quantity,
+                ];
+            }
+        }
+
+        return $result;
+    }
 }

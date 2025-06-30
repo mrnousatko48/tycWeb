@@ -1,18 +1,99 @@
-<h1>Faktura č. {$order->id}</h1>
-<p>Datum: {$order->created_at|date:'d.m.Y'}</p>
-<p>Odběratel: {$recipient}</p>
-<p>Adresa: {$order->address}, {$order->city}, {$order->psc}</p>
+<style>
+    body {
+        font-family: DejaVu Sans, sans-serif;
+        font-size: 12px;
+        color: #333;
+    }
+
+    .header {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+
+    .details, .items {
+        width: 100%;
+        margin-bottom: 20px;
+        border-collapse: collapse;
+    }
+
+    .details td {
+        padding: 5px;
+        vertical-align: top;
+    }
+
+    .items th, .items td {
+        border: 1px solid #999;
+        padding: 6px;
+        text-align: left;
+    }
+
+    .items th {
+        background-color: #f2f2f2;
+    }
+
+    h1 {
+        font-size: 20px;
+        margin-bottom: 5px;
+    }
+
+    hr {
+        margin: 20px 0;
+    }
+</style>
+
+<div class="header">
+    <h1>Faktura č. {$order->id}</h1>
+    <p>Datum vystavení: {$order->created_at|date:'d.m.Y'}</p>
+</div>
+
+<table class="details">
+    <tr>
+        <td><strong>Odběratel:</strong><br>{$recipient}</td>
+        <td>
+            <strong>Adresa:</strong><br>
+            {$order->address}<br>
+            {$order->city}, {$order->psc}
+        </td>
+    </tr>
+</table>
+
 <hr>
-<table border="1" cellpadding="5" cellspacing="0" width="100%">
+
+<table class="items">
     <thead>
-        <tr><th>Položka</th><th>Množství</th></tr>
+        <tr>
+            <th>#</th>
+            <th>ID</th>
+            <th>Výrobce</th>
+            <th>Model</th>
+            <th>Barva</th>
+            <th>Zakrytí portů</th>
+            <th>Držák karty</th>
+            <th>Množství</th>
+        </tr>
     </thead>
     <tbody>
-    {foreach $items as $item}
-        <tr>
-            <td>Kryt č. {$item->id}</td>
-            <td>{$item->quantity}</td>
-        </tr>
-    {/foreach}
+        {foreach $items as $i => $item}
+            <tr>
+                <td>{$i + 1}</td>
+                <td>{$item->id}</td>
+                <td>{$item->manufacturer}</td>
+                <td>{$item->model}</td>
+                <td>{$item->color}</td>
+                <td>{$item->port_cover ? 'Ano' : 'Ne'}</td>
+                <td>
+                    {if $item->card_holder === 0}
+                        Žádný
+                    {elseif $item->card_holder === 1}
+                        Jednoduchý
+                    {elseif $item->card_holder === 2}
+                        Dvojitý
+                    {else}
+                        Neznámý
+                    {/if}
+                </td>
+                <td>{$item->quantity}</td>
+            </tr>
+        {/foreach}
     </tbody>
 </table>
