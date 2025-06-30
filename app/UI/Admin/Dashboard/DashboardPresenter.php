@@ -35,7 +35,6 @@ final class DashboardPresenter extends Nette\Application\UI\Presenter
         }
     }
 
-
     public function renderDefault(): void
     {
         $orders = $this->orderFacade->getAllOrders();

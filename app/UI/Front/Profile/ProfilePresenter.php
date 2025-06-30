@@ -156,17 +156,14 @@ final class ProfilePresenter extends Nette\Application\UI\Presenter
     {
         $userId = $this->user->getId();
 
-        // Načti uživatele z DB
         $userRow = $this->database->table('users')->get($userId);
         if (!$userRow) {
             $this->error('Uživatel nebyl nalezen.');
         }
 
-        // Ověření aktuálního hesla
         $passwords = $this->user->getAuthenticator();
         $identity = $this->user->getIdentity();
 
-        // Pokud používáte Nette\Security\Passwords pro hashování:
         $passwords = new \Nette\Security\Passwords();
 
         if (!$passwords->verify($values->currentPassword, $userRow->password)) {

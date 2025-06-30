@@ -14,27 +14,29 @@ final class OrderFacade
         $this->database = $database;
     }
 
-    public function createOrder(int $userId, string $address, string $city, string $psc, array $caseQuantities): ActiveRow
+    public function createOrder(int $userId, string $firstname, string $lastname, string $address, string $city, string $psc, array $caseQuantities): ActiveRow
     {
         $this->database->beginTransaction();
-
+    
         try {
             $order = $this->database->table('orders')->insert([
                 'user_id' => $userId,
+                'firstname' => $firstname,
+                'lastname' => $lastname,
                 'address' => $address,
                 'city' => $city,
                 'psc' => $psc,
                 'state' => 'OBJEDNANO',
                 'created_at' => new \DateTime(),
             ]);
-
+    
             foreach ($caseQuantities as $caseId => $quantity) {
                 $this->database->table('order_case')->insert([
                     'order_id' => $order->id,
                     'case_id' => $caseId,
                     'quantity' => $quantity,
                 ]);
-
+    
                 $this->database->table('cases')
                     ->where('id', $caseId)
                     ->where('user_id', $userId)
@@ -43,7 +45,7 @@ final class OrderFacade
                         'state' => 'OBJEDNANO',
                     ]);
             }
-
+    
             $this->database->commit();
             return $order;
         } catch (\Throwable $e) {
@@ -51,6 +53,39 @@ final class OrderFacade
             throw $e;
         }
     }
+    
+    public function createGuestOrder(string $firstname, string $lastname, string $address, string $city, string $psc, array $caseQuantities): ActiveRow
+    {
+        $this->database->beginTransaction();
+    
+        try {
+            $order = $this->database->table('orders')->insert([
+                'user_id' => null,
+                'firstname' => $firstname,
+                'lastname' => $lastname,
+                'address' => $address,
+                'city' => $city,
+                'psc' => $psc,
+                'state' => 'OBJEDNANO',
+                'created_at' => new \DateTime(),
+            ]);
+    
+            foreach ($caseQuantities as $caseId => $quantity) {
+                $this->database->table('order_case')->insert([
+                    'order_id' => $order->id,
+                    'case_id' => $caseId,
+                    'quantity' => $quantity,
+                ]);
+            }
+    
+            $this->database->commit();
+            return $order;
+        } catch (\Throwable $e) {
+            $this->database->rollBack();
+            throw $e;
+        }
+    }
+    
 
     public function getAllOrders(): iterable
     {
@@ -81,6 +116,19 @@ final class OrderFacade
             ->order('created_at DESC');
     }
 
+    public function getCasesByIds(array $ids): array
+    {
+        if (empty($ids)) {
+            return [];
+        }
+
+        return $this->database->table('cases')
+            ->where('id', $ids)
+            ->where('state', 'KOSIK')
+            ->fetchAll();
+    }
+
+
     public function getCasesByUserId(int $userId): \Nette\Database\Table\Selection
     {
         return $this->database->table('cases')
@@ -96,20 +144,23 @@ final class OrderFacade
             ->order('created_at DESC');
     }
 
-    /**
-     * Add a new case (to cart or manually)
-     */
-    public function createCase(array $data): ActiveRow
+    public function createCase(array $data, ?int $userId = null, \Nette\Http\Session $session = null): ActiveRow
     {
-        return $this->database->table('cases')->insert($data);
+        $data['user_id'] = $userId;
+        $data['state'] = 'KOSIK';
+    
+        $case = $this->database->table('cases')->insert($data);
+    
+        if ($userId === null && $session !== null) {
+            $orderSection = $session->getSection('order');
+            $quantities = $orderSection->quantities ?? [];
+            $quantities[$case->id] = 1;
+            $orderSection->quantities = $quantities;
+        }
+    
+        return $case;
     }
-
-    public function getCasesByIds(array $ids)
-    {
-        return $this->database->table('cases')
-            ->where('id', $ids)
-            ->fetchAll();
-    }
+    
 
     public function removeCaseFromCart(\Nette\Http\Session $session, int $caseId): void
     {
@@ -123,12 +174,12 @@ final class OrderFacade
     }
 
     public function removeCaseFromCartByUser(int $userId, int $caseId): void
-{
-    $this->database->table('cases')
-        ->where('id', $caseId)
-        ->where('user_id', $userId)
-        ->where('state', 'KOSIK')
-        ->delete();
-}
+    {
+        $this->database->table('cases')
+            ->where('id', $caseId)
+            ->where('user_id', $userId)
+            ->where('state', 'KOSIK')
+            ->delete();
+    }
 
 }

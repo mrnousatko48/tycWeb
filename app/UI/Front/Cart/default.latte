@@ -1,7 +1,8 @@
 {block content}
 <h1>Košík</h1>
 
-{if !$cases || $cases->count() === 0}
+{if empty($cases)}
+
     <p>Nemáte žádné kryty v košíku.</p>
 {else}
     <form action="{$presenter->link('CreateOrder')}" method="post">
@@ -16,7 +17,7 @@
                 <th>Držák karet</th>
                 <th>Datum</th>
                 <th>Množství</th>
-                <th>Akce</th> {* <-- NEW column for actions *}
+                <th>Akce</th>
             </tr>
             </thead>
             <tbody>

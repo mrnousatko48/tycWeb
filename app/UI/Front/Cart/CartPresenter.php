@@ -21,28 +21,44 @@ final class CartPresenter extends Nette\Application\UI\Presenter
         $this->database = $database;
     }
 
-    protected function startup(): void
+    public function renderDefault(): void
     {
-        parent::startup();
+        if ($this->getUser()->isLoggedIn()) {
+            $userId = (int) $this->getUser()->getId();
+            $cases = $this->orderFacade->getCartCasesByUserId($userId);
+            $this->template->cases = $cases;
+        } else {
+            $session = $this->getSession('order');
+            $quantities = $session->quantities ?? [];
 
-        if (!$this->getUser()->isLoggedIn()) {
-            $this->flashMessage('Pro zobrazení košíku se musíte přihlásit.', 'warning');
-            $this->redirect('Sign:in', ['backlink' => $this->storeRequest()]);
+            if (empty($quantities)) {
+                $this->template->cases = [];
+                return;
+            }
+
+            $caseIds = array_keys($quantities);
+            $cases = $this->orderFacade->getCasesByIds($caseIds);
+            $this->template->cases = $cases;
+            $this->template->quantities = $quantities;
         }
     }
 
-    public function renderDefault(): void
-    {
-        $userId = (int) $this->getUser()->getId();
-        $cases = $this->orderFacade->getCartCasesByUserId($userId);
-
-        $this->template->cases = $cases;
-    }
 
 
     protected function createComponentSendOrderForm(): Form
     {
         $form = new Form;
+
+        $userId = (int) $this->getUser()->getId();
+        $user = $this->database->table('users')->get($userId);
+
+        $form->addText('firstname', 'Jméno:');
+        $form->addText('lastname', 'Příjmení:');
+
+        if (!$this->getUser()->isLoggedIn()) {
+            $form['firstname']->setRequired('Zadejte své jméno');
+            $form['lastname']->setRequired('Zadejte své příjmení');
+        }
 
         $form->addText('address', 'Adresa:')
             ->setRequired('Zadejte svou adresu');
@@ -55,11 +71,10 @@ final class CartPresenter extends Nette\Application\UI\Presenter
 
         $form->addSubmit('submit', 'Dokončit objednávku');
 
-        $userId = (int) $this->getUser()->getId();
-        $user = $this->database->table('users')->get($userId);
-
         if ($user) {
             $form->setDefaults([
+                'firstname' => $user->firstname ?? '',
+                'lastname' => $user->lastname ?? '',
                 'address' => $user->address ?? '',
                 'city' => $user->city ?? '',
                 'psc' => $user->psc ?? '',
@@ -71,7 +86,6 @@ final class CartPresenter extends Nette\Application\UI\Presenter
         return $form;
     }
 
-
     public function sendOrderFormSucceeded(Form $form, \stdClass $values): void
     {
         $session = $this->getSession('order');
@@ -80,16 +94,38 @@ final class CartPresenter extends Nette\Application\UI\Presenter
         if (empty($quantities)) {
             $this->flashMessage('Nelze dokončit prázdnou objednávku.', 'danger');
             $this->redirect('Cart:default');
+            return;
         }
 
-        $userId = (int) $this->getUser()->getId();
-        $order = $this->orderFacade->createOrder($userId, $values->address, $values->city, $values->psc, $quantities);
+        $userId = $this->getUser()->getId();
+
+        if ($this->getUser()->isLoggedIn()) {
+            $order = $this->orderFacade->createOrder(
+                (int)$userId,
+                $values->firstname,
+                $values->lastname,
+                $values->address,
+                $values->city,
+                $values->psc,
+                $quantities
+            );
+        } else {
+            $order = $this->orderFacade->createGuestOrder(
+                $values->firstname,
+                $values->lastname,
+                $values->address,
+                $values->city,
+                $values->psc,
+                $quantities
+            );
+        }
 
         unset($session->quantities);
 
         $this->flashMessage('Objednávka byla úspěšně dokončena.', 'success');
-        $this->redirect('Cart:default');
+        $this->redirect('Home:default');
     }
+
 
     public function renderOrder(): void
     {
@@ -162,7 +198,6 @@ final class CartPresenter extends Nette\Application\UI\Presenter
         $userId = (int) $this->getUser()->getId();
         $this->orderFacade->removeCaseFromCartByUser($userId, $caseId);
 
-        // Also remove from session quantities if used
         $session = $this->getSession();
         $this->orderFacade->removeCaseFromCart($session, $caseId);
 

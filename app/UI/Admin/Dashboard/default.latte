@@ -9,6 +9,7 @@
         <tr>
             <th class="border border-gray-300 px-4 py-2">ID objednávky</th>
             <th class="border border-gray-300 px-4 py-2">Uživatel</th>
+            <th class="border border-gray-300 px-4 py-2">Jméno</th>
             <th class="border border-gray-300 px-4 py-2">Pouzdra</th>
             <th class="border border-gray-300 px-4 py-2">Adresa</th>
             <th class="border border-gray-300 px-4 py-2">Datum objednávky</th>
@@ -21,6 +22,7 @@
             <td class="border border-gray-300 px-4 py-2">
                 {$orderData['user']?->email ?? $orderData['order']->user_id}
             </td>
+            <td class="border border-gray-300 px-4 py-2">{$orderData['order']->firstname} {$orderData['order']->lastname}</td>
             <td class="border border-gray-300 px-4 py-2">
                 {if count($orderData['cases']) > 0}
                     <ul class="list-disc pl-5">

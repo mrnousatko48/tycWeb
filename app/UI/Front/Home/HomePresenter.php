@@ -66,28 +66,24 @@ final class HomePresenter extends Nette\Application\UI\Presenter
         return $form;
     }
 
-    public function CaseFormSucceeded(Form $form, \stdClass $values): void
-    {
-        if (!$this->getUser()->isLoggedIn()) {
-            $this->flashMessage('Pro zadání objednávky se musíte přihlásit.', 'danger');
-            $this->redirect('Sign:in');
-        }
-    
-        $userId = (int) $this->getUser()->getId();
-    
-        $this->orderFacade->createCase([
-            'user_id' => $userId,
-            'manufacturer' => $values->manufacturer,
-            'model' => $values->model,
-            'color' => $values->color,
-            'port_cover' => (bool) $values->port_cover,
-            'card_holder' => $values->card_holder,
-            'STATE' => "KOSIK",
-            'created_at' => new \DateTime(),
-        ]);
-    
-        $this->flashMessage('Kryt byl uložen do Vašeho košíku.', 'success');
-        $this->redirect('this');
-    }
+    public function caseFormSucceeded(Form $form, \stdClass $values): void
+{
+    $userId = $this->getUser()->isLoggedIn() ? (int) $this->getUser()->getId() : null;
+
+    $data = [
+        'manufacturer' => $values->manufacturer,
+        'model' => $values->model,
+        'color' => $values->color,
+        'port_cover' => (bool) $values->port_cover,
+        'card_holder' => $values->card_holder,
+        'created_at' => new \DateTime(),
+    ];
+
+    $this->orderFacade->createCase($data, $userId, $this->getSession());
+
+    $this->flashMessage('Kryt byl přidán do košíku.', 'success');
+    $this->redirect('this');
+}
+
     
 }

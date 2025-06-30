@@ -30,7 +30,7 @@ final class Template_50f1ea4ccd extends Latte\Runtime\Template
 		extract($this->params);
 
 		if (!$this->getReferringTemplate() || $this->getReferenceType() === 'extends') {
-			foreach (array_intersect_key(['case' => '23'], $this->params) as $ʟ_v => $ʟ_l) {
+			foreach (array_intersect_key(['case' => '24'], $this->params) as $ʟ_v => $ʟ_l) {
 				trigger_error("Variable \$$ʟ_v overwritten in foreach on line $ʟ_l");
 			}
 		}
@@ -48,12 +48,13 @@ final class Template_50f1ea4ccd extends Latte\Runtime\Template
 		echo '<h1>Košík</h1>
 
 ';
-		if (!$cases || $cases->count() === 0) /* line 4 */ {
-			echo '    <p>Nemáte žádné kryty v košíku.</p>
+		if (empty($cases)) /* line 4 */ {
+			echo '
+    <p>Nemáte žádné kryty v košíku.</p>
 ';
-		} else /* line 6 */ {
+		} else /* line 7 */ {
 			echo '    <form action="';
-			echo LR\Filters::escapeHtmlAttr(LR\Filters::safeUrl($presenter->link('CreateOrder'))) /* line 7 */;
+			echo LR\Filters::escapeHtmlAttr(LR\Filters::safeUrl($presenter->link('CreateOrder'))) /* line 8 */;
 			echo '" method="post">
         <table class="table table-striped">
             <thead>
@@ -66,50 +67,50 @@ final class Template_50f1ea4ccd extends Latte\Runtime\Template
                 <th>Držák karet</th>
                 <th>Datum</th>
                 <th>Množství</th>
-                <th>Akce</th> 
+                <th>Akce</th>
             </tr>
             </thead>
             <tbody>
 ';
-			foreach ($cases as $case) /* line 23 */ {
+			foreach ($cases as $case) /* line 24 */ {
 				echo '                <tr>
                     <td>';
-				echo LR\Filters::escapeHtmlText($case->id) /* line 25 */;
+				echo LR\Filters::escapeHtmlText($case->id) /* line 26 */;
 				echo '</td>
                     <td>';
-				echo LR\Filters::escapeHtmlText($case->manufacturer) /* line 26 */;
+				echo LR\Filters::escapeHtmlText($case->manufacturer) /* line 27 */;
 				echo '</td>
                     <td>';
-				echo LR\Filters::escapeHtmlText($case->model) /* line 27 */;
+				echo LR\Filters::escapeHtmlText($case->model) /* line 28 */;
 				echo '</td>
                     <td>';
-				echo LR\Filters::escapeHtmlText($case->color) /* line 28 */;
+				echo LR\Filters::escapeHtmlText($case->color) /* line 29 */;
 				echo '</td>
                     <td>';
-				if ($case->port_cover) /* line 29 */ {
-					echo 'Ano';
-				} else /* line 29 */ {
-					echo 'Ne';
-				}
-				echo '</td>
-                    <td>';
-				if ($case->card_holder) /* line 30 */ {
+				if ($case->port_cover) /* line 30 */ {
 					echo 'Ano';
 				} else /* line 30 */ {
 					echo 'Ne';
 				}
 				echo '</td>
                     <td>';
-				echo LR\Filters::escapeHtmlText(($this->filters->date)($case->created_at, 'j. n. Y H:i')) /* line 31 */;
+				if ($case->card_holder) /* line 31 */ {
+					echo 'Ano';
+				} else /* line 31 */ {
+					echo 'Ne';
+				}
+				echo '</td>
+                    <td>';
+				echo LR\Filters::escapeHtmlText(($this->filters->date)($case->created_at, 'j. n. Y H:i')) /* line 32 */;
 				echo '</td>
                     <td>
                         <input type="number" name="quantities[';
-				echo LR\Filters::escapeHtmlAttr($case->id) /* line 33 */;
+				echo LR\Filters::escapeHtmlAttr($case->id) /* line 34 */;
 				echo '][amount]" value="1" min="1" class="form-control" style="width: 80px;">
                     </td>
                     <td>
                         <a class="btn btn-danger btn-sm" href="';
-				echo LR\Filters::escapeHtmlAttr($this->global->uiControl->link('removeCase!', [$case->id])) /* line 36 */;
+				echo LR\Filters::escapeHtmlAttr($this->global->uiControl->link('removeCase!', [$case->id])) /* line 37 */;
 				echo '" onclick="return confirm(\'Opravdu chcete odstranit tento kryt z košíku?\')">Odstranit</a>
                     </td>
                 </tr>

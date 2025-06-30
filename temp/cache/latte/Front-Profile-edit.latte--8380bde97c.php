@@ -39,7 +39,5 @@ final class Template_8380bde97c extends Latte\Runtime\Template
 		$ʟ_tmp = $this->global->uiControl->getComponent('editProfileForm');
 		if ($ʟ_tmp instanceof Nette\Application\UI\Renderable) $ʟ_tmp->redrawControl(null, false);
 		$ʟ_tmp->render() /* line 3 */;
-
-		echo "\n";
 	}
 }
