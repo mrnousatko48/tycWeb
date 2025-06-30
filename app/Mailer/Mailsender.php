@@ -18,19 +18,19 @@ class MailSender
     {
         $latte = new Engine();
         $mail = new Message;
-    
+
         $params = [
             'email' => $email,
             'username' => $username,
         ];
-    
+
         $html = $latte->renderToString(__DIR__ . '/registration.latte', $params);
-    
+
         $mail->setFrom('okurkyvmalinovce@seznam.cz')
             ->addTo($email)
             ->setSubject('Vítejte! Registrace byla úspěšná')
             ->setHtmlBody($html);
-    
+
         return $mail;
     }
 
@@ -65,34 +65,53 @@ class MailSender
         $mail = $this->createNewUserEmail($email, $username);
         $this->mailer->send($mail);
     }
-    
+
     public function sendInvoiceEmail(string $recipientEmail, string $recipientName, \Nette\Database\Table\ActiveRow $order, array $orderItems): void
-{
-    $latte = new Engine();
+    {
+        $latte = new Engine();
 
-    $htmlInvoice = $latte->renderToString(__DIR__ . '/invoice.latte', [
-        'order' => $order,
-        'items' => $orderItems,
-        'recipient' => $recipientName,
-    ]);
+        $htmlInvoice = $latte->renderToString(__DIR__ . '/invoice.latte', [
+            'order' => $order,
+            'items' => $orderItems,
+            'recipient' => $recipientName,
+        ]);
 
-    $mpdf = new Mpdf();
-    $mpdf->WriteHTML($htmlInvoice);
-    $pdfContent = $mpdf->Output('', \Mpdf\Output\Destination::STRING_RETURN);
+        $mpdf = new Mpdf();
+        $mpdf->WriteHTML($htmlInvoice);
+        $pdfContent = $mpdf->Output('', \Mpdf\Output\Destination::STRING_RETURN);
 
-    $htmlBody = $latte->renderToString(__DIR__ . '/invoiceEmail.latte', [
-        'recipient' => $recipientName,
-        'orderId' => $order->id,
-    ]);
-    
-    $mail = new Message;
-    $mail->setFrom('okurkyvmalinovce@seznam.cz')
-        ->addTo($recipientEmail)
-        ->setSubject('Faktura za vaši objednávku č. ' . $order->id)
-        ->setHtmlBody($htmlBody)
-        ->addAttachment("faktura-{$order->id}.pdf", $pdfContent, 'application/pdf');
+        $htmlBody = $latte->renderToString(__DIR__ . '/invoiceEmail.latte', [
+            'recipient' => $recipientName,
+            'orderId' => $order->id,
+        ]);
 
-    $this->mailer->send($mail);
-}
+        $mail = new Message;
+        $mail->setFrom('okurkyvmalinovce@seznam.cz')
+            ->addTo($recipientEmail)
+            ->setSubject('Faktura za vaši objednávku č. ' . $order->id)
+            ->setHtmlBody($htmlBody)
+            ->addAttachment("faktura-{$order->id}.pdf", $pdfContent, 'application/pdf');
 
+        $this->mailer->send($mail);
+    }
+
+    public function sendPasswordResetEmail(string $email, string $resetCode): void
+    {
+        $latte = new Engine();
+        $mail = new Message;
+
+        $params = [
+            'email' => $email,
+            'resetCode' => $resetCode,
+        ];
+
+        $html = $latte->renderToString(__DIR__ . '/passreset.latte', $params);
+
+        $mail->setFrom('okurkyvmalinovce@seznam.cz')
+            ->addTo($email)
+            ->setSubject('Reset hesla')
+            ->setHtmlBody($html);
+
+        $this->mailer->send($mail);
+    }
 }

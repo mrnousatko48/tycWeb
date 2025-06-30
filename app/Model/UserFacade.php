@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Model;
 
+use Nette;
 use Nette\Database\Explorer;
 use Nette\Security\Passwords;
 use Nette\Security\Identity;
@@ -100,6 +101,49 @@ final class UserFacade implements Authenticator
     {
         $this->database->table('users')->get($id)->update((array) $values);
     }
+
+    public function saveResetCode(int $userId, string $resetCode): void
+	{
+		$this->database->table('users')->where('id', $userId)->update([
+			'reset_code' => $resetCode,
+			'reset_code_expires' => new \DateTime('+10 minutes'),
+		]);
+	}
+
+	public function findByResetCode(string $resetCode): ?Nette\Database\IRow
+	{
+		return $this->database->table('users')
+			->where('reset_code', $resetCode)
+			->where('reset_code_expires > ?', new \DateTime())
+			->fetch();
+	}
+
+	public function updatePassword(int $userId, string $newPassword): void
+	{
+		$hashedPassword = $this->passwords->hash($newPassword);
+		$this->database->table('users')->where('id', $userId)->update([
+			'password' => $hashedPassword,
+			'reset_code' => null,
+			'reset_code_expires' => null,
+		]);
+	}
+    
+    public function findByEmail(string $email): ?Nette\Database\IRow
+	{
+		$row = $this->database->table('users')->where('email', $email)->fetch();
+		return $row;
+	}
+
+	public function verifyPassword(int $userId, string $password): bool
+	{
+		$user = $this->getUserById($userId);
+
+		if (!$user) {
+			return false;
+		}
+
+		return password_verify($password, $user->password);
+	}
 }
 
 class DuplicateNameException extends \Exception

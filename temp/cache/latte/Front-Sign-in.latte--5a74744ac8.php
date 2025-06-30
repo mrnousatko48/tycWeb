@@ -43,6 +43,9 @@ final class Template_5a74744ac8 extends Latte\Runtime\Template
         <a href="';
 		echo LR\Filters::escapeHtmlAttr($this->global->uiControl->link('up')) /* line 7 */;
 		echo '" class="btn btn-outline-success">Nemáte účet? Zaregistrujte se</a>
+        <a href="';
+		echo LR\Filters::escapeHtmlAttr($this->global->uiControl->link('forgotPassword')) /* line 8 */;
+		echo '" class="btn btn-outline-success">Zapomněli jste heslo?</a>
 </div>
 ';
 	}

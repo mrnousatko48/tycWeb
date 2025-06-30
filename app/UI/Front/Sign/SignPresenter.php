@@ -111,5 +111,75 @@ final class SignPresenter extends Nette\Application\UI\Presenter
 		$this->flashMessage('Byli jste odhlášeni.', 'success');
 		$this->redirect('Home:default');
 	}
+
+	protected function createComponentForgotPasswordForm(): Form
+	{
+		$form = $this->formFactory->create();
+		$form->elementPrototype->class[] = 'custom-form';
+		$form->addEmail('email', 'Váš email:')
+			->setRequired('Zadejte váš email');
+
+		$form->addSubmit('send', 'Odeslat resetovací kód');
+
+		$form->onSuccess[] = function (Form $form, \stdClass $data): void {
+			$user = $this->userFacade->findByEmail($data->email);
+			if (!$user) {
+				$this->flashMessage('Tento email nebyl nalezen', 'danger');
+				return;
+			}
+
+			$resetCode = $this->generateRandomCode();
+			$this->userFacade->saveResetCode($user->id, $resetCode);
+			$this->mailSender->sendPasswordResetEmail($data->email, $resetCode);
+
+			$this->flashMessage('Na váš email byl odeslán resetovací kód', 'success');
+			$this->redirect('Sign:resetPassword');
+		};
+
+		return $form;
+	}
+
+	protected function createComponentResetPasswordForm(): Form
+	{
+		$form = $this->formFactory->create();
+		$form->elementPrototype->class[] = 'custom-form';
+
+		$form->addText('resetCode', 'Resetovací kód:')
+			->setRequired('Zadejte resetovací kód');
+
+		$form->addPassword('newPassword', 'Nové heslo:')
+			->setRequired('Zadejte nové heslo')
+			->addRule(Form::MIN_LENGTH, 'Heslo musí mít alespoň 6 znaků', 6);
+
+		$form->addPassword('confirmPassword', 'Potvrďte nové heslo:')
+			->setRequired('Potvrďte nové heslo');
+
+		$form->addSubmit('send', 'Obnovit heslo');
+
+		$form->onSuccess[] = function (Form $form, \stdClass $data): void {
+			$user = $this->userFacade->findByResetCode($data->resetCode);
+			if (!$user) {
+				$form->addError('Neplatný resetovací kód');
+				return;
+			}
+
+			if ($data->newPassword !== $data->confirmPassword) {
+				$form->addError('Hesla se neshodují');
+				return;
+			}
+
+			$this->userFacade->updatePassword($user->id, $data->newPassword);
+			$this->flashMessage('Heslo bylo úspěšně změněno', 'success');
+			$this->redirect('Sign:in');
+		};
+
+		return $form;
+	}
+
+	private function generateRandomCode(): string
+	{
+		return str_pad((string) random_int(100000, 999999), 6, '0', STR_PAD_LEFT);
+	}
+
 }
 
