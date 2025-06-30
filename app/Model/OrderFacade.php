@@ -14,7 +14,7 @@ final class OrderFacade
         $this->database = $database;
     }
 
-    public function createOrder(int $userId, string $firstname, string $lastname, string $email, string $address, string $city, string $psc, array $caseQuantities): ActiveRow
+    public function createOrder(int $userId, string $firstname, string $lastname, string $email, string $address, string $city, string $psc, string $payment, array $caseQuantities): ActiveRow
     {
         $this->database->beginTransaction();
 
@@ -27,6 +27,7 @@ final class OrderFacade
                 'address' => $address,
                 'city' => $city,
                 'psc' => $psc,
+                'payment' => $payment,
                 'state' => 'OBJEDNANO',
                 'created_at' => new \DateTime(),
             ]);
@@ -55,7 +56,7 @@ final class OrderFacade
         }
     }
 
-    public function createGuestOrder(string $firstname, string $lastname, string $address, string $city, string $psc, array $caseQuantities): ActiveRow
+    public function createGuestOrder(string $firstname, string $lastname, string $address, string $city, string $psc, string $payment, array $caseQuantities): ActiveRow
     {
         $this->database->beginTransaction();
 
@@ -67,6 +68,7 @@ final class OrderFacade
                 'address' => $address,
                 'city' => $city,
                 'psc' => $psc,
+                'payment' => $payment,
                 'state' => 'OBJEDNANO',
                 'created_at' => new \DateTime(),
             ]);

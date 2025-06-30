@@ -66,6 +66,12 @@ final class CartPresenter extends Nette\Application\UI\Presenter
             ->setRequired('Zadejte město');
         $form->addText('psc', 'PSČ:')
             ->setRequired('Zadejte PSČ');
+        $form->addSelect('payment', 'Způsob platby:', [
+                'PREVOD' => 'Převodem',
+                'DOBIRKA' => 'Dobírka',
+            ])
+            ->setRequired('Zvolte způsob platby');
+            
         $form->addSubmit('submit', 'Dokončit objednávku');
 
         if ($user) {
@@ -105,6 +111,7 @@ final class CartPresenter extends Nette\Application\UI\Presenter
                 $values->address,
                 $values->city,
                 $values->psc,
+                $values->payment,
                 $quantities
             );
         } else {
@@ -115,6 +122,7 @@ final class CartPresenter extends Nette\Application\UI\Presenter
                 $values->address,
                 $values->city,
                 $values->psc,
+                $values->payment,
                 $quantities
             );
         }
