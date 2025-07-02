@@ -1,8 +1,41 @@
-{block content}
-    <script src="https://cdn.tailwindcss.com"></script>
+<?php
+
+use Latte\Runtime as LR;
+
+/** source: /root/tycWeb/app/UI/Front/Home/detail.latte */
+final class Template_b7f2e224e9 extends Latte\Runtime\Template
+{
+	public const Source = '/root/tycWeb/app/UI/Front/Home/detail.latte';
+
+	public const Blocks = [
+		['content' => 'blockContent'],
+	];
+
+
+	public function main(array $ʟ_args): void
+	{
+		extract($ʟ_args);
+		unset($ʟ_args);
+
+		if ($this->global->snippetDriver?->renderSnippets($this->blocks[self::LayerSnippet], $this->params)) {
+			return;
+		}
+
+		$this->renderBlock('content', get_defined_vars()) /* line 1 */;
+	}
+
+
+	/** {block content} on line 1 */
+	public function blockContent(array $ʟ_args): void
+	{
+		extract($this->params);
+		extract($ʟ_args);
+		unset($ʟ_args);
+
+		echo '    <script src="https://cdn.tailwindcss.com"></script>
     <style>
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
             @apply bg-gray-50;
         }
         .selected {
@@ -28,7 +61,7 @@
         }
         nav a::after {
             @apply absolute bottom-0 left-0 w-0 h-0.5 bg-black transition-all duration-300;
-            content: '';
+            content: \'\';
         }
         nav a:hover::after {
             @apply w-full;
@@ -125,28 +158,28 @@
         </div>
     </div>
 
-    <script n:syntax=off>
+    <script>
         // Data pro modely podle výrobce
         const modelsByManufacturer = {
-            apple: ['iPhone 13', 'iPhone 14', 'iPhone 15'],
-            samsung: ['Galaxy S22', 'Galaxy S23', 'Galaxy Z Fold 5'],
-            xiaomi: ['Mi 12', 'Mi 13', 'Redmi Note 12']
+            apple: [\'iPhone 13\', \'iPhone 14\', \'iPhone 15\'],
+            samsung: [\'Galaxy S22\', \'Galaxy S23\', \'Galaxy Z Fold 5\'],
+            xiaomi: [\'Mi 12\', \'Mi 13\', \'Redmi Note 12\']
         };
 
         function updateModels() {
-            const manufacturerSelect = document.getElementById('manufacturer');
-            const modelSelect = document.getElementById('model');
-            const selectedDevice = document.getElementById('selected-device');
+            const manufacturerSelect = document.getElementById(\'manufacturer\');
+            const modelSelect = document.getElementById(\'model\');
+            const selectedDevice = document.getElementById(\'selected-device\');
 
             // Vyčištění model selectu
-            modelSelect.innerHTML = '<option value="" disabled selected>Vyberte model</option>';
+            modelSelect.innerHTML = \'<option value="" disabled selected>Vyberte model</option>\';
             modelSelect.disabled = false;
 
             // Naplnění model selectu podle výrobce
             const selectedManufacturer = manufacturerSelect.value;
             if (selectedManufacturer && modelsByManufacturer[selectedManufacturer]) {
                 modelsByManufacturer[selectedManufacturer].forEach(model => {
-                    const option = document.createElement('option');
+                    const option = document.createElement(\'option\');
                     option.value = model;
                     option.textContent = model;
                     modelSelect.appendChild(option);
@@ -160,32 +193,34 @@
                 if (modelSelect.value) {
                     selectedDevice.textContent = `${manufacturerSelect.options[manufacturerSelect.selectedIndex].text} ${modelSelect.value}`;
                 } else {
-                    selectedDevice.textContent = 'Vyberte výrobce a model';
+                    selectedDevice.textContent = \'Vyberte výrobce a model\';
                 }
             };
         }
 
         function changeImage(button) {
-            document.querySelectorAll('[data-color]').forEach(btn => btn.classList.remove('selected'));
-            button.classList.add('selected');
-            const image = document.getElementById('product-image');
+            document.querySelectorAll(\'[data-color]\').forEach(btn => btn.classList.remove(\'selected\'));
+            button.classList.add(\'selected\');
+            const image = document.getElementById(\'product-image\');
             image.src = button.dataset.image;
             image.alt = `Náhled krytu - ${button.dataset.color}`;
         }
 
         function toggleSelection(button) {
-            button.parentElement.querySelectorAll('button').forEach(btn => btn.classList.remove('selected'));
-            button.classList.add('selected');
+            button.parentElement.querySelectorAll(\'button\').forEach(btn => btn.classList.remove(\'selected\'));
+            button.classList.add(\'selected\');
         }
 
         // Dynamické přidání třídy při scrollování
-        window.addEventListener('scroll', () => {
-            const header = document.getElementById('header');
+        window.addEventListener(\'scroll\', () => {
+            const header = document.getElementById(\'header\');
             if (window.scrollY > 50) {
-                header.classList.add('scrolled');
+                header.classList.add(\'scrolled\');
             } else {
-                header.classList.remove('scrolled');
+                header.classList.remove(\'scrolled\');
             }
         });
     </script>
-{/block}
+';
+	}
+}

@@ -1,13 +1,37 @@
-<!DOCTYPE html>
+<?php
+
+use Latte\Runtime as LR;
+
+/** source: /root/tycWeb/app/UI/Front/@layout.latte */
+final class Template_3f1df96694 extends Latte\Runtime\Template
+{
+	public const Source = '/root/tycWeb/app/UI/Front/@layout.latte';
+
+	public const Blocks = [
+		['title' => 'blockTitle'],
+	];
+
+
+	public function main(array $ʟ_args): void
+	{
+		extract($ʟ_args);
+		unset($ʟ_args);
+
+		if ($this->global->snippetDriver?->renderSnippets($this->blocks[self::LayerSnippet], $this->params)) {
+			return;
+		}
+
+		echo '<!DOCTYPE html>
 <html lang="cs">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>
-        {ifset title}
-            {block title}{/block}
-        {/ifset}
-        OPNX3D | obaly na telefony
+';
+		if ($this->hasBlock('title')) /* line 7 */ {
+			$this->renderBlock('title', get_defined_vars()) /* line 8 */;
+		}
+		echo '        OPNX3D | obaly na telefony
     </title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
@@ -36,7 +60,7 @@
         }
 
         body {
-            font-family: 'Inter', sans-serif;
+            font-family: \'Inter\', sans-serif;
             background-color: var(--color-background);
             color: var(--color-text);
             transition: background-color 0.3s ease, color 0.3s ease;
@@ -110,21 +134,40 @@
 <header class="site-header">
     <div class="container mx-auto px-4 flex justify-between items-center">
         <h1 class="text-2xl font-semibold text-[var(--color-text)]">
-            <a href="{$basePath}/" class="hover:text-[var(--color-accent)] transition">OPNX3D</a>
+            <a href="';
+		echo LR\Filters::escapeHtmlAttr(LR\Filters::safeUrl($basePath)) /* line 113 */;
+		echo '/" class="hover:text-[var(--color-accent)] transition">OPNX3D</a>
         </h1>
         <nav class="flex items-center space-x-6">
-            <a n:href="Home:default">Domů</a>
-            <a n:href="Home:case">Objednat</a>
-            <a n:href="Cart:default">Košík</a>
+            <a href="';
+		echo LR\Filters::escapeHtmlAttr($this->global->uiControl->link('Home:default')) /* line 116 */;
+		echo '">Domů</a>
+            <a href="';
+		echo LR\Filters::escapeHtmlAttr($this->global->uiControl->link('Home:case')) /* line 117 */;
+		echo '">Objednat</a>
+            <a href="';
+		echo LR\Filters::escapeHtmlAttr($this->global->uiControl->link('Cart:default')) /* line 118 */;
+		echo '">Košík</a>
             <a href="#">Kontakt</a>
-            {if $user->isLoggedIn()}
-                <span class="text-sm">Přihlášen jako <strong>{$user->identity->username ?? '(neznámý uživatel)'}</strong></span>
-                <a n:href="Profile:default" class="hover:text-[var(--color-accent)] transition">Profil</a>
-                <a n:href="Sign:out" class="text-[var(--color-accent)] hover:text-[var(--color-secondary)] transition">Odhlásit se</a>
-            {else}
-                <a n:href="Sign:in" class="hover:text-[var(--color-accent)] transition">Přihlášení</a>
-            {/if}
-           <button id="theme-toggle" class="btn btn-accent shadow-md hover:shadow-lg">
+';
+		if ($user->isLoggedIn()) /* line 120 */ {
+			echo '                <span class="text-sm">Přihlášen jako <strong>';
+			echo LR\Filters::escapeHtmlText($user->identity->username ?? '(neznámý uživatel)') /* line 121 */;
+			echo '</strong></span>
+                <a href="';
+			echo LR\Filters::escapeHtmlAttr($this->global->uiControl->link('Profile:default')) /* line 122 */;
+			echo '" class="hover:text-[var(--color-accent)] transition">Profil</a>
+                <a href="';
+			echo LR\Filters::escapeHtmlAttr($this->global->uiControl->link('Sign:out')) /* line 123 */;
+			echo '" class="text-[var(--color-accent)] hover:text-[var(--color-secondary)] transition">Odhlásit se</a>
+';
+		} else /* line 124 */ {
+			echo '                <a href="';
+			echo LR\Filters::escapeHtmlAttr($this->global->uiControl->link('Sign:in')) /* line 125 */;
+			echo '" class="hover:text-[var(--color-accent)] transition">Přihlášení</a>
+';
+		}
+		echo '           <button id="theme-toggle" class="btn btn-accent shadow-md hover:shadow-lg">
                 <i class="theme-icon fas fa-sun sun-icon"></i>
                 <i class="theme-icon fas fa-moon moon-icon"></i>
             </button>
@@ -133,13 +176,16 @@
 </header>
 
 <main class="flex-1 pt-0">
-    {include content}
-</main>
+';
+		$this->renderBlock('content', [], 'html') /* line 136 */;
+		echo '</main>
 
 <footer class="text-[var(--color-text)] py-8 mt-12">
     <div class="container mx-auto flex flex-col md:flex-row items-center justify-between px-4">
         <p class="text-sm mb-4 md:mb-0 text-center md:text-left">
-            © {date('Y')} OPNX3D. Všechna práva vyhrazena.
+            © ';
+		echo LR\Filters::escapeHtmlText(date('Y')) /* line 142 */;
+		echo ' OPNX3D. Všechna práva vyhrazena.
         </p>
         <div class="flex items-center space-x-6">
             <a href="mailto:opnx3d@gmail.com" target="_blank" class="text-sm hover:text-[var(--color-accent)] transition">
@@ -147,30 +193,38 @@
             </a>
             <a href="https://www.instagram.com/opnx3d" target="_blank" aria-label="Instagram">
                 <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
-                    <path d="M7 2C4.2 2 2 4.2 2 7v10c0 2.8 2.2 5 5 5h10c2.8 0 5-2.2 5-5V7c0-2.8-2.2-5-5-5H7zm10 2c1.7 0 3 1.3 3 3v10c0 1.7-1.3 3-3 3H7c-1.7 0-3-1.3-3-3V7c0-1.7 1.3-3 3-3h10zM12 7.5A4.5 4.5 0 1016.5 12 4.5 4.5 0 0012 7.5zm0 7.2A2.7 2.7 0 1114.7 12 2.7 2.7 0 0112 14.7zM17.8 6.2a1 1 0 11-1-1 1 1 0 011 1z"/>
+                    <path d="M7 2C4.2 2 2 4.2 2 7v10c0 2.8 2.2 5 5 5h10c2.8 0 5-2.2 5-5V7c0-2.8-2.2-5-5-5H7zm10 2c1.7 0 3 1.3 3 3v10c0 1.7-1.3 3-3 3H7c-1.7 0-3-1.3-3-3V7c0-1.7 1.3-3 3-3h10zM12 7.5A4.5 4.5 0 1016.5 12 4.5 4.5 0 0012 7.5zm0 7.2A2.7 2.7 0 1114.7 12 2.7 2.7 0 0112 14.7zM17.8 6.2a1 1 0 11-1-1 1 1 0 011 1z"></path>
                 </svg>
             </a>
         </div>
     </div>
 </footer>
 </body>
-    <script n:syntax=off>
-        document.addEventListener('DOMContentLoaded', () => {
-            const themeToggle = document.getElementById('theme-toggle');
+    <script>
+        document.addEventListener(\'DOMContentLoaded\', () => {
+            const themeToggle = document.getElementById(\'theme-toggle\');
             const body = document.body;
 
             // Check for saved theme or system preference
-            const savedTheme = document.cookie.split('; ').find(row => row.startsWith('theme='));
-            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            const initialTheme = savedTheme ? savedTheme.split('=')[1] : (prefersDark ? 'dark' : 'light');
-            body.setAttribute('data-theme', initialTheme);
+            const savedTheme = document.cookie.split(\'; \').find(row => row.startsWith(\'theme=\'));
+            const prefersDark = window.matchMedia(\'(prefers-color-scheme: dark)\').matches;
+            const initialTheme = savedTheme ? savedTheme.split(\'=\')[1] : (prefersDark ? \'dark\' : \'light\');
+            body.setAttribute(\'data-theme\', initialTheme);
 
-            themeToggle.addEventListener('click', () => {
-                const currentTheme = body.getAttribute('data-theme');
-                const newTheme = currentTheme === 'light' ? 'dark' : 'light';
-                body.setAttribute('data-theme', newTheme);
+            themeToggle.addEventListener(\'click\', () => {
+                const currentTheme = body.getAttribute(\'data-theme\');
+                const newTheme = currentTheme === \'light\' ? \'dark\' : \'light\';
+                body.setAttribute(\'data-theme\', newTheme);
                 document.cookie = `theme=${newTheme}; path=/; max-age=${30 * 24 * 60 * 60}`;
             });
         });
     </script>
-</html>
+</html>';
+	}
+
+
+	/** {block title} on line 8 */
+	public function blockTitle(array $ʟ_args): void
+	{
+	}
+}

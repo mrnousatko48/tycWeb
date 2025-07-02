@@ -1,5 +1,38 @@
-{block content}
-<style>
+<?php
+
+use Latte\Runtime as LR;
+
+/** source: /root/tycWeb/app/UI/Front/Home/default.latte */
+final class Template_5226ce86cb extends Latte\Runtime\Template
+{
+	public const Source = '/root/tycWeb/app/UI/Front/Home/default.latte';
+
+	public const Blocks = [
+		['content' => 'blockContent'],
+	];
+
+
+	public function main(array $ʟ_args): void
+	{
+		extract($ʟ_args);
+		unset($ʟ_args);
+
+		if ($this->global->snippetDriver?->renderSnippets($this->blocks[self::LayerSnippet], $this->params)) {
+			return;
+		}
+
+		$this->renderBlock('content', get_defined_vars()) /* line 1 */;
+	}
+
+
+	/** {block content} on line 1 */
+	public function blockContent(array $ʟ_args): void
+	{
+		extract($this->params);
+		extract($ʟ_args);
+		unset($ʟ_args);
+
+		echo '<style>
     .fixed-img {
         width: 100%;
         max-height: 300px;
@@ -128,7 +161,9 @@
             <p class="text-lg md:text-xl mb-6 max-w-2xl mx-auto">
                 Vytvořte si pevný a stylový kryt s pokročilou 3D tiskovou technologií a vlastním designem.
             </p>
-            <a n:href="Home:detail" class="btn btn-primary shadow-md hover:shadow-lg">
+            <a href="';
+		echo LR\Filters::escapeHtmlAttr($this->global->uiControl->link('Home:detail')) /* line 131 */;
+		echo '" class="btn btn-primary shadow-md hover:shadow-lg">
                 Navrhnout kryt
             </a>
         </div>
@@ -171,7 +206,9 @@
             </div>
         </div>
         <div class="text-center mt-8">
-            <a n:href="Home:default" class="btn btn-accent shadow-md hover:shadow-lg">
+            <a href="';
+		echo LR\Filters::escapeHtmlAttr($this->global->uiControl->link('Home:default')) /* line 174 */;
+		echo '" class="btn btn-accent shadow-md hover:shadow-lg">
                 Začít navrhovat
             </a>
         </div>
@@ -218,4 +255,6 @@
 </section>
 
 
-{/block}
+';
+	}
+}
