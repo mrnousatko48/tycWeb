@@ -51,6 +51,8 @@ final class HomePresenter extends Nette\Application\UI\Presenter
         $this->template->banner = $this->pageFacade->getSectionContent('banner');
         $this->template->durability = $this->pageFacade->getSectionContent('durability');
         $this->template->customization = $this->pageFacade->getSectionContent('customization');
+        $this->template->gallery = $this->pageFacade->getGalleryImages();
+        $this->template->contact = $this->pageFacade->getContactInfo();
     }
 
     protected function createComponentCaseForm(): Form
@@ -116,13 +118,13 @@ final class HomePresenter extends Nette\Application\UI\Presenter
         foreach ($sections as $section) {
             $sectionContent = $this->pageFacade->getSectionContent($section);
             foreach ($sectionContent as $content) {
-                if ($content['content_type'] === 'title' || strpos($content['content_type'], 'description') === 0) {
-                    $form->addTextArea("{$section}_{$content['content_type']}", ucfirst($section) . ' ' . $content['content_type'])
-                        ->setDefaultValue($content['content_text']);
+                if ($content->content_text !== null) {
+                    $form->addTextArea("{$section}_{$content->content_type}", ucfirst($section) . ' ' . $content->content_type)
+                        ->setDefaultValue($content->content_text);
                 }
-                if ($content['image_path']) {
-                    $form->addText("{$section}_{$content['content_type']}_image", ucfirst($section) . ' ' . $content['content_type'] . ' Image')
-                        ->setDefaultValue($content['image_path']);
+                if ($content->image_path) {
+                    $form->addText("{$section}_{$content->content_type}_image", ucfirst($section) . ' ' . $content->content_type . ' Image')
+                        ->setDefaultValue($content->image_path);
                 }
             }
         }
@@ -145,5 +147,13 @@ final class HomePresenter extends Nette\Application\UI\Presenter
         }
         $this->flashMessage('Obsah byl úspěšně aktualizován.', 'success');
         $this->redirect('this');
+    }
+
+    public function renderEditContent(): void
+    {
+        if (!$this->getUser()->isLoggedIn() || !$this->getUser()->isInRole('admin')) {
+            $this->flashMessage('Pro úpravu obsahu musíte být přihlášen jako administrátor.', 'danger');
+            $this->redirect('Sign:in');
+        }
     }
 }
