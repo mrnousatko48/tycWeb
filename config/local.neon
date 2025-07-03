@@ -1,7 +1,7 @@
 parameters:
 
 database:
-    dsn: 'mysql:host=127.0.0.1;dbname=tycweb'
+    dsn: 'mysql:host=127.0.0.1;dbname=WEB2'
     user: root
     password: root
 

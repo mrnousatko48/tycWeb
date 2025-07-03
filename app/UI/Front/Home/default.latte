@@ -1,108 +1,203 @@
 {block content}
-<!DOCTYPE html>
-<html lang="cs">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mobilní Kryty - Úvod</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-        }
-        .fixed-img {
-            width: 100%;
-            height: 300px;
-            object-fit: cover;
-        }
-        .product-img {
-            width: 100%;
-            height: 400px;
-            object-fit: cover;
-        }
-    </style>
-</head>
-<body class="bg-gray-50">
-    <!-- Hlavní úvodní sekce -->
-    <section class="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-50 to-gray-200">
-        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h1 class="text-4xl md:text-5xl font-bold text-gray-900 mb-4">3D tisknuté kryty na míru</h1>
-            <p class="text-lg md:text-xl text-gray-600 mb-8">Navrhněte si jedinečný kryt na telefon s využitím pokročilé 3D tiskové technologie.</p>
-            <a n:href="Home:detail" class="inline-block bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition text-lg">Navrhnout kryt</a>
-        </div>
-    </section>
+<style>
+    .fixed-img {
+        width: 100%;
+        max-height: 300px;
+        object-fit: cover;
+        aspect-ratio: 16 / 9;
+    }
+    .banner-section {
+        min-height: 100vh;
+        background: url({foreach $banner as $item}{if $item->content_type == 'image'}{$item->image_path}{/if}{/foreach}) no-repeat center/cover;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+    }
+    .banner-content {
+        text-align: center;
+        z-index: 1;
+        padding: 1.5rem;
+        max-width: 80%;
+    }
+    .section-img {
+        width: 100%;
+        max-height: 350px;
+        object-fit: cover;
+        aspect-ratio: 4 / 3;
+        border-radius: 0.75rem;
+    }
+    [data-theme="light"] .banner-section .banner-content h1,
+    [data-theme="light"] .banner-section .banner-content p {
+        color: white;
+    }
+    .gallery-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        grid-template-rows: repeat(2, auto);
+        gap: 1.5rem;
+        padding: 1rem 0;
+    }
+    .gallery-item {
+        position: relative;
+        overflow: hidden;
+        border-radius: 0.75rem;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .gallery-item img {
+        width: 100%;
+        max-height: 350px;
+        object-fit: cover;
+        aspect-ratio: 4 / 3;
+        border-radius: 0.75rem;
+        display: block;
+    }
+    .gallery-item:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+    .contact {
+        background-color: #f8f9fa;
+        padding: 4rem 0;
+        border-top: 1px solid #e5e7eb;
+    }
+    .contact h2 {
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        font-weight: 700;
+        color: #1f2937;
+    }
+    .contact p {
+        font-size: 1.125rem;
+        color: #4b5563;
+    }
+    .contact .contact-info {
+        background-color: #ffffff;
+        padding: 2rem;
+        border-radius: 0.75rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .contact .contact-info:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+    }
+    .contact .contact-info p {
+        font-size: 1.1rem;
+        margin-bottom: 1.2rem;
+        display: flex;
+        align-items: center;
+    }
+    .contact .contact-info i {
+        color: #007bff;
+        font-size: 1.25rem;
+        margin-right: 0.75rem;
+        flex-shrink: 0;
+    }
+    .contact .contact-info a {
+        color: #007bff;
+        text-decoration: none;
+        transition: color 0.3s ease, text-decoration 0.3s ease;
+    }
+    .contact .contact-info a:hover {
+        text-decoration: underline;
+        color: #0056b3;
+    }
+    .contact iframe {
+        border-radius: 0.75rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+</style>
 
-    <!-- Sekce o technologii 3D tisku -->
-    <section class="py-16 bg-white">
-        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-                <div>
-                    <h2 class="text-3xl font-semibold text-gray-900 mb-4">Pokročilá 3D tisková technologie</h2>
-                    <p class="text-lg text-gray-600 mb-4">Naše kryty jsou vyráběny pomocí nejmodernějších 3D tiskáren, které zajišťují precizní zpracování a vysokou odolnost.</p>
-                    <p class="text-lg text-gray-600">Díky 3D tisku můžeme nabídnout nejen unikátní design, ale i perfektní přizpůsobení vašemu telefonu. Každý kryt je vyroben z ekologických materiálů s důrazem na kvalitu.</p>
-                </div>
-                <div>
-                    <img src="/uploads/3Dprint.webp" alt="3D tiskárna" class="fixed-img rounded-lg shadow-md">
-                </div>
+<section class="banner-section relative">
+    <div class="absolute inset-0 bg-black bg-opacity-50"></div>
+    <div class="banner-content relative z-10 max-w-5xl mx-auto">
+        <h1 class="text-4xl md:text-5xl font-extrabold mb-4">{foreach $banner as $item}{if $item->content_type == 'title'}{$item->content_text}{/if}{/foreach}</h1>
+        <p class="text-lg md:text-xl mb-6 max-w-2xl mx-auto">{foreach $banner as $item}{if $item->content_type == 'description'}{$item->content_text}{/if}{/foreach}</p>
+        {var $link = ''}
+        {var $text = ''}
+        {foreach $banner as $item}
+            {if $item->content_type == 'button_link'}{var $link = $item->content_text}{/if}
+            {if $item->content_type == 'button_text'}{var $text = $item->content_text}{/if}
+        {/foreach}
+        <a n:href="$link" class="btn btn-primary shadow-md hover:shadow-lg">{$text}</a>
+    </div>
+</section>
+
+<section class="py-12">
+    <div class="container mx-auto px-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+            <div>
+                <h2 class="text-3xl font-semibold mb-3">{foreach $durability as $item}{if $item->content_type == 'title'}{$item->content_text}{/if}{/foreach}</h2>
+                {foreach $durability as $item}
+                    {if strpos($item->content_type, 'description') === 0}
+                        <p class="text-lg mb-3">{$item->content_text}</p>
+                    {/if}
+                {/foreach}
+            </div>
+            <div>
+                <img src="{foreach $durability as $item}{if $item->content_type == 'image'}{$item->image_path}{/if}{/foreach}" alt="Odolnost krytu" class="section-img shadow-lg">
             </div>
         </div>
-    </section>
+    </div>
+</section>
 
-    <!-- Sekce o customizaci -->
-    <section class="py-16 bg-gray-100">
-        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
-                <div>
-                    <img src="/uploads/custom.png" alt="Customizace krytu" class="fixed-img rounded-lg shadow-md">
+<section class="py-12">
+    <div class="container mx-auto px-4">
+        <h2 class="text-3xl font-semibold text-center border-b border-[var(--color-accent)] pb-3 mb-6">{foreach $customization as $item}{if $item->content_type == 'title'}{$item->content_text}{/if}{/foreach}</h2>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {foreach $customization as $item}
+                {if strpos($item->content_type, 'feature') === 0 && strpos($item->content_type, 'title') !== false}
+                    {var $imageType = str_replace('title', 'image', $item->content_type)}
+                    <div class="p-4 rounded-xl shadow-md hover:shadow-lg transition text-center">
+                        <img src="{foreach $customization as $img}{if $img->content_type == $imageType}{$img->image_path}{/if}{/foreach}" alt="{$item->content_text}" class="section-img mb-3">
+                        <h3 class="text-xl font-semibold mb-2">{$item->content_text}</h3>
+                        <p>{foreach $customization as $desc}{if $desc->content_type == str_replace('title', 'description', $item->content_type)}{$desc->content_text}{/if}{/foreach}</p>
+                    </div>
+                {/if}
+            {/foreach}
+        </div>
+        <div class="text-center mt-8">
+            {var $customLink = ''}
+            {var $customText = ''}
+            {foreach $customization as $item}
+                {if $item->content_type == 'button_link'}{var $customLink = $item->content_text}{/if}
+                {if $item->content_type == 'button_text'}{var $customText = $item->content_text}{/if}
+            {/foreach}
+            <a n:href="$customLink" class="btn btn-accent shadow-md hover:shadow-lg">{$customText}</a>
+        </div>
+    </div>
+</section>
+
+<section class="py-12">
+    <div class="container mx-auto px-4">
+        <h2 class="text-3xl font-semibold text-center border-b border-[var(--color-accent)] pb-3 mb-6">Galerie našich krytů</h2>
+        <div class="gallery-grid">
+            {foreach $gallery as $image}
+                <div class="gallery-item">
+                    <img src="{$image->image}" alt="{$image->alt_text}">
                 </div>
-                <div>
-                    <h2 class="text-3xl font-semibold text-gray-900 mb-4">Vytvořte si kryt podle svého</h2>
-                    <p class="text-lg text-gray-600 mb-4">Přizpůsobte si kryt přesně podle svých představ. Vyberte barvu, přidejte krytku nabíjecího portu nebo držák na karty.</p>
-                    <p class="text-lg text-gray-600">S naším intuitivním konfigurátorem si navrhnete kryt, který dokonale odráží váš styl a potřeby.</p>
-                    <a n:href="Home:default" class="mt-4 inline-block bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition">Začít navrhovat</a>
-                </div>
+            {/foreach}
+        </div>
+    </div>
+</section>
+
+<section class="contact">
+    <div class="container mx-auto px-4">
+        <h2 class="text-center">Kontakt</h2>
+        <p class="text-center text-gray-600 mb-8">Máte otázky? Neváhejte nás kontaktovat.</p>
+        <div class="flex flex-col md:flex-row md:space-x-8">
+            <div class="contact-info mb-8 md:mb-0 flex-1">
+                <p><i class="fas fa-user"></i> <strong>{$contact->name}</strong></p>
+                <p><i class="fas fa-map-marker-alt"></i> <a href="#">Adresa: {$contact->address}</a></p>
+                <p><i class="fas fa-id-card"></i> <a href="#">IČO: {$contact->ico}</a></p>
+                <p><i class="fas fa-phone"></i> <a href="tel:{$contact->phone|replace: ' ', ''}">Mobil: {$contact->phone}</a></p>
+                <p><i class="fas fa-envelope"></i> <a href="mailto:{$contact->email}">Email: {$contact->email}</a></p>
+            </div>
+            <div class="md:w-1/2">
+                {$contact->map_embed|noescape}
             </div>
         </div>
-    </section>
-
-    <!-- Sekce s ukázkou produktů -->
-    <section class="py-16 bg-white">
-        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
-            <h2 class="text-3xl font-semibold text-gray-900 text-center mb-12">Inspirujte se našimi kryty</h2>
-            <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
-                <!-- Produkt 1 -->
-                <div class="group">
-                    <img src="/uploads/black.jpeg" alt="Černý kryt" class="product-img rounded-lg shadow-md group-hover:shadow-lg transition">
-                    <h3 class="mt-4 text-xl font-medium text-gray-900">Černý kryt</h3>
-                    <p class="text-gray-600">599 Kč</p>
-                    <a n:href="Home:detail" class="mt-2 inline-block text-gray-600 hover:text-gray-900">Zobrazit detaily</a>
-                </div>
-                <!-- Produkt 2 -->
-                <div class="group">
-                    <img src="/uploads/blue.jpeg" alt="Modrý kryt" class="product-img rounded-lg shadow-md group-hover:shadow-lg transition">
-                    <h3 class="mt-4 text-xl font-medium text-gray-900">Modrý kryt</h3>
-                    <p class="text-gray-600">599 Kč</p>
-                    <a n:href="Home:detail" class="mt-2 inline-block text-gray-600 hover:text-gray-900">Zobrazit detaily</a>
-                </div>
-                <!-- Produkt 3 -->
-                <div class="group">
-                    <img src="/uploads/white.jpg" alt="Bílý kryt" class="product-img rounded-lg shadow-md group-hover:shadow-lg transition">
-                    <h3 class="mt-4 text-xl font-medium text-gray-900">Bílý kryt</h3>
-                    <p class="text-gray-600">599 Kč</p>
-                    <a n:href="Home:detail" class="mt-2 inline-block text-gray-600 hover:text-gray-900">Zobrazit detaily</a>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Sekce s výzvou k akci -->
-    <section class="py-16 bg-gray-100">
-        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-            <h2 class="text-3xl font-semibold text-gray-900 mb-4">Váš kryt, váš styl</h2>
-            <p class="text-lg text-gray-600 mb-8">S 3D tiskem si navrhnete kryt přesně podle svých představ.</p>
-            <a n:href="Home:default" class="inline-block bg-black text-white px-6 py-3 rounded-lg hover:bg-gray-800 transition text-lg">Začít nyní</a>
-        </div>
-    </section>
-</body>
-</html>
+    </div>
+</section>
 {/block}
