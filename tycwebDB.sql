@@ -6,6 +6,7 @@ CREATE TABLE `cases` (
   `color` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `port_cover` tinyint(1) NOT NULL,
   `card_holder` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `camera_cover` tinyint(1) NOT NULL,
   `state` enum('KOSIK','OBJEDNANO','DORUCENO') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `user_id` int unsigned DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -14,40 +15,46 @@ CREATE TABLE `cases` (
   CONSTRAINT `cases_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-INSERT INTO `cases` (`id`, `manufacturer`, `model`, `color`, `port_cover`, `card_holder`, `state`, `user_id`, `created_at`) VALUES
-(3,	'samsung',	'a1',	'Černá',	1,	'1 slot',	'KOSIK',	NULL,	'2025-06-24 15:05:15'),
-(4,	'xiaomi',	'aaaa',	'Černá',	0,	'1 slot',	'KOSIK',	NULL,	'2025-06-24 15:05:15'),
-(5,	'samsung',	'S1',	'Černá',	1,	'1 slot',	'KOSIK',	NULL,	'2025-06-24 15:05:15'),
-(6,	'samsung',	'asdasdasd',	'Černá',	0,	'1 slot',	'OBJEDNANO',	3,	'2025-06-24 15:05:15'),
-(7,	'samsung',	'test31231',	'Černá',	1,	'Žádný',	'OBJEDNANO',	3,	'2025-06-24 15:05:15'),
-(8,	'apple',	'ano',	'Černá',	0,	'2 sloty',	'OBJEDNANO',	3,	'2025-06-24 15:05:15'),
-(9,	'samsung',	'a',	'Černá',	1,	'1 slot',	'OBJEDNANO',	3,	'2025-06-24 15:05:15'),
-(10,	'samsung',	'ss',	'Černá',	1,	'1 slot',	'OBJEDNANO',	3,	'2025-06-24 15:31:24'),
-(11,	'xiaomi',	'Redmi Note 8',	'Modrá',	0,	'2 sloty',	'OBJEDNANO',	3,	'2025-06-24 15:47:35'),
-(13,	'xiaomi',	'Lite 2',	'Černá',	1,	'2 sloty',	'OBJEDNANO',	2,	'2025-06-24 17:07:25'),
-(14,	'samsung',	'a',	'Černá',	0,	'Žádný',	'KOSIK',	2,	'2025-06-24 17:09:22'),
-(18,	'xiaomi',	'ssss',	'Černá',	1,	'Žádný',	'OBJEDNANO',	6,	'2025-06-24 20:12:08'),
-(19,	'samsung',	'a',	'Černá',	0,	'1 slot',	'OBJEDNANO',	3,	'2025-06-26 08:43:08'),
-(20,	'samsung',	'S2',	'Černá',	1,	'1 slot',	'OBJEDNANO',	3,	'2025-06-26 08:44:34'),
-(22,	'xiaomi',	'aaa',	'Černá',	1,	'1 slot',	'OBJEDNANO',	3,	'2025-06-29 13:54:43'),
-(23,	'samsung',	'S1',	'Černá',	1,	'1 slot',	'OBJEDNANO',	3,	'2025-06-29 13:57:17'),
-(24,	'samsung',	'ssss',	'Černá',	1,	'2 sloty',	'OBJEDNANO',	3,	'2025-06-29 13:59:34'),
-(25,	'xiaomi',	'model',	'Bílá',	1,	'Žádný',	'OBJEDNANO',	3,	'2025-06-29 13:59:46'),
-(26,	'samsung',	'as',	'Bílá',	1,	'1 slot',	NULL,	NULL,	'2025-06-30 14:04:01'),
-(27,	'xiaomi',	'a',	'Bílá',	0,	'1 slot',	NULL,	NULL,	'2025-06-30 14:04:59'),
-(28,	'samsung',	'aXXXX',	'Černá',	1,	'1 slot',	NULL,	NULL,	'2025-06-30 14:06:28'),
-(29,	'samsung',	'yyyyy',	'Černá',	1,	'1 slot',	'KOSIK',	NULL,	'2025-06-30 14:09:35'),
-(30,	'samsung',	'RRR',	'Černá',	1,	'1 slot',	'KOSIK',	NULL,	'2025-06-30 14:16:10'),
-(31,	'samsung',	'PPPPP',	'Černá',	1,	'1 slot',	'KOSIK',	NULL,	'2025-06-30 14:18:59'),
-(32,	'samsung',	'sessiomn test',	'Bílá',	1,	'1 slot',	'KOSIK',	NULL,	'2025-06-30 14:32:54'),
-(33,	'xiaomi',	'CCCC',	'Bílá',	1,	'1 slot',	'KOSIK',	NULL,	'2025-06-30 14:35:54'),
-(34,	'samsung',	'ahoj',	'Černá',	0,	'1 slot',	'KOSIK',	NULL,	'2025-06-30 14:36:42'),
-(35,	'xiaomi',	'a',	'Černá',	1,	'1 slot',	'KOSIK',	NULL,	'2025-06-30 14:37:16'),
-(36,	'samsung',	'a',	'Modrá',	1,	'1 slot',	'OBJEDNANO',	3,	'2025-06-30 15:53:42'),
-(37,	'xiaomi',	'A',	'Černá',	1,	'Žádný',	'OBJEDNANO',	3,	'2025-06-30 16:00:25'),
-(38,	'xiaomi',	'B',	'Černá',	0,	'Žádný',	'OBJEDNANO',	3,	'2025-06-30 16:00:32'),
-(39,	'apple',	'C',	'Černá',	0,	'2 sloty',	'OBJEDNANO',	3,	'2025-06-30 16:00:42'),
-(40,	'xiaomi',	'test',	'Bílá',	1,	'1 slot',	'OBJEDNANO',	3,	'2025-06-30 16:08:43');
+INSERT INTO `cases` (`id`, `manufacturer`, `model`, `color`, `port_cover`, `card_holder`, `camera_cover`, `state`, `user_id`, `created_at`) VALUES
+(3,	'samsung',	'a1',	'Černá',	1,	'1 slot',	0,	'KOSIK',	NULL,	'2025-06-24 15:05:15'),
+(4,	'xiaomi',	'aaaa',	'Černá',	0,	'1 slot',	0,	'KOSIK',	NULL,	'2025-06-24 15:05:15'),
+(5,	'samsung',	'S1',	'Černá',	1,	'1 slot',	0,	'KOSIK',	NULL,	'2025-06-24 15:05:15'),
+(6,	'samsung',	'asdasdasd',	'Černá',	0,	'1 slot',	0,	'OBJEDNANO',	3,	'2025-06-24 15:05:15'),
+(7,	'samsung',	'test31231',	'Černá',	1,	'Žádný',	0,	'OBJEDNANO',	3,	'2025-06-24 15:05:15'),
+(8,	'apple',	'ano',	'Černá',	0,	'2 sloty',	0,	'OBJEDNANO',	3,	'2025-06-24 15:05:15'),
+(9,	'samsung',	'a',	'Černá',	1,	'1 slot',	0,	'OBJEDNANO',	3,	'2025-06-24 15:05:15'),
+(10,	'samsung',	'ss',	'Černá',	1,	'1 slot',	0,	'OBJEDNANO',	3,	'2025-06-24 15:31:24'),
+(11,	'xiaomi',	'Redmi Note 8',	'Modrá',	0,	'2 sloty',	0,	'OBJEDNANO',	3,	'2025-06-24 15:47:35'),
+(13,	'xiaomi',	'Lite 2',	'Černá',	1,	'2 sloty',	0,	'OBJEDNANO',	2,	'2025-06-24 17:07:25'),
+(14,	'samsung',	'a',	'Černá',	0,	'Žádný',	0,	'KOSIK',	2,	'2025-06-24 17:09:22'),
+(18,	'xiaomi',	'ssss',	'Černá',	1,	'Žádný',	0,	'OBJEDNANO',	6,	'2025-06-24 20:12:08'),
+(19,	'samsung',	'a',	'Černá',	0,	'1 slot',	0,	'OBJEDNANO',	3,	'2025-06-26 08:43:08'),
+(20,	'samsung',	'S2',	'Černá',	1,	'1 slot',	0,	'OBJEDNANO',	3,	'2025-06-26 08:44:34'),
+(22,	'xiaomi',	'aaa',	'Černá',	1,	'1 slot',	0,	'OBJEDNANO',	3,	'2025-06-29 13:54:43'),
+(23,	'samsung',	'S1',	'Černá',	1,	'1 slot',	0,	'OBJEDNANO',	3,	'2025-06-29 13:57:17'),
+(24,	'samsung',	'ssss',	'Černá',	1,	'2 sloty',	0,	'OBJEDNANO',	3,	'2025-06-29 13:59:34'),
+(25,	'xiaomi',	'model',	'Bílá',	1,	'Žádný',	0,	'OBJEDNANO',	3,	'2025-06-29 13:59:46'),
+(26,	'samsung',	'as',	'Bílá',	1,	'1 slot',	0,	NULL,	NULL,	'2025-06-30 14:04:01'),
+(27,	'xiaomi',	'a',	'Bílá',	0,	'1 slot',	0,	NULL,	NULL,	'2025-06-30 14:04:59'),
+(28,	'samsung',	'aXXXX',	'Černá',	1,	'1 slot',	0,	NULL,	NULL,	'2025-06-30 14:06:28'),
+(29,	'samsung',	'yyyyy',	'Černá',	1,	'1 slot',	0,	'KOSIK',	NULL,	'2025-06-30 14:09:35'),
+(30,	'samsung',	'RRR',	'Černá',	1,	'1 slot',	0,	'KOSIK',	NULL,	'2025-06-30 14:16:10'),
+(31,	'samsung',	'PPPPP',	'Černá',	1,	'1 slot',	0,	'KOSIK',	NULL,	'2025-06-30 14:18:59'),
+(32,	'samsung',	'sessiomn test',	'Bílá',	1,	'1 slot',	0,	'KOSIK',	NULL,	'2025-06-30 14:32:54'),
+(33,	'xiaomi',	'CCCC',	'Bílá',	1,	'1 slot',	0,	'KOSIK',	NULL,	'2025-06-30 14:35:54'),
+(34,	'samsung',	'ahoj',	'Černá',	0,	'1 slot',	0,	'KOSIK',	NULL,	'2025-06-30 14:36:42'),
+(35,	'xiaomi',	'a',	'Černá',	1,	'1 slot',	0,	'KOSIK',	NULL,	'2025-06-30 14:37:16'),
+(36,	'samsung',	'a',	'Modrá',	1,	'1 slot',	0,	'OBJEDNANO',	3,	'2025-06-30 15:53:42'),
+(37,	'xiaomi',	'A',	'Černá',	1,	'Žádný',	0,	'OBJEDNANO',	3,	'2025-06-30 16:00:25'),
+(38,	'xiaomi',	'B',	'Černá',	0,	'Žádný',	0,	'OBJEDNANO',	3,	'2025-06-30 16:00:32'),
+(39,	'apple',	'C',	'Černá',	0,	'2 sloty',	0,	'OBJEDNANO',	3,	'2025-06-30 16:00:42'),
+(40,	'xiaomi',	'test',	'Bílá',	1,	'1 slot',	0,	'OBJEDNANO',	3,	'2025-06-30 16:08:43'),
+(41,	'Apple',	'iPhone 13',	'',	1,	'Žádný',	1,	'KOSIK',	NULL,	'2025-07-04 16:58:02'),
+(42,	'',	'',	'',	1,	'Žádný',	1,	'KOSIK',	NULL,	'2025-07-04 16:58:06'),
+(43,	'Apple',	'iPhone 13',	'Červená',	1,	'Žádný',	1,	'KOSIK',	NULL,	'2025-07-04 17:16:34'),
+(51,	'Samsung',	'Galaxy S22',	'Bílá',	1,	'Žádný',	1,	'OBJEDNANO',	9,	'2025-07-04 17:27:03'),
+(52,	'Samsung',	'Galaxy S22',	'Bílá',	0,	'2 sloty',	0,	'OBJEDNANO',	9,	'2025-07-04 17:52:22'),
+(54,	'Apple',	'iPhone 13',	'Bílá',	1,	'2 sloty',	1,	'KOSIK',	9,	'2025-07-04 20:35:36');
 
 DROP TABLE IF EXISTS `contact_info`;
 CREATE TABLE `contact_info` (
@@ -97,7 +104,7 @@ INSERT INTO `content_sections` (`id`, `section_name`, `content_type`, `content_t
 (18,	'customization',	'feature3_description',	'Praktické měřítko pro každodenní použití přímo na krytu.',	NULL,	9),
 (19,	'customization',	'feature3_image',	NULL,	'/uploads/home/pravitko.jpg',	10),
 (20,	'customization',	'button_text',	'Začít navrhovat',	NULL,	11),
-(21,	'customization',	'button_link',	'default',	NULL,	12);
+(21,	'customization',	'button_link',	'detail',	NULL,	12);
 
 DROP TABLE IF EXISTS `form_options`;
 CREATE TABLE `form_options` (
@@ -213,7 +220,9 @@ INSERT INTO `order_case` (`order_id`, `case_id`, `quantity`) VALUES
 (29,	39,	1),
 (29,	38,	1),
 (29,	37,	1),
-(30,	40,	1);
+(30,	40,	1),
+(31,	52,	1),
+(31,	51,	1);
 
 DROP TABLE IF EXISTS `orders`;
 CREATE TABLE `orders` (
@@ -248,7 +257,8 @@ INSERT INTO `orders` (`id`, `user_id`, `firstname`, `lastname`, `email`, `addres
 (27,	3,	'administrátor',	'veliký',	'dostals64@gmail.com',	'Nádražní 23',	'Praha',	'OBJEDNANO',	NULL,	'110 03',	'2025-06-30 16:00:51'),
 (28,	3,	'administrátor',	'veliký',	'dostals64@gmail.com',	'Nádražní 23',	'Praha',	'OBJEDNANO',	NULL,	'110 03',	'2025-06-30 16:02:43'),
 (29,	3,	'administrátor',	'veliký',	'dostals64@gmail.com',	'Nádražní 23',	'Praha',	'OBJEDNANO',	NULL,	'110 03',	'2025-06-30 16:04:34'),
-(30,	3,	'administrátor',	'veliký',	'dostals64@gmail.com',	'Nádražní 23',	'Praha',	'OBJEDNANO',	NULL,	'110 03',	'2025-06-30 16:08:48');
+(30,	3,	'administrátor',	'veliký',	'dostals64@gmail.com',	'Nádražní 23',	'Praha',	'OBJEDNANO',	NULL,	'110 03',	'2025-06-30 16:08:48'),
+(31,	9,	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'Konopáčská 465',	'Heřmanův Městec',	'OBJEDNANO',	'PREVOD',	'53803',	'2025-07-04 17:54:40');
 
 DROP TABLE IF EXISTS `users`;
 CREATE TABLE `users` (

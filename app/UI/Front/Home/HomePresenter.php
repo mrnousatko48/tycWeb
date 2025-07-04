@@ -1,5 +1,4 @@
 <?php
-declare(strict_types=1);
 
 namespace App\UI\Front\Home;
 
@@ -7,17 +6,20 @@ use Nette;
 use Nette\Application\UI\Form;
 use App\Model\OrderFacade;
 use App\Model\PageFacade;
+use Nette\Http\Session;
 
 final class HomePresenter extends Nette\Application\UI\Presenter
 {
     private OrderFacade $orderFacade;
     private PageFacade $pageFacade;
+    private Session $session;
 
-    public function __construct(OrderFacade $orderFacade, PageFacade $pageFacade)
+    public function __construct(OrderFacade $orderFacade, PageFacade $pageFacade, Session $session)
     {
         parent::__construct();
         $this->orderFacade = $orderFacade;
         $this->pageFacade = $pageFacade;
+        $this->session = $session;
     }
 
     public function startup(): void
@@ -56,8 +58,7 @@ final class HomePresenter extends Nette\Application\UI\Presenter
         $this->template->manufacturers = $this->pageFacade->getManufacturers();
     }
 
-
-protected function createComponentCaseForm(): Form
+    protected function createComponentCaseForm(): Form
     {
         $form = new Form;
 
@@ -69,15 +70,20 @@ protected function createComponentCaseForm(): Form
 
         $manufacturer = $form->addSelect('manufacturer', 'Manufacturer:', $manufacturerItems)
             ->setPrompt('Select a manufacturer')
-            ->setHtmlAttribute('data-url', $this->link('Endpoint:manufacturers'));
+            ->setHtmlAttribute('data-url', $this->link('Endpoint:manufacturers'))
+            ->setRequired('Please select a manufacturer.');
 
         $model = $form->addSelect('model', 'Model:')
             ->setPrompt('Select a model')
             ->setHtmlAttribute('data-depends', $manufacturer->getHtmlName())
             ->setHtmlAttribute('data-url', $this->link('Endpoint:models', ['manufacturerId' => '#']))
-            ->setHtmlAttribute('data-colors-url', $this->link('Endpoint:modelColors', ['modelId' => '#']));
+            ->setHtmlAttribute('data-colors-url', $this->link('Endpoint:modelColors', ['modelId' => '#']))
+            ->setRequired('Please select a model.');
 
-        $form->addHidden('color');
+        $form->addHidden('color')->setRequired('Please select a color.');
+        $form->addHidden('chargingPortCover')->setDefaultValue('Ano');
+        $form->addHidden('frontCameraCover')->setDefaultValue('Ano');
+        $form->addHidden('cardHolder')->setDefaultValue('Žádný');
 
         $form->addSubmit('submit', 'Přidat do košíku');
 
@@ -97,16 +103,37 @@ protected function createComponentCaseForm(): Form
     public function processForm(Form $form): void
     {
         $values = $form->getValues();
-        $manufacturerId = (int) $values['manufacturer'];
-        $modelId = (int) $values['model'];
+        $manufacturerId = (int)$values['manufacturer'];
+        $modelId = (int)$values['model'];
         $color = $values['color'];
+        $chargingPortCover = $values['chargingPortCover'];
+        $frontCameraCover = $values['frontCameraCover'];
+        $cardHolder = $values['cardHolder'];
 
-        $success = $this->orderFacade->addOrder($manufacturerId, $modelId, $color);
-        if ($success) {
-            $this->flashMessage('Data was successfully saved.', 'success');
-        } else {
-            $this->flashMessage('An error occurred while saving data.', 'error');
+        try {
+            $manufacturerName = $this->pageFacade->getManufacturerNameById($manufacturerId);
+            $modelName = $this->pageFacade->getModelNameById($modelId);
+
+            if (!$manufacturerName || !$modelName) {
+                throw new \Exception('Invalid manufacturer or model selected.');
+            }
+
+            $userId = $this->getUser()->isLoggedIn() ? $this->getUser()->getId() : null;
+
+            $this->orderFacade->createCase([
+                'manufacturer' => $manufacturerName,
+                'model' => $modelName,
+                'color' => $color,
+                'port_cover' => $chargingPortCover === 'Ano' ? 1 : 0,
+                'camera_cover' => $frontCameraCover === 'Ano' ? 1 : 0,
+                'card_holder' => $cardHolder,
+            ], $userId);
+
+            $this->flashMessage('Položka byla přidána do košíku.', 'success');
+            $this->redirect('Cart:default'); // Redirect to cart page (create this route if it doesn't exist)
+        } catch (\Exception $e) {
+            $this->flashMessage('Chyba při přidávání do košíku: ' . $e->getMessage(), 'error');
+            $this->redirect('this');
         }
-        $this->redirect('this');
     }
 }

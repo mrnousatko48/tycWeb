@@ -114,4 +114,16 @@ public function getColorsByModel(int $modelId): array
     return $model && $model->colors ? explode(',', $model->colors) : [];
 }
 
+    public function getManufacturerNameById(int $id): string
+    {
+        $manufacturer = $this->database->table('manufacturers')->get($id);
+        return $manufacturer ? $manufacturer->name : '';
+    }
+
+    public function getModelNameById(int $id): string
+    {
+        $model = $this->database->table('models')->get($id);
+        return $model ? $model->name : '';
+    }
+
 }

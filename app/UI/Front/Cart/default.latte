@@ -1,46 +1,55 @@
 {block content}
-<h1>Košík</h1>
-
 {if empty($cases)}
-
-    <p>Nemáte žádné kryty v košíku.</p>
+    <div class="text-center py-16 px-6 bg-[var(--color-background)] rounded-2xl shadow-2xl">
+        <p class="text-2xl font-medium text-[var(--color-text)] mb-6">Nemáte žádné kryty v košíku.</p>
+        <a href="{$basePath}/" class="inline-block btn px-6 py-3 rounded-xl text-lg font-semibold transition hover:scale-105" style="background-color: var(--color-primary); color: var(--button-text);">Pokračovat v nákupu</a>
+    </div>
 {else}
-    <form action="{$presenter->link('CreateOrder')}" method="post">
-        <table class="table table-striped">
+    <form action="{$presenter->link('CreateOrder')}" method="post" class="bg-[var(--color-background)] p-8 rounded-3xl shadow-2xl overflow-x-auto">
+        <table class="w-full text-left border-separate border-spacing-y-3 min-w-[700px]">
             <thead>
-            <tr>
-                <th>ID</th>
-                <th>Výrobce</th>
-                <th>Model</th>
-                <th>Barva</th>
-                <th>Krytka portu</th>
-                <th>Držák karet</th>
-                <th>Datum</th>
-                <th>Množství</th>
-                <th>Akce</th>
-            </tr>
+                <tr class="bg-[var(--color-secondary)] text-[var(--color-text)] text-base">
+                    <th class="p-5 rounded-l-2xl">Výrobce</th>
+                    <th class="p-5">Model</th>
+                    <th class="p-5">Barva</th>
+                    <th class="p-5">Krytka portu</th>
+                    <th class="p-5">Clona kamery</th>
+                    <th class="p-5">Držák karet</th>
+                    <th class="p-5">Množství</th>
+                    <th class="p-5 rounded-r-2xl">Akce</th>
+                </tr>
             </thead>
             <tbody>
             {foreach $cases as $case}
-                <tr>
-                    <td>{$case->id}</td>
-                    <td>{$case->manufacturer}</td>
-                    <td>{$case->model}</td>
-                    <td>{$case->color}</td>
-                    <td>{if $case->port_cover}Ano{else}Ne{/if}</td>
-                    <td>{if $case->card_holder}Ano{else}Ne{/if}</td>
-                    <td>{$case->created_at|date:'j. n. Y H:i'}</td>
-                    <td>
-                        <input type="number" name="quantities[{$case->id}][amount]" value="1" min="1" class="form-control" style="width: 80px;">
+                <tr class="bg-white dark:bg-[var(--color-secondary)] text-[var(--color-text)] shadow transition hover:shadow-lg duration-300 rounded-2xl">
+                    <td class="p-5 rounded-l-2xl">{$case->manufacturer}</td>
+                    <td class="p-5">{$case->model}</td>
+                    <td class="p-5">{$case->color}</td>
+                    <td class="p-5">{$case->port_cover}</td>
+                    <td class="p-5">{$case->camera_cover}</td>
+                    <td class="p-5">{$case->card_holder}</td>
+                    <td class="p-5">
+                        <input type="number" name="quantities[{$case->id}][amount]" value="1" min="1"
+                            class="w-20 text-center border border-[var(--color-secondary)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)] focus:outline-none transition">
                     </td>
-                    <td>
-                        <a class="btn btn-danger btn-sm" href="{link removeCase! $case->id}" onclick="return confirm('Opravdu chcete odstranit tento kryt z košíku?')">Odstranit</a>
+                    <td class="p-5 rounded-r-2xl">
+                        <a class="inline-flex items-center justify-center text-sm font-semibold text-white rounded-lg px-4 py-2 transition transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-400"
+                           style="background-color: #ef4444;"
+                           href="{link removeCase! $case->id}"
+                           onclick="return confirm('Opravdu chcete odstranit tento kryt z košíku?')">
+                            <i class="fas fa-trash mr-2"></i> Odstranit
+                        </a>
                     </td>
                 </tr>
             {/foreach}
             </tbody>
         </table>
-        <button type="submit" class="btn btn-success">Pokračovat k objednávce</button>
+        <div class="flex justify-end mt-10">
+            <button type="submit" class="btn px-8 py-4 rounded-2xl text-lg font-bold transition transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-[var(--color-accent)]"
+                style="background-color: var(--color-primary); color: var(--button-text);">
+                Pokračovat k objednávce
+            </button>
+        </div>
     </form>
 {/if}
 {/block}

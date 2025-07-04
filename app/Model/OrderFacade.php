@@ -147,22 +147,25 @@ final class OrderFacade
             ->order('created_at DESC');
     }
 
-    public function createCase(array $data, ?int $userId = null, \Nette\Http\Session $session = null): ActiveRow
-    {
-        $data['user_id'] = $userId;
-        $data['state'] = 'KOSIK';
+    public function createCase(array $data, ?int $userId = null): ActiveRow
+        {
+            $data['user_id'] = $userId;
+            $data['state'] = 'KOSIK';
+            $data['created_at'] = new \DateTime(); // Ensure created_at is set
 
-        $case = $this->database->table('cases')->insert($data);
+            // Insert case into the database
+            $case = $this->database->table('cases')->insert($data);
 
-        if ($userId === null && $session !== null) {
-            $orderSection = $session->getSection('order');
-            $quantities = $orderSection->quantities ?? [];
-            $quantities[$case->id] = 1;
-            $orderSection->quantities = $quantities;
+            // For guest users, store case in session
+            if ($userId === null) {
+                $orderSection = $this->session->getSection('order');
+                $quantities = $orderSection->quantities ?? [];
+                $quantities[$case->id] = ($quantities[$case->id] ?? 0) + 1; // Increment quantity if case exists
+                $orderSection->quantities = $quantities;
+            }
+
+            return $case;
         }
-
-        return $case;
-    }
 
 
     public function removeCaseFromCart(\Nette\Http\Session $session, int $caseId): void
