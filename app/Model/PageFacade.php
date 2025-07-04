@@ -13,7 +13,6 @@ class PageFacade
         $this->database = $database;
     }
 
-    // Fetch content for a specific section (banner, durability, customization)
     public function getSectionContent(string $section): array
     {
         return $this->database->table('content_sections')
@@ -22,7 +21,6 @@ class PageFacade
             ->fetchAll();
     }
 
-    // Update content for a section
     public function updateSectionContent(string $section, string $contentType, ?string $contentText = null, ?string $imagePath = null): void
     {
         $this->database->table('content_sections')
@@ -33,7 +31,6 @@ class PageFacade
             ]);
     }
 
-    // Fetch gallery images
     public function getGalleryImages(): array
     {
         return $this->database->table('gallery')
@@ -41,7 +38,6 @@ class PageFacade
             ->fetchAll();
     }
 
-    // Add a gallery image
     public function addGalleryImage(string $imagePath, ?string $altText, int $ordering): void
     {
         $this->database->table('gallery')
@@ -55,7 +51,6 @@ class PageFacade
         ]);
     }
 
-    // Delete a gallery image
     public function deleteGalleryImage(int $id): void
     {
         $image = $this->database->table('gallery')->get($id);
@@ -67,7 +62,6 @@ class PageFacade
         }
     }
 
-    // Update gallery image ordering
     public function updateGalleryOrder(array $order): void
     {
         foreach ($order as $index => $id) {
@@ -77,21 +71,47 @@ class PageFacade
         }
     }
 
-    // Fetch contact information
     public function getContactInfo()
     {
         return $this->database->table('contact_info')->fetch();
     }
 
-    // Update contact information
     public function updateContactInfo(int $id, array $values): void
     {
         $this->database->table('contact_info')->get($id)->update($values);
     }
 
-    // Existing methods for form options (unchanged)
     public function getFormOptions(string $type): array
     {
+        if ($type === 'color') {
+            return []; // Handled by models table
+        }
         return $this->database->table($type . '_options')->fetchAll();
     }
+
+    public function getManufacturers(): array
+    {
+        return $this->database->table('manufacturers')
+            ->order('name ASC')
+            ->fetchAll();
+    }
+
+    public function getModelsByManufacturer(int $manufacturerId): array
+    {
+        $query = $this->database->table('models')
+            ->where('manufacturer_id', $manufacturerId)
+            ->order('name ASC');
+        $models = [];
+        foreach ($query->fetchAll() as $model) {
+            $models[$model->id] = $model->name;
+        }
+        return $models;
+    }
+    
+public function getColorsByModel(int $modelId): array
+{
+    $model = $this->database->table('models')->get($modelId);
+    return $model && $model->colors ? explode(',', $model->colors) : [];
+}
+
 }

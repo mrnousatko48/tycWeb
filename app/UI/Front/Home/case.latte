@@ -1,3 +1,153 @@
 {block content}
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            @apply bg-gray-50;
+        }
+        .selected {
+            @apply ring-2 ring-black ring-offset-2;
+        }
+    </style>
+    <div class="content-container flex items-center justify-center">
+        <div class="max-w-5xl w-full mx-auto p-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <div class="flex justify-center items-center">
+                    <img id="product-image" src="/Uploads/black.jpeg" alt="Náhled krytu" class="max-w-full h-auto rounded-lg shadow-lg">
+                </div>
+                <div class="space-y-6">
+                    <h1 class="text-3xl font-semibold text-gray-900">Kryt na telefon</h1>
+                    <p class="text-lg text-gray-600">Vyberte si svůj styl a přizpůsobte si kryt podle svých potřeb.</p>
+                    <p class="text-xl font-medium text-gray-900">Cena: 599 Kč</p>
+                    <p class="text-sm text-gray-500">Kompatibilní s: <span id="selected-device">Vyberte výrobce a model</span></p>
 
-{control caseForm}
+                    {form caseForm}
+                        <div>
+                            <h2 class="text-xl font-medium text-gray-900">Model telefonu</h2>
+                            <div class="mt-2 flex space-x-3">
+                                {input manufacturer class => 'px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 focus:ring-2 focus:ring-black transition'}
+                                {input model class => 'px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 focus:ring-2 focus:ring-black transition', data-colors-url => '/endpoint/model-colors?modelId=#'
+}
+
+
+                            </div>
+                        </div>
+
+                        <div>
+                            <h2 class="text-xl font-medium text-gray-900">Barva</h2>
+                            <div id="color-buttons" class="mt-2 flex space-x-3">
+                                <!-- Color buttons will be inserted here by JavaScript -->
+                            </div>
+                        </div>
+
+                        <div>
+                            <h2 class="text-xl font-medium text-gray-900">Krytka nabíjecího portu</h2>
+                            <div class="mt-2 flex space-x-3">
+                                <button class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 selected transition" onclick="toggleSelection(this)">Ano</button>
+                                <button class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition" onclick="toggleSelection(this)">Ne</button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h2 class="text-xl font-medium text-gray-900">Držák karet</h2>
+                            <div class="mt-2 flex space-x-3">
+                                <button class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 selected transition" onclick="toggleSelection(this)">1 slot</button>
+                                <button class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition" onclick="toggleSelection(this)">2 sloty</button>
+                                <button class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition" onclick="toggleSelection(this)">Žádný</button>
+                            </div>
+                        </div>
+
+                        <div>
+                            {input submit class => 'w-full py-3 bg-black text-white rounded-lg hover:bg-gray-800 focus:ring-2 focus:ring-black transition'}
+                        </div>
+                    {/form}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script n:syntax=off>
+        document.querySelectorAll('select[data-depends]').forEach((childSelect) => {
+            let parentSelect = childSelect.form[childSelect.dataset.depends];
+            let url = childSelect.dataset.url;
+            let items = JSON.parse(childSelect.dataset.items || 'null');
+
+            parentSelect.addEventListener('change', () => {
+                if (items) {
+                    updateSelectbox(childSelect, items[parentSelect.value]);
+                }
+                if (url) {
+                    fetch(url.replace(encodeURIComponent('#'), encodeURIComponent(parentSelect.value)))
+                        .then((response) => response.json())
+                        .then((data) => updateSelectbox(childSelect, data));
+                }
+            });
+        });
+
+        function updateSelectbox(select, items) {
+            select.innerHTML = '';
+            let defaultOption = document.createElement('option');
+            defaultOption.setAttribute('value', '');
+            defaultOption.setAttribute('disabled', 'disabled');
+            defaultOption.setAttribute('selected', 'selected');
+            defaultOption.innerText = 'Vyberte model';
+            select.appendChild(defaultOption);
+            for (let id in items) {
+                let el = document.createElement('option');
+                el.setAttribute('value', id);
+                el.innerText = items[id];
+                select.appendChild(el);
+            }
+            select.disabled = Object.keys(items).length === 0;
+        }
+
+        const colorMap = {
+            'Černá': { bgClass: 'bg-black', image: 'https://via.placeholder.com/400x600/000000/FFFFFF?text=Černý+kryt' },
+            'Bílá': { bgClass: 'bg-white border border-gray-300', image: 'https://via.placeholder.com/400x600/FFFFFF/000000?text=Bílý+kryt' },
+            'Modrá': { bgClass: 'bg-blue-500', image: 'https://via.placeholder.com/400x600/3B82F6/FFFFFF?text=Modrý+kryt' },
+            'Červená': { bgClass: 'bg-red-500', image: 'https://via.placeholder.com/400x600/EF4444/FFFFFF?text=Červený+kryt' }
+        };
+
+        document.getElementById('frm-caseForm-model').addEventListener('change', function() {
+            let modelId = this.value;
+            if (modelId) {
+                let url = this.dataset.colorsUrl.replace('#', encodeURIComponent(modelId));
+                fetch(url)
+                    .then(response => response.json())
+                    .then(colors => {
+                        updateColorButtons(colors);
+                    });
+            } else {
+                updateColorButtons([]);
+            }
+        });
+
+        function updateColorButtons(colors) {
+            const container = document.getElementById('color-buttons');
+            container.innerHTML = '';
+            colors.forEach(color => {
+                if (colorMap[color]) {
+                    const button = document.createElement('button');
+                    button.setAttribute('data-color', color);
+                    button.setAttribute('data-image', colorMap[color].image);
+                    button.className = `w-10 h-10 rounded-full ${colorMap[color].bgClass} hover:ring-2 hover:ring-offset-2 hover:ring-gray-400 transition`;
+                    button.title = color;
+                    button.onclick = function() { changeImage(this); };
+                    container.appendChild(button);
+                }
+            });
+            if (colors.length > 0) {
+                container.firstChild.classList.add('selected');
+                changeImage(container.firstChild);
+            }
+        }
+
+        function changeImage(button) {
+            const imageUrl = button.dataset.image;
+            document.getElementById('product-image').src = imageUrl;
+            document.querySelectorAll('#color-buttons button').forEach(btn => btn.classList.remove('selected'));
+            button.classList.add('selected');
+            document.getElementById('frm-caseForm-color').value = button.dataset.color;
+        }
+    </script>
+{/block}

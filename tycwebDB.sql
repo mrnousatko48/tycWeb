@@ -138,6 +138,41 @@ INSERT INTO `gallery` (`id`, `image`, `alt_text`, `ordering`) VALUES
 (3,	'/uploads/home/showcase1.jpg',	'Kryt 3',	3),
 (4,	'/uploads/home/showcase2.jpg',	'Kryt 4',	4);
 
+DROP TABLE IF EXISTS `manufacturers`;
+CREATE TABLE `manufacturers` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(100) NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `name` (`name`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+INSERT INTO `manufacturers` (`id`, `name`, `created_at`) VALUES
+(1,	'Apple',	'2025-07-03 16:52:35'),
+(2,	'Samsung',	'2025-07-03 16:52:35'),
+(3,	'Xiaomi',	'2025-07-03 16:52:35');
+
+DROP TABLE IF EXISTS `models`;
+CREATE TABLE `models` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `manufacturer_id` int NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `colors` varchar(255) DEFAULT NULL COMMENT 'Comma-separated list of available colors for this model',
+  `has_card_holder` tinyint(1) DEFAULT '0',
+  `has_front_camera_cover` tinyint(1) DEFAULT '0',
+  PRIMARY KEY (`id`),
+  KEY `manufacturer_id` (`manufacturer_id`),
+  CONSTRAINT `models_ibfk_1` FOREIGN KEY (`manufacturer_id`) REFERENCES `manufacturers` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+INSERT INTO `models` (`id`, `manufacturer_id`, `name`, `created_at`, `colors`, `has_card_holder`, `has_front_camera_cover`) VALUES
+(1,	1,	'iPhone 13',	'2025-07-03 16:52:35',	'Černá,Bílá,Modrá,Červená',	1,	1),
+(2,	1,	'iPhone 14',	'2025-07-03 16:52:35',	'Černá,Bílá,Modrá,Červená',	1,	1),
+(3,	2,	'Galaxy S22',	'2025-07-03 16:52:35',	'Černá,Bílá,Modrá',	0,	0),
+(4,	2,	'Galaxy S23',	'2025-07-03 16:52:35',	'Černá,Bílá,Modrá',	0,	0),
+(5,	3,	'Mi 12',	'2025-07-03 16:52:35',	'Černá,Červená',	1,	0);
+
 DROP TABLE IF EXISTS `order_case`;
 CREATE TABLE `order_case` (
   `order_id` int NOT NULL,
@@ -240,4 +275,5 @@ INSERT INTO `users` (`id`, `username`, `firstname`, `lastname`, `email`, `passwo
 (3,	'admin',	'administrátor',	'veliký',	'admin@mail.com',	'$2y$10$5dUIUJioPW1aleFtwM.PiOIvdYUxIVq85Di4oDuOUzAgABF402auW',	'ADMIN',	'Nádražní 23',	'Praha',	'110 03',	'2025-06-24 11:43:46',	NULL,	NULL),
 (6,	'dostals',	'',	'',	'dostals64@gmail.com',	'$2y$10$RJhN6zE1eZqpGLSBTyFI/OApvmXrcaobEVeOjzfvYmLePRuqrMBRG',	'ADMIN',	NULL,	NULL,	NULL,	'2025-06-24 19:27:29',	241712,	'2025-06-30 21:04:00'),
 (7,	'bakub',	'Kuba',	'Syč',	'bakua@mail.com',	'$2y$10$ZVF9RfycPsVhpryvQf50zePtoXVFCl4.6bUzZKxiSIdpdCguW4Eri',	'UZIVATEL',	NULL,	NULL,	NULL,	'2025-06-24 19:29:28',	NULL,	NULL),
-(8,	'igor',	'igor',	'rucicka',	'igor@mail.com',	'$2y$10$bEiEpKsd.RXoA7yvEk9QdOZ9LC9zdlX7MpgYnGDJ7S52QVI5U5Flm',	'UZIVATEL',	NULL,	NULL,	NULL,	'2025-06-29 14:10:39',	NULL,	NULL);
+(8,	'igor',	'igor',	'rucicka',	'igor@mail.com',	'$2y$10$bEiEpKsd.RXoA7yvEk9QdOZ9LC9zdlX7MpgYnGDJ7S52QVI5U5Flm',	'UZIVATEL',	NULL,	NULL,	NULL,	'2025-06-29 14:10:39',	NULL,	NULL),
+(9,	'martin',	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'$2y$10$IL5Fv2uV.ltlOl7k61KAh.BzQnm4tCrgGaCBuPO/qlm36uoHDyItC',	'UZIVATEL',	NULL,	NULL,	NULL,	'2025-07-03 16:48:05',	NULL,	NULL);

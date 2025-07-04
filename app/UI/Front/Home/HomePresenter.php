@@ -53,107 +53,60 @@ final class HomePresenter extends Nette\Application\UI\Presenter
         $this->template->customization = $this->pageFacade->getSectionContent('customization');
         $this->template->gallery = $this->pageFacade->getGalleryImages();
         $this->template->contact = $this->pageFacade->getContactInfo();
+        $this->template->manufacturers = $this->pageFacade->getManufacturers();
     }
 
-    protected function createComponentCaseForm(): Form
+
+protected function createComponentCaseForm(): Form
     {
         $form = new Form;
 
-        $manufacturers = $this->pageFacade->getFormOptions('manufacturer');
-        $form->addSelect('manufacturer', 'Výrobce:', array_column($manufacturers, 'option_label', 'option_value'))
-            ->setPrompt('Vyberte výrobce')
-            ->setRequired();
+        $manufacturers = $this->pageFacade->getManufacturers();
+        $manufacturerItems = [];
+        foreach ($manufacturers as $manufacturer) {
+            $manufacturerItems[$manufacturer->id] = $manufacturer->name;
+        }
 
-        $form->addText('model', 'Model:')
-            ->setRequired();
+        $manufacturer = $form->addSelect('manufacturer', 'Manufacturer:', $manufacturerItems)
+            ->setPrompt('Select a manufacturer')
+            ->setHtmlAttribute('data-url', $this->link('Endpoint:manufacturers'));
 
-        $colors = $this->pageFacade->getFormOptions('color');
-        $form->addSelect('color', 'Barva:', array_column($colors, 'option_label', 'option_value'))
-            ->setRequired();
+        $model = $form->addSelect('model', 'Model:')
+            ->setPrompt('Select a model')
+            ->setHtmlAttribute('data-depends', $manufacturer->getHtmlName())
+            ->setHtmlAttribute('data-url', $this->link('Endpoint:models', ['manufacturerId' => '#']))
+            ->setHtmlAttribute('data-colors-url', $this->link('Endpoint:modelColors', ['modelId' => '#']));
 
-        $portCovers = $this->pageFacade->getFormOptions('port_cover');
-        $form->addRadioList('port_cover', 'Krytka nabíjecího portu:', array_column($portCovers, 'option_label', 'option_value'))
-            ->setRequired();
-
-        $cardHolders = $this->pageFacade->getFormOptions('card_holder');
-        $form->addSelect('card_holder', 'Držák karet:', array_column($cardHolders, 'option_label', 'option_value'))
-            ->setRequired();
+        $form->addHidden('color');
 
         $form->addSubmit('submit', 'Přidat do košíku');
 
-        $form->onSuccess[] = [$this, 'caseFormSucceeded'];
+        $form->onAnchor[] = function () use ($model, $manufacturer) {
+            $model->setItems(
+                $manufacturer->getValue()
+                    ? $this->pageFacade->getModelsByManufacturer((int)$manufacturer->getValue())
+                    : []
+            );
+        };
+
+        $form->onSuccess[] = [$this, 'processForm'];
 
         return $form;
     }
 
-    public function caseFormSucceeded(Form $form, \stdClass $values): void
+    public function processForm(Form $form): void
     {
-        if (!$this->getUser()->isLoggedIn()) {
-            $this->flashMessage('Pro zadání objednávky se musíte přihlásit.', 'danger');
-            $this->redirect('Sign:in');
+        $values = $form->getValues();
+        $manufacturerId = (int) $values['manufacturer'];
+        $modelId = (int) $values['model'];
+        $color = $values['color'];
+
+        $success = $this->orderFacade->addOrder($manufacturerId, $modelId, $color);
+        if ($success) {
+            $this->flashMessage('Data was successfully saved.', 'success');
+        } else {
+            $this->flashMessage('An error occurred while saving data.', 'error');
         }
-    
-        $userId = (int) $this->getUser()->getId();
-    
-        $this->orderFacade->createCase([
-            'user_id' => $userId,
-            'manufacturer' => $values->manufacturer,
-            'model' => $values->model,
-            'color' => $values->color,
-            'port_cover' => (bool) $values->port_cover,
-            'card_holder' => $values->card_holder,
-            'STATE' => "KOSIK",
-            'created_at' => new \DateTime(),
-        ]);
-    
-        $this->flashMessage('Kryt byl uložen do Vašeho košíku.', 'success');
         $this->redirect('this');
-    }
-
-    protected function createComponentEditContentForm(): Form
-    {
-        $form = new Form;
-
-        $sections = ['banner', 'durability', 'customization'];
-        foreach ($sections as $section) {
-            $sectionContent = $this->pageFacade->getSectionContent($section);
-            foreach ($sectionContent as $content) {
-                if ($content->content_text !== null) {
-                    $form->addTextArea("{$section}_{$content->content_type}", ucfirst($section) . ' ' . $content->content_type)
-                        ->setDefaultValue($content->content_text);
-                }
-                if ($content->image_path) {
-                    $form->addText("{$section}_{$content->content_type}_image", ucfirst($section) . ' ' . $content->content_type . ' Image')
-                        ->setDefaultValue($content->image_path);
-                }
-            }
-        }
-
-        $form->addSubmit('submit', 'Uložit změny');
-        $form->onSuccess[] = [$this, 'editContentFormSucceeded'];
-        return $form;
-    }
-
-    public function editContentFormSucceeded(Form $form, \stdClass $values): void
-    {
-        foreach ($values as $key => $value) {
-            [$section, $content_type] = explode('_', $key, 2);
-            if (strpos($content_type, 'image') !== false) {
-                [$content_type] = explode('_', $content_type);
-                $this->pageFacade->updateSectionContent($section, $content_type, null, $value);
-            } else {
-                $this->pageFacade->updateSectionContent($section, $content_type, $value);
-            }
-        }
-        $this->flashMessage('Obsah byl úspěšně aktualizován.', 'success');
-        $this->redirect('this');
-    }
-
-    public function renderEditContent(): void
-    {
-        if (!$this->getUser()->isLoggedIn() || !$this->getUser()->isInRole('admin')) {
-            $this->flashMessage('Pro úpravu obsahu musíte být přihlášen jako administrátor.', 'danger');
-            $this->redirect('Sign:in');
-        }
     }
 }
