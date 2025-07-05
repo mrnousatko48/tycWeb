@@ -148,9 +148,7 @@ nav a:hover {
             <a href="{$basePath}/" class="hover:text-[var(--color-accent)] transition">OPNX3D</a>
         </h1>
         <nav class="flex items-center space-x-6 text-lg font-medium relative">
-            <a n:href="Cart:default" class="hover:text-[var(--color-accent)] transition relative flex items-center">
-                <i class="fas fa-shopping-cart text-xl"></i>
-            </a>
+        
             {if $user->isLoggedIn()}
                 <div class="relative">
                     <button id="dropdownButton" class="flex items-center gap-2 rounded-full focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]">
@@ -166,12 +164,21 @@ nav a:hover {
             {else}
                 <a n:href="Sign:in" class="hover:text-[var(--color-accent)] transition">Přihlášení</a>
             {/if}
+            
+            <a n:href="Cart:default" class="hover:text-[var(--color-accent)] transition relative flex items-center">
+                <i class="fas fa-shopping-cart text-xl"></i>
+                <span n:if="$cartCount > 0" class="absolute -top-2 -right-3 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                    {$cartCount}
+                </span>
+            </a>
+
             <div class="flex justify-center flex-grow">
                 <button id="theme-toggle" class="btn btn-accent shadow-md hover:shadow-lg flex items-center justify-center w-10 h-10 p-0 rounded-full">
                     <i class="theme-icon fas fa-sun sun-icon"></i>
                     <i class="theme-icon fas fa-moon moon-icon"></i>
                 </button>
             </div>
+    
         </nav>
     </div>
 </header>

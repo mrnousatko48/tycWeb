@@ -4,15 +4,20 @@ namespace App\Model;
 
 use Nette\Database\Explorer;
 use Nette\Database\Table\ActiveRow;
+use Nette\Http\Session;
 
 final class OrderFacade
 {
     private Explorer $database;
+    private Session $session; 
 
-    public function __construct(Explorer $database)
+    public function __construct(Explorer $database, Session $session)
     {
         $this->database = $database;
+        $this->session = $session; 
     }
+
+
 
     public function createOrder(int $userId, string $firstname, string $lastname, string $email, string $address, string $city, string $psc, string $payment, array $caseQuantities): ActiveRow
     {

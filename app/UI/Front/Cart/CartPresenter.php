@@ -4,22 +4,21 @@ declare(strict_types=1);
 
 namespace App\UI\Front\Cart;
 
-use Nette;
-use App\Model\OrderFacade;
+
+use App\UI\Front\BaseFrontPresenter;
 use Nette\Application\UI\Form;
 use Nette\Database\Explorer;
 use App\MailSender\MailSender;
 
-final class CartPresenter extends Nette\Application\UI\Presenter
+
+final class CartPresenter extends BaseFrontPresenter
 {
-    private OrderFacade $orderFacade;
     private Explorer $database;
     private MailSender $mailSender;
 
-    public function __construct(OrderFacade $orderFacade, Explorer $database, MailSender $mailSender)
+    public function __construct(Explorer $database, MailSender $mailSender)
     {
         parent::__construct();
-        $this->orderFacade = $orderFacade;
         $this->database = $database;
         $this->mailSender = $mailSender;
     }
@@ -214,4 +213,20 @@ final class CartPresenter extends Nette\Application\UI\Presenter
         $this->flashMessage("Kryt byl odebrán z košíku.", 'info');
         $this->redirect('this');
     }
+
+    public function handleAddCase($caseData): void
+{
+    $case = $this->orderFacade->createCase($caseData, null); // null == guest
+
+    if ($this->getUser()->isLoggedIn() === false) {
+        $session = $this->getSession('order');
+        $quantities = $session->quantities ?? [];
+        $quantities[$case->id] = ($quantities[$case->id] ?? 0) + 1;
+        $session->quantities = $quantities;
+    }
+
+    $this->flashMessage('Kryt byl přidán do košíku.', 'success');
+    $this->redirect('this');
+}
+
 }

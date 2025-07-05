@@ -4,24 +4,24 @@ declare(strict_types=1);
 
 namespace App\UI\Front\Profile;
 
+
+use App\UI\Front\BaseFrontPresenter;
 use Nette;
 use Nette\Application\UI\Form;
 use Nette\Database\Explorer;
 use Nette\Security\User;
 use App\Model\OrderFacade;
 
-final class ProfilePresenter extends Nette\Application\UI\Presenter
+final class ProfilePresenter extends BaseFrontPresenter
 {
     private Explorer $database;
     private User $user;
-    private OrderFacade $orderFacade;
 
-    public function __construct(Explorer $database, User $user, OrderFacade $orderFacade)
+    public function __construct(Explorer $database, User $user)
     {
         parent::__construct();
         $this->database = $database;
         $this->user = $user;
-        $this->orderFacade = $orderFacade;
     }
 
     protected function startup(): void

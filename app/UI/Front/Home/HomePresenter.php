@@ -7,20 +7,23 @@ use Nette\Application\UI\Form;
 use App\Model\OrderFacade;
 use App\Model\PageFacade;
 use Nette\Http\Session;
+use App\UI\Front\BaseFrontPresenter;
 
-final class HomePresenter extends Nette\Application\UI\Presenter
+
+final class HomePresenter extends BaseFrontPresenter
+
 {
-    private OrderFacade $orderFacade;
     private PageFacade $pageFacade;
     private Session $session;
 
-    public function __construct(OrderFacade $orderFacade, PageFacade $pageFacade, Session $session)
+    public function __construct(PageFacade $pageFacade, Session $session)
     {
         parent::__construct();
-        $this->orderFacade = $orderFacade;
         $this->pageFacade = $pageFacade;
         $this->session = $session;
     }
+
+
 
     public function startup(): void
     {
