@@ -1,0 +1,60 @@
+{block content}
+{block css}
+<link rel="stylesheet" href="/css/dash.css">
+{/block}
+
+<div class="container mt-5">
+  <h1>Upravit sekci Přizpůsobení</h1>
+  {ifset $customization}
+    <div class="card mb-4">
+      <div class="card-body">
+        <h2 class="card-title">Aktuální obsah</h2>
+        <p><strong>Text tlačítka:</strong> {$customization['button_text']}</p>
+        <p><strong>Odkaz tlačítka:</strong> {$customization['button_link']}</p>
+        <h3>Funkce:</h3>
+        {foreach $customization['features'] as $feature}
+          <div class="mb-3">
+            <p><strong>Název:</strong> {$feature['title']}</p>
+            <p><strong>Popis:</strong> {$feature['description']}</p>
+            {if $feature['image']}
+              <p><strong>Obrázek:</strong></p>
+              <img src="{$feature['image']}" alt="{$feature['title']}" class="img-fluid" style="max-width: 200px;">
+            {/if}
+            {if $feature['id']}
+              <a href="{link Editcustomization, id => $feature['id']}" class="btn btn-sm btn-primary">Upravit</a>
+            {/if}
+          </div>
+        {/foreach}
+      </div>
+    </div>
+  {/ifset}
+
+  <h2>{if $feature}Upravit funkci{else}Přidat novou funkci{/if}</h2>
+  {form customizationForm}
+    <div class="form-group mb-3">
+      {label title /}
+      {input title}
+    </div>
+    <div class="form-group mb-3">
+      {label description /}
+      {input description}
+    </div>
+    <div class="form-group mb-3">
+      {label image /}
+      {input image}
+    </div>
+    <div class="form-group mb-3">
+      {label button_text /}
+      {input button_text}
+    </div>
+    <div class="form-group mb-3">
+      {label button_link /}
+      {input button_link}
+    </div>
+    {input id}
+    {input save}
+  {/form}
+
+  <a href="{link Editdefault}" class="btn btn-secondary mt-3">Zpět na přehled</a>
+</div>
+{/block}

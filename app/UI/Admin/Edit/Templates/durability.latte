@@ -1,0 +1,48 @@
+{block content}
+{block css}
+<link rel="stylesheet" href="/css/dash.css">
+{/block}
+
+<div class="container mt-5">
+  <h1>Upravit sekci Odolnost</h1>
+  {ifset $durability}
+    <div class="card mb-4">
+      <div class="card-body">
+        <h2 class="card-title">Aktuální obsah</h2>
+        <p><strong>Nadpis:</strong> {$durability['title']}</p>
+        <p><strong>Popis 1:</strong> {$durability['description1']}</p>
+        {if $durability['description2']}
+          <p><strong>Popis 2:</strong> {$durability['description2']}</p>
+        {/if}
+        {if $durability['image']}
+          <p><strong>Obrázek:</strong></p>
+          <img src="{$durability['image']}" alt="Odolnost" class="img-fluid" style="max-width: 300px;">
+        {/if}
+      </div>
+    </div>
+  {/ifset}
+
+  <h2>Editace</h2>
+  {form durabilityForm}
+    <div class="form-group mb-3">
+      {label title /}
+      {input title}
+    </div>
+    <div class="form-group mb-3">
+      {label description1 /}
+      {input description1}
+    </div>
+    <div class="form-group mb-3">
+      {label description2 /}
+      {input description2}
+    </div>
+    <div class="form-group mb-3">
+      {label image /}
+      {input image}
+    </div>
+    {input save}
+  {/form}
+
+  <a href="{link Editdefault}" class="btn btn-secondary mt-3">Zpět na přehled</a>
+</div>
+{/block}

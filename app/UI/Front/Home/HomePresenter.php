@@ -2,9 +2,7 @@
 
 namespace App\UI\Front\Home;
 
-use Nette;
 use Nette\Application\UI\Form;
-use App\Model\OrderFacade;
 use App\Model\PageFacade;
 use Nette\Http\Session;
 use App\UI\Front\BaseFrontPresenter;

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\UI\Front\Sign;
 
+use App\UI\Front\BaseFrontPresenter;
 use Nette;
 use App\Model\UserFacade;
 use App\UI\Accessory\FormFactory;
@@ -11,7 +12,7 @@ use Nette\Application\UI\Form;
 use App\Model\DuplicateNameException;
 use App\MailSender\MailSender;
 
-final class SignPresenter extends Nette\Application\UI\Presenter
+final class SignPresenter extends BaseFrontPresenter
 {
 	public string $backlink = '';
 
