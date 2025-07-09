@@ -1,51 +1,67 @@
 {block content}
 {block css}
-<link rel="stylesheet" href="/css/dash.css">
+<style>
+    .dashboard-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    .section-card {
+        background: #fff;
+        border-radius: 0.75rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    .banner-preview {
+        background: url({$banner->image ?? '/Uploads/home/2.jpg'}) no-repeat center/cover;
+        min-height: 300px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        border-radius: 0.75rem;
+        margin-bottom: 1.5rem;
+    }
+    .banner-preview .overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+    }
+    .banner-content {
+        position: relative;
+        text-align: center;
+        color: white;
+        padding: 1.5rem;
+    }
+</style>
 {/block}
 
-<div class="container mt-5">
-  <h1>Upravit Banner</h1>
-  {ifset $banner}
-    <div class="card mb-4">
-      <div class="card-body">
-        <h2 class="card-title">Aktuální obsah</h2>
-        <p><strong>Nadpis:</strong> {$banner['title']}</p>
-        <p><strong>Popis:</strong> {$banner['description']}</p>
-        <p><strong>Text tlačítka:</strong> {$banner['button_text']}</p>
-        <p><strong>Odkaz tlačítka:</strong> {$banner['button_link']}</p>
-        {if $banner['image']}
-          <p><strong>Obrázek:</strong></p>
-          <img src="{$banner['image']}" alt="Banner" class="img-fluid" style="max-width: 300px;">
-        {/if}
-      </div>
-    </div>
-  {/ifset}
+<div class="dashboard-container">
+    <h1 class="text-center">Upravit banner</h1>
 
-  <h2>Editace</h2>
-  {form bannerForm}
-    <div class="form-group mb-3">
-      {label title /}
-      {input title}
+    <!-- Preview -->
+    <div class="section-card">
+        <h3 class="text-center">Náhled banneru</h3>
+        <div class="banner-preview">
+            <div class="overlay"></div>
+            <div class="banner-content">
+                <h1 class="text-3xl font-bold mb-4">{$banner->title}</h1>
+                <p class="text-lg mb-6">{$banner->description}</p>
+                <a href="{$banner->button_link}" class="btn btn-primary">{$banner->button_text}</a>
+            </div>
+        </div>
     </div>
-    <div class="form-group mb-3">
-      {label description /}
-      {input description}
-    </div>
-    <div class="form-group mb-3">
-      {label button_text /}
-      {input button_text}
-    </div>
-    <div class="form-group mb-3">
-      {label button_link /}
-      {input button_link}
-    </div>
-    <div class="form-group mb-3">
-      {label image /}
-      {input image}
-    </div>
-    {input save}
-  {/form}
 
-  <a href="{link Editdefault}" class="btn btn-secondary mt-3">Zpět na přehled</a>
+    <!-- Edit Form -->
+    <div class="section-card">
+        <h3 class="text-center">Upravit obsah banneru</h3>
+        {control bannerForm}
+    </div>
+
+    <!-- Back to Dashboard -->
+    <div class="mt-4 text-center">
+        <a href="{link default}" class="btn btn-secondary">Zpět na nástěnku</a>
+    </div>
 </div>
 {/block}

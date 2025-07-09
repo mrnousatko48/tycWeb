@@ -1,0 +1,56 @@
+{block content}
+<div class="container mt-4">
+    <h2 class="mb-4">🎨 Colors</h2>
+
+    {foreach $flashes as $flash}
+        <div class="alert alert-{$flash->type} alert-dismissible fade show" role="alert">
+            {$flash->message}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    {/foreach}
+
+    <div class="row g-4 mb-4">
+        <div class="col-md-6">
+            <div class="card shadow-sm">
+                <div class="card-header fw-bold">➕ Add Color</div>
+                <div class="card-body">
+                    {control colorForm}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header fw-bold">📋 Color List</div>
+        <div class="card-body table-responsive" n:snippet="colorsTable">
+            <table class="table table-striped table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Name</th>
+                        <th>Preview</th>
+                        <th class="text-end">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {foreach $colors as $color}
+                    <tr>
+                        <td>{$color->name}</td>
+                        <td>
+                            <span class="d-inline-block rounded-circle border" style="width: 24px; height: 24px; background-color: {$color->hex_code};"></span>
+                            <span class="text-muted ms-2">{$color->hex_code}</span>
+                        </td>
+                        <td class="text-end">
+                            <a href="{link deleteColor! $color->id}" class="btn btn-sm btn-danger ajax">
+                                🗑 Delete
+                            </a>
+                        </td>
+                    </tr>
+                {/foreach}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<script src="/js/product.js"></script>
+{/block}

@@ -157,6 +157,9 @@ nav a:hover {
                         <svg class="w-4 h-4 fill-current text-[var(--color-text)]" viewBox="0 0 20 20"><path d="M5.5 7l4.5 4 4.5-4H5.5z"/></svg>
                     </button>
                     <div id="dropdownMenu" class="hidden absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-[var(--color-background)] ring-1 ring-black ring-opacity-5 z-50">
+                        {if $user->isInRole('ADMIN')}
+                        <a n:href=":Admin:Dashboard:default" class="block px-4 py-2 text-sm text-[var(--color-text)] hover:bg-[var(--color-secondary)]">Administrace</a>
+                        {/if}
                         <a n:href="Profile:default" class="block px-4 py-2 text-sm text-[var(--color-text)] hover:bg-[var(--color-secondary)]">Účet</a>
                         <a n:href="Sign:out" class="block px-4 py-2 text-sm text-red-500 hover:bg-[var(--color-secondary)]">Odhlásit se</a>
                     </div>

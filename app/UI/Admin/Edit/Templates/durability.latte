@@ -1,48 +1,60 @@
 {block content}
 {block css}
-<link rel="stylesheet" href="/css/dash.css">
+<style>
+    .dashboard-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    .section-card {
+        background: #fff;
+        border-radius: 0.75rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    .durability-preview {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.5rem;
+        align-items: center;
+    }
+    .section-img {
+        width: 100%;
+        max-height: 350px;
+        object-fit: cover;
+        border-radius: 0.75rem;
+    }
+</style>
 {/block}
 
-<div class="container mt-5">
-  <h1>Upravit sekci Odolnost</h1>
-  {ifset $durability}
-    <div class="card mb-4">
-      <div class="card-body">
-        <h2 class="card-title">Aktuální obsah</h2>
-        <p><strong>Nadpis:</strong> {$durability['title']}</p>
-        <p><strong>Popis 1:</strong> {$durability['description1']}</p>
-        {if $durability['description2']}
-          <p><strong>Popis 2:</strong> {$durability['description2']}</p>
-        {/if}
-        {if $durability['image']}
-          <p><strong>Obrázek:</strong></p>
-          <img src="{$durability['image']}" alt="Odolnost" class="img-fluid" style="max-width: 300px;">
-        {/if}
-      </div>
-    </div>
-  {/ifset}
+<div class="dashboard-container">
+    <h1 class="text-center">Upravit sekci odolnosti</h1>
 
-  <h2>Editace</h2>
-  {form durabilityForm}
-    <div class="form-group mb-3">
-      {label title /}
-      {input title}
+    <!-- Preview -->
+    <div class="section-card">
+        <h3 class="text-center">Náhled sekce odolnosti</h3>
+        <div class="durability-preview">
+            <div>
+                <h2 class="text-2xl font-semibold mb-3">{$durability['title']}</h2>
+                <p class="text-lg mb-3">{$durability['description1']}</p>
+                <p class="text-lg mb-3">{$durability['description2']}</p>
+            </div>
+            <div>
+                <img src="{$durability['image'] ?? '/Uploads/home/sekera.jpg'}" alt="Odolnost krytu" class="section-img">
+            </div>
+        </div>
     </div>
-    <div class="form-group mb-3">
-      {label description1 /}
-      {input description1}
-    </div>
-    <div class="form-group mb-3">
-      {label description2 /}
-      {input description2}
-    </div>
-    <div class="form-group mb-3">
-      {label image /}
-      {input image}
-    </div>
-    {input save}
-  {/form}
 
-  <a href="{link Editdefault}" class="btn btn-secondary mt-3">Zpět na přehled</a>
+    <!-- Edit Form -->
+    <div class="section-card">
+        <h3 class="text-center">Upravit obsah sekce odolnosti</h3>
+        {control durabilityForm}
+    </div>
+
+    <!-- Back to Dashboard -->
+    <div class="mt-4 text-center">
+        <a href="{link default}" class="btn btn-secondary">Zpět na nástěnku</a>
+    </div>
 </div>
 {/block}

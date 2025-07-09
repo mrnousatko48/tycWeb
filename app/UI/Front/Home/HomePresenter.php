@@ -70,16 +70,16 @@ final class HomePresenter extends BaseFrontPresenter
         }
 
         $manufacturer = $form->addSelect('manufacturer', 'Manufacturer:', $manufacturerItems)
-            ->setPrompt('Select a manufacturer')
+            ->setPrompt('Vyberte výrobce')
             ->setHtmlAttribute('data-url', $this->link('Endpoint:manufacturers'))
-            ->setRequired('Please select a manufacturer.');
+            ->setRequired('Prosím vyberte výrobce.');
 
         $model = $form->addSelect('model', 'Model:')
-            ->setPrompt('Select a model')
+            ->setPrompt('vyberte model')
             ->setHtmlAttribute('data-depends', $manufacturer->getHtmlName())
             ->setHtmlAttribute('data-url', $this->link('Endpoint:models', ['manufacturerId' => '#']))
             ->setHtmlAttribute('data-colors-url', $this->link('Endpoint:modelColors', ['modelId' => '#']))
-            ->setRequired('Please select a model.');
+            ->setRequired('Prosím vyberte model.');
 
         $form->addHidden('color')->setRequired('Please select a color.');
         $form->addHidden('chargingPortCover')->setDefaultValue('Ano');

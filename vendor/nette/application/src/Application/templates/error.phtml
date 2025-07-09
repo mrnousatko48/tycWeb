@@ -10,13 +10,14 @@ declare(strict_types=1);
 namespace NetteModule;
 
 $messages = [
-	0 => ['Oops...', 'Your browser sent a request that this server could not understand or process.'],
-	403 => ['Access Denied', 'You do not have permission to view this page. Please try contact the web site administrator if you believe you should be able to view this page.'],
-	404 => ['Page Not Found', 'The page you requested could not be found. It is possible that the address is incorrect, or that the page no longer exists. Please use a search engine to find what you are looking for.'],
-	405 => ['Method Not Allowed', 'The requested method is not allowed for the URL.'],
-	410 => ['Page Not Found', 'The page you requested has been taken off the site. We apologize for the inconvenience.'],
-	500 => ['Server Error', 'We\'re sorry! The server encountered an internal error and was unable to complete your request. Please try again later.'],
+	0 => ['Jejda...', 'Váš prohlížeč odeslal požadavek, kterému server nerozumí nebo ho nedokáže zpracovat.'],
+	403 => ['Přístup odepřen', 'Nemáte oprávnění pro zobrazení této stránky. Pokud si myslíte, že byste ji měli vidět, kontaktujte správce webu.'],
+	404 => ['Stránka nenalezena', 'Požadovanou stránku se nepodařilo najít. Je možné, že adresa je nesprávná nebo stránka již neexistuje.'],
+	405 => ['Metoda není povolena', 'Požadovaná metoda není pro tuto URL povolena.'],
+	410 => ['Stránka nenalezena', 'Požadovaná stránka byla odstraněna z webu. Omlouváme se za vzniklé nepříjemnosti.'],
+	500 => ['Chyba serveru', 'Omlouváme se! Na serveru došlo k interní chybě a požadavek nemohl být dokončen. Zkuste to prosím později znovu.'],
 ];
+
 $message = $messages[$code] ?? $messages[0];
 
 ?>

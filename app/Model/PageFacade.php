@@ -4,7 +4,12 @@ declare(strict_types=1);
 namespace App\Model;
 
 use Nette\Database\Context;
+use Nette\Http\FileUpload;
+use App\Utils\ImageUploader;
 
+/**
+ * PageFacade handles all data operations for page content, including database interactions and image uploads.
+ */
 class PageFacade
 {
     private Context $database;
@@ -17,11 +22,10 @@ class PageFacade
     /**
      * Fetch all content for a given section, ordered by ordering.
      */
-    public function getSectionContent(string $section): array
+    public function getSectionContent(string $sectionName): array
     {
-        return $this->database->table('content_sections')
-            ->where('section_name', $section)
-            ->order('ordering ASC')
+        return $this->database->table($sectionName)
+            ->order('ordering')
             ->fetchAll();
     }
 
@@ -36,17 +40,16 @@ class PageFacade
             'ordering' => $ordering,
         ]);
 
-        $existing = $this->database->table('content_sections')
-            ->where('section_name = ? AND content_type = ?', $section, $contentType)
+        $existing = $this->database->table($section)
+            ->where('content_type', $contentType)
             ->fetch();
 
         if ($existing) {
-            $this->database->table('content_sections')
-                ->where('section_name = ? AND content_type = ?', $section, $contentType)
+            $this->database->table($section)
+                ->where('content_type', $contentType)
                 ->update($data);
         } else {
-            $this->database->table('content_sections')->insert(array_merge($data, [
-                'section_name' => $section,
+            $this->database->table($section)->insert(array_merge($data, [
                 'content_type' => $contentType,
             ]));
         }
@@ -55,90 +58,127 @@ class PageFacade
     /**
      * Fetch banner section data.
      */
-    public function getBannerSection(): array
+    public function getBannerSection(): object
     {
         $banner = $this->getSectionContent('banner');
-        $result = [];
+        $result = [
+            'title' => '',
+            'description' => '',
+            'button_text' => '',
+            'button_link' => '',
+            'image' => null
+        ];
         foreach ($banner as $item) {
             $result[$item->content_type] = $item->content_text ?? $item->image_path;
         }
-        return $result;
+        return (object)$result;
     }
 
     /**
-     * Update banner section.
+     * Update banner section with form values, including image upload.
      */
-    public function updateBannerSection(?int $id, array $values): void
+    public function updateBannerSection(array $values): void
     {
+        $image = $values['image'] ?? null;
+        if ($image instanceof FileUpload && $image->isOk()) {
+            $currentImage = $this->getBannerSection()->image ?? null;
+            $imagePath = ImageUploader::uploadImage($image, 'Uploads/home', $currentImage);
+            $this->updateSectionContent('banner', 'image', null, $imagePath);
+        }
         $fields = ['title', 'description', 'button_text', 'button_link'];
         foreach ($fields as $field) {
             if (isset($values[$field])) {
                 $this->updateSectionContent('banner', $field, $values[$field]);
             }
         }
-        if (isset($values['image_path'])) {
-            $this->updateSectionContent('banner', 'image', null, $values['image_path']);
-        }
     }
 
     /**
      * Fetch durability section data.
      */
-    public function getDurabilitySection(): array
+    public function getDurabilitySection(): object
     {
         $durability = $this->getSectionContent('durability');
-        $result = [];
-        $descriptionCount = 1;
+        $result = [
+            'title' => '',
+            'description1' => '',
+            'description2' => '',
+            'image' => null
+        ];
         foreach ($durability as $item) {
-            if (strpos($item->content_type, 'description') === 0) {
-                $result['description' . $descriptionCount] = $item->content_text;
-                $descriptionCount++;
-            } else {
-                $result[$item->content_type] = $item->content_text ?? $item->image_path;
-            }
+            $result[$item->content_type] = $item->content_text ?? $item->image_path;
         }
-        return $result;
+        return (object)$result;
     }
 
     /**
-     * Update durability section.
+     * Update durability section with form values, including image upload.
      */
-    public function updateDurabilitySection(?int $id, array $values): void
+    public function updateDurabilitySection(array $values): void
     {
+        $image = $values['image'] ?? null;
+        if ($image instanceof FileUpload && $image->isOk()) {
+            $currentImage = $this->getDurabilitySection()->image ?? null;
+            $imagePath = ImageUploader::uploadImage($image, 'Uploads/home', $currentImage);
+            $this->updateSectionContent('durability', 'image', null, $imagePath);
+        }
         $fields = ['title', 'description1', 'description2'];
         foreach ($fields as $field) {
             if (isset($values[$field])) {
-                $contentType = $field === 'description1' ? 'description1' : ($field === 'description2' ? 'description2' : $field);
-                $this->updateSectionContent('durability', $contentType, $values[$field]);
+                $this->updateSectionContent('durability', $field, $values[$field]);
             }
-        }
-        if (isset($values['image_path'])) {
-            $this->updateSectionContent('durability', 'image', null, $values['image_path']);
         }
     }
 
     /**
      * Fetch customization section data.
      */
-    public function getCustomizationSection(): array
+    public function getCustomizationSection(): object
     {
-        $customization = $this->getSectionContent('customization');
-        $result = ['features' => [], 'button_text' => '', 'button_link' => ''];
-        $featureIndex = 1;
-        foreach ($customization as $item) {
-            if (strpos($item->content_type, 'feature') === 0) {
-                $typeParts = explode('_', $item->content_type);
-                $index = $typeParts[1] ?? $featureIndex;
-                $type = $typeParts[2] ?? '';
-                $result['features'][$index][$type] = $item->content_text ?? $item->image_path;
-                if ($type === 'title') {
-                    $featureIndex++;
-                }
-            } else {
-                $result[$item->content_type] = $item->content_text ?? $item->image_path;
+        $rows = $this->database->table('customization')
+            ->order('ordering')
+            ->fetchAll();
+
+        $section = [
+            'title' => '',
+            'button_text' => '',
+            'button_link' => '',
+            'features' => []
+        ];
+
+        $features = [];
+        foreach ($rows as $row) {
+            if ($row->content_type === 'title') {
+                $section['title'] = $row->content_text;
+            } elseif ($row->content_type === 'button_text') {
+                $section['button_text'] = $row->content_text;
+            } elseif ($row->content_type === 'button_link') {
+                $section['button_link'] = $row->content_text;
+            } elseif (preg_match('/feature(\d+)_title/', $row->content_type, $matches)) {
+                $featureId = $matches[1];
+                $features[$featureId]['id'] = $row->id;
+                $features[$featureId]['title'] = $row->content_text;
+            } elseif (preg_match('/feature(\d+)_description/', $row->content_type, $matches)) {
+                $featureId = $matches[1];
+                $features[$featureId]['id'] = $row->id;
+                $features[$featureId]['description'] = $row->content_text;
+            } elseif (preg_match('/feature(\d+)_image/', $row->content_type, $matches)) {
+                $featureId = $matches[1];
+                $features[$featureId]['id'] = $row->id;
+                $features[$featureId]['image_path'] = $row->image_path;
             }
         }
-        return $result;
+
+        $section['features'] = array_values(array_map(function ($feature) {
+            return (object)[
+                'id' => $feature['id'] ?? null,
+                'title' => $feature['title'] ?? '',
+                'description' => $feature['description'] ?? '',
+                'image_path' => $feature['image_path'] ?? null
+            ];
+        }, $features));
+
+        return (object)$section;
     }
 
     /**
@@ -146,79 +186,118 @@ class PageFacade
      */
     public function getCustomizationFeature(int $id): ?object
     {
-        $feature = $this->database->table('content_sections')
-            ->where('section_name = ? AND id = ?', 'customization', $id)
-            ->fetch();
-        if (!$feature) {
+        $row = $this->database->table('customization')->get($id);
+        if (!$row || !preg_match('/feature(\d+)_/', $row->content_type, $matches)) {
             return null;
         }
-        $index = explode('_', $feature->content_type)[1];
-        $related = $this->database->table('content_sections')
-            ->where('section_name = ? AND content_type LIKE ?', 'customization', "feature_{$index}%")
+
+        $featureId = $matches[1];
+        $featureRows = $this->database->table('customization')
+            ->where('content_type LIKE ?', "feature{$featureId}%")
             ->fetchAll();
-        
-        $result = (object)[
-            'id' => $feature->id,
+
+        $feature = [
+            'id' => $id,
             'title' => '',
             'description' => '',
-            'image_path' => '',
+            'image_path' => null
         ];
-        foreach ($related as $item) {
-            $type = explode('_', $item->content_type)[2];
-            if ($type === 'title') {
-                $result->title = $item->content_text;
-            } elseif ($type === 'description') {
-                $result->description = $item->content_text;
-            } elseif ($type === 'image') {
-                $result->image_path = $item->image_path;
+
+        foreach ($featureRows as $featureRow) {
+            if ($featureRow->content_type === "feature{$featureId}_title") {
+                $feature['title'] = $featureRow->content_text;
+            } elseif ($featureRow->content_type === "feature{$featureId}_description") {
+                $feature['description'] = $featureRow->content_text;
+            } elseif ($featureRow->content_type === "feature{$featureId}_image") {
+                $feature['image_path'] = $featureRow->image_path;
             }
         }
-        return $result;
+
+        return (object)$feature;
     }
 
     /**
-     * Update a customization feature.
+     * Update a customization feature with form values, including image upload.
      */
     public function updateCustomizationFeature(int $id, array $values): void
     {
-        $feature = $this->database->table('content_sections')->get($id);
-        if (!$feature) {
-            return;
+        $row = $this->database->table('customization')->get($id);
+        if (!$row || !preg_match('/feature(\d+)_/', $row->content_type, $matches)) {
+            throw new \Exception('Feature not found');
         }
-        $index = explode('_', $feature->content_type)[1];
-        if (isset($values['title'])) {
-            $this->updateSectionContent('customization', "feature_{$index}_title", $values['title']);
+
+        $featureId = $matches[1];
+        $image = $values['image'] ?? null;
+        $imagePath = null;
+        if ($image instanceof FileUpload && $image->isOk()) {
+            $currentFeature = $this->getCustomizationFeature($id);
+            $imagePath = ImageUploader::uploadImage($image, 'Uploads/home', $currentFeature->image_path ?? null);
         }
-        if (isset($values['description'])) {
-            $this->updateSectionContent('customization', "feature_{$index}_description", $values['description']);
+
+        $this->database->table('customization')
+            ->where('content_type LIKE ?', "feature{$featureId}%")
+            ->delete();
+
+        $this->database->table('customization')->insert([
+            ['content_type' => "feature{$featureId}_title", 'content_text' => $values['title'], 'ordering' => $featureId * 3 - 1],
+            ['content_type' => "feature{$featureId}_description", 'content_text' => $values['description'], 'ordering' => $featureId * 3],
+            ['content_type' => "feature{$featureId}_image", 'image_path' => $imagePath ?? ($this->getCustomizationFeature($id)->image_path ?? null), 'ordering' => $featureId * 3 + 1]
+        ]);
+    }
+
+    /**
+     * Add a new customization feature with form values, including image upload.
+     */
+    public function addCustomizationFeature(array $values): void
+    {
+        $image = $values['image'] ?? null;
+        if (!$image instanceof FileUpload || !$image->isOk()) {
+            throw new \Exception('Valid image file is required.');
         }
-        if (isset($values['image_path'])) {
-            $this->updateSectionContent('customization', "feature_{$index}_image", null, $values['image_path']);
+        $imagePath = ImageUploader::uploadImage($image, 'Uploads/home', null);
+
+        $maxFeature = $this->database->table('customization')
+            ->where('content_type LIKE ?', 'feature%_title')
+            ->select('MAX(SUBSTRING(content_type, 8, 1)) AS max_feature')
+            ->fetchField('max_feature');
+
+        $featureId = ($maxFeature ? (int)$maxFeature + 1 : 1);
+
+        $this->database->table('customization')->insert([
+            ['content_type' => "feature{$featureId}_title", 'content_text' => $values['title'], 'ordering' => $featureId * 3 - 1],
+            ['content_type' => "feature{$featureId}_description", 'content_text' => $values['description'], 'ordering' => $featureId * 3],
+            ['content_type' => "feature{$featureId}_image", 'image_path' => $imagePath, 'ordering' => $featureId * 3 + 1]
+        ]);
+    }
+
+    /**
+     * Delete a customization feature by ID.
+     */
+    public function deleteCustomizationFeature(int $id): void
+    {
+        $row = $this->database->table('customization')->get($id);
+        if ($row && preg_match('/feature(\d+)_/', $row->content_type, $matches)) {
+            $featureId = $matches[1];
+            $this->database->table('customization')
+                ->where('content_type LIKE ?', "feature{$featureId}%")
+                ->delete();
         }
     }
 
     /**
-     * Add a new customization feature.
+     * Update customization section with form values.
      */
-    public function addCustomizationFeature(array $values): void
+    public function updateCustomizationSection(array $values): void
     {
-        $maxIndex = $this->database->table('content_sections')
-            ->where('section_name = ? AND content_type LIKE ?', 'customization', 'feature%')
-            ->select('MAX(CAST(SUBSTRING(content_type, 8, LOCATE("_", content_type, 8) - 8) AS UNSIGNED)) AS max_index')
-            ->fetchField('max_index') ?? 0;
-        $newIndex = $maxIndex + 1;
+        $this->database->table('customization')
+            ->where('content_type', ['title', 'button_text', 'button_link'])
+            ->delete();
 
-        $this->updateSectionContent('customization', "feature_{$newIndex}_title", $values['title'], null, $newIndex * 10);
-        $this->updateSectionContent('customization', "feature_{$newIndex}_description", $values['description'], null, $newIndex * 10 + 1);
-        if (isset($values['image_path'])) {
-            $this->updateSectionContent('customization', "feature_{$newIndex}_image", null, $values['image_path'], $newIndex * 10 + 2);
-        }
-        if (isset($values['button_text'])) {
-            $this->updateSectionContent('customization', 'button_text', $values['button_text']);
-        }
-        if (isset($values['button_link'])) {
-            $this->updateSectionContent('customization', 'button_link', $values['button_link']);
-        }
+        $this->database->table('customization')->insert([
+            ['content_type' => 'title', 'content_text' => $values['title'], 'ordering' => 1],
+            ['content_type' => 'button_text', 'content_text' => $values['button_text'], 'ordering' => 11],
+            ['content_type' => 'button_link', 'content_text' => $values['button_link'], 'ordering' => 12]
+        ]);
     }
 
     /**
@@ -232,10 +311,18 @@ class PageFacade
     }
 
     /**
-     * Add a new gallery image.
+     * Add a new gallery image with form values, including image upload.
      */
-    public function addGalleryImage(string $imagePath, ?string $altText, int $ordering): void
+    public function addGalleryImage(array $values): void
     {
+        $image = $values['image'] ?? null;
+        if (!$image instanceof FileUpload || !$image->isOk()) {
+            throw new \Exception('Valid image file is required.');
+        }
+        $imagePath = ImageUploader::uploadImage($image, 'Uploads/gallery', null);
+        $altText = $values['alt_text'] ?? null;
+        $ordering = (int)($values['ordering'] ?? 0);
+
         $this->database->table('gallery')
             ->where('ordering >= ?', $ordering)
             ->update(['ordering' => $this->database->literal('ordering + 1')]);
@@ -351,4 +438,6 @@ class PageFacade
         $model = $this->database->table('models')->get($id);
         return $model ? $model->name : '';
     }
+
+    
 }

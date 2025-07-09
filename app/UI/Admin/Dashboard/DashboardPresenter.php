@@ -6,18 +6,17 @@ namespace App\UI\Admin\Dashboard;
 
 use Nette;
 use App\Model\OrderFacade;
-use Nette\Database\Explorer;
+
 
 final class DashboardPresenter extends Nette\Application\UI\Presenter
 {
     private OrderFacade $orderFacade;
-    private Explorer $database;
 
-    public function __construct(OrderFacade $orderFacade, Explorer $database)
+
+    public function __construct(OrderFacade $orderFacade)
     {
         parent::__construct();
         $this->orderFacade = $orderFacade;
-        $this->database = $database;
     }
 
     protected function startup(): void
@@ -36,6 +35,14 @@ final class DashboardPresenter extends Nette\Application\UI\Presenter
     }
 
     public function renderDefault(): void
+    {
+    }
+
+    public function renderDetail(): void
+    {
+    }
+
+        public function renderOrders(): void
     {
         $orders = $this->orderFacade->getAllOrders();
 
@@ -59,9 +66,5 @@ final class DashboardPresenter extends Nette\Application\UI\Presenter
         }
 
         $this->template->orders = $orderData;
-    }
-
-    public function renderDetail(): void
-    {
     }
 }

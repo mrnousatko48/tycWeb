@@ -495,9 +495,9 @@ abstract class Presenter extends Control implements Application\IPresenter
 		}
 
 		$file = strtr(Arrays::first($files), '/', DIRECTORY_SEPARATOR);
-		$this->error("Page not found. Missing template '$file'.");
+		$this->error("Stránka nenalezena '$file'.");
 	}
-
+ 
 
 	/**
 	 * Finds layout template file name.

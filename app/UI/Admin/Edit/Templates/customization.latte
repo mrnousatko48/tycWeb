@@ -1,60 +1,76 @@
 {block content}
 {block css}
-<link rel="stylesheet" href="/css/dash.css">
+<style>
+    .dashboard-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    .section-card {
+        background: #fff;
+        border-radius: 0.75rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    .customization-preview {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 1.5rem;
+    }
+    .feature-card {
+        text-align: center;
+        padding: 1rem;
+        border-radius: 0.75rem;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    .section-img {
+        width: 100%;
+        max-height: 200px;
+        object-fit: cover;
+        border-radius: 0.75rem;
+    }
+</style>
 {/block}
 
-<div class="container mt-5">
-  <h1>Upravit sekci Přizpůsobení</h1>
-  {ifset $customization}
-    <div class="card mb-4">
-      <div class="card-body">
-        <h2 class="card-title">Aktuální obsah</h2>
-        <p><strong>Text tlačítka:</strong> {$customization['button_text']}</p>
-        <p><strong>Odkaz tlačítka:</strong> {$customization['button_link']}</p>
-        <h3>Funkce:</h3>
-        {foreach $customization['features'] as $feature}
-          <div class="mb-3">
-            <p><strong>Název:</strong> {$feature['title']}</p>
-            <p><strong>Popis:</strong> {$feature['description']}</p>
-            {if $feature['image']}
-              <p><strong>Obrázek:</strong></p>
-              <img src="{$feature['image']}" alt="{$feature['title']}" class="img-fluid" style="max-width: 200px;">
-            {/if}
-            {if $feature['id']}
-              <a href="{link Editcustomization, id => $feature['id']}" class="btn btn-sm btn-primary">Upravit</a>
-            {/if}
-          </div>
-        {/foreach}
-      </div>
-    </div>
-  {/ifset}
+<div class="dashboard-container">
+    <h1 class="text-center">Upravit sekci přizpůsobení</h1>
 
-  <h2>{if $feature}Upravit funkci{else}Přidat novou funkci{/if}</h2>
-  {form customizationForm}
-    <div class="form-group mb-3">
-      {label title /}
-      {input title}
+    <!-- Preview -->
+    <div class="section-card">
+        <h3 class="text-center">Náhled sekce přizpůsobení</h3>
+        <h2 class="text-2xl font-semibold text-center mb-4">{$customization->title}</h2>
+        <div class="customization-preview">
+            {foreach $customization->features as $feature}
+                <div class="feature-card">
+                    <img src="{$feature->image_path}" alt="{$feature->title}" class="section-img mb-3">
+                    <h3 class="text-lg font-semibold mb-2">{$feature->title}</h3>
+                    <p>{$feature->description}</p>
+                    <a href="{link deleteCustomizationFeature, id => $feature->id}" class="btn btn-danger btn-sm mt-2"
+                       onclick="return confirm('Opravdu chcete smazat tuto funkci?');">Smazat</a>
+                </div>
+            {/foreach}
+        </div>
+        <div class="text-center mt-4">
+            <a href="{$customization->button_link}" class="btn btn-accent">{$customization->button_text}</a>
+        </div>
     </div>
-    <div class="form-group mb-3">
-      {label description /}
-      {input description}
-    </div>
-    <div class="form-group mb-3">
-      {label image /}
-      {input image}
-    </div>
-    <div class="form-group mb-3">
-      {label button_text /}
-      {input button_text}
-    </div>
-    <div class="form-group mb-3">
-      {label button_link /}
-      {input button_link}
-    </div>
-    {input id}
-    {input save}
-  {/form}
 
-  <a href="{link Editdefault}" class="btn btn-secondary mt-3">Zpět na přehled</a>
+    <!-- Edit Section Form -->
+    <div class="section-card">
+        <h3 class="text-center">Upravit obsah sekce</h3>
+        {control customizationForm}
+    </div>
+
+    <!-- Add Feature Form -->
+    <div class="section-card">
+        <h3 class="text-center">Přidat novou funkci</h3>
+        {control addCustomizationFeatureForm}
+    </div>
+
+    <!-- Back to Dashboard -->
+    <div class="mt-4 text-center">
+        <a href="{link default}" class="btn btn-secondary">Zpět na nástěnku</a>
+    </div>
 </div>
 {/block}

@@ -1,98 +1,96 @@
 {block content}
 {block css}
-<link rel="stylesheet" href="/css/dash.css">
+<link rel="stylesheet" href="/css/gallery.css">
+<style>
+    .dashboard-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 2rem;
+    }
+    .section-card {
+        background: #fff;
+        border-radius: 0.75rem;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        padding: 2rem;
+        margin-bottom: 2rem;
+    }
+    .gallery-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.5rem;
+    }
+    .gallery-item {
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    .gallery-item:hover {
+        transform: scale(1.05);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+    }
+    .card-img-top {
+        max-height: 200px;
+        object-fit: cover;
+        border-radius: 0.75rem;
+    }
+</style>
 {/block}
 
-<div class="container mt-5">
-  <h1>U Hawkins Gallery</h1>
-  {if $galleryImages}
-    <div class="gallery-grid mb-4">
-      {foreach $galleryImages as $image}
-        <div class="gallery-item" data-id="{$image->id}">
-          <img src="{$image->image}" alt="{$image->alt_text}" class="img-fluid" style="max-width: 200px;">
-          <p><strong>Pořadí:</strong> {$image->ordering}</p>
-          <p><strong>Alt text:</strong> {$image->alt_text}</p>
-          <a href="{link EditdeleteGalleryImage, id => $image->id}" class="btn btn-sm btn-danger" onclick="return confirm('Opravdu smazat obrázek?')">Smazat</a>
-        </div>
-      {/foreach}
-    </div>
-  {/if}
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.0/Sortable.min.js"></script>
+<div class="dashboard-container">
+    <h1 class="text-center">Upravit galerii</h1>
 
-  <h2>Nahrát nový obrázek</h2>
-  {form galleryForm}
-    <div class="form-group mb-3">
-      {label image /}
-      {input image}
+    <!-- Upload Form -->
+    <div class="section-card">
+        <h3 class="text-center">Nahrát nový obrázek</h3>
+        {control galleryForm}
     </div>
-    <div class="form-group mb-3">
-      {label alt_text /}
-      {input alt_text}
+
+    <!-- Gallery Images List -->
+    <div class="section-card">
+        <h3 class="text-center">Správa obrázků</h3>
+        {if $galleryImages->count() > 0}
+            <form n:name="galleryOrderForm" id="galleryOrderForm">
+                <div class="gallery-grid" id="galleryImages">
+                    {foreach $galleryImages as $image}
+                        <div class="gallery-item" data-id="{$image->id}">
+                            <div class="card h-100 border-0 shadow-sm">
+                                <img src="{$image->image}" class="card-img-top" alt="{$image->alt_text}" loading="lazy">
+                                <div class="card-body">
+                                    <p class="card-text"><strong>Alt text:</strong> {$image->alt_text}</p>
+                                    <p class="card-text"><strong>Pořadí:</strong> {$image->ordering}</p>
+                                    <a href="{link deleteGalleryImage, id => $image->id}" class="btn btn-danger btn-sm"
+                                       onclick="return confirm('Opravdu chcete smazat tento obrázek?');">Smazat</a>
+                                </div>
+                            </div>
+                        </div>
+                    {/foreach}
+                </div>
+                {control galleryOrderForm}
+            </form>
+        {else}
+            <p class="text-center">Žádné obrázky v galerii.</p>
+        {/if}
     </div>
-    <div class="form-group mb-3">
-      {label ordering /}
-      {input ordering}
+
+    <!-- Back to Dashboard -->
+    <div class="mt-4 text-center">
+        <a href="{link default}" class="btn btn-secondary">Zpět na nástěnku</a>
     </div>
-    {input save}
-  {/form}
-
-  <h2>Upravit pořadí</h2>
-  {form galleryOrderForm}
-    <div class="form-group mb-3">
-      {label order /}
-      {input order}
-    </div>
-    {input save}
-  {/form}
-
-  <a href="{link Editdefault}" class="btn btn-secondary mt-3">Zpět na přehled</a>
-
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const galleryItems = document.querySelectorAll('.gallery-item');
-      const orderInput = document.querySelector('#order');
-      let order = Array.from(galleryItems).map(item => item.dataset.id);
-
-      galleryItems.forEach(item => {
-        item.draggable = true;
-        item.addEventListener('dragstart', e => {
-          e.dataTransfer.setData('text/plain', item.dataset.id);
-        });
-        item.addEventListener('dragover', e => {
-          e.preventDefault();
-        });
-        item.addEventListener('drop', e => {
-          e.preventDefault();
-          const draggedId = e.dataTransfer.getData('text/plain');
-          const targetId = item.dataset.id;
-          const draggedIndex = order.indexOf(draggedId);
-          const targetIndex = order.indexOf(targetId);
-          order.splice(draggedIndex, 1);
-          order.splice(targetIndex, 0, draggedId);
-          orderInput.value = JSON.stringify(order);
-          galleryItems.forEach((item, index) => {
-            item.querySelector('p').textContent = `Pořadí: ${order.indexOf(item.dataset.id) + 1}`;
-          });
-        });
-      });
-    });
-  </script>
 </div>
 
-<style>
-.gallery-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 1rem;
-}
-.gallery-item {
-  border: 1px solid #ddd;
-  padding: 1rem;
-  border-radius: 0.5rem;
-  text-align: center;
-  cursor: move;
-}
-.gallery-item:hover {
-  box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-</style>
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const galleryImages = document.getElementById('galleryImages');
+        if (galleryImages) {
+            const sortable = Sortable.create(galleryImages, {
+                animation: 150,
+                touchStartThreshold: 10,
+                handle: '.card',
+                onEnd: function (evt) {
+                    const order = sortable.toArray();
+                    document.querySelector('#galleryOrderForm input[name="order"]').value = JSON.stringify(order);
+                }
+            });
+        }
+    });
+</script>
 {/block}
