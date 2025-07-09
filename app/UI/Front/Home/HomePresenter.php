@@ -1,5 +1,4 @@
 <?php
-
 namespace App\UI\Front\Home;
 
 use Nette\Application\UI\Form;
@@ -7,9 +6,7 @@ use App\Model\PageFacade;
 use Nette\Http\Session;
 use App\UI\Front\BaseFrontPresenter;
 
-
 final class HomePresenter extends BaseFrontPresenter
-
 {
     private PageFacade $pageFacade;
     private Session $session;
@@ -20,8 +17,6 @@ final class HomePresenter extends BaseFrontPresenter
         $this->pageFacade = $pageFacade;
         $this->session = $session;
     }
-
-
 
     public function startup(): void
     {
@@ -56,6 +51,10 @@ final class HomePresenter extends BaseFrontPresenter
         $this->template->customization = $this->pageFacade->getSectionContent('customization');
         $this->template->gallery = $this->pageFacade->getGalleryImages();
         $this->template->contact = $this->pageFacade->getContactInfo();
+    }
+
+    public function renderDetail(): void
+    {
         $this->template->manufacturers = $this->pageFacade->getManufacturers();
     }
 
@@ -75,16 +74,18 @@ final class HomePresenter extends BaseFrontPresenter
             ->setRequired('Prosím vyberte výrobce.');
 
         $model = $form->addSelect('model', 'Model:')
-            ->setPrompt('vyberte model')
+            ->setPrompt('Vyberte model')
             ->setHtmlAttribute('data-depends', $manufacturer->getHtmlName())
             ->setHtmlAttribute('data-url', $this->link('Endpoint:models', ['manufacturerId' => '#']))
             ->setHtmlAttribute('data-colors-url', $this->link('Endpoint:modelColors', ['modelId' => '#']))
+            ->setHtmlAttribute('data-features-url', $this->link('Endpoint:modelFeatures', ['modelId' => '#']))
             ->setRequired('Prosím vyberte model.');
 
-        $form->addHidden('color')->setRequired('Please select a color.');
-        $form->addHidden('chargingPortCover')->setDefaultValue('Ano');
-        $form->addHidden('frontCameraCover')->setDefaultValue('Ano');
-        $form->addHidden('cardHolder')->setDefaultValue('Žádný');
+        $form->addHidden('color')->setRequired('Prosím vyberte barvu.');
+        
+        $form->addHidden('port_cover')->setDefaultValue('yes');
+        $form->addHidden('camera_cover')->setDefaultValue('yes');
+        $form->addHidden('card_holder')->setDefaultValue('none');
 
         $form->addSubmit('submit', 'Přidat do košíku');
 
@@ -107,9 +108,9 @@ final class HomePresenter extends BaseFrontPresenter
         $manufacturerId = (int)$values['manufacturer'];
         $modelId = (int)$values['model'];
         $color = $values['color'];
-        $chargingPortCover = $values['chargingPortCover'];
-        $frontCameraCover = $values['frontCameraCover'];
-        $cardHolder = $values['cardHolder'];
+        $portCover = $values['port_cover'];
+        $cameraCover = $values['camera_cover'];
+        $cardHolder = $values['card_holder'];
 
         try {
             $manufacturerName = $this->pageFacade->getManufacturerNameById($manufacturerId);
@@ -125,13 +126,13 @@ final class HomePresenter extends BaseFrontPresenter
                 'manufacturer' => $manufacturerName,
                 'model' => $modelName,
                 'color' => $color,
-                'port_cover' => $chargingPortCover === 'Ano' ? 1 : 0,
-                'camera_cover' => $frontCameraCover === 'Ano' ? 1 : 0,
+                'port_cover' => $portCover === 'yes' ? 1 : 0,
+                'camera_cover' => $cameraCover === 'yes' ? 1 : 0,
                 'card_holder' => $cardHolder,
             ], $userId);
 
             $this->flashMessage('Položka byla přidána do košíku.', 'success');
-            $this->redirect('Cart:default'); // Redirect to cart page (create this route if it doesn't exist)
+            $this->redirect('Cart:default');
         } catch (\Exception $e) {
             $this->flashMessage('Chyba při přidávání do košíku: ' . $e->getMessage(), 'error');
             $this->redirect('this');

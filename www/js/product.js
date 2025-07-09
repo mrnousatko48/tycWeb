@@ -5,7 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (colorSelect) {
         $(colorSelect).select2({
-            placeholder: 'Select colors',
+            placeholder: 'Vyberte barvy', // Translated to Czech
             allowClear: true,
             width: '100%'
         });
@@ -13,7 +13,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (featureSelect) {
         $(featureSelect).select2({
-            placeholder: 'Select features',
+            placeholder: 'Vyberte vlastnosti', // Translated to Czech
             allowClear: true,
             width: '100%'
         });
@@ -30,7 +30,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = await res.json();
                 if (data.snippets) {
                     Object.keys(data.snippets).forEach(id => {
-                        document.getElementById(id).innerHTML = data.snippets[id];
+                        const element = document.getElementById(id);
+                        if (element) element.innerHTML = data.snippets[id];
                     });
                 }
             });
@@ -48,13 +49,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 const data = await res.json();
                 if (data.snippets) {
                     Object.keys(data.snippets).forEach(id => {
-                        document.getElementById(id).innerHTML = data.snippets[id];
+                        const element = document.getElementById(id);
+                        if (element) element.innerHTML = data.snippets[id];
                     });
                 }
 
-                // re-init select2 after AJAX redraw
-                $('#frm-modelForm-color_ids').select2({ placeholder: 'Select colors', width: '100%' });
-                $('#frm-modelForm-feature_ids').select2({ placeholder: 'Select features', width: '100%' });
+                // Re-init Select2 only if on the model form page
+                if (colorSelect) {
+                    $('#frm-modelForm-color_ids').select2({ placeholder: 'Vyberte barvy', width: '100%' });
+                }
+                if (featureSelect) {
+                    $('#frm-modelForm-feature_ids').select2({ placeholder: 'Vyberte vlastnosti', width: '100%' });
+                }
             });
         }
     });

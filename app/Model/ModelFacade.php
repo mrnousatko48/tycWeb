@@ -233,13 +233,20 @@ class ModelFacade
 
     public function addFeatureOption(int $featureId, string $name): ActiveRow
     {
+        $this->database->beginTransaction();
         try {
-            return $this->database->table('feature_options')->insert([
+            $option = $this->database->table('feature_options')->insert([
                 'feature_id' => $featureId,
                 'name' => trim($name),
             ]);
+            $this->database->commit();
+            return $option;
         } catch (UniqueConstraintViolationException $e) {
+            $this->database->rollBack();
             throw new \Exception("Option '$name' already exists for this feature.");
+        } catch (\Exception $e) {
+            $this->database->rollBack();
+            throw $e;
         }
     }
 

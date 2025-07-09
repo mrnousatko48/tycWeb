@@ -25,4 +25,8 @@ class EndpointPresenter extends Nette\Application\UI\Presenter
         $this->sendJson($this->pageFacade->getColorsByModel((int)$modelId));
     }
 
+    public function actionModelFeatures($modelId): void
+    {
+        $this->sendJson($this->pageFacade->getFeaturesByModel((int)$modelId));
+    }
 }

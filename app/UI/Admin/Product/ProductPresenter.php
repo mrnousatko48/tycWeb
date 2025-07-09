@@ -46,18 +46,18 @@ final class ProductPresenter extends Nette\Application\UI\Presenter
     {
         $form = new Form;
 
-        $form->addSelect('manufacturer_id', 'Manufacturer:', 
+        $form->addSelect('manufacturer_id', 'Výrobce:', 
             $this->modelFacade->getManufacturers()->fetchPairs('id', 'name'))
-            ->setPrompt('Select manufacturer')
-            ->setRequired();
+            ->setPrompt('Vyberte výrobce')
+            ->setRequired('Prosím, vyberte výrobce.');
 
-        $form->addText('name', 'Model name:')
-            ->setRequired();
+        $form->addText('name', 'Název modelu:')
+            ->setRequired('Prosím, zadejte název modelu.');
 
-        $form->addMultiSelect('color_ids', 'Available colors:', 
+        $form->addMultiSelect('color_ids', 'Dostupné barvy:', 
             $this->modelFacade->getColors()->fetchPairs('id', 'name'))
             ->setHtmlAttribute('multiple')
-            ->setRequired('Select at least one color.');
+            ->setRequired('Vyberte alespoň jednu barvu.');
 
         $features = $this->modelFacade->getFeatures()->fetchPairs('id', 'name');
         $featureOptions = [];
@@ -68,11 +68,10 @@ final class ProductPresenter extends Nette\Application\UI\Presenter
                 array_map(fn($opt) => "$featureName: {$opt['name']}", $options)
             );
         }
-        $form->addMultiSelect('feature_options', 'Available feature options:', $featureOptions)
-            ->setHtmlAttribute('multiple')
-            ->setPrompt('Select feature options');
+        $form->addMultiSelect('feature_options', 'Dostupné vlastnosti:', $featureOptions)
+            ->setHtmlAttribute('multiple');
 
-        $form->addSubmit('save', 'Save model');
+        $form->addSubmit('save', 'Uložit model');
 
         $form->onSuccess[] = [$this, 'modelFormSucceeded'];
         return $form;
@@ -93,7 +92,7 @@ final class ProductPresenter extends Nette\Application\UI\Presenter
             $values['feature_options'] = $featureOptions;
 
             $this->modelFacade->addModel($values);
-            $this->flashMessage('Model added successfully!', 'success');
+            $this->flashMessage('Model byl úspěšně přidán!', 'success');
         } catch (\Exception $e) {
             $this->flashMessage($e->getMessage(), 'error');
         }
@@ -110,10 +109,10 @@ final class ProductPresenter extends Nette\Application\UI\Presenter
     {
         $form = new Form;
 
-        $form->addText('name', 'Manufacturer name:')
-            ->setRequired();
+        $form->addText('name', 'Název výrobce:')
+            ->setRequired('Prosím, zadejte název výrobce.');
 
-        $form->addSubmit('save', 'Add manufacturer');
+        $form->addSubmit('save', 'Přidat výrobce');
 
         $form->onSuccess[] = [$this, 'manufacturerFormSucceeded'];
         return $form;
@@ -123,7 +122,7 @@ final class ProductPresenter extends Nette\Application\UI\Presenter
     {
         try {
             $this->modelFacade->addManufacturer($values['name']);
-            $this->flashMessage('Manufacturer added!', 'success');
+            $this->flashMessage('Výrobce byl přidán!', 'success');
         } catch (\Exception $e) {
             $this->flashMessage($e->getMessage(), 'error');
         }
@@ -140,14 +139,14 @@ final class ProductPresenter extends Nette\Application\UI\Presenter
     {
         $form = new Form;
 
-        $form->addText('name', 'Color name:')
-            ->setRequired();
+        $form->addText('name', 'Název barvy:')
+            ->setRequired('Prosím, zadejte název barvy.');
 
-        $form->addText('hex_code', 'Hex code (e.g., #FF0000):')
-            ->addRule($form::PATTERN, 'Must be a valid hex color code (e.g., #FF0000)', '^#[0-9A-Fa-f]{6}$')
+        $form->addText('hex_code', 'Hex kód (např. #FF0000):')
+            ->addRule($form::PATTERN, 'Musí být platný hex kód (např. #FF0000)', '^#[0-9A-Fa-f]{6}$')
             ->setRequired(false);
 
-        $form->addSubmit('save', 'Add color');
+        $form->addSubmit('save', 'Přidat barvu');
 
         $form->onSuccess[] = [$this, 'colorFormSucceeded'];
         return $form;
@@ -157,7 +156,7 @@ final class ProductPresenter extends Nette\Application\UI\Presenter
     {
         try {
             $this->modelFacade->addColor($values['name'], $values['hex_code'] ?? null);
-            $this->flashMessage('Color added successfully!', 'success');
+            $this->flashMessage('Barva byla úspěšně přidána!', 'success');
         } catch (\Exception $e) {
             $this->flashMessage($e->getMessage(), 'error');
         }
@@ -174,10 +173,10 @@ final class ProductPresenter extends Nette\Application\UI\Presenter
     {
         $form = new Form;
 
-        $form->addText('name', 'Feature name:')
-            ->setRequired();
+        $form->addText('name', 'Název funkci:')
+            ->setRequired('Prosím, zadejte název funkce.');
 
-        $form->addSubmit('save', 'Add feature');
+        $form->addSubmit('save', 'Přidat funkci');
 
         $form->onSuccess[] = [$this, 'featureFormSucceeded'];
         return $form;
@@ -187,7 +186,7 @@ final class ProductPresenter extends Nette\Application\UI\Presenter
     {
         try {
             $this->modelFacade->addFeature($values['name']);
-            $this->flashMessage('Feature added successfully!', 'success');
+            $this->flashMessage('Funkce byla úspěšně přidána!', 'success');
         } catch (\Exception $e) {
             $this->flashMessage($e->getMessage(), 'error');
         }
@@ -195,7 +194,7 @@ final class ProductPresenter extends Nette\Application\UI\Presenter
         if ($this->isAjax()) {
             $this->template->features = $this->modelFacade->getFeatures();
             $this->redrawControl('featuresTable');
-            $this->redrawControl('featureOptionForm-feature_id'); // Update the feature select dropdown
+            $this->redrawControl('featureOptionForm-feature_id');
             $this->redrawControl('flashes');
         } else {
             $this->redirect('features');
@@ -206,15 +205,15 @@ final class ProductPresenter extends Nette\Application\UI\Presenter
     {
         $form = new Form;
 
-        $form->addSelect('feature_id', 'Feature:', 
+        $form->addSelect('feature_id', 'Funkce:', 
             $this->modelFacade->getFeatures()->fetchPairs('id', 'name'))
-            ->setPrompt('Select feature')
-            ->setRequired();
+            ->setPrompt('Vyberte funkci')
+            ->setRequired('Prosím, vyberte funkci.');
 
-        $form->addText('name', 'Option name:')
-            ->setRequired();
+        $form->addText('name', 'Název varianty:')
+            ->setRequired('Prosím, zadejte název varianty.');
 
-        $form->addSubmit('save', 'Add option');
+        $form->addSubmit('save', 'Přidat variantu');
 
         $form->onSuccess[] = [$this, 'featureOptionFormSucceeded'];
         return $form;
@@ -223,8 +222,17 @@ final class ProductPresenter extends Nette\Application\UI\Presenter
     public function featureOptionFormSucceeded(Form $form, array $values): void
     {
         try {
-            $this->modelFacade->addFeatureOption($values['feature_id'], $values['name']);
-            $this->flashMessage('Option added successfully!', 'success');
+            $existingOption = $this->modelFacade->getAllFeatureOptions()
+                ->where('feature_id', $values['feature_id'])
+                ->where('name', $values['name'])
+                ->fetch();
+            
+            if ($existingOption) {
+                $this->flashMessage("Možnost '{$values['name']}' již pro tuto vlastnost existuje.", 'error');
+            } else {
+                $this->modelFacade->addFeatureOption($values['feature_id'], $values['name']);
+                $this->flashMessage('Možnost byla úspěšně přidána!', 'success');
+            }
         } catch (\Exception $e) {
             $this->flashMessage($e->getMessage(), 'error');
         }
@@ -232,7 +240,7 @@ final class ProductPresenter extends Nette\Application\UI\Presenter
         if ($this->isAjax()) {
             $this->template->featureOptions = $this->modelFacade->getAllFeatureOptions();
             $this->redrawControl('featureOptionsTable');
-            $this->redrawControl('featureOptionForm-feature_id'); // Update the feature select dropdown
+            $this->redrawControl('featureOptionForm-feature_id');
             $this->redrawControl('flashes');
         } else {
             $this->redirect('features');
@@ -252,7 +260,7 @@ final class ProductPresenter extends Nette\Application\UI\Presenter
     {
         try {
             $this->modelFacade->deleteColor($colorId);
-            $this->flashMessage('Color deleted successfully!', 'success');
+            $this->flashMessage('Barva byla úspěšně smazána!', 'success');
         } catch (\Exception $e) {
             $this->flashMessage($e->getMessage(), 'error');
         }
@@ -269,7 +277,7 @@ final class ProductPresenter extends Nette\Application\UI\Presenter
     {
         try {
             $this->modelFacade->deleteFeature($featureId);
-            $this->flashMessage('Feature deleted successfully!', 'success');
+            $this->flashMessage('Vlastnost byla úspěšně smazána!', 'success');
         } catch (\Exception $e) {
             $this->flashMessage($e->getMessage(), 'error');
         }
@@ -279,7 +287,7 @@ final class ProductPresenter extends Nette\Application\UI\Presenter
             $this->template->featureOptions = $this->modelFacade->getAllFeatureOptions();
             $this->redrawControl('featuresTable');
             $this->redrawControl('featureOptionsTable');
-            $this->redrawControl('featureOptionForm-feature_id'); // Update the feature select dropdown
+            $this->redrawControl('featureOptionForm-feature_id');
             $this->redrawControl('flashes');
         } else {
             $this->redirect('features');
@@ -290,7 +298,7 @@ final class ProductPresenter extends Nette\Application\UI\Presenter
     {
         try {
             $this->modelFacade->deleteFeatureOption($optionId);
-            $this->flashMessage('Option deleted successfully!', 'success');
+            $this->flashMessage('Možnost byla úspěšně smazána!', 'success');
         } catch (\Exception $e) {
             $this->flashMessage($e->getMessage(), 'error');
         }
@@ -308,7 +316,7 @@ final class ProductPresenter extends Nette\Application\UI\Presenter
     {
         try {
             $this->modelFacade->deleteModel($modelId);
-            $this->flashMessage('Model deleted successfully!', 'success');
+            $this->flashMessage('Model byl úspěšně smazán!', 'success');
         } catch (\Exception $e) {
             $this->flashMessage($e->getMessage(), 'error');
         }
@@ -326,7 +334,7 @@ final class ProductPresenter extends Nette\Application\UI\Presenter
     {
         try {
             $this->modelFacade->deleteManufacturer($manufacturerId);
-            $this->flashMessage('Manufacturer deleted successfully!', 'success');
+            $this->flashMessage('Výrobce byl úspěšně smazán!', 'success');
         } catch (\Exception $e) {
             $this->flashMessage($e->getMessage(), 'error');
         }

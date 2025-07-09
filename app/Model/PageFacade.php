@@ -381,9 +381,6 @@ class PageFacade
      */
     public function getFormOptions(string $type): array
     {
-        if ($type === 'color') {
-            return [];
-        }
         return $this->database->table($type . '_options')->fetchAll();
     }
 
@@ -417,9 +414,71 @@ class PageFacade
      */
     public function getColorsByModel(int $modelId): array
     {
-        $model = $this->database->table('models')->get($modelId);
-        return $model && $model->colors ? explode(',', $model->colors) : [];
+        // Load all color IDs related to the model
+        $modelColors = $this->database->table('model_colors')
+            ->where('model_id', $modelId)
+            ->fetchPairs('color_id', null);
+
+        if (!$modelColors) {
+            return [];
+        }
+
+        // Fetch color details
+        $colors = $this->database->table('colors')
+            ->where('id', array_keys($modelColors))
+            ->fetchAll();
+
+        // Organize results
+        $result = [];
+        foreach ($colors as $color) {
+            $result[] = [
+                'name' => $color->name,
+                'hex_code' => $color->hex_code,
+            ];
+        }
+
+        return $result;
     }
+
+
+    /**
+     * Fetch features by model ID.
+     */
+/**
+ * Fetch features by model ID.
+ */
+public function getFeaturesByModel(int $modelId): array
+{
+    // Load all features related to the model
+    $features = $this->database->table('model_features')
+        ->where('model_id', $modelId)
+        ->fetchPairs('feature_id', null);
+
+    if (!$features) {
+        return [];
+    }
+
+    // Get all related features names
+    $featureData = $this->database->table('features')
+        ->where('id', array_keys($features))
+        ->fetchPairs('id', 'name');
+
+    // Get all options for all those features
+    $options = $this->database->table('feature_options')
+        ->where('feature_id', array_keys($features))
+        ->order('feature_id') // Optional, for cleaner structure
+        ->fetchAll();
+
+    // Organize results
+    $result = [];
+    foreach ($options as $option) {
+        $featureName = $featureData[$option->feature_id];
+        $result[$featureName][] = $option->name;
+    }
+
+    return $result;
+}
+
 
     /**
      * Fetch manufacturer name by ID.
@@ -438,6 +497,4 @@ class PageFacade
         $model = $this->database->table('models')->get($id);
         return $model ? $model->name : '';
     }
-
-    
 }

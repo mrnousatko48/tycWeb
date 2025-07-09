@@ -26,7 +26,7 @@
                             <h2 class="text-xl font-medium text-gray-900">Model telefonu</h2>
                             <div class="mt-2 flex space-x-3">
                                 {input manufacturer class => 'px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 focus:ring-2 focus:ring-black transition'}
-                                {input model class => 'px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 focus:ring-2 focus:ring-black transition', data-colors-url => '/endpoint/model-colors?modelId=#'}
+                                {input model class => 'px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 focus:ring-2 focus:ring-black transition', data-colors-url => '/endpoint/model-colors?modelId=#', data-features-url => '/endpoint/model-features?modelId=#'}
                             </div>
                         </div>
 
@@ -36,36 +36,11 @@
                                 <!-- Color buttons will be inserted here by JavaScript -->
                             </div>
                         </div>
-                        {* Add the hidden input for selected color *}
                         {input color type => 'hidden', id => 'frm-caseForm-color'}
 
-
-                        <div>
-                            <h2 class="text-xl font-medium text-gray-900">Krytka nabíjecího portu</h2>
-                            <div class="mt-2 flex space-x-3">
-                                <button type="button" data-target="frm-caseForm-chargingPortCover" data-value="Ano" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 selected transition" onclick="toggleSelection(this)">Ano</button>
-                                <button type="button" data-target="frm-caseForm-chargingPortCover" data-value="Ne" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition" onclick="toggleSelection(this)">Ne</button>
-                            </div>
+                        <div id="features">
+                            <!-- Feature sections will be inserted here by JavaScript -->
                         </div>
-                        {input chargingPortCover type => 'hidden', id => 'frm-caseForm-chargingPortCover'}
-
-                        <div>
-                            <h2 class="text-xl font-medium text-gray-900">Clona přední kamery</h2>
-                            <div class="mt-2 flex space-x-3">
-                                <button type="button" data-target="frm-caseForm-frontCameraCover" data-value="Ano" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 selected transition" onclick="toggleSelection(this)">Ano</button>
-                                <button type="button" data-target="frm-caseForm-frontCameraCover" data-value="Ne" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition" onclick="toggleSelection(this)">Ne</button>
-                            </div>
-                        </div>
-                        {input frontCameraCover type => 'hidden', id => 'frm-caseForm-frontCameraCover'}
-
-                        <div>
-                            <h2 class="text-xl font-medium text-gray-900">Držák karet</h2>
-                            <div class="mt-2 flex space-x-3">
-                                <button type="button" data-target="frm-caseForm-cardHolder" data-value="2 sloty" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 selected transition" onclick="toggleSelection(this)">2 sloty</button>
-                                <button type="button" data-target="frm-caseForm-cardHolder" data-value="Žádný" class="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition" onclick="toggleSelection(this)">Žádný</button>
-                            </div>
-                        </div>
-                        {input cardHolder type => 'hidden', id => 'frm-caseForm-cardHolder'}
 
                         <div>
                             {input submit class => 'w-full py-3 bg-black text-white rounded-lg hover:bg-gray-800 focus:ring-2 focus:ring-black transition'}
@@ -77,121 +52,148 @@
     </div>
 
     <script n:syntax=off>
-    document.querySelectorAll('select[data-depends]').forEach((childSelect) => {
-        let parentSelect = childSelect.form[childSelect.dataset.depends];
-        let url = childSelect.dataset.url;
-        let items = JSON.parse(childSelect.dataset.items || 'null');
+        document.querySelectorAll('select[data-depends]').forEach((childSelect) => {
+            let parentSelect = childSelect.form[childSelect.dataset.depends];
+            let url = childSelect.dataset.url;
+            let items = JSON.parse(childSelect.dataset.items || 'null');
 
-        parentSelect.addEventListener('change', () => {
-            if (items) {
-                updateSelectbox(childSelect, items[parentSelect.value]);
+            parentSelect.addEventListener('change', () => {
+                if (items) {
+                    updateSelectbox(childSelect, items[parentSelect.value]);
+                }
+                if (url) {
+                    fetch(url.replace(encodeURIComponent('#'), encodeURIComponent(parentSelect.value)))
+                        .then((response) => response.json())
+                        .then((data) => updateSelectbox(childSelect, data));
+                }
+            });
+        });
+
+        function updateSelectbox(select, items) {
+            select.innerHTML = '';
+            let defaultOption = document.createElement('option');
+            defaultOption.setAttribute('value', '');
+            defaultOption.setAttribute('disabled', 'disabled');
+            defaultOption.setAttribute('selected', 'selected');
+            defaultOption.innerText = 'Vyberte model';
+            select.appendChild(defaultOption);
+            for (let id in items) {
+                let el = document.createElement('option');
+                el.setAttribute('value', id);
+                el.innerText = items[id];
+                select.appendChild(el);
             }
-            if (url) {
-                fetch(url.replace(encodeURIComponent('#'), encodeURIComponent(parentSelect.value)))
-                    .then((response) => response.json())
-                    .then((data) => updateSelectbox(childSelect, data));
+            select.disabled = Object.keys(items).length === 0;
+        }
+
+        function toggleSelection(button) {
+            let group = button.parentElement.querySelectorAll('button');
+            group.forEach(btn => btn.classList.remove('ring-2', 'ring-black', 'ring-offset-2'));
+            button.classList.add('ring-2', 'ring-black', 'ring-offset-2');
+
+            let hiddenInputId = button.dataset.target;
+            let hiddenValue = button.dataset.value;
+            if (hiddenInputId && hiddenValue !== undefined) {
+                document.getElementById(hiddenInputId).value = hiddenValue;
+            }
+        }
+
+        const colorMap = {
+            'Černá': { bgClass: 'bg-black', image: '/Uploads/black.jpeg' },
+            'Bílá': { bgClass: 'bg-white border border-gray-300', image: '/Uploads/white.jpeg' },
+            'Modrá': { bgClass: 'bg-blue-500', image: '/Uploads/blue.jpeg' },
+            'Červená': { bgClass: 'bg-red-500', image: '/Uploads/red.jpeg' },
+            'Zelená': { bgClass: 'bg-green-500', image: '/Uploads/green.jpeg' },
+            'oranžová': { bgClass: 'bg-orange-500', image: '/Uploads/orange.jpeg' }
+        };
+
+        document.getElementById('frm-caseForm-model').addEventListener('change', function() {
+            let modelId = this.value;
+            if (modelId) {
+                let colorsUrl = this.dataset.colorsUrl.replace('#', encodeURIComponent(modelId));
+                let featuresUrl = this.dataset.featuresUrl.replace('#', encodeURIComponent(modelId));
+                
+                Promise.all([
+                    fetch(colorsUrl)
+                        .then(response => response.json())
+                        .then(colors => updateColorButtons(colors)),
+                    fetch(featuresUrl)
+                        .then(response => response.json())
+                        .then(features => updateFeatureButtons(features))
+                ]).catch(error => console.error('Error fetching data:', error));
+            } else {
+                updateColorButtons([]);
+                updateFeatureButtons([]);
             }
         });
-    });
 
-    function updateSelectbox(select, items) {
-        select.innerHTML = '';
-        let defaultOption = document.createElement('option');
-        defaultOption.setAttribute('value', '');
-        defaultOption.setAttribute('disabled', 'disabled');
-        defaultOption.setAttribute('selected', 'selected');
-        defaultOption.innerText = 'Vyberte model';
-        select.appendChild(defaultOption);
-        for (let id in items) {
-            let el = document.createElement('option');
-            el.setAttribute('value', id);
-            el.innerText = items[id];
-            select.appendChild(el);
-        }
-        select.disabled = Object.keys(items).length === 0;
-    }
-
-    function toggleSelection(button) {
-        let group = button.parentElement.querySelectorAll('button');
-        group.forEach(btn => btn.classList.remove('ring-2', 'ring-black', 'ring-offset-2'));
-        button.classList.add('ring-2', 'ring-black', 'ring-offset-2');
-
-        let hiddenInputId = button.dataset.target;
-        let hiddenValue = button.dataset.value;
-        if (hiddenInputId && hiddenValue !== undefined) {
-            document.getElementById(hiddenInputId).value = hiddenValue;
-        }
-    }
-
-    const colorMap = {
-        'Černá': { bgClass: 'bg-black', image: 'https://via.placeholder.com/400x600/000000/FFFFFF?text=Černý+kryt' },
-        'Bílá': { bgClass: 'bg-white border border-gray-300', image: 'https://via.placeholder.com/400x600/FFFFFF/000000?text=Bílý+kryt' },
-        'Modrá': { bgClass: 'bg-blue-500', image: 'https://via.placeholder.com/400x600/3B82F6/FFFFFF?text=Modrý+kryt' },
-        'Červená': { bgClass: 'bg-red-500', image: 'https://via.placeholder.com/400x600/EF4444/FFFFFF?text=Červený+kryt' }
-    };
-
-    document.getElementById('frm-caseForm-model').addEventListener('change', function() {
-        let modelId = this.value;
-        if (modelId) {
-            let url = this.dataset.colorsUrl.replace('#', encodeURIComponent(modelId));
-            fetch(url)
-                .then(response => response.json())
-                .then(colors => {
-                    updateColorButtons(colors);
-                })
-                .catch(error => console.error('Error fetching colors:', error));
-        } else {
-            updateColorButtons([]);
-        }
-    });
-
-    function updateColorButtons(colors) {
-        const container = document.getElementById('color-buttons');
-        container.innerHTML = '';
-        colors.forEach(color => {
-            if (colorMap[color]) {
+        function updateColorButtons(colors) {
+            const container = document.getElementById('color-buttons');
+            container.innerHTML = '';
+            colors.forEach(color => {
                 const button = document.createElement('button');
                 button.setAttribute('type', 'button');
-                button.setAttribute('data-color', color);
-                button.setAttribute('data-image', colorMap[color].image);
-                button.className = `w-10 h-10 rounded-full ${colorMap[color].bgClass} hover:ring-2 hover:ring-offset-2 hover:ring-gray-400 transition`;
-                button.title = color;
+                button.setAttribute('data-color', color.name);
+                button.setAttribute('data-image', colorMap[color.name]?.image || '/Uploads/default.jpeg');
+                button.className = `w-10 h-10 rounded-full ${colorMap[color.name]?.bgClass || `bg-[${color.hex_code}]`} hover:ring-2 hover:ring-offset-2 hover:ring-gray-400 transition`;
+                button.title = color.name;
                 button.addEventListener('click', function() {
-                    console.log('Color button clicked:', color); // Debug log
                     changeImage(this);
                 });
                 container.appendChild(button);
+            });
+            if (colors.length > 0) {
+                container.firstChild.classList.add('ring-2', 'ring-black', 'ring-offset-2');
+                changeImage(container.firstChild);
             }
-        });
-        if (colors.length > 0) {
-            container.firstChild.classList.add('ring-2', 'ring-black', 'ring-offset-2');
-            changeImage(container.firstChild);
-        }
-    }
-
-    function changeImage(button) {
-        console.log('Changing image for color:', button.dataset.color); // Debug log
-        const imageUrl = button.dataset.image;
-        const productImage = document.getElementById('product-image');
-        const hiddenColorInput = document.getElementById('frm-caseForm-color');
-
-        if (productImage && imageUrl) {
-            productImage.src = imageUrl;
-        } else {
-            console.error('Product image element or image URL not found');
         }
 
-        document.querySelectorAll('#color-buttons button').forEach(btn => {
-            btn.classList.remove('ring-2', 'ring-black', 'ring-offset-2');
-        });
-        button.classList.add('ring-2', 'ring-black', 'ring-offset-2');
-
-        if (hiddenColorInput && button.dataset.color) {
-            hiddenColorInput.value = button.dataset.color;
-            console.log('Hidden input updated:', hiddenColorInput.value); // Debug log
-        } else {
-            console.error('Hidden color input or color data not found');
+        function updateFeatureButtons(features) {
+            const container = document.getElementById('features');
+            container.innerHTML = '';
+            
+            for (const [featureName, options] of Object.entries(features)) {
+                const featureDiv = document.createElement('div');
+                featureDiv.className = 'mt-4';
+                const h2 = document.createElement('h2');
+                h2.className = 'text-xl font-medium text-gray-900';
+                h2.innerText = featureName;
+                featureDiv.appendChild(h2);
+                
+                const buttonDiv = document.createElement('div');
+                buttonDiv.className = 'mt-2 flex space-x-3';
+                options.forEach(option => {
+                    const button = document.createElement('button');
+                    button.setAttribute('type', 'button');
+                    button.setAttribute('data-target', `frm-caseForm-${featureName.replace(/\s+/g, '_').toLowerCase()}`);
+                    button.setAttribute('data-value', option);
+                    button.className = `px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition ${option === (featureName === 'card_holder' ? 'none' : 'yes') ? 'selected' : ''}`;
+                    button.innerText = option;
+                    button.addEventListener('click', function() { toggleSelection(this); });
+                    buttonDiv.appendChild(button);
+                });
+                featureDiv.appendChild(buttonDiv);
+                container.appendChild(featureDiv);
+            }
         }
-    }
-</script>
+
+        function changeImage(button) {
+            const imageUrl = button.dataset.image;
+            const productImage = document.getElementById('product-image');
+            const hiddenColorInput = document.getElementById('frm-caseForm-color');
+
+            if (productImage && imageUrl) {
+                productImage.src = imageUrl;
+            }
+
+            document.querySelectorAll('#color-buttons button').forEach(btn => {
+                btn.classList.remove('ring-2', 'ring-black', 'ring-offset-2');
+            });
+            button.classList.add('ring-2', 'ring-black', 'ring-offset-2');
+
+            if (hiddenColorInput && button.dataset.color) {
+                hiddenColorInput.value = button.dataset.color;
+            }
+        }
+    </script>
 {/block}
