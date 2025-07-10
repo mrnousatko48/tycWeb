@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\Model;
 
 use Nette\Database\Explorer;
@@ -17,22 +19,29 @@ final class OrderFacade
         $this->session = $session; 
     }
 
-
-
-    public function createOrder(int $userId, string $firstname, string $lastname, string $email, string $address, string $city, string $psc, string $payment, array $caseQuantities): ActiveRow
+    public function createOrder(int $userId, string $firstname, string $lastname, string $email, string $phone, string $address, string $city, string $psc, string $payment, array $caseQuantities, string $shipping, ?string $deliveryPoint = null): ActiveRow
     {
+        if (empty($caseQuantities)) {
+            throw new \InvalidArgumentException('Cart cannot be empty.');
+        }
+
         $this->database->beginTransaction();
 
         try {
+            $additionalCost = $this->calculateAdditionalCost($shipping, $payment);
             $order = $this->database->table('orders')->insert([
                 'user_id' => $userId,
                 'firstname' => $firstname,
                 'lastname' => $lastname,
                 'email' => $email,
+                'phone' => $phone,
                 'address' => $address,
                 'city' => $city,
                 'psc' => $psc,
                 'payment' => $payment,
+                'shipping' => $shipping,
+                'delivery_point' => $deliveryPoint,
+                'additional_cost' => $additionalCost,
                 'state' => 'OBJEDNANO',
                 'created_at' => new \DateTime(),
             ]);
@@ -61,19 +70,29 @@ final class OrderFacade
         }
     }
 
-    public function createGuestOrder(string $firstname, string $lastname, string $address, string $city, string $psc, string $payment, array $caseQuantities): ActiveRow
+    public function createGuestOrder(string $firstname, string $lastname, string $email, string $phone, string $address, string $city, string $psc, string $payment, array $caseQuantities, string $shipping, ?string $deliveryPoint = null): ActiveRow
     {
+        if (empty($caseQuantities)) {
+            throw new \InvalidArgumentException('Cart cannot be empty.');
+        }
+
         $this->database->beginTransaction();
 
         try {
+            $additionalCost = $this->calculateAdditionalCost($shipping, $payment);
             $order = $this->database->table('orders')->insert([
                 'user_id' => null,
                 'firstname' => $firstname,
                 'lastname' => $lastname,
+                'email' => $email,
+                'phone' => $phone,
                 'address' => $address,
                 'city' => $city,
                 'psc' => $psc,
                 'payment' => $payment,
+                'shipping' => $shipping,
+                'delivery_point' => $deliveryPoint,
+                'additional_cost' => $additionalCost,
                 'state' => 'OBJEDNANO',
                 'created_at' => new \DateTime(),
             ]);
@@ -94,6 +113,26 @@ final class OrderFacade
         }
     }
 
+    private function calculateAdditionalCost(string $shipping, string $payment): float
+    {
+        $shippingRow = $this->database->table('shipping')
+            ->where('code', $shipping)
+            ->fetch();
+
+        $shippingCost = $shippingRow ? (float)$shippingRow->cost : 0.0;
+        $paymentCost = $payment === 'DOBIRKA' ? 40.0 : 0.0;
+        return $shippingCost + $paymentCost;
+    }
+
+    public function getShippingOptions(): array
+    {
+        $options = [];
+        $shippingRows = $this->database->table('shipping')->fetchAll();
+        foreach ($shippingRows as $row) {
+            $options[$row->code] = sprintf('%s (%s Kč)', $row->name, number_format($row->cost, 2, ',', ' '));
+        }
+        return $options;
+    }
 
     public function getAllOrders(): iterable
     {
@@ -136,7 +175,6 @@ final class OrderFacade
             ->fetchAll();
     }
 
-
     public function getCasesByUserId(int $userId): \Nette\Database\Table\Selection
     {
         return $this->database->table('cases')
@@ -152,7 +190,7 @@ final class OrderFacade
             ->order('created_at DESC');
     }
 
-      public function createCase(array $data, ?int $userId = null): ActiveRow
+    public function createCase(array $data, ?int $userId = null): ActiveRow
     {
         $coreData = [
             'user_id' => $userId,
@@ -164,7 +202,6 @@ final class OrderFacade
             'created_at' => new \DateTime()
         ];
 
-        // Extract features (all fields except core ones)
         $features = [];
         foreach ($data as $key => $value) {
             if (!in_array($key, ['manufacturer', 'model', 'color', 'total_price'])) {
@@ -172,21 +209,18 @@ final class OrderFacade
             }
         }
 
-        // Add features to core data if using JSON column
         if (!empty($features)) {
             $coreData['features'] = json_encode($features);
         }
 
         try {
-            // Insert case into the database
             $case = $this->database->table('cases')->insert($coreData);
             error_log('Case created with ID: ' . $case->id . ', Data: ' . print_r($coreData, true));
         } catch (\Exception $e) {
             error_log('Error inserting case: ' . $e->getMessage());
-            throw $e; // Re-throw to be caught by processForm
+            throw $e;
         }
 
-        // For guest users, store case in session
         if ($userId === null) {
             $orderSection = $this->session->getSection('order');
             $quantities = $orderSection->quantities ?? [];
@@ -198,7 +232,6 @@ final class OrderFacade
 
         return $case;
     }
-
 
     public function removeCaseFromCart(\Nette\Http\Session $session, int $caseId): void
     {
@@ -236,7 +269,7 @@ final class OrderFacade
                     'manufacturer' => $case->manufacturer,
                     'model' => $case->model,
                     'color' => $case->color,
-                    'features' => $features, // Decoded features
+                    'features' => $features,
                     'quantity' => $orderCase->quantity,
                 ];
             }

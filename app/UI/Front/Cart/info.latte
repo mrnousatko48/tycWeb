@@ -49,8 +49,8 @@
     content: '';
     position: absolute;
     top: 2.5rem;
-    left: calc(50% + 1.25rem);
-    width: calc(100% - 2.5rem);
+    left: 50%;
+    width: 50%;
     height: 4px;
     background-color: var(--color-secondary);
     z-index: -1;
@@ -58,38 +58,6 @@
 .step.completed:not(:last-child)::after,
 .step.active:not(:last-child)::after {
     background-color: var(--color-accent);
-}
-.notification {
-    background-color: #fef3c7;
-    border: 1px solid #fcd34d;
-    padding: 1rem;
-    border-radius: 0.5rem;
-    margin-bottom: 1.5rem;
-    color: #5a2d0c;
-    font-size: 0.95rem;
-    line-height: 1.4;
-    max-width: 100%;
-    box-sizing: border-box;
-}
-@media (max-width: 640px) {
-    .notification {
-        font-size: 0.9rem;
-        padding: 0.75rem;
-    }
-}
-.notification p {
-    margin: 0;
-}
-.notification .font-semibold {
-    font-size: 1rem;
-    margin-bottom: 0.4rem;
-}
-.notification::before {
-    content: 'ℹ️';
-    display: inline-block;
-    margin-right: 0.4rem;
-    font-size: 1.1rem;
-    vertical-align: middle;
 }
 .collapsible-header {
     cursor: pointer;
@@ -130,8 +98,7 @@
     background-color: var(--color-background);
     padding: 0 0.2rem;
 }
-.form-field input,
-.form-field select {
+.form-field input {
     width: 100%;
     padding: 0.8rem 1rem;
     border: 1px solid var(--color-secondary);
@@ -145,48 +112,28 @@
     -moz-appearance: none;
     appearance: none;
 }
-.form-field select {
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23555555' width='20px' height='20px'%3E%3Cpath d='M7 10l5 5 5-5H7z'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 0.8rem center;
-    background-size: 1.2rem;
-}
-.form-field input:focus,
-.form-field select:focus {
+.form-field input:focus {
     outline: none;
     border-color: var(--color-accent);
     box-shadow: 0 0 0 3px rgba(var(--color-accent-rgb), 0.2);
 }
 .form-field input:not(:placeholder-shown) + label,
-.form-field input:focus + label,
-.form-field select:not(:empty) + label,
-.form-field select:focus + label {
+.form-field input:focus + label {
     top: -0.4rem;
     left: 0.8rem;
     font-size: 0.7rem;
     color: var(--color-primary);
 }
-.form-field input[required]:not(:focus):not(:placeholder-shown):invalid,
-.form-field select[required]:not(:focus):not(:empty):invalid {
+.form-field input[required]:not(:focus):not(:placeholder-shown):invalid {
     border-color: #e53e3e;
     box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.2);
-}
-#delivery-point-field {
-    display: none;
-}
-#delivery-point-field.visible {
-    display: block;
 }
 .form-field .btn {
     width: 100%;
     text-align: center;
 }
-.order-summary {
-    font-size: 0.95rem;
-}
 @media (max-width: 640px) {
-    .form-field input,
-    .form-field select {
+    .form-field input {
         padding: 0.6rem 0.8rem;
         font-size: 0.9rem;
     }
@@ -195,14 +142,50 @@
         top: 0.6rem;
     }
     .form-field input:not(:placeholder-shown) + label,
-    .form-field input:focus + label,
-    .form-field select:not(:empty) + label,
-    .form-field select:focus + label {
+    .form-field input:focus + label {
         font-size: 0.65rem;
         top: -0.3rem;
     }
+}
+.order-summary {
+    font-size: 0.95rem;
+}
+@media (max-width: 640px) {
     .order-summary {
         font-size: 0.9rem;
+    }
+}
+.cost-breakdown {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 1rem;
+}
+.cost-item {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.5rem 0;
+}
+.cost-item.total {
+    border-top: 2px solid var(--color-secondary);
+    padding-top: 1rem;
+    font-weight: bold;
+}
+.features-list {
+    margin-top: 0.5rem;
+    padding-left: 1rem;
+}
+.features-list li {
+    font-size: 0.9rem;
+    color: var(--color-text-secondary);
+    list-style-type: disc;
+}
+@media (max-width: 640px) {
+    .features-list {
+        padding-left: 0.8rem;
+    }
+    .features-list li {
+        font-size: 0.85rem;
     }
 }
 </style>
@@ -212,35 +195,47 @@
         <div class="step completed">
             <span class="step-number">1</span> Košík
         </div>
-        <div class="step active">
+        <div class="step completed">
             <span class="step-number">2</span> Doprava a platba
         </div>
-        <div class="step inactive">
+        <div class="step active">
             <span class="step-number">3</span> Osobní údaje
         </div>
     </div>
 </div>
 
 <div class="bg-[var(--color-background)] p-6 rounded-2xl shadow-lg form-container">
-    <a href="{link Cart:default}" class="text-[var(--color-primary)] hover:underline mb-3 inline-block text-sm">Zpět do košíku</a>
-    <h2 class="text-xl font-bold text-[var(--color-text)] mb-4">Způsob dopravy a platby</h2>
-    <div class="notification">
-        <p class="font-semibold">Upozornění:</p>
-        <p>Vážený zákazníku, jsme nový e-shop a na integraci Balíkovny a Zásilkovny do našeho systému stále pracujeme. Zásilky momentálně odesíláme jako fyzická osoba. Prosím, vyberte způsob dopravy a zadejte název Z-Boxu nebo pobočky, kam chcete balíček doručit. Děkujeme za pochopení.</p>
-    </div>
+    <a href="{link Cart:order}" class="text-[var(--color-primary)] hover:underline mb-3 inline-block text-sm">Zpět na dopravu a platbu</a>
+    <h2 class="text-xl font-bold text-[var(--color-text)] mb-4">Osobní údaje</h2>
 
-    <form n:name="orderForm" class="space-y-3">
+    <form n:name="sendOrderForm" class="space-y-3">
         <div class="form-field">
-            <select n:name="shipping" id="shipping-field"></select>
-            <label for="shipping-field">Způsob dopravy</label>
-        </div>
-        <div class="form-field" id="delivery-point-field">
-            <input n:name="delivery_point" id="delivery-point-input" placeholder=" ">
-            <label for="delivery-point-input">Místo doručení (např. název Z-Boxu nebo pobočky)</label>
+            <input n:name="firstname" id="firstname-field" placeholder=" ">
+            <label for="firstname-field">Jméno</label>
         </div>
         <div class="form-field">
-            <select n:name="payment" id="payment-field"></select>
-            <label for="payment-field">Způsob platby</label>
+            <input n:name="lastname" id="lastname-field" placeholder=" ">
+            <label for="lastname-field">Příjmení</label>
+        </div>
+        <div class="form-field">
+            <input n:name="email" id="email-field" placeholder=" ">
+            <label for="email-field">E-mail</label>
+        </div>
+        <div class="form-field">
+            <input n:name="phone" id="phone-field" placeholder=" ">
+            <label for="phone-field">Telefon</label>
+        </div>
+        <div class="form-field">
+            <input n:name="address" id="address-field" placeholder=" ">
+            <label for="address-field">Adresa</label>
+        </div>
+        <div class="form-field">
+            <input n:name="city" id="city-field" placeholder=" ">
+            <label for="city-field">Město</label>
+        </div>
+        <div class="form-field">
+            <input n:name="psc" id="psc-field" placeholder=" ">
+            <label for="psc-field">PSČ</label>
         </div>
         <div class="form-field">
             <input n:name="submit" type="submit">
@@ -249,7 +244,7 @@
 
     <div class="mt-6">
         <div class="collapsible-header" onclick="toggleCartSummary()">
-            <span>Zobrazit košík</span>
+            <span>Zobrazit shrnutí objednávky</span>
             <span class="float-right">▼</span>
         </div>
         <div class="collapsible-content" id="cart-summary">
@@ -274,10 +269,45 @@
                                 <p class="text-sm">{$quantities[$case->id] ?? 1}</p>
                             </div>
                         </div>
+                        {if !empty($case->features)}
+                            <div class="features-list">
+                                <h3 class="text-base font-semibold mt-2">Funkce</h3>
+                                <ul>
+                                    {foreach $case->features as $key => $value}
+                                        <li>{$key}: {$value}</li>
+                                    {/foreach}
+                                </ul>
+                            </div>
+                        {/if}
                     </div>
                 {/foreach}
                 <div class="order-summary text-right text-base font-semibold text-[var(--color-text)]">
-                    Celková cena: <span class="text-[var(--color-primary)]">{number_format($totalCartValue, 2, ',', ' ')} Kč</span>
+                    <div class="cost-breakdown">
+                        <div class="cost-item">
+                            <span>Mezisoučet zboží:</span>
+                            <span>{number_format($itemsSubtotal, 2, ',', ' ')} Kč</span>
+                        </div>
+                        <div class="cost-item">
+                            <span>Doprava ({$shipping}):</span>
+                            <span>{number_format($shippingCost, 2, ',', ' ')} Kč</span>
+                        </div>
+                        {if $paymentCost > 0}
+                            <div class="cost-item">
+                                <span>Poplatek za dobírku:</span>
+                                <span>{number_format($paymentCost, 2, ',', ' ')} Kč</span>
+                            </div>
+                        {/if}
+                        {if $delivery_point !== 'Není zadáno'}
+                            <div class="cost-item">
+                                <span>Místo doručení:</span>
+                                <span>{$delivery_point}</span>
+                            </div>
+                        {/if}
+                        <div class="cost-item total">
+                            <span>Celková cena:</span>
+                            <span class="text-[var(--color-primary)]">{number_format($totalCartValue, 2, ',', ' ')} Kč</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -291,21 +321,5 @@ function toggleCartSummary() {
     content.classList.toggle('open');
     header.textContent = content.classList.contains('open') ? '▲' : '▼';
 }
-
-document.addEventListener('DOMContentLoaded', function() {
-    const shippingSelect = document.querySelector('select[name="shipping"]');
-    const deliveryPointField = document.getElementById('delivery-point-field');
-    
-    function toggleDeliveryPoint() {
-        if (shippingSelect.value === 'ZASILKOVNA' || shippingSelect.value === 'BALIKOVNA') {
-            deliveryPointField.classList.add('visible');
-        } else {
-            deliveryPointField.classList.remove('visible');
-        }
-    }
-    
-    shippingSelect.addEventListener('change', toggleDeliveryPoint);
-    toggleDeliveryPoint();
-});
 </script>
 {/block}

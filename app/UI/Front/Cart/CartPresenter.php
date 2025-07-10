@@ -23,15 +23,9 @@ final class CartPresenter extends BaseFrontPresenter
 
     private function cleanFeatureKey(string $key): string
     {
-        // Replace underscores with spaces
         $key = str_replace('_', ' ', $key);
-
-        // Lowercase everything
         $key = mb_strtolower($key);
-
-        // Capitalize first letter
         $key = ucfirst($key);
-
         return $key;
     }
 
@@ -60,7 +54,6 @@ final class CartPresenter extends BaseFrontPresenter
             $caseArray = $case->toArray();
             $features = $case->features ? json_decode($case->features, true) : [];
 
-            // Check if there's an outer 'features' key and decode the inner JSON
             $cleanFeatures = [];
             if (!empty($features) && isset($features['features'])) {
                 $innerFeatures = json_decode($features['features'], true);
@@ -75,7 +68,6 @@ final class CartPresenter extends BaseFrontPresenter
             $caseArray['features'] = $cleanFeatures;
             $decodedCases[] = (object) $caseArray;
 
-            // Calculate total value for this case based on quantity
             $quantity = $this->template->quantities[$case->id] ?? 1;
             $totalCartValue += $case->total_price * $quantity;
         }
@@ -84,44 +76,155 @@ final class CartPresenter extends BaseFrontPresenter
         $this->template->totalCartValue = $totalCartValue;
     }
 
+    public function renderOrder(): void
+    {
+        $session = $this->getSession('order');
+        $quantities = $session->quantities ?? [];
+
+        if (empty($quantities)) {
+            $this->flashMessage('Košík je prázdný.', 'warning');
+            $this->redirect('Cart:default');
+        }
+
+        $caseIds = array_keys($quantities);
+        $cases = $this->orderFacade->getCasesByIds($caseIds);
+
+        $decodedCases = [];
+        $totalCartValue = 0;
+        foreach ($cases as $case) {
+            $caseArray = $case->toArray();
+            $features = $case->features ? json_decode($case->features, true) : [];
+
+            $cleanFeatures = [];
+            if (!empty($features) && isset($features['features'])) {
+                $innerFeatures = json_decode($features['features'], true);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    foreach ($innerFeatures as $key => $value) {
+                        $cleanKey = $this->cleanFeatureKey($key);
+                        $cleanFeatures[$cleanKey] = $value;
+                    }
+                }
+            }
+
+            $caseArray['features'] = $cleanFeatures;
+            $decodedCases[] = (object) $caseArray;
+
+            $quantity = $quantities[$case->id] ?? 1;
+            $totalCartValue += $case->total_price * $quantity;
+        }
+
+        $this->template->cases = $decodedCases;
+        $this->template->quantities = $quantities;
+        $this->template->totalCartValue = $totalCartValue;
+    }
+
+    public function renderInfo(): void
+    {
+        $session = $this->getSession('order');
+        $quantities = $session->quantities ?? [];
+
+        if (empty($quantities)) {
+            $this->flashMessage('Košík je prázdný.', 'warning');
+            $this->redirect('Cart:default');
+        }
+
+        if (!isset($session->shipping) || !isset($session->payment)) {
+            $this->flashMessage('Prosím, vyberte způsob dopravy a platby.', 'warning');
+            $this->redirect('Cart:order');
+        }
+
+        $caseIds = array_keys($quantities);
+        $cases = $this->orderFacade->getCasesByIds($caseIds);
+
+        $decodedCases = [];
+        $itemsSubtotal = 0;
+        foreach ($cases as $case) {
+            $caseArray = $case->toArray();
+            $features = $case->features ? json_decode($case->features, true) : [];
+
+            $cleanFeatures = [];
+            if (!empty($features) && isset($features['features'])) {
+                $innerFeatures = json_decode($features['features'], true);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    foreach ($innerFeatures as $key => $value) {
+                        $cleanKey = $this->cleanFeatureKey($key);
+                        $cleanFeatures[$cleanKey] = $value;
+                    }
+                }
+            }
+
+            $caseArray['features'] = $cleanFeatures;
+            $decodedCases[] = (object) $caseArray;
+
+            $quantity = $quantities[$case->id] ?? 1;
+            $itemsSubtotal += $case->total_price * $quantity;
+        }
+
+        $shippingRow = $this->database->table('shipping')->where('code', $session->shipping)->fetch();
+        $shippingCost = $shippingRow ? (float)$shippingRow->cost : 0.0;
+        $paymentCost = $session->payment === 'DOBIRKA' ? 40.0 : 0.0;
+        $totalCartValue = $itemsSubtotal + $shippingCost + $paymentCost;
+
+        $this->template->cases = $decodedCases;
+        $this->template->quantities = $quantities;
+        $this->template->itemsSubtotal = $itemsSubtotal;
+        $this->template->shippingCost = $shippingCost;
+        $this->template->paymentCost = $paymentCost;
+        $this->template->totalCartValue = $totalCartValue;
+        $this->template->shipping = $shippingRow ? $shippingRow->name : 'Není vybráno';
+        $this->template->payment = $session->payment === 'DOBIRKA' ? 'Dobírka' : 'Bankovní převod';
+        $this->template->delivery_point = $session->delivery_point ?? 'Není zadáno';
+    }
+
     protected function createComponentSendOrderForm(): Form
     {
         $form = new Form;
 
-        $userId = (int) $this->getUser()->getId();
-        $user = $this->database->table('users')->get($userId);
+        $user = $this->getUser()->isLoggedIn() ? $this->getUser()->getIdentity() : null;
 
         $form->addText('firstname', 'Jméno:')
-            ->setRequired('Zadejte své jméno');
-        $form->addText('lastname', 'Příjmení:')
-            ->setRequired('Zadejte své příjmení');
-        $form->addText('email', 'E-mail:')
-            ->setRequired('Zadejte e-mail')
-            ->addRule(Form::EMAIL, 'Zadejte platný e-mail');
-        $form->addText('address', 'Adresa:')
-            ->setRequired('Zadejte svou adresu');
-        $form->addText('city', 'Město:')
-            ->setRequired('Zadejte město');
-        $form->addText('psc', 'PSČ:')
-            ->setRequired('Zadejte PSČ');
-        $form->addSelect('payment', 'Způsob platby:', [
-                'PREVOD' => 'Převodem',
-                'DOBIRKA' => 'Dobírka',
-            ])
-            ->setRequired('Zvolte způsob platby');
-            
-        $form->addSubmit('submit', 'Dokončit objednávku');
+            ->setRequired('Zadejte své jméno')
+            ->setHtmlAttribute('id', 'firstname-field')
+            ->setDefaultValue($user ? $user->firstname : '');
 
-        if ($user) {
-            $form->setDefaults([
-                'firstname' => $user->firstname ?? '',
-                'lastname' => $user->lastname ?? '',
-                'email' => $user->email ?? '',
-                'address' => $user->address ?? '',
-                'city' => $user->city ?? '',
-                'psc' => $user->psc ?? '',
-            ]);
-        }
+        $form->addText('lastname', 'Příjmení:')
+            ->setRequired('Zadejte své příjmení')
+            ->setHtmlAttribute('id', 'lastname-field')
+            ->setDefaultValue($user ? $user->lastname : '');
+
+        $form->addEmail('email', 'E-mail:')
+            ->setRequired('Zadejte svůj e-mail')
+            ->setHtmlAttribute('id', 'email-field')
+            ->setHtmlAttribute('placeholder', 'Zadejte svůj e-mail')
+            ->setDefaultValue($user ? $user->email : '');
+
+        $form->addText('phone', 'Telefon:')
+            ->setRequired('Zadejte své telefonní číslo')
+            ->setHtmlAttribute('id', 'phone-field')
+            ->setHtmlAttribute('placeholder', 'Zadejte své telefonní číslo')
+            ->setDefaultValue($user ? $user->phone : '');
+
+        $form->addText('address', 'Adresa:')
+            ->setRequired('Zadejte svou adresu')
+            ->setHtmlAttribute('id', 'address-field')
+            ->setHtmlAttribute('placeholder', 'Zadejte svou adresu')
+            ->setDefaultValue($user ? $user->address : '');
+
+        $form->addText('city', 'Město:')
+            ->setRequired('Zadejte své město')
+            ->setHtmlAttribute('id', 'city-field')
+            ->setHtmlAttribute('placeholder', 'Zadejte své město')
+            ->setDefaultValue($user ? $user->city : '');
+
+        $form->addText('psc', 'PSČ:')
+            ->setRequired('Zadejte své PSČ')
+            ->setHtmlAttribute('id', 'psc-field')
+            ->setHtmlAttribute('placeholder', 'Zadejte své PSČ')
+            ->setDefaultValue($user ? $user->psc : '');
+
+        $form->addSubmit('submit', 'Dokončit objednávku')
+            ->setHtmlAttribute('class', 'btn px-6 py-3 rounded-xl text-base font-semibold transition transform hover:scale-105')
+            ->setHtmlAttribute('style', 'background-color: var(--color-primary); color: var(--button-text);');
 
         $form->onSuccess[] = [$this, 'sendOrderFormSucceeded'];
         return $form;
@@ -138,84 +241,58 @@ final class CartPresenter extends BaseFrontPresenter
             return;
         }
 
-        $userId = $this->getUser()->getId();
-
-        if ($this->getUser()->isLoggedIn()) {
-            $order = $this->orderFacade->createOrder(
-                (int)$userId,
-                $values->firstname,
-                $values->lastname,
-                $values->email,
-                $values->address,
-                $values->city,
-                $values->psc,
-                $values->payment,
-                $quantities
-            );
-        } else {
-            $order = $this->orderFacade->createGuestOrder(
-                $values->firstname,
-                $values->lastname,
-                $values->email,
-                $values->address,
-                $values->city,
-                $values->psc,
-                $values->payment,
-                $quantities
-            );
-        }
-        $items = $this->orderFacade->getOrderItems($order->id);
-
-        $recipientName = $values->firstname . ' ' . $values->lastname;
-        $this->mailSender->sendInvoiceEmail($values->email, $recipientName, $order, $items);
-
-        unset($session->quantities);
-        $this->flashMessage('Objednávka byla úspěšně dokončena a faktura odeslána.', 'success');
-        $this->redirect('Home:default');
-    }
-
-    public function renderOrder(): void
-    {
-        $session = $this->getSession('order');
-        $quantities = $session->quantities ?? [];
-
-        if (empty($quantities)) {
-            $this->flashMessage('Košík je prázdný.', 'warning');
-            $this->redirect('Cart:default');
+        if (!isset($session->shipping) || !isset($session->payment)) {
+            $this->flashMessage('Prosím, vyberte způsob dopravy a platby.', 'warning');
+            $this->redirect('Cart:order');
+            return;
         }
 
-        $caseIds = array_keys($quantities);
-        $cases = $this->orderFacade->getCasesByIds($caseIds);
-
-        $this->template->cases = $cases;
-        $this->template->quantities = $quantities;
-    }
-
-    public function createOrder(int $userId, string $address, string $city, array $caseIds)
-    {
-        $this->database->beginTransaction();
+        $userId = $this->getUser()->isLoggedIn() ? (int)$this->getUser()->getId() : null;
+        $payment = $session->payment;
+        $shipping = $session->shipping;
 
         try {
-            $order = $this->database->table('orders')->insert([
-                'user_id' => $userId,
-                'address' => $address,
-                'city' => $city,
-                'state' => 'OBJEDNANO',
-                'created_at' => new \DateTime(),
-            ]);
-
-            foreach ($caseIds as $caseId) {
-                $this->database->table('order_case')->insert([
-                    'order_id' => $order->id,
-                    'case_id' => $caseId,
-                ]);
+            if ($userId) {
+                $order = $this->orderFacade->createOrder(
+                    $userId,
+                    $values->firstname,
+                    $values->lastname,
+                    $values->email,
+                    $values->phone,
+                    $values->address,
+                    $values->city,
+                    $values->psc,
+                    $payment,
+                    $quantities,
+                    $shipping,
+                    $session->delivery_point
+                );
+            } else {
+                $order = $this->orderFacade->createGuestOrder(
+                    $values->firstname,
+                    $values->lastname,
+                    $values->email,
+                    $values->phone,
+                    $values->address,
+                    $values->city,
+                    $values->psc,
+                    $payment,
+                    $quantities,
+                    $shipping,
+                    $session->delivery_point
+                );
             }
 
-            $this->database->commit();
-            return $order;
-        } catch (\Throwable $e) {
-            $this->database->rollBack();
-            throw $e;
+            $items = $this->orderFacade->getOrderItems($order->id);
+            $recipientName = $values->firstname . ' ' . $values->lastname;
+            $this->mailSender->sendInvoiceEmail($values->email, $recipientName, $order, $items);
+
+            unset($session->quantities, $session->shipping, $session->payment, $session->additionalCost, $session->delivery_point);
+            $this->flashMessage('Objednávka byla úspěšně dokončena a faktura odeslána.', 'success');
+            $this->redirect('Home:default');
+        } catch (\InvalidArgumentException $e) {
+            $this->flashMessage($e->getMessage(), 'danger');
+            $this->redirect('Cart:default');
         }
     }
 
@@ -227,7 +304,7 @@ final class CartPresenter extends BaseFrontPresenter
         foreach ($quantities as $caseId => $data) {
             $amount = (int)($data['amount'] ?? 0);
             if ($amount > 0) {
-                $selected[(int) $caseId] = $amount;
+                $selected[(int)$caseId] = $amount;
             }
         }
 
@@ -254,7 +331,7 @@ final class CartPresenter extends BaseFrontPresenter
 
     public function handleAddCase($caseData): void
     {
-        $case = $this->orderFacade->createCase($caseData, null); // null == guest
+        $case = $this->orderFacade->createCase($caseData, null);
 
         if ($this->getUser()->isLoggedIn() === false) {
             $session = $this->getSession('order');
@@ -265,5 +342,67 @@ final class CartPresenter extends BaseFrontPresenter
 
         $this->flashMessage('Kryt byl přidán do košíku.', 'success');
         $this->redirect('this');
+    }
+
+    protected function createComponentOrderForm(): Form
+    {
+        $form = new Form;
+
+        $form->addSelect('shipping', 'Způsob dopravy:', $this->orderFacade->getShippingOptions())
+            ->setRequired('Zvolte způsob dopravy')
+            ->setHtmlAttribute('id', 'shipping-field');
+
+        $form->addText('delivery_point', 'Místo doručení (např. název Z-Boxu nebo pobočky):')
+            ->setHtmlAttribute('id', 'delivery-point-input')
+            ->setHtmlAttribute('placeholder', 'Zadejte název Z-Boxu nebo pobočky')
+            ->setRequired(false)
+            ->addCondition(Form::EQUAL, $form['shipping'], 'ZASILKOVNA')
+                ->toggle('delivery-point-field')
+            ->addCondition(Form::EQUAL, $form['shipping'], 'BALIKOVNA')
+                ->toggle('delivery-point-field');
+
+        $form->addSelect('payment', 'Způsob platby:', [
+            'PREVOD' => 'Bankovní převod',
+            'DOBIRKA' => 'Dobírka (+40 Kč)',
+        ])
+            ->setRequired('Zvolte způsob platby')
+            ->setHtmlAttribute('id', 'payment-field');
+
+        $form->addSubmit('submit', 'Pokračovat k osobním údajům')
+            ->setHtmlAttribute('class', 'btn px-8 py-4 rounded-2xl text-lg font-bold transition transform hover:scale-105')
+            ->setHtmlAttribute('style', 'background-color: var(--color-primary); color: var(--button-text);');
+
+        $form->onSuccess[] = [$this, 'orderFormSucceeded'];
+        return $form;
+    }
+
+    public function orderFormSucceeded(Form $form, \stdClass $values): void
+    {
+        $session = $this->getSession('order');
+        $quantities = $session->quantities ?? [];
+
+        if (empty($quantities)) {
+            $this->flashMessage('Košík je prázdný.', 'warning');
+            $this->redirect('Cart:default');
+            return;
+        }
+
+        // Validate shipping code
+        $shippingRow = $this->database->table('shipping')->where('code', $values->shipping)->fetch();
+        if (!$shippingRow) {
+            $this->flashMessage('Neplatný způsob dopravy.', 'danger');
+            $this->redirect('this');
+            return;
+        }
+
+        $session->shipping = $values->shipping;
+        $session->payment = $values->payment;
+        $session->delivery_point = $values->delivery_point ?: null;
+
+        $shippingCost = (float)$shippingRow->cost;
+        $paymentCost = $values->payment === 'DOBIRKA' ? 40.0 : 0.0;
+        $session->additionalCost = $shippingCost + $paymentCost;
+
+        $this->redirect('Cart:info');
     }
 }
