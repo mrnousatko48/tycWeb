@@ -1,4 +1,3 @@
-DROP TABLE IF EXISTS `banner`;
 CREATE TABLE `banner` (
   `id` int NOT NULL AUTO_INCREMENT,
   `content_type` enum('title','description','image','button_text','button_link') NOT NULL,
@@ -162,6 +161,7 @@ CREATE TABLE `feature_options` (
   `id` int NOT NULL AUTO_INCREMENT,
   `feature_id` int NOT NULL,
   `name` varchar(50) NOT NULL,
+  `price` decimal(10,2) DEFAULT '0.00',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_feature_option` (`feature_id`,`name`),
@@ -169,17 +169,13 @@ CREATE TABLE `feature_options` (
   CONSTRAINT `feature_options_ibfk_1` FOREIGN KEY (`feature_id`) REFERENCES `features` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-INSERT INTO `feature_options` (`id`, `feature_id`, `name`, `created_at`) VALUES
-(16,	16,	'Ano',	'2025-07-09 19:46:47'),
-(18,	16,	'Ne',	'2025-07-09 19:46:50'),
-(24,	12,	'2 Sloty',	'2025-07-09 19:47:06'),
-(25,	12,	'Žádný',	'2025-07-09 19:47:37'),
-(30,	18,	'Ano',	'2025-07-09 20:05:52'),
-(31,	18,	'Ne',	'2025-07-09 20:05:58'),
-(32,	19,	'1',	'2025-07-09 20:07:20'),
-(33,	19,	'2',	'2025-07-09 20:07:22'),
-(34,	20,	'nain',	'2025-07-09 20:09:13'),
-(35,	20,	'eeee',	'2025-07-09 20:09:18');
+INSERT INTO `feature_options` (`id`, `feature_id`, `name`, `price`, `created_at`) VALUES
+(16,	16,	'Ano',	30.00,	'2025-07-09 19:46:47'),
+(18,	16,	'Ne',	0.00,	'2025-07-09 19:46:50'),
+(24,	12,	'2 Sloty',	45.00,	'2025-07-09 19:47:06'),
+(25,	12,	'Žádný',	0.00,	'2025-07-09 19:47:37'),
+(30,	18,	'Ano',	30.00,	'2025-07-09 20:05:52'),
+(31,	18,	'Ne',	0.00,	'2025-07-09 20:05:58');
 
 DROP TABLE IF EXISTS `features`;
 CREATE TABLE `features` (
@@ -193,33 +189,7 @@ CREATE TABLE `features` (
 INSERT INTO `features` (`id`, `name`, `created_at`) VALUES
 (12,	'Držák karet',	'2025-07-09 19:45:56'),
 (16,	'Clona přední kamery',	'2025-07-09 19:46:07'),
-(18,	'Krytka nabíjecího portu',	'2025-07-09 19:46:27'),
-(19,	'test',	'2025-07-09 20:07:13'),
-(20,	'monke',	'2025-07-09 20:09:06');
-
-DROP TABLE IF EXISTS `form_options`;
-CREATE TABLE `form_options` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `field_name` varchar(50) NOT NULL,
-  `option_value` varchar(100) NOT NULL,
-  `option_label` varchar(100) NOT NULL,
-  `created_at` datetime DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
-INSERT INTO `form_options` (`id`, `field_name`, `option_value`, `option_label`, `created_at`) VALUES
-(1,	'manufacturer',	'apple',	'Apple',	'2025-06-30 15:48:56'),
-(2,	'manufacturer',	'samsung',	'Samsung',	'2025-06-30 15:48:56'),
-(3,	'manufacturer',	'xiaomi',	'Xiaomi',	'2025-06-30 15:48:56'),
-(4,	'color',	'Černá',	'Černá',	'2025-06-30 15:48:56'),
-(5,	'color',	'Bílá',	'Bílá',	'2025-06-30 15:48:56'),
-(6,	'color',	'Modrá',	'Modrá',	'2025-06-30 15:48:56'),
-(7,	'color',	'Červená',	'Červená',	'2025-06-30 15:48:56'),
-(8,	'port_cover',	'1',	'Ano',	'2025-06-30 15:48:56'),
-(9,	'port_cover',	'0',	'Ne',	'2025-06-30 15:48:56'),
-(10,	'card_holder',	'1 slot',	'1 slot',	'2025-06-30 15:48:56'),
-(11,	'card_holder',	'2 sloty',	'2 sloty',	'2025-06-30 15:48:56'),
-(12,	'card_holder',	'Žádný',	'Žádný',	'2025-06-30 15:48:56');
+(18,	'Krytka nabíjecího portu',	'2025-07-09 19:46:27');
 
 DROP TABLE IF EXISTS `gallery`;
 CREATE TABLE `gallery` (
@@ -269,30 +239,17 @@ INSERT INTO `model_colors` (`model_id`, `color_id`) VALUES
 (3,	1),
 (4,	1),
 (5,	1),
-(7,	1),
-(9,	1),
-(10,	1),
-(11,	1),
 (1,	2),
 (2,	2),
 (3,	2),
 (4,	2),
-(7,	2),
 (1,	3),
 (2,	3),
 (3,	3),
 (4,	3),
-(8,	3),
-(10,	3),
 (1,	4),
 (2,	4),
-(5,	4),
-(8,	4),
-(8,	5),
-(10,	5),
-(11,	5),
-(8,	6),
-(11,	6);
+(5,	4);
 
 DROP TABLE IF EXISTS `model_features`;
 CREATE TABLE `model_features` (
@@ -308,15 +265,12 @@ CREATE TABLE `model_features` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 INSERT INTO `model_features` (`model_id`, `feature_id`, `feature_option_id`) VALUES
-(10,	16,	18),
-(11,	16,	18),
-(10,	12,	25),
-(11,	12,	25),
-(10,	18,	31),
-(11,	18,	31),
-(10,	19,	33),
-(11,	19,	33),
-(11,	20,	34);
+(1,	16,	18),
+(3,	16,	18),
+(4,	16,	18),
+(1,	12,	25),
+(4,	12,	25),
+(1,	18,	31);
 
 DROP TABLE IF EXISTS `models`;
 CREATE TABLE `models` (
@@ -324,22 +278,18 @@ CREATE TABLE `models` (
   `manufacturer_id` int NOT NULL,
   `name` varchar(100) NOT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `price` decimal(10,2) NOT NULL DEFAULT '0.00' COMMENT 'Base price of the model',
   PRIMARY KEY (`id`),
   KEY `manufacturer_id` (`manufacturer_id`),
   CONSTRAINT `models_ibfk_1` FOREIGN KEY (`manufacturer_id`) REFERENCES `manufacturers` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-INSERT INTO `models` (`id`, `manufacturer_id`, `name`, `created_at`) VALUES
-(1,	1,	'iPhone 13',	'2025-07-03 16:52:35'),
-(2,	1,	'iPhone 14',	'2025-07-03 16:52:35'),
-(3,	2,	'Galaxy S22',	'2025-07-03 16:52:35'),
-(4,	2,	'Galaxy S23',	'2025-07-03 16:52:35'),
-(5,	3,	'Mi 12',	'2025-07-03 16:52:35'),
-(7,	6,	'Mate 20 pro',	'2025-07-08 20:37:20'),
-(8,	7,	'Skibidi',	'2025-07-09 13:11:52'),
-(9,	1,	'test',	'2025-07-09 19:45:01'),
-(10,	6,	'sigma',	'2025-07-09 20:08:18'),
-(11,	6,	'Skupina B',	'2025-07-09 20:09:54');
+INSERT INTO `models` (`id`, `manufacturer_id`, `name`, `created_at`, `price`) VALUES
+(1,	1,	'iPhone 13',	'2025-07-03 16:52:35',	529.99),
+(2,	1,	'iPhone 14',	'2025-07-03 16:52:35',	617.00),
+(3,	2,	'Galaxy S22',	'2025-07-03 16:52:35',	500.00),
+(4,	2,	'Galaxy S23',	'2025-07-03 16:52:35',	510.00),
+(5,	3,	'Mi 12',	'2025-07-03 16:52:35',	199.99);
 
 DROP TABLE IF EXISTS `order_case`;
 CREATE TABLE `order_case` (

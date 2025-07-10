@@ -42,6 +42,7 @@
                     <tr>
                         <th>Výrobce</th>
                         <th>Model</th>
+                        <th>Základní cena (CZK)</th>
                         <th>Barvy</th>
                         <th>Funkce</th>
                         <th>Akce</th>
@@ -52,6 +53,7 @@
                     <tr>
                         <td>{$model->ref('manufacturers', 'manufacturer_id')->name}</td>
                         <td>{$model->name}</td>
+                        <td>{$model->price|number:2,',',' '} CZK</td>
                         <td>
                             {foreach $model->related('model_colors') as $mc}
                                 {var $color = $mc->ref('colors', 'color_id')}
@@ -67,12 +69,28 @@
                             {/foreach}
                         </td>
                         <td>
-                            <a href="{link deleteModel! $model->id}" class="ajax btn btn-danger btn-sm">Smazat</a>
+                            <a href="{link editModel! $model->id}" class="btn btn-sm btn-primary ajax edit-model" data-bs-toggle="modal" data-bs-target="#editModelModal">✏️ Upravit</a>
+                            <a href="{link deleteModel! $model->id}" class="ajax btn btn-danger btn-sm">🗑 Smazat</a>
                         </td>
                     </tr>
                 {/foreach}
                 </tbody>
             </table>
+        </div>
+    </div>
+
+    <!-- Modal for editing models -->
+    <div class="modal fade" id="editModelModal" tabindex="-1" aria-labelledby="editModelModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editModelModalLabel">Upravit model</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zavřít"></button>
+                </div>
+                <div class="modal-body" n:snippet="modelEditForm">
+                    {control modelEditForm}
+                </div>
+            </div>
         </div>
     </div>
 </div>
@@ -83,72 +101,78 @@
 
 <script>
 document.addEventListener('DOMContentLoaded', () => {
-    // Inicializace Select2 pro výběr barev a vlastností
-    $('#frm-modelForm-color_ids').select2({
-        placeholder: 'Vyberte barvy',
-        allowClear: true,
-        width: '100%'
-    });
-    $('#frm-modelForm-feature_options').select2({
-        placeholder: 'Vyberte funkce',
+    // Initialize Select2 for model form
+    $('#frm-modelForm-color_ids, #frm-modelForm-feature_options').select2({
+        placeholder: 'Vyberte',
         allowClear: true,
         width: '100%'
     });
 
-    // Zpracování AJAX akcí pro formuláře a mazání
-    document.querySelectorAll('form, a.ajax').forEach(element => {
-        element.addEventListener('click', async (e) => {
-            if (element.tagName === 'A') {
-                e.preventDefault();
-                const response = await fetch(element.href, {
-                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
-                });
-                const data = await response.json();
-                if (data.snippets) {
-                    Object.keys(data.snippets).forEach(snippet => {
-                        document.getElementById(snippet).innerHTML = data.snippets[snippet];
-                    });
-                }
-            }
-        });
+    // Handle form submissions and AJAX links
+    document.body.addEventListener('click', async e => {
+        let el = e.target.closest('button[type="submit"], a.ajax');
+        if (!el) return;
 
-        if (element.tagName === 'FORM') {
-            element.addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const formData = new FormData(element);
-                const response = await fetch(element.action, {
+        e.preventDefault();
+
+        if (el.tagName === 'BUTTON' && el.type === 'submit') {
+            const form = el.closest('form');
+            if (!form) return;
+
+            el.dataset.originalText = el.innerText;
+            el.disabled = true;
+            el.innerText = 'Ukládám...';
+
+            try {
+                const res = await fetch(form.action, {
                     method: 'POST',
-                    body: formData,
+                    body: new FormData(form),
                     headers: { 'X-Requested-With': 'XMLHttpRequest' }
                 });
-                const data = await response.json();
-                if (data.snippets) {
-                    Object.keys(data.snippets).forEach(snippet => {
-                        document.getElementById(snippet).innerHTML = data.snippets[snippet];
-                    });
+                const json = await res.json();
+                for (let snip in json.snippets) {
+                    document.getElementById(snip).innerHTML = json.snippets[snip];
                 }
-                // Znovu inicializuj Select2 po AJAXu
-                $('#frm-modelForm-color_ids').select2({
-                    placeholder: 'Vyberte barvy',
-                    allowClear: true,
-                    width: '100%'
+                if (form.closest('#editModelModal')) {
+                    bootstrap.Modal.getInstance(document.getElementById('editModelModal')).hide();
+                }
+            } catch (error) {
+                console.error('Chyba:', error);
+            } finally {
+                el.disabled = false;
+                el.innerText = el.dataset.originalText || 'Uložit';
+            }
+        } else if (el.tagName === 'A' && el.classList.contains('ajax')) {
+            if (el.classList.contains('btn-danger') && !confirm('Opravdu chcete tuto položku smazat?')) {
+                return;
+            }
+
+            try {
+                const res = await fetch(el.href, {
+                    method: 'GET',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
                 });
-                $('#frm-modelForm-feature_options').select2({
-                    placeholder: 'Vyberte funkce',
-                    allowClear: true,
-                    width: '100%'
-                });
-            });
+                const json = await res.json();
+                for (let snip in json.snippets) {
+                    document.getElementById(snip).innerHTML = json.snippets[snip];
+                }
+            } catch (error) {
+                console.error('Chyba:', error);
+            }
         }
     });
 
-    // Potvrzení před smazáním
-    document.querySelectorAll('a.ajax').forEach(link => {
-        link.addEventListener('click', (e) => {
-            if (!confirm('Opravdu chcete tuto položku smazat?')) {
-                e.preventDefault();
-            }
+    // Initialize Select2 for all selects in the modal
+    $('#editModelModal').on('shown.bs.modal', function () {
+        $(this).find('select').select2({
+            dropdownParent: $(this),
+            width: '100%'
         });
+    });
+
+    // Destroy Select2 when modal is hidden to prevent memory leaks
+    $('#editModelModal').on('hidden.bs.modal', function () {
+        $(this).find('select').select2('destroy');
     });
 });
 </script>

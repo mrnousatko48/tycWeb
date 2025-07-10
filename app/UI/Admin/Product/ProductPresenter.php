@@ -42,40 +42,45 @@ final class ProductPresenter extends Nette\Application\UI\Presenter
         $this->template->isAjax = $this->isAjax();
     }
 
-    public function createComponentModelForm(): Form
-    {
-        $form = new Form;
+   public function createComponentModelForm(): Form
+{
+    $form = new Form;
 
-        $form->addSelect('manufacturer_id', 'Výrobce:', 
-            $this->modelFacade->getManufacturers()->fetchPairs('id', 'name'))
-            ->setPrompt('Vyberte výrobce')
-            ->setRequired('Prosím, vyberte výrobce.');
+    $form->addSelect('manufacturer_id', 'Výrobce:', 
+        $this->modelFacade->getManufacturers()->fetchPairs('id', 'name'))
+        ->setPrompt('Vyberte výrobce')
+        ->setRequired('Prosím, vyberte výrobce.');
 
-        $form->addText('name', 'Název modelu:')
-            ->setRequired('Prosím, zadejte název modelu.');
+    $form->addText('name', 'Název modelu:')
+        ->setRequired('Prosím, zadejte název modelu.');
 
-        $form->addMultiSelect('color_ids', 'Dostupné barvy:', 
-            $this->modelFacade->getColors()->fetchPairs('id', 'name'))
-            ->setHtmlAttribute('multiple')
-            ->setRequired('Vyberte alespoň jednu barvu.');
+    $form->addText('price', 'Základní cena (CZK):')
+        ->setRequired('Prosím, zadejte základní cenu.')
+        ->addRule($form::FLOAT, 'Cena musí být platné číslo.')
+        ->setDefaultValue('0.00');
 
-        $features = $this->modelFacade->getFeatures()->fetchPairs('id', 'name');
-        $featureOptions = [];
-        foreach ($features as $featureId => $featureName) {
-            $options = $this->modelFacade->getFeatureOptions($featureId);
-            $featureOptions[$featureId] = array_combine(
-                array_map(fn($opt) => "$featureId:$opt[id]", $options),
-                array_map(fn($opt) => "$featureName: {$opt['name']}", $options)
-            );
-        }
-        $form->addMultiSelect('feature_options', 'Dostupné vlastnosti:', $featureOptions)
-            ->setHtmlAttribute('multiple');
+    $form->addMultiSelect('color_ids', 'Dostupné barvy:', 
+        $this->modelFacade->getColors()->fetchPairs('id', 'name'))
+        ->setHtmlAttribute('multiple')
+        ->setRequired('Vyberte alespoň jednu barvu.');
 
-        $form->addSubmit('save', 'Uložit model');
-
-        $form->onSuccess[] = [$this, 'modelFormSucceeded'];
-        return $form;
+    $features = $this->modelFacade->getFeatures()->fetchPairs('id', 'name');
+    $featureOptions = [];
+    foreach ($features as $featureId => $featureName) {
+        $options = $this->modelFacade->getFeatureOptions($featureId);
+        $featureOptions[$featureId] = array_combine(
+            array_map(fn($opt) => "$featureId:$opt[id]", $options),
+            array_map(fn($opt) => "$featureName: {$opt['name']}", $options)
+        );
     }
+    $form->addMultiSelect('feature_options', 'Dostupné vlastnosti:', $featureOptions)
+        ->setHtmlAttribute('multiple');
+
+    $form->addSubmit('save', 'Uložit model');
+
+    $form->onSuccess[] = [$this, 'modelFormSucceeded'];
+    return $form;
+}
 
     public function modelFormSucceeded(Form $form, array $values): void
     {
@@ -102,6 +107,107 @@ final class ProductPresenter extends Nette\Application\UI\Presenter
             $this->redrawControl('flashes');
         } else {
             $this->redirect('models');
+        }
+    }
+
+    public function createComponentModelEditForm(): Form
+    {
+        $form = new Form;
+
+        $form->addHidden('id');
+
+        $form->addSelect('manufacturer_id', 'Výrobce:', 
+            $this->modelFacade->getManufacturers()->fetchPairs('id', 'name'))
+            ->setPrompt('Vyberte výrobce')
+            ->setRequired('Prosím, vyberte výrobce.');
+
+        $form->addText('name', 'Název modelu:')
+            ->setRequired('Prosím, zadejte název modelu.');
+
+        $form->addText('price', 'Základní cena (CZK):')
+            ->setRequired('Prosím, zadejte základní cenu.')
+            ->addRule($form::FLOAT, 'Cena musí být platné číslo.')
+            ->setDefaultValue('0.00');
+
+        $form->addMultiSelect('color_ids', 'Dostupné barvy:', 
+            $this->modelFacade->getColors()->fetchPairs('id', 'name'))
+            ->setHtmlAttribute('multiple')
+            ->setRequired('Vyberte alespoň jednu barvu.');
+
+        $features = $this->modelFacade->getFeatures()->fetchPairs('id', 'name');
+        $featureOptions = [];
+        foreach ($features as $featureId => $featureName) {
+            $options = $this->modelFacade->getFeatureOptions($featureId);
+            $featureOptions[$featureId] = array_combine(
+                array_map(fn($opt) => "$featureId:$opt[id]", $options),
+                array_map(fn($opt) => "$featureName: {$opt['name']}", $options)
+            );
+        }
+        $form->addMultiSelect('feature_options', 'Dostupné vlastnosti:', $featureOptions)
+            ->setHtmlAttribute('multiple');
+
+        $form->addSubmit('save', 'Upravit model');
+
+        $form->onSuccess[] = [$this, 'modelEditFormSucceeded'];
+        return $form;
+    }
+
+    public function modelEditFormSucceeded(Form $form, array $values): void
+    {
+        try {
+            $featureOptions = [];
+            foreach ($values['feature_options'] as $featureOptionId) {
+                $parts = explode(':', $featureOptionId, 2);
+                if (count($parts) === 2) {
+                    $featureId = (int)$parts[0];
+                    $optionId = (int)trim($parts[1]);
+                    $featureOptions[$featureId] = $optionId;
+                }
+            }
+            $values['feature_options'] = $featureOptions;
+
+            $this->modelFacade->updateModel((int)$values['id'], $values);
+            $this->flashMessage('Model byl úspěšně upraven!', 'success');
+        } catch (\Exception $e) {
+            $this->flashMessage($e->getMessage(), 'error');
+        }
+
+        if ($this->isAjax()) {
+            $this->template->models = $this->modelFacade->getModels($this->template->selectedManufacturerId);
+            $this->redrawControl('modelsTable');
+            $this->redrawControl('flashes');
+        } else {
+            $this->redirect('models');
+        }
+    }
+
+    public function handleEditModel(int $modelId): void
+    {
+        $model = $this->modelFacade->getModel($modelId);
+        if (!$model) {
+            $this->flashMessage('Model neexistuje.', 'error');
+            $this->redirect('models');
+        }
+
+        $colorIds = array_keys($this->modelFacade->getModelColors($modelId));
+        $featureOptions = [];
+        foreach ($this->modelFacade->getModelFeatures($modelId) as $mf) {
+            if ($mf->feature_option_id) {
+                $featureOptions[] = "{$mf->feature_id}:{$mf->feature_option_id}";
+            }
+        }
+
+        $this['modelEditForm']->setDefaults([
+            'id' => $model->id,
+            'manufacturer_id' => $model->manufacturer_id,
+            'name' => $model->name,
+            'price' => $model->price,
+            'color_ids' => $colorIds,
+            'feature_options' => $featureOptions,
+        ]);
+
+        if ($this->isAjax()) {
+            $this->redrawControl('modelEditForm');
         }
     }
 
@@ -388,23 +494,25 @@ final class ProductPresenter extends Nette\Application\UI\Presenter
         }
     }
 
-    public function handleDeleteModel(int $modelId): void
-    {
-        try {
-            $this->modelFacade->deleteModel($modelId);
-            $this->flashMessage('Model byl úspěšně smazán!', 'success');
-        } catch (\Exception $e) {
-            $this->flashMessage($e->getMessage(), 'error');
-        }
-
-        if ($this->isAjax()) {
-            $this->template->models = $this->modelFacade->getModels($this->template->selectedManufacturerId);
-            $this->redrawControl('modelsTable');
-            $this->redrawControl('flashes');
-        } else {
-            $this->redirect('models');
-        }
+public function handleDeleteModel(int $modelId): void
+{
+    try {
+        $this->modelFacade->deleteModel($modelId);
+        $this->flashMessage('Model byl úspěšně smazán!', 'success');
+    } catch (\Exception $e) {
+        $this->flashMessage($e->getMessage(), 'error');
     }
+
+    if ($this->isAjax()) {
+        // Use null if selectedManufacturerId is not set
+        $manufacturerId = $this->template->selectedManufacturerId ?? null;
+        $this->template->models = $this->modelFacade->getModels($manufacturerId);
+        $this->redrawControl('modelsTable');
+        $this->redrawControl('flashes');
+    } else {
+        $this->redirect('models');
+    }
+}
 
     public function handleDeleteManufacturer(int $manufacturerId): void
     {
