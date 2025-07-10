@@ -164,18 +164,22 @@ CREATE TABLE `feature_options` (
   `name` varchar(50) NOT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_feature_option` (`feature_id`,`name`),
   KEY `feature_id` (`feature_id`),
   CONSTRAINT `feature_options_ibfk_1` FOREIGN KEY (`feature_id`) REFERENCES `features` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 INSERT INTO `feature_options` (`id`, `feature_id`, `name`, `created_at`) VALUES
-(1,	1,	'2-slot',	'2025-07-09 14:46:00'),
-(2,	1,	'1-slot',	'2025-07-09 14:46:00'),
-(3,	1,	'none',	'2025-07-09 14:46:00'),
-(4,	2,	'yes',	'2025-07-09 14:46:00'),
-(5,	2,	'no',	'2025-07-09 14:46:00'),
-(6,	3,	'yes',	'2025-07-09 14:46:00'),
-(7,	3,	'no',	'2025-07-09 14:46:00');
+(16,	16,	'Ano',	'2025-07-09 19:46:47'),
+(18,	16,	'Ne',	'2025-07-09 19:46:50'),
+(24,	12,	'2 Sloty',	'2025-07-09 19:47:06'),
+(25,	12,	'Žádný',	'2025-07-09 19:47:37'),
+(30,	18,	'Ano',	'2025-07-09 20:05:52'),
+(31,	18,	'Ne',	'2025-07-09 20:05:58'),
+(32,	19,	'1',	'2025-07-09 20:07:20'),
+(33,	19,	'2',	'2025-07-09 20:07:22'),
+(34,	20,	'nain',	'2025-07-09 20:09:13'),
+(35,	20,	'eeee',	'2025-07-09 20:09:18');
 
 DROP TABLE IF EXISTS `features`;
 CREATE TABLE `features` (
@@ -187,9 +191,11 @@ CREATE TABLE `features` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 INSERT INTO `features` (`id`, `name`, `created_at`) VALUES
-(1,	'card holder',	'2025-07-09 14:46:00'),
-(2,	'camera cover',	'2025-07-09 14:46:00'),
-(3,	'port cover',	'2025-07-09 14:46:00');
+(12,	'Držák karet',	'2025-07-09 19:45:56'),
+(16,	'Clona přední kamery',	'2025-07-09 19:46:07'),
+(18,	'Krytka nabíjecího portu',	'2025-07-09 19:46:27'),
+(19,	'test',	'2025-07-09 20:07:13'),
+(20,	'monke',	'2025-07-09 20:09:06');
 
 DROP TABLE IF EXISTS `form_options`;
 CREATE TABLE `form_options` (
@@ -264,6 +270,9 @@ INSERT INTO `model_colors` (`model_id`, `color_id`) VALUES
 (4,	1),
 (5,	1),
 (7,	1),
+(9,	1),
+(10,	1),
+(11,	1),
 (1,	2),
 (2,	2),
 (3,	2),
@@ -274,12 +283,16 @@ INSERT INTO `model_colors` (`model_id`, `color_id`) VALUES
 (3,	3),
 (4,	3),
 (8,	3),
+(10,	3),
 (1,	4),
 (2,	4),
 (5,	4),
 (8,	4),
 (8,	5),
-(8,	6);
+(10,	5),
+(11,	5),
+(8,	6),
+(11,	6);
 
 DROP TABLE IF EXISTS `model_features`;
 CREATE TABLE `model_features` (
@@ -295,15 +308,15 @@ CREATE TABLE `model_features` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 INSERT INTO `model_features` (`model_id`, `feature_id`, `feature_option_id`) VALUES
-(1,	1,	NULL),
-(1,	2,	NULL),
-(2,	1,	NULL),
-(2,	2,	NULL),
-(5,	1,	NULL),
-(7,	1,	NULL),
-(7,	2,	NULL),
-(8,	1,	NULL),
-(8,	3,	NULL);
+(10,	16,	18),
+(11,	16,	18),
+(10,	12,	25),
+(11,	12,	25),
+(10,	18,	31),
+(11,	18,	31),
+(10,	19,	33),
+(11,	19,	33),
+(11,	20,	34);
 
 DROP TABLE IF EXISTS `models`;
 CREATE TABLE `models` (
@@ -323,7 +336,10 @@ INSERT INTO `models` (`id`, `manufacturer_id`, `name`, `created_at`) VALUES
 (4,	2,	'Galaxy S23',	'2025-07-03 16:52:35'),
 (5,	3,	'Mi 12',	'2025-07-03 16:52:35'),
 (7,	6,	'Mate 20 pro',	'2025-07-08 20:37:20'),
-(8,	7,	'Skibidi',	'2025-07-09 13:11:52');
+(8,	7,	'Skibidi',	'2025-07-09 13:11:52'),
+(9,	1,	'test',	'2025-07-09 19:45:01'),
+(10,	6,	'sigma',	'2025-07-09 20:08:18'),
+(11,	6,	'Skupina B',	'2025-07-09 20:09:54');
 
 DROP TABLE IF EXISTS `order_case`;
 CREATE TABLE `order_case` (
