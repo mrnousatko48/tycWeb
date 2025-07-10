@@ -410,11 +410,18 @@ class PageFacade
     }
 
     /**
+     * Fetch model by ID.
+     */
+    public function getModelById(int $id): ?object
+    {
+        return $this->database->table('models')->get($id);
+    }
+
+    /**
      * Fetch colors by model ID.
      */
     public function getColorsByModel(int $modelId): array
     {
-        // Load all color IDs related to the model
         $modelColors = $this->database->table('model_colors')
             ->where('model_id', $modelId)
             ->fetchPairs('color_id', null);
@@ -423,62 +430,54 @@ class PageFacade
             return [];
         }
 
-        // Fetch color details
         $colors = $this->database->table('colors')
             ->where('id', array_keys($modelColors))
             ->fetchAll();
 
-        // Organize results
         $result = [];
         foreach ($colors as $color) {
             $result[] = [
                 'name' => $color->name,
-                'hex_code' => $color->hex_code,
+                'hex_code' => $color->hex_code
             ];
         }
 
         return $result;
     }
 
-
     /**
-     * Fetch features by model ID.
+     * Fetch features by model ID, including prices.
      */
-/**
- * Fetch features by model ID.
- */
-public function getFeaturesByModel(int $modelId): array
-{
-    // Load all features related to the model
-    $features = $this->database->table('model_features')
-        ->where('model_id', $modelId)
-        ->fetchPairs('feature_id', null);
+    public function getFeaturesByModel(int $modelId): array
+    {
+        $features = $this->database->table('model_features')
+            ->where('model_id', $modelId)
+            ->fetchPairs('feature_id', null);
 
-    if (!$features) {
-        return [];
+        if (!$features) {
+            return [];
+        }
+
+        $featureData = $this->database->table('features')
+            ->where('id', array_keys($features))
+            ->fetchPairs('id', 'name');
+
+        $options = $this->database->table('feature_options')
+            ->where('feature_id', array_keys($features))
+            ->order('feature_id')
+            ->fetchAll();
+
+        $result = [];
+        foreach ($options as $option) {
+            $featureName = $featureData[$option->feature_id];
+            $result[$featureName][] = [
+                'name' => $option->name,
+                'price' => (float)$option->price
+            ];
+        }
+
+        return $result;
     }
-
-    // Get all related features names
-    $featureData = $this->database->table('features')
-        ->where('id', array_keys($features))
-        ->fetchPairs('id', 'name');
-
-    // Get all options for all those features
-    $options = $this->database->table('feature_options')
-        ->where('feature_id', array_keys($features))
-        ->order('feature_id') // Optional, for cleaner structure
-        ->fetchAll();
-
-    // Organize results
-    $result = [];
-    foreach ($options as $option) {
-        $featureName = $featureData[$option->feature_id];
-        $result[$featureName][] = $option->name;
-    }
-
-    return $result;
-}
-
 
     /**
      * Fetch manufacturer name by ID.

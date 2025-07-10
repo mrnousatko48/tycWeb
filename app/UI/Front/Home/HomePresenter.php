@@ -79,13 +79,12 @@ final class HomePresenter extends BaseFrontPresenter
             ->setHtmlAttribute('data-url', $this->link('Endpoint:models', ['manufacturerId' => '#']))
             ->setHtmlAttribute('data-colors-url', $this->link('Endpoint:modelColors', ['modelId' => '#']))
             ->setHtmlAttribute('data-features-url', $this->link('Endpoint:modelFeatures', ['modelId' => '#']))
+            ->setHtmlAttribute('data-price-url', $this->link('Endpoint:modelPrice', ['modelId' => '#']))
             ->setRequired('Prosím vyberte model.');
 
         $form->addHidden('color')->setRequired('Prosím vyberte barvu.');
-        
-        $form->addHidden('port_cover')->setDefaultValue('yes');
-        $form->addHidden('camera_cover')->setDefaultValue('yes');
-        $form->addHidden('card_holder')->setDefaultValue('none');
+        $form->addHidden('features')->setDefaultValue('{}');
+        $form->addHidden('total_price')->setDefaultValue('0.00');
 
         $form->addSubmit('submit', 'Přidat do košíku');
 
@@ -105,14 +104,23 @@ final class HomePresenter extends BaseFrontPresenter
     public function processForm(Form $form): void
     {
         $values = $form->getValues();
-        $manufacturerId = (int)$values['manufacturer'];
-        $modelId = (int)$values['model'];
-        $color = $values['color'];
-        $portCover = $values['port_cover'];
-        $cameraCover = $values['camera_cover'];
-        $cardHolder = $values['card_holder'];
-
+        bdump($values);
+        error_log('Form submitted with values: ' . print_r($values, true)); // Debug log
         try {
+            $manufacturerId = (int)$values['manufacturer'];
+            $modelId = (int)$values['model'];
+            $color = $values['color'];
+            $totalPrice = (float)$values['total_price'];
+            $features = json_decode($values['features'], true);
+
+            if (!$manufacturerId || !$modelId || !$color) {
+                throw new \Exception('Missing required fields: manufacturer, model, or color.');
+            }
+
+            if (!is_array($features)) {
+                throw new \Exception('Invalid features format.');
+            }
+
             $manufacturerName = $this->pageFacade->getManufacturerNameById($manufacturerId);
             $modelName = $this->pageFacade->getModelNameById($modelId);
 
@@ -120,20 +128,22 @@ final class HomePresenter extends BaseFrontPresenter
                 throw new \Exception('Invalid manufacturer or model selected.');
             }
 
-            $userId = $this->getUser()->isLoggedIn() ? $this->getUser()->getId() : null;
-
-            $this->orderFacade->createCase([
+            $caseData = [
                 'manufacturer' => $manufacturerName,
                 'model' => $modelName,
                 'color' => $color,
-                'port_cover' => $portCover === 'yes' ? 1 : 0,
-                'camera_cover' => $cameraCover === 'yes' ? 1 : 0,
-                'card_holder' => $cardHolder,
-            ], $userId);
+                'total_price' => $totalPrice,
+                'features' => $values['features']
+            ];
+
+            $userId = $this->getUser()->isLoggedIn() ? $this->getUser()->getId() : null;
+            error_log('Creating case with data: ' . print_r($caseData, true)); // Debug log
+            $this->orderFacade->createCase($caseData, $userId);
 
             $this->flashMessage('Položka byla přidána do košíku.', 'success');
             $this->redirect('Cart:default');
         } catch (\Exception $e) {
+            error_log('Error in processForm: ' . $e->getMessage()); // Log specific error
             $this->flashMessage('Chyba při přidávání do košíku: ' . $e->getMessage(), 'error');
             $this->redirect('this');
         }

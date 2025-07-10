@@ -152,25 +152,52 @@ final class OrderFacade
             ->order('created_at DESC');
     }
 
-    public function createCase(array $data, ?int $userId = null): ActiveRow
-        {
-            $data['user_id'] = $userId;
-            $data['state'] = 'KOSIK';
-            $data['created_at'] = new \DateTime(); // Ensure created_at is set
+      public function createCase(array $data, ?int $userId = null): ActiveRow
+    {
+        $coreData = [
+            'user_id' => $userId,
+            'manufacturer' => $data['manufacturer'] ?? null,
+            'model' => $data['model'] ?? null,
+            'color' => $data['color'] ?? null,
+            'total_price' => $data['total_price'] ?? 0.0,
+            'state' => 'KOSIK',
+            'created_at' => new \DateTime()
+        ];
 
-            // Insert case into the database
-            $case = $this->database->table('cases')->insert($data);
-
-            // For guest users, store case in session
-            if ($userId === null) {
-                $orderSection = $this->session->getSection('order');
-                $quantities = $orderSection->quantities ?? [];
-                $quantities[$case->id] = ($quantities[$case->id] ?? 0) + 1; // Increment quantity if case exists
-                $orderSection->quantities = $quantities;
+        // Extract features (all fields except core ones)
+        $features = [];
+        foreach ($data as $key => $value) {
+            if (!in_array($key, ['manufacturer', 'model', 'color', 'total_price'])) {
+                $features[$key] = $value;
             }
-
-            return $case;
         }
+
+        // Add features to core data if using JSON column
+        if (!empty($features)) {
+            $coreData['features'] = json_encode($features);
+        }
+
+        try {
+            // Insert case into the database
+            $case = $this->database->table('cases')->insert($coreData);
+            error_log('Case created with ID: ' . $case->id . ', Data: ' . print_r($coreData, true));
+        } catch (\Exception $e) {
+            error_log('Error inserting case: ' . $e->getMessage());
+            throw $e; // Re-throw to be caught by processForm
+        }
+
+        // For guest users, store case in session
+        if ($userId === null) {
+            $orderSection = $this->session->getSection('order');
+            $quantities = $orderSection->quantities ?? [];
+            $quantities[$case->id] = ($quantities[$case->id] ?? 0) + 1;
+            $orderSection->quantities = $quantities;
+            $this->session->setExpiration('30 minutes');
+            error_log('Guest cart updated: ' . print_r($quantities, true));
+        }
+
+        return $case;
+    }
 
 
     public function removeCaseFromCart(\Nette\Http\Session $session, int $caseId): void
@@ -203,13 +230,13 @@ final class OrderFacade
         foreach ($orderCases as $orderCase) {
             $case = $this->database->table('cases')->get($orderCase->case_id);
             if ($case) {
-                $result[] = (object) [
+                $features = $case->features ? json_decode($case->features, true) : [];
+                $result[] = (object)[
                     'id' => $case->id,
                     'manufacturer' => $case->manufacturer,
                     'model' => $case->model,
                     'color' => $case->color,
-                    'port_cover' => $case->port_cover,
-                    'card_holder' => $case->card_holder,
+                    'features' => $features, // Decoded features
                     'quantity' => $orderCase->quantity,
                 ];
             }

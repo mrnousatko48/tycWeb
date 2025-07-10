@@ -4,12 +4,10 @@ declare(strict_types=1);
 
 namespace App\UI\Front\Cart;
 
-
 use App\UI\Front\BaseFrontPresenter;
 use Nette\Application\UI\Form;
 use Nette\Database\Explorer;
 use App\MailSender\MailSender;
-
 
 final class CartPresenter extends BaseFrontPresenter
 {
@@ -23,12 +21,25 @@ final class CartPresenter extends BaseFrontPresenter
         $this->mailSender = $mailSender;
     }
 
+    private function cleanFeatureKey(string $key): string
+    {
+        // Replace underscores with spaces
+        $key = str_replace('_', ' ', $key);
+
+        // Lowercase everything
+        $key = mb_strtolower($key);
+
+        // Capitalize first letter
+        $key = ucfirst($key);
+
+        return $key;
+    }
+
     public function renderDefault(): void
     {
         if ($this->getUser()->isLoggedIn()) {
-            $userId = (int) $this->getUser()->getId();
+            $userId = (int)$this->getUser()->getId();
             $cases = $this->orderFacade->getCartCasesByUserId($userId);
-            $this->template->cases = $cases;
         } else {
             $session = $this->getSession('order');
             $quantities = $session->quantities ?? [];
@@ -40,9 +51,37 @@ final class CartPresenter extends BaseFrontPresenter
 
             $caseIds = array_keys($quantities);
             $cases = $this->orderFacade->getCasesByIds($caseIds);
-            $this->template->cases = $cases;
             $this->template->quantities = $quantities;
         }
+
+        $decodedCases = [];
+        $totalCartValue = 0;
+        foreach ($cases as $case) {
+            $caseArray = $case->toArray();
+            $features = $case->features ? json_decode($case->features, true) : [];
+
+            // Check if there's an outer 'features' key and decode the inner JSON
+            $cleanFeatures = [];
+            if (!empty($features) && isset($features['features'])) {
+                $innerFeatures = json_decode($features['features'], true);
+                if (json_last_error() === JSON_ERROR_NONE) {
+                    foreach ($innerFeatures as $key => $value) {
+                        $cleanKey = $this->cleanFeatureKey($key);
+                        $cleanFeatures[$cleanKey] = $value;
+                    }
+                }
+            }
+
+            $caseArray['features'] = $cleanFeatures;
+            $decodedCases[] = (object) $caseArray;
+
+            // Calculate total value for this case based on quantity
+            $quantity = $this->template->quantities[$case->id] ?? 1;
+            $totalCartValue += $case->total_price * $quantity;
+        }
+
+        $this->template->cases = $decodedCases;
+        $this->template->totalCartValue = $totalCartValue;
     }
 
     protected function createComponentSendOrderForm(): Form
@@ -88,7 +127,7 @@ final class CartPresenter extends BaseFrontPresenter
         return $form;
     }
 
-   public function sendOrderFormSucceeded(Form $form, \stdClass $values): void
+    public function sendOrderFormSucceeded(Form $form, \stdClass $values): void
     {
         $session = $this->getSession('order');
         $quantities = $session->quantities ?? [];
@@ -134,7 +173,6 @@ final class CartPresenter extends BaseFrontPresenter
         $this->flashMessage('Objednávka byla úspěšně dokončena a faktura odeslána.', 'success');
         $this->redirect('Home:default');
     }
-
 
     public function renderOrder(): void
     {
@@ -215,18 +253,17 @@ final class CartPresenter extends BaseFrontPresenter
     }
 
     public function handleAddCase($caseData): void
-{
-    $case = $this->orderFacade->createCase($caseData, null); // null == guest
+    {
+        $case = $this->orderFacade->createCase($caseData, null); // null == guest
 
-    if ($this->getUser()->isLoggedIn() === false) {
-        $session = $this->getSession('order');
-        $quantities = $session->quantities ?? [];
-        $quantities[$case->id] = ($quantities[$case->id] ?? 0) + 1;
-        $session->quantities = $quantities;
+        if ($this->getUser()->isLoggedIn() === false) {
+            $session = $this->getSession('order');
+            $quantities = $session->quantities ?? [];
+            $quantities[$case->id] = ($quantities[$case->id] ?? 0) + 1;
+            $session->quantities = $quantities;
+        }
+
+        $this->flashMessage('Kryt byl přidán do košíku.', 'success');
+        $this->redirect('this');
     }
-
-    $this->flashMessage('Kryt byl přidán do košíku.', 'success');
-    $this->redirect('this');
-}
-
 }
