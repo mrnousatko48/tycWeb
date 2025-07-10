@@ -1,18 +1,11 @@
 {block content}
 <div class="container mt-4">
-    <h2 class="mb-4">🎨 Barvy</h2>
-
-    {foreach $flashes as $flash}
-        <div class="alert alert-{$flash->type} alert-dismissible fade show" role="alert">
-            {$flash->message}
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Zavřít"></button>
-        </div>
-    {/foreach}
+    <h2 class="mb-4">Barvy</h2>
 
     <div class="row g-4 mb-4">
         <div class="col-md-6">
             <div class="card shadow-sm">
-                <div class="card-header fw-bold">➕ Přidat barvu</div>
+                <div class="card-header fw-bold">Přidat barvu</div>
                 <div class="card-body">
                     {control colorForm}
                 </div>
@@ -21,7 +14,7 @@
     </div>
 
     <div class="card shadow-sm">
-        <div class="card-header fw-bold">📋 Seznam barev</div>
+        <div class="card-header fw-bold">Seznam barev</div>
         <div class="card-body table-responsive" n:snippet="colorsTable">
             <table class="table table-striped table-hover align-middle">
                 <thead class="table-light">

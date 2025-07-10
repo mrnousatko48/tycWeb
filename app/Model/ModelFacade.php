@@ -231,13 +231,14 @@ class ModelFacade
         return $this->database->table('feature_options')->order('feature_id, name');
     }
 
-    public function addFeatureOption(int $featureId, string $name): ActiveRow
+    public function addFeatureOption(int $featureId, string $name, float $price = 0.00): ActiveRow
     {
         $this->database->beginTransaction();
         try {
             $option = $this->database->table('feature_options')->insert([
                 'feature_id' => $featureId,
                 'name' => trim($name),
+                'price' => $price, // Add price to the insert
             ]);
             $this->database->commit();
             return $option;
@@ -249,6 +250,23 @@ class ModelFacade
             throw $e;
         }
     }
+    public function updateFeatureOption(int $id, string $name, float $price): void
+{
+    $this->database->beginTransaction();
+    try {
+        $this->database->table('feature_options')->get($id)->update([
+            'name' => trim($name),
+            'price' => $price,
+        ]);
+        $this->database->commit();
+    } catch (UniqueConstraintViolationException $e) {
+        $this->database->rollBack();
+        throw new \Exception("Option '$name' already exists for this feature.");
+    } catch (\Exception $e) {
+        $this->database->rollBack();
+        throw $e;
+    }
+}
 
     public function deleteFeatureOption(int $id): void
     {

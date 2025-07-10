@@ -201,6 +201,8 @@ final class ProductPresenter extends Nette\Application\UI\Presenter
         }
     }
 
+
+    # Creating feature option form with price input
     public function createComponentFeatureOptionForm(): Form
     {
         $form = new Form;
@@ -213,12 +215,18 @@ final class ProductPresenter extends Nette\Application\UI\Presenter
         $form->addText('name', 'Název varianty:')
             ->setRequired('Prosím, zadejte název varianty.');
 
+        $form->addText('price', 'Cena (CZK):')
+            ->setRequired('Prosím, zadejte cenu.')
+            ->addRule($form::FLOAT, 'Cena musí být platné číslo.')
+            ->setDefaultValue('0.00');
+
         $form->addSubmit('save', 'Přidat variantu');
 
         $form->onSuccess[] = [$this, 'featureOptionFormSucceeded'];
         return $form;
     }
 
+    # Handling feature option form submission
     public function featureOptionFormSucceeded(Form $form, array $values): void
     {
         try {
@@ -230,7 +238,7 @@ final class ProductPresenter extends Nette\Application\UI\Presenter
             if ($existingOption) {
                 $this->flashMessage("Možnost '{$values['name']}' již pro tuto vlastnost existuje.", 'error');
             } else {
-                $this->modelFacade->addFeatureOption($values['feature_id'], $values['name']);
+                $this->modelFacade->addFeatureOption($values['feature_id'], $values['name'], (float)$values['price']);
                 $this->flashMessage('Možnost byla úspěšně přidána!', 'success');
             }
         } catch (\Exception $e) {
@@ -244,6 +252,74 @@ final class ProductPresenter extends Nette\Application\UI\Presenter
             $this->redrawControl('flashes');
         } else {
             $this->redirect('features');
+        }
+    }
+
+    # Creating feature option edit form
+    public function createComponentFeatureOptionEditForm(): Form
+    {
+        $form = new Form;
+
+        $form->addHidden('id');
+
+        $form->addSelect('feature_id', 'Funkce:', 
+            $this->modelFacade->getFeatures()->fetchPairs('id', 'name'))
+            ->setPrompt('Vyberte funkci')
+            ->setRequired('Prosím, vyberte funkci.');
+
+        $form->addText('name', 'Název varianty:')
+            ->setRequired('Prosím, zadejte název varianty.');
+
+        $form->addText('price', 'Cena (CZK):')
+            ->setRequired('Prosím, zadejte cenu.')
+            ->addRule($form::FLOAT, 'Cena musí být platné číslo.')
+            ->setDefaultValue('0.00');
+
+        $form->addSubmit('save', 'Upravit variantu');
+
+        $form->onSuccess[] = [$this, 'featureOptionEditFormSucceeded'];
+        return $form;
+    }
+
+    # Handling feature option edit form submission
+    public function featureOptionEditFormSucceeded(Form $form, array $values): void
+    {
+        try {
+            $this->modelFacade->updateFeatureOption((int)$values['id'], $values['name'], (float)$values['price']);
+            $this->flashMessage('Varianta byla úspěšně upravena!', 'success');
+        } catch (\Exception $e) {
+            $this->flashMessage($e->getMessage(), 'error');
+        }
+
+        if ($this->isAjax()) {
+            $this->template->featureOptions = $this->modelFacade->getAllFeatureOptions();
+            $this->redrawControl('featureOptionsTable');
+            $this->redrawControl('featureOptionForm-feature_id');
+            $this->redrawControl('flashes');
+        } else {
+            $this->redirect('features');
+        }
+    }
+
+    # Handling edit feature option action
+    public function handleEditFeatureOption(int $optionId): void
+    {
+
+        $option = $this->modelFacade->getAllFeatureOptions()->get($optionId);
+        if (!$option) {
+            $this->flashMessage('Možnost neexistuje.', 'error');
+            $this->redirect('features');
+        }
+
+        $this['featureOptionEditForm']->setDefaults([
+            'id' => $option->id,
+            'feature_id' => $option->feature_id,
+            'name' => $option->name,
+            'price' => $option->price,
+        ]);
+
+        if ($this->isAjax()) {
+            $this->redrawControl('featureOptionEditForm');
         }
     }
 
