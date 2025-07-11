@@ -1,4 +1,6 @@
 <?php
+declare(strict_types=1);
+
 namespace App\UI\Front\Home;
 
 use Nette\Application\UI\Form;
@@ -48,7 +50,7 @@ final class HomePresenter extends BaseFrontPresenter
     {
         $this->template->banner = $this->pageFacade->getSectionContent('banner');
         $this->template->durability = $this->pageFacade->getSectionContent('durability');
-        $this->template->customization = $this->pageFacade->getSectionContent('customization');
+        $this->template->customizations = $this->pageFacade->getCustomizations();
         $this->template->gallery = $this->pageFacade->getGalleryImages();
         $this->template->contact = $this->pageFacade->getContactInfo();
     }
@@ -105,7 +107,7 @@ final class HomePresenter extends BaseFrontPresenter
     {
         $values = $form->getValues();
         bdump($values);
-        error_log('Form submitted with values: ' . print_r($values, true)); // Debug log
+        error_log('Form submitted with values: ' . print_r($values, true));
         try {
             $manufacturerId = (int)$values['manufacturer'];
             $modelId = (int)$values['model'];
@@ -137,13 +139,13 @@ final class HomePresenter extends BaseFrontPresenter
             ];
 
             $userId = $this->getUser()->isLoggedIn() ? $this->getUser()->getId() : null;
-            error_log('Creating case with data: ' . print_r($caseData, true)); // Debug log
+            error_log('Creating case with data: ' . print_r($caseData, true));
             $this->orderFacade->createCase($caseData, $userId);
 
             $this->flashMessage('Položka byla přidána do košíku.', 'success');
             $this->redirect('Cart:default');
         } catch (\Exception $e) {
-            error_log('Error in processForm: ' . $e->getMessage()); // Log specific error
+            error_log('Error in processForm: ' . $e->getMessage());
             $this->flashMessage('Chyba při přidávání do košíku: ' . $e->getMessage(), 'error');
             $this->redirect('this');
         }

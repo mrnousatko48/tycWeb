@@ -1,6 +1,4 @@
 <?php
-declare(strict_types=1);
-
 namespace App\Model;
 
 use Nette\Database\Context;
@@ -131,173 +129,50 @@ class PageFacade
     }
 
     /**
-     * Fetch customization section data.
+     * Fetch all customizations.
      */
-    public function getCustomizationSection(): object
+    public function getCustomizations(): array
     {
-        $rows = $this->database->table('customization')
+        return $this->database->table('customization')
             ->order('ordering')
             ->fetchAll();
-
-        $section = [
-            'title' => '',
-            'button_text' => '',
-            'button_link' => '',
-            'features' => []
-        ];
-
-        $features = [];
-        foreach ($rows as $row) {
-            if ($row->content_type === 'title') {
-                $section['title'] = $row->content_text;
-            } elseif ($row->content_type === 'button_text') {
-                $section['button_text'] = $row->content_text;
-            } elseif ($row->content_type === 'button_link') {
-                $section['button_link'] = $row->content_text;
-            } elseif (preg_match('/feature(\d+)_title/', $row->content_type, $matches)) {
-                $featureId = $matches[1];
-                $features[$featureId]['id'] = $row->id;
-                $features[$featureId]['title'] = $row->content_text;
-            } elseif (preg_match('/feature(\d+)_description/', $row->content_type, $matches)) {
-                $featureId = $matches[1];
-                $features[$featureId]['id'] = $row->id;
-                $features[$featureId]['description'] = $row->content_text;
-            } elseif (preg_match('/feature(\d+)_image/', $row->content_type, $matches)) {
-                $featureId = $matches[1];
-                $features[$featureId]['id'] = $row->id;
-                $features[$featureId]['image_path'] = $row->image_path;
-            }
-        }
-
-        $section['features'] = array_values(array_map(function ($feature) {
-            return (object)[
-                'id' => $feature['id'] ?? null,
-                'title' => $feature['title'] ?? '',
-                'description' => $feature['description'] ?? '',
-                'image_path' => $feature['image_path'] ?? null
-            ];
-        }, $features));
-
-        return (object)$section;
     }
 
     /**
-     * Fetch a single customization feature by ID.
+     * Add a new customization with title, description, and image.
      */
-    public function getCustomizationFeature(int $id): ?object
+    public function addCustomization(string $title, string $description, FileUpload $image): void
     {
-        $row = $this->database->table('customization')->get($id);
-        if (!$row || !preg_match('/feature(\d+)_/', $row->content_type, $matches)) {
-            return null;
-        }
-
-        $featureId = $matches[1];
-        $featureRows = $this->database->table('customization')
-            ->where('content_type LIKE ?', "feature{$featureId}%")
-            ->fetchAll();
-
-        $feature = [
-            'id' => $id,
-            'title' => '',
-            'description' => '',
-            'image_path' => null
-        ];
-
-        foreach ($featureRows as $featureRow) {
-            if ($featureRow->content_type === "feature{$featureId}_title") {
-                $feature['title'] = $featureRow->content_text;
-            } elseif ($featureRow->content_type === "feature{$featureId}_description") {
-                $feature['description'] = $featureRow->content_text;
-            } elseif ($featureRow->content_type === "feature{$featureId}_image") {
-                $feature['image_path'] = $featureRow->image_path;
-            }
-        }
-
-        return (object)$feature;
-    }
-
-    /**
-     * Update a customization feature with form values, including image upload.
-     */
-    public function updateCustomizationFeature(int $id, array $values): void
-    {
-        $row = $this->database->table('customization')->get($id);
-        if (!$row || !preg_match('/feature(\d+)_/', $row->content_type, $matches)) {
-            throw new \Exception('Feature not found');
-        }
-
-        $featureId = $matches[1];
-        $image = $values['image'] ?? null;
-        $imagePath = null;
-        if ($image instanceof FileUpload && $image->isOk()) {
-            $currentFeature = $this->getCustomizationFeature($id);
-            $imagePath = ImageUploader::uploadImage($image, 'Uploads/home', $currentFeature->image_path ?? null);
-        }
-
-        $this->database->table('customization')
-            ->where('content_type LIKE ?', "feature{$featureId}%")
-            ->delete();
-
-        $this->database->table('customization')->insert([
-            ['content_type' => "feature{$featureId}_title", 'content_text' => $values['title'], 'ordering' => $featureId * 3 - 1],
-            ['content_type' => "feature{$featureId}_description", 'content_text' => $values['description'], 'ordering' => $featureId * 3],
-            ['content_type' => "feature{$featureId}_image", 'image_path' => $imagePath ?? ($this->getCustomizationFeature($id)->image_path ?? null), 'ordering' => $featureId * 3 + 1]
-        ]);
-    }
-
-    /**
-     * Add a new customization feature with form values, including image upload.
-     */
-    public function addCustomizationFeature(array $values): void
-    {
-        $image = $values['image'] ?? null;
-        if (!$image instanceof FileUpload || !$image->isOk()) {
-            throw new \Exception('Valid image file is required.');
+        if (!$image->isOk()) {
+            throw new \Exception('Musíte nahrát platný obrázek.');
         }
         $imagePath = ImageUploader::uploadImage($image, 'Uploads/home', null);
 
-        $maxFeature = $this->database->table('customization')
-            ->where('content_type LIKE ?', 'feature%_title')
-            ->select('MAX(SUBSTRING(content_type, 8, 1)) AS max_feature')
-            ->fetchField('max_feature');
-
-        $featureId = ($maxFeature ? (int)$maxFeature + 1 : 1);
+        $maxOrdering = $this->database->table('customization')
+            ->select('MAX(ordering) AS max_ordering')
+            ->fetch()
+            ->max_ordering ?? 0;
 
         $this->database->table('customization')->insert([
-            ['content_type' => "feature{$featureId}_title", 'content_text' => $values['title'], 'ordering' => $featureId * 3 - 1],
-            ['content_type' => "feature{$featureId}_description", 'content_text' => $values['description'], 'ordering' => $featureId * 3],
-            ['content_type' => "feature{$featureId}_image", 'image_path' => $imagePath, 'ordering' => $featureId * 3 + 1]
+            'title' => $title,
+            'description' => $description,
+            'image_path' => $imagePath,
+            'ordering' => $maxOrdering + 1
         ]);
     }
 
     /**
-     * Delete a customization feature by ID.
+     * Delete a customization by ID.
      */
-    public function deleteCustomizationFeature(int $id): void
+    public function deleteCustomization(int $id): void
     {
-        $row = $this->database->table('customization')->get($id);
-        if ($row && preg_match('/feature(\d+)_/', $row->content_type, $matches)) {
-            $featureId = $matches[1];
-            $this->database->table('customization')
-                ->where('content_type LIKE ?', "feature{$featureId}%")
-                ->delete();
+        $customization = $this->database->table('customization')->get($id);
+        if ($customization) {
+            if ($customization->image_path && file_exists(__DIR__ . '/../../web' . $customization->image_path)) {
+                unlink(__DIR__ . '/../../web' . $customization->image_path);
+            }
+            $customization->delete();
         }
-    }
-
-    /**
-     * Update customization section with form values.
-     */
-    public function updateCustomizationSection(array $values): void
-    {
-        $this->database->table('customization')
-            ->where('content_type', ['title', 'button_text', 'button_link'])
-            ->delete();
-
-        $this->database->table('customization')->insert([
-            ['content_type' => 'title', 'content_text' => $values['title'], 'ordering' => 1],
-            ['content_type' => 'button_text', 'content_text' => $values['button_text'], 'ordering' => 11],
-            ['content_type' => 'button_link', 'content_text' => $values['button_link'], 'ordering' => 12]
-        ]);
     }
 
     /**

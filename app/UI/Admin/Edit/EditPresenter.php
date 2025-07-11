@@ -9,7 +9,7 @@ use App\Model\PageFacade;
 use App\Utils\ImageUploader;
 
 /**
- * LandingPresenter provides admin pages for editing landing page sections.
+ * EditPresenter provides admin pages for editing landing page sections.
  */
 final class EditPresenter extends Presenter
 {
@@ -23,14 +23,14 @@ final class EditPresenter extends Presenter
 
     protected function startup(): void
     {
-        parent::startup();  
+        parent::startup();
         if (!$this->user->isLoggedIn()) {
             $this->flashMessage('Nemáš přístup🚫', 'danger');
             $this->redirect(':Front:Home:default');
         }
     }
 
- /**
+    /**
      * Default dashboard view with navigation buttons.
      */
     public function renderDefault(): void
@@ -60,7 +60,7 @@ final class EditPresenter extends Presenter
      */
     public function renderCustomization(): void
     {
-        $this->template->customization = $this->pageFacade->getCustomizationSection();
+        $this->template->customizations = $this->pageFacade->getCustomizations();
         $this->template->setFile(__DIR__ . '/Templates/customization.latte');
     }
 
@@ -74,6 +74,15 @@ final class EditPresenter extends Presenter
     }
 
     /**
+     * Render the Contact Section edit page.
+     */
+    public function renderContact(): void
+    {
+        $this->template->contact = $this->pageFacade->getContactInfo();
+        $this->template->setFile(__DIR__ . '/Templates/contact.latte');
+    }
+
+    /**
      * Action to delete a gallery image.
      */
     public function actionDeleteGalleryImage(int $id): void
@@ -84,11 +93,11 @@ final class EditPresenter extends Presenter
     }
 
     /**
-     * Action to delete a customization feature.
+     * Action to delete a customization.
      */
-    public function actionDeleteCustomizationFeature(int $id): void
+    public function actionDeleteCustomization(int $id): void
     {
-        $this->pageFacade->deleteCustomizationFeature($id);
+        $this->pageFacade->deleteCustomization($id);
         $this->flashMessage('Funkce byla úspěšně odstraněna.', 'success');
         $this->redirect('customization');
     }
@@ -97,95 +106,83 @@ final class EditPresenter extends Presenter
      * Helper method to build an edit form.
      */
     private function createEditForm(
-    object $entity,
-    array $fields,
-    callable $updateCallback,
-    string $flashMessage,
-    string $redirectDestination
-): Form {
-    $form = new Form;
-    foreach ($fields as $name => $config) {
-        $method = 'add' . ucfirst($config['type']);
-        $field = $form->$method($name, $config['label'] ?? '');
-        if (array_key_exists('default', $config)) {
-            $field->setDefaultValue($config['default']);
-        } else {
-            // Use object property access instead of array access
-            $field->setDefaultValue($entity->$name ?? '');
+        object $entity,
+        array $fields,
+        callable $updateCallback,
+        string $flashMessage,
+        string $redirectDestination
+    ): Form
+    {
+        $form = new Form;
+        foreach ($fields as $name => $config) {
+            $method = 'add' . ucfirst($config['type']);
+            $field = $form->$method($name, $config['label'] ?? '');
+            if (array_key_exists('default', $config)) {
+                $field->setDefaultValue($config['default']);
+            } else {
+                $field->setDefaultValue($entity->$name ?? '');
+            }
+            if (!empty($config['required'])) {
+                $field->setRequired();
+            }
+            if ($config['type'] !== 'hidden' && $config['type'] !== 'upload') {
+                $field->getControlPrototype()->addClass('form-control');
+            }
         }
-        if (!empty($config['required'])) {
-            $field->setRequired();
-        }
-        if ($config['type'] !== 'hidden' && $config['type'] !== 'upload') {
-            $field->getControlPrototype()->addClass('form-control');
-        }
+        $form->addSubmit('save', 'Uložit')
+             ->getControlPrototype()->addClass('btn btn-primary');
+        $form->onSuccess[] = function (Form $form, $values) use ($updateCallback, $flashMessage, $redirectDestination): void {
+            $updateCallback((array)$values);
+            $this->flashMessage($flashMessage, 'success');
+            $this->redirect($redirectDestination);
+        };
+        return $form;
     }
-    $form->addSubmit('save', 'Uložit')
-         ->getControlPrototype()->addClass('btn btn-primary');
-    $form->onSuccess[] = function (Form $form, $values) use ($updateCallback, $flashMessage, $redirectDestination): void {
-        $updateCallback((array)$values);
-        $this->flashMessage($flashMessage, 'success');
-        $this->redirect($redirectDestination);
-    };
-    return $form;
-}
 
     /**
      * Create a form to edit the Banner Section.
      */
-    /**
- * Create a form to edit the Banner Section.
- */
-/**
- * Create a form to edit the Banner Section.
- */
-public function createComponentBannerForm(): Form
-{
-    $banner = $this->pageFacade->getBannerSection();
-    $fields = [
-        'title' => ['type' => 'text', 'label' => 'Nadpis:', 'required' => true],
-        'description' => ['type' => 'textArea', 'label' => 'Popis:', 'required' => true],
-        'button_text' => ['type' => 'text', 'label' => 'Text tlačítka:', 'required' => true],
-        'button_link' => ['type' => 'text', 'label' => 'Odkaz tlačítka:', 'required' => true],
-        'image' => [
-            'type' => 'upload',
-            'label' => 'Obrázek:',
-            'required' => false, // Set to true if the image is mandatory
-        ],
-    ];
+    public function createComponentBannerForm(): Form
+    {
+        $banner = $this->pageFacade->getBannerSection();
+        $fields = [
+            'title' => ['type' => 'text', 'label' => 'Nadpis:', 'required' => true],
+            'description' => ['type' => 'textArea', 'label' => 'Popis:', 'required' => true],
+            'button_text' => ['type' => 'text', 'label' => 'Text tlačítka:', 'required' => true],
+            'button_link' => ['type' => 'text', 'label' => 'Odkaz tlačítka:', 'required' => true],
+            'image' => [
+                'type' => 'upload',
+                'label' => 'Obrázek:',
+                'required' => false,
+            ],
+        ];
 
-    $form = $this->createEditForm(
-        (object)$banner,
-        $fields,
-        function ($values) {
-            $image = $values['image'] ?? null;
-            if ($image instanceof FileUpload && $image->isOk()) {
-                $currentImage = $this->pageFacade->getBannerSection()->image ?? null;
-                $imagePath = ImageUploader::uploadImage($image, 'Uploads/home', $currentImage);
-                $values['image'] = $imagePath;
-            } else {
-                unset($values['image']);
-            }
-            $this->pageFacade->updateBannerSection($values);
-        },
-        'Banner byl úspěšně aktualizován.',
-        'Edit:banner' // Changed from 'Dashboard:banner' to 'Edit:banner'
-    );
+        $form = $this->createEditForm(
+            (object)$banner,
+            $fields,
+            function ($values) {
+                $image = $values['image'] ?? null;
+                if ($image instanceof FileUpload && $image->isOk()) {
+                    $currentImage = $this->pageFacade->getBannerSection()->image ?? null;
+                    $imagePath = ImageUploader::uploadImage($image, 'Uploads/home', $currentImage);
+                    $values['image'] = $imagePath;
+                } else {
+                    unset($values['image']);
+                }
+                $this->pageFacade->updateBannerSection($values);
+            },
+            'Banner byl úspěšně aktualizován.',
+            'Edit:banner'
+        );
 
-    $form['image']
-        ->setHtmlAttribute('class', 'form-control')
-        ->addRule(Form::IMAGE, 'Soubor musí být obrázek (JPEG, PNG, GIF, WebP).');
+        $form['image']
+            ->setHtmlAttribute('class', 'form-control')
+            ->addRule(Form::IMAGE, 'Soubor musí být obrázek (JPEG, PNG, GIF, WebP).');
 
-    $form->getElementPrototype()->enctype = 'multipart/form-data';
-    return $form;
-}
+        $form->getElementPrototype()->enctype = 'multipart/form-data';
+        return $form;
+    }
 
-    /**
-     * Create a form to edit the Durability Section.
-     */
-    /**
- * Create a form to edit the Durability Section.
- */
     /**
      * Create a form to edit the Durability Section.
      */
@@ -199,7 +196,7 @@ public function createComponentBannerForm(): Form
             'image' => [
                 'type' => 'upload',
                 'label' => 'Obrázek:',
-                'required' => false, // Set to true if the image is mandatory
+                'required' => false,
             ],
         ];
 
@@ -218,7 +215,7 @@ public function createComponentBannerForm(): Form
                 $this->pageFacade->updateDurabilitySection($values);
             },
             'Sekce odolnosti byla úspěšně aktualizována.',
-            'Edit:durability' // Changed from 'Dashboard:durability'
+            'Edit:durability'
         );
 
         $form['image']
@@ -229,111 +226,38 @@ public function createComponentBannerForm(): Form
         return $form;
     }
 
- /**
- * Create a form to edit the Customization Section.
- */
-public function createComponentCustomizationForm(): Form
-{
-    $customization = $this->pageFacade->getCustomizationSection();
-    $fields = [
-        'title' => ['type' => 'text', 'label' => 'Nadpis:', 'required' => true],
-        'button_text' => ['type' => 'text', 'label' => 'Text tlačítka:', 'required' => true],
-        'button_link' => ['type' => 'text', 'label' => 'Odkaz tlačítka:', 'required' => true],
-    ];
-
-    $form = $this->createEditForm(
-        $customization,
-        $fields,
-        fn($values) => $this->pageFacade->updateCustomizationSection($values),
-        'Sekce přizpůsobení byla úspěšně aktualizována.',
-        'Edit:customization' // Changed from 'Dashboard:customization'
-    );
-    return $form;
-}
-
     /**
-     * Create a form to add a new Customization Feature.
+     * Create a form to add a new customization.
      */
-    /**
- * Create a form to add a new Customization Feature.
- */
-public function createComponentAddCustomizationFeatureForm(): Form
-{
-    $form = new Form;
-    $form->addText('title', 'Název funkce:')
-         ->setRequired('Zadejte název funkce.')
-         ->setHtmlAttribute('class', 'form-control');
-    $form->addTextArea('description', 'Popis funkce:')
-         ->setRequired('Zadejte popis funkce.')
-         ->setHtmlAttribute('class', 'form-control');
-    $form->addUpload('image', 'Obrázek:')
-         ->setRequired('Vyberte obrázek.')
-         ->setHtmlAttribute('class', 'form-control')
-         ->addRule(Form::IMAGE, 'Soubor musí být obrázek (JPEG, PNG, GIF, WebP).');
-    $form->addSubmit('save', 'Přidat funkci')
-         ->getControlPrototype()->addClass('btn btn-primary');
+    public function createComponentAddCustomizationForm(): Form
+    {
+        $form = new Form;
+        $form->addText('title', 'Název funkce:')
+             ->setRequired('Zadejte název funkce.')
+             ->setHtmlAttribute('class', 'form-control');
+        $form->addTextArea('description', 'Popis funkce:')
+             ->setRequired('Zadejte popis funkce.')
+             ->setHtmlAttribute('class', 'form-control');
+        $form->addUpload('image', 'Obrázek:')
+             ->setRequired('Vyberte obrázek.')
+             ->setHtmlAttribute('class', 'form-control')
+             ->addRule(Form::IMAGE, 'Soubor musí být obrázek (JPEG, PNG, GIF, WebP).');
+        $form->addSubmit('save', 'Přidat funkci')
+             ->getControlPrototype()->addClass('btn btn-primary');
 
-    $form->onSuccess[] = function (Form $form, $values) {
-        try {
-            $this->pageFacade->addCustomizationFeature((array)$values);
-            $this->flashMessage('Funkce byla úspěšně přidána.', 'success');
-        } catch (\Exception $e) {
-            $this->flashMessage('Chyba při přidávání funkce: ' . $e->getMessage(), 'danger');
-        }
-        $this->redirect('Edit:customization'); // Changed from 'customization'
-    };
-
-    $form->getElementPrototype()->enctype = 'multipart/form-data';
-    return $form;
-}
-
-/**
- * Create a form to edit a Customization Feature.
- */
-public function createComponentCustomizationFeatureForm(): Form
-{
-    $id = (int)$this->getParameter('id');
-    $feature = $this->pageFacade->getCustomizationFeature($id);
-    if (!$feature) {
-        $this->error('Funkce nenalezena');
-    }
-
-    $fields = [
-        'title' => ['type' => 'text', 'label' => 'Název funkce:', 'required' => true],
-        'description' => ['type' => 'textArea', 'label' => 'Popis funkce:', 'required' => true],
-        'image' => [
-            'type' => 'upload',
-            'label' => 'Obrázek:',
-            'required' => false, // Set to true if the image is mandatory
-        ],
-    ];
-
-    $form = $this->createEditForm(
-        (object)$feature,
-        $fields,
-        function ($values) use ($id) {
-            $image = $values['image'] ?? null;
-            if ($image instanceof FileUpload && $image->isOk()) {
-                $currentImage = $this->pageFacade->getCustomizationFeature($id)->image_path ?? null;
-                $imagePath = ImageUploader::uploadImage($image, 'Uploads/home', $currentImage);
-                $values['image'] = $imagePath;
-            } else {
-                unset($values['image']);
+        $form->onSuccess[] = function (Form $form, $values) {
+            try {
+                $this->pageFacade->addCustomization($values->title, $values->description, $values->image);
+                $this->flashMessage('Funkce byla úspěšně přidána.', 'success');
+            } catch (\Exception $e) {
+                $this->flashMessage('Chyba při přidávání funkce: ' . $e->getMessage(), 'danger');
             }
-            $this->pageFacade->updateCustomizationFeature($id, $values);
-        },
-        'Funkce byla úspěšně aktualizována.',
-        'Edit:customization' // Changed from 'Dashboard:customization'
-    );
+            $this->redirect('customization');
+        };
 
-    $form['image']
-        ->setHtmlAttribute('class', 'form-control')
-        ->addRule(Form::IMAGE, 'Soubor musí být obrázek (JPEG, PNG, GIF, WebP).');
-
-    $form->getElementPrototype()->enctype = 'multipart/form-data';
-    $form->setAction($this->link('Edit:customization', ['id' => $feature->id])); // Changed from 'Dashboard:customization'
-    return $form;
-}
+        $form->getElementPrototype()->enctype = 'multipart/form-data';
+        return $form;
+    }
 
     /**
      * Create a form to add/edit Gallery images.
@@ -392,6 +316,42 @@ public function createComponentCustomizationFeatureForm(): Form
             }
             $this->redirect('gallery');
         };
+        return $form;
+    }
+
+    /**
+     * Create a form to edit the Contact Information.
+     */
+    public function createComponentContactForm(): Form
+    {
+        $contact = $this->pageFacade->getContactInfo();
+        $fields = [
+            'name' => ['type' => 'text', 'label' => 'Jméno:', 'required' => true],
+            'address' => ['type' => 'text', 'label' => 'Adresa:', 'required' => true],
+            'ico' => ['type' => 'text', 'label' => 'IČO:', 'required' => true],
+            'phone' => ['type' => 'text', 'label' => 'Telefon:', 'required' => true],
+            'email' => ['type' => 'email', 'label' => 'Email:', 'required' => true],
+            'map_embed' => ['type' => 'textArea', 'label' => 'Kód mapy:', 'required' => true],
+        ];
+
+        $form = $this->createEditForm(
+            $contact ?? (object)[
+                'name' => '',
+                'address' => '',
+                'ico' => '',
+                'phone' => '',
+                'email' => '',
+                'map_embed' => ''
+            ],
+            $fields,
+            function ($values) use ($contact) {
+                $id = $contact ? $contact->id : 1;
+                $this->pageFacade->updateContactInfo($id, (array)$values);
+            },
+            'Kontaktní informace byly úspěšně aktualizovány.',
+            'Edit:contact'
+        );
+
         return $form;
     }
 }
