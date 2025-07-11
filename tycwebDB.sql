@@ -1,4 +1,4 @@
-CREATE TABLE `banner` (
+REATE TABLE `banner` (
   `id` int NOT NULL AUTO_INCREMENT,
   `content_type` enum('title','description','image','button_text','button_link') NOT NULL,
   `content_text` text,
@@ -21,9 +21,8 @@ CREATE TABLE `cases` (
   `manufacturer` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `model` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `color` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `port_cover` tinyint(1) NOT NULL,
-  `card_holder` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `camera_cover` tinyint(1) NOT NULL,
+  `total_price` decimal(10,2) DEFAULT '0.00',
+  `features` json DEFAULT NULL,
   `state` enum('KOSIK','OBJEDNANO','DORUCENO') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `user_id` int unsigned DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -32,54 +31,19 @@ CREATE TABLE `cases` (
   CONSTRAINT `cases_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-INSERT INTO `cases` (`id`, `manufacturer`, `model`, `color`, `port_cover`, `card_holder`, `camera_cover`, `state`, `user_id`, `created_at`) VALUES
-(3,	'samsung',	'a1',	'Černá',	1,	'1 slot',	0,	'KOSIK',	NULL,	'2025-06-24 15:05:15'),
-(4,	'xiaomi',	'aaaa',	'Černá',	0,	'1 slot',	0,	'KOSIK',	NULL,	'2025-06-24 15:05:15'),
-(5,	'samsung',	'S1',	'Černá',	1,	'1 slot',	0,	'KOSIK',	NULL,	'2025-06-24 15:05:15'),
-(6,	'samsung',	'asdasdasd',	'Černá',	0,	'1 slot',	0,	'OBJEDNANO',	3,	'2025-06-24 15:05:15'),
-(7,	'samsung',	'test31231',	'Černá',	1,	'Žádný',	0,	'OBJEDNANO',	3,	'2025-06-24 15:05:15'),
-(8,	'apple',	'ano',	'Černá',	0,	'2 sloty',	0,	'OBJEDNANO',	3,	'2025-06-24 15:05:15'),
-(9,	'samsung',	'a',	'Černá',	1,	'1 slot',	0,	'OBJEDNANO',	3,	'2025-06-24 15:05:15'),
-(10,	'samsung',	'ss',	'Černá',	1,	'1 slot',	0,	'OBJEDNANO',	3,	'2025-06-24 15:31:24'),
-(11,	'xiaomi',	'Redmi Note 8',	'Modrá',	0,	'2 sloty',	0,	'OBJEDNANO',	3,	'2025-06-24 15:47:35'),
-(13,	'xiaomi',	'Lite 2',	'Černá',	1,	'2 sloty',	0,	'OBJEDNANO',	2,	'2025-06-24 17:07:25'),
-(14,	'samsung',	'a',	'Černá',	0,	'Žádný',	0,	'KOSIK',	2,	'2025-06-24 17:09:22'),
-(18,	'xiaomi',	'ssss',	'Černá',	1,	'Žádný',	0,	'OBJEDNANO',	6,	'2025-06-24 20:12:08'),
-(19,	'samsung',	'a',	'Černá',	0,	'1 slot',	0,	'OBJEDNANO',	3,	'2025-06-26 08:43:08'),
-(20,	'samsung',	'S2',	'Černá',	1,	'1 slot',	0,	'OBJEDNANO',	3,	'2025-06-26 08:44:34'),
-(22,	'xiaomi',	'aaa',	'Černá',	1,	'1 slot',	0,	'OBJEDNANO',	3,	'2025-06-29 13:54:43'),
-(23,	'samsung',	'S1',	'Černá',	1,	'1 slot',	0,	'OBJEDNANO',	3,	'2025-06-29 13:57:17'),
-(24,	'samsung',	'ssss',	'Černá',	1,	'2 sloty',	0,	'OBJEDNANO',	3,	'2025-06-29 13:59:34'),
-(25,	'xiaomi',	'model',	'Bílá',	1,	'Žádný',	0,	'OBJEDNANO',	3,	'2025-06-29 13:59:46'),
-(26,	'samsung',	'as',	'Bílá',	1,	'1 slot',	0,	NULL,	NULL,	'2025-06-30 14:04:01'),
-(27,	'xiaomi',	'a',	'Bílá',	0,	'1 slot',	0,	NULL,	NULL,	'2025-06-30 14:04:59'),
-(28,	'samsung',	'aXXXX',	'Černá',	1,	'1 slot',	0,	NULL,	NULL,	'2025-06-30 14:06:28'),
-(29,	'samsung',	'yyyyy',	'Černá',	1,	'1 slot',	0,	'KOSIK',	NULL,	'2025-06-30 14:09:35'),
-(30,	'samsung',	'RRR',	'Černá',	1,	'1 slot',	0,	'KOSIK',	NULL,	'2025-06-30 14:16:10'),
-(31,	'samsung',	'PPPPP',	'Černá',	1,	'1 slot',	0,	'KOSIK',	NULL,	'2025-06-30 14:18:59'),
-(32,	'samsung',	'sessiomn test',	'Bílá',	1,	'1 slot',	0,	'KOSIK',	NULL,	'2025-06-30 14:32:54'),
-(33,	'xiaomi',	'CCCC',	'Bílá',	1,	'1 slot',	0,	'KOSIK',	NULL,	'2025-06-30 14:35:54'),
-(34,	'samsung',	'ahoj',	'Černá',	0,	'1 slot',	0,	'KOSIK',	NULL,	'2025-06-30 14:36:42'),
-(35,	'xiaomi',	'a',	'Černá',	1,	'1 slot',	0,	'KOSIK',	NULL,	'2025-06-30 14:37:16'),
-(36,	'samsung',	'a',	'Modrá',	1,	'1 slot',	0,	'OBJEDNANO',	3,	'2025-06-30 15:53:42'),
-(37,	'xiaomi',	'A',	'Černá',	1,	'Žádný',	0,	'OBJEDNANO',	3,	'2025-06-30 16:00:25'),
-(38,	'xiaomi',	'B',	'Černá',	0,	'Žádný',	0,	'OBJEDNANO',	3,	'2025-06-30 16:00:32'),
-(39,	'apple',	'C',	'Černá',	0,	'2 sloty',	0,	'OBJEDNANO',	3,	'2025-06-30 16:00:42'),
-(40,	'xiaomi',	'test',	'Bílá',	1,	'1 slot',	0,	'OBJEDNANO',	3,	'2025-06-30 16:08:43'),
-(41,	'Apple',	'iPhone 13',	'',	1,	'Žádný',	1,	'KOSIK',	NULL,	'2025-07-04 16:58:02'),
-(42,	'',	'',	'',	1,	'Žádný',	1,	'KOSIK',	NULL,	'2025-07-04 16:58:06'),
-(43,	'Apple',	'iPhone 13',	'Červená',	1,	'Žádný',	1,	'KOSIK',	NULL,	'2025-07-04 17:16:34'),
-(51,	'Samsung',	'Galaxy S22',	'Bílá',	1,	'Žádný',	1,	'OBJEDNANO',	9,	'2025-07-04 17:27:03'),
-(52,	'Samsung',	'Galaxy S22',	'Bílá',	0,	'2 sloty',	0,	'OBJEDNANO',	9,	'2025-07-04 17:52:22'),
-(55,	'Apple',	'iPhone 13',	'Bílá',	0,	'Žádný',	0,	'OBJEDNANO',	9,	'2025-07-05 19:30:47'),
-(56,	'Samsung',	'Galaxy S22',	'Bílá',	0,	'2 sloty',	0,	'KOSIK',	NULL,	'2025-07-05 19:34:01'),
-(57,	'Samsung',	'Galaxy S22',	'Bílá',	0,	'2 sloty',	0,	'KOSIK',	NULL,	'2025-07-05 19:46:19'),
-(58,	'Samsung',	'Galaxy S22',	'Bílá',	0,	'Žádný',	0,	'KOSIK',	NULL,	'2025-07-05 19:46:26'),
-(59,	'Apple',	'iPhone 13',	'Bílá',	0,	'Žádný',	0,	'KOSIK',	NULL,	'2025-07-05 19:48:20'),
-(60,	'Apple',	'iPhone 13',	'Bílá',	1,	'2 sloty',	1,	'KOSIK',	NULL,	'2025-07-05 19:48:40'),
-(61,	'Apple',	'iPhone 13',	'Červená',	0,	'Žádný',	0,	'KOSIK',	NULL,	'2025-07-07 10:08:18'),
-(62,	'Samsung',	'Galaxy S22',	'Modrá',	0,	'Žádný',	0,	'KOSIK',	NULL,	'2025-07-07 10:08:39'),
-(63,	'Samsung',	'Galaxy S22',	'Modrá',	0,	'2 sloty',	0,	'OBJEDNANO',	9,	'2025-07-07 10:26:33');
+INSERT INTO `cases` (`id`, `manufacturer`, `model`, `color`, `total_price`, `features`, `state`, `user_id`, `created_at`) VALUES
+(20,	'Apple',	'iPhone 13',	'Bílá',	634.99,	'\"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\",\\\"test\\\":\\\"1\\\"}\"',	'OBJEDNANO',	9,	'2025-07-10 19:20:13'),
+(22,	'Apple',	'iPhone 13',	'fialova',	634.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\",\\\"test\\\":\\\"1\\\"}\"}',	'OBJEDNANO',	9,	'2025-07-10 21:47:52'),
+(23,	'Apple',	'iPhone 13',	'Modrá',	559.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ne\\\",\\\"test\\\":\\\"2\\\"}\"}',	'OBJEDNANO',	9,	'2025-07-10 22:00:17'),
+(24,	'Apple',	'iPhone 13',	'Modrá',	604.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ne\\\",\\\"test\\\":\\\"2\\\"}\"}',	'OBJEDNANO',	9,	'2025-07-10 22:06:16'),
+(25,	'Apple',	'iPhone 13',	'Modrá',	634.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\",\\\"test\\\":\\\"1\\\"}\"}',	'OBJEDNANO',	9,	'2025-07-10 22:10:02'),
+(26,	'Apple',	'iPhone 13',	'Bílá',	559.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\",\\\"test\\\":\\\"2\\\"}\"}',	'KOSIK',	NULL,	'2025-07-10 22:17:02'),
+(27,	'Apple',	'iPhone 13',	'Modrá',	559.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\",\\\"test\\\":\\\"2\\\"}\"}',	'OBJEDNANO',	9,	'2025-07-11 06:06:10'),
+(28,	'Apple',	'iPhone 13',	'Červená',	559.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ne\\\",\\\"test\\\":\\\"2\\\"}\"}',	'OBJEDNANO',	9,	'2025-07-11 06:29:43'),
+(29,	'Apple',	'iPhone 13',	'Červená',	529.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ne\\\",\\\"test\\\":\\\"2\\\"}\"}',	'KOSIK',	NULL,	'2025-07-11 06:41:21'),
+(30,	'Apple',	'iPhone 13',	'Modrá',	589.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\",\\\"test\\\":\\\"1\\\"}\"}',	'OBJEDNANO',	9,	'2025-07-11 07:33:47'),
+(31,	'Apple',	'iPhone 13',	'fialova',	634.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\",\\\"test\\\":\\\"1\\\"}\"}',	'OBJEDNANO',	9,	'2025-07-11 07:35:26'),
+(32,	'Apple',	'iPhone 13',	'Černá',	634.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\",\\\"test\\\":\\\"1\\\"}\"}',	'OBJEDNANO',	9,	'2025-07-11 07:49:40');
 
 DROP TABLE IF EXISTS `colors`;
 CREATE TABLE `colors` (
@@ -97,7 +61,8 @@ INSERT INTO `colors` (`id`, `name`, `hex_code`, `created_at`) VALUES
 (3,	'Modrá',	'#0000FF',	'2025-07-09 14:37:00'),
 (4,	'Červená',	'#FF0000',	'2025-07-09 14:37:00'),
 (5,	'Zelená',	'#00FF00',	'2025-07-09 14:37:00'),
-(6,	'oranžová',	'#FFAC1C',	'2025-07-09 12:39:45');
+(6,	'oranžová',	'#FFAC1C',	'2025-07-09 12:39:45'),
+(10,	'fialova',	'#bd00ff',	'2025-07-10 15:01:31');
 
 DROP TABLE IF EXISTS `contact_info`;
 CREATE TABLE `contact_info` (
@@ -156,6 +121,27 @@ INSERT INTO `durability` (`id`, `content_type`, `content_text`, `image_path`, `o
 (3,	'description2',	'Vyrobeny z odolných, ekologických materiálů s perfektním přizpůsobením pro váš telefon.',	NULL,	3),
 (4,	'image',	NULL,	'/uploads/home/sekera.jpg',	4);
 
+DROP TABLE IF EXISTS `email_templates`;
+CREATE TABLE `email_templates` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `name` varchar(255) NOT NULL,
+  `subject` varchar(255) NOT NULL,
+  `body` text NOT NULL,
+  `recipient_email` varchar(255) DEFAULT NULL,
+  `admin_phone` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `pdf_paths` text,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+INSERT INTO `email_templates` (`id`, `name`, `subject`, `body`, `recipient_email`, `admin_phone`, `created_at`, `pdf_paths`, `updated_at`) VALUES
+(11,	'registration',	'Vítejte! Registrace byla úspěšná',	'<!DOCTYPE html>\r\n<html lang=\"cs\">\r\n<head>\r\n    <meta charset=\"UTF-8\">\r\n    <title>Registrace na stránky 3D kryty</title>\r\n</head>\r\n<body>\r\n    <h1>Zdravím, {$username}!</h1>\r\n    <p>Vaše registrace do 3D kryty proběhla úspěšně.</p>    \r\n</body>\r\n</html>',	NULL,	NULL,	'2025-07-10 21:54:32',	NULL,	'2025-07-10 21:54:32'),
+(12,	'new_user',	'Nová registrace uživatele',	'<!DOCTYPE html>\r\n<html lang=\"cs\">\r\n<head>\r\n    <meta charset=\"UTF-8\">\r\n    <title>Nová registrace</title>\r\n</head>\r\n<body>\r\n    <h1>Nová registrace uživatele {$username}</h1>\r\n    <p>Do systému 3D kryty byl zaregistrován nový uživatel {$username}</p>\r\n    <p>Email: {$email}</p>\r\n</body>\r\n</html>',	'okurkyvmalinovce@seznam.cz',	NULL,	'2025-07-10 21:54:32',	NULL,	'2025-07-10 21:54:32'),
+(13,	'password_reset',	'Reset hesla',	'<!DOCTYPE html>\r\n<html lang=\"cs\">\r\n<head>\r\n    <meta charset=\"UTF-8\">\r\n    <title>Obnova hesla</title>\r\n</head>\r\n<body>\r\n    <h1>Obnova hesla</h1>\r\n    <p>Dobrý den,</p>\r\n    <p>Váš ověřovací kód: <strong>{$resetCode}</strong></p>\r\n    <p>Zadejte tento kód na stránce pro obnovu hesla. Je platný po dobu 10 minut.</p>\r\n    <p>Pokud jste o reset nežádali, tento email ignorujte.</p>\r\n</body>\r\n</html>',	NULL,	NULL,	'2025-07-10 21:54:32',	NULL,	'2025-07-10 21:54:32'),
+(15,	'invoice',	'Faktura č. {$order.id}',	'<style>\r\n    body {\r\n        font-family: DejaVu Sans, sans-serif;\r\n        font-size: 12px;\r\n        color: #333;\r\n    }\r\n    .header {\r\n        text-align: center;\r\n        margin-bottom: 20px;\r\n    }\r\n    .details, .items, .costs {\r\n        width: 100%;\r\n        margin-bottom: 20px;\r\n        border-collapse: collapse;\r\n    }\r\n    .details td, .costs td {\r\n        padding: 5px;\r\n        vertical-align: top;\r\n    }\r\n    .items th, .items td {\r\n        border: 1px solid #999;\r\n        padding: 6px;\r\n        text-align: left;\r\n    }\r\n    .items th {\r\n        background-color: #f2f2f2;\r\n    }\r\n    h1 {\r\n        font-size: 20px;\r\n        margin-bottom: 5px;\r\n    }\r\n    hr {\r\n        margin: 20px 0;\r\n    }\r\n</style>\r\n\r\n<div class=\"header\">\r\n    <h1>Faktura č. {$order.id}</h1>\r\n    <p>Datum vystavení: {$created_at}</p>\r\n</div>\r\n\r\n<table class=\"details\">\r\n    <tr>\r\n        <td><strong>Odběratel:</strong><br>{$recipient}</td>\r\n        <td>\r\n            <strong>Adresa:</strong><br>\r\n            {$order.address}<br>\r\n            {$order.city}, {$order.psc}<br>\r\n            {if $order.delivery_point}Výdejní místo: {$order.delivery_point}{/if}\r\n        </td>\r\n    </tr>\r\n</table>\r\n\r\n<hr>\r\n\r\n<table class=\"items\">\r\n    <thead>\r\n        <tr>\r\n            <th>#</th>\r\n            <th>ID</th>\r\n            <th>Výrobce</th>\r\n            <th>Model</th>\r\n            <th>Barva</th>\r\n            <th>Vlastnosti</th>\r\n            <th>Množství</th>\r\n            <th>Cena za kus</th>\r\n            <th>Celkem</th>\r\n        </tr>\r\n    </thead>\r\n    <tbody>\r\n        {foreach $items as $i => $item}\r\n            <tr>\r\n                <td>{$i + 1}</td>\r\n                <td>{$item.id}</td>\r\n                <td>{$item.manufacturer}</td>\r\n                <td>{$item.model}</td>\r\n                <td>{$item.color}</td>\r\n                <td>\r\n                    {foreach $item.features as $key => $value}\r\n                        {$key}: {$value}<br>\r\n                    {/foreach}\r\n                </td>\r\n                <td>{$item.quantity}</td>\r\n                <td>{$item.total_price|number:2,\",\",\" \"} Kč</td>\r\n                <td>{($item.total_price * $item.quantity)|number:2,\",\",\" \"} Kč</td>\r\n            </tr>\r\n        {/foreach}\r\n    </tbody>\r\n</table>\r\n\r\n<table class=\"costs\">\r\n    <tr>\r\n        <td><strong>Mezisoučet položek:</strong></td>\r\n        <td>{$itemsSubtotal|number:2,\",\",\" \"} Kč</td>\r\n    </tr>\r\n    <tr>\r\n        <td><strong>Doprava ({$order.shipping}):</strong></td>\r\n        <td>{$shippingCost|number:2,\",\",\" \"} Kč</td>\r\n    </tr>\r\n    <tr>\r\n        <td><strong>Platba ({$order.payment}):</strong></td>\r\n        <td>{$paymentCost|number:2,\",\",\" \"} Kč</td>\r\n    </tr>\r\n    <tr>\r\n        <td><strong>Celková částka:</strong></td>\r\n        <td>{($itemsSubtotal + $order.additional_cost)|number:2,\",\",\" \"} Kč</td>\r\n    </tr>\r\n</table>',	NULL,	NULL,	'2025-07-10 21:54:32',	NULL,	'2025-07-10 22:17:52'),
+(16,	'invoice_email',	'Faktura za vaši objednávku č. {$orderId}',	'<!DOCTYPE html>\r\n<html lang=\"cs\">\r\n<head>\r\n    <meta charset=\"UTF-8\">\r\n    <title>Faktura za vaši objednávku č. {$orderId}</title>\r\n</head>\r\n<body style=\"font-family: DejaVu Sans, sans-serif; font-size: 14px; color: #333;\">\r\n    <h1 style=\"font-size: 20px; margin-bottom: 10px;\">Dobrý den, {$recipient}!</h1>\r\n    <p style=\"margin-bottom: 10px;\">Vaše objednávka č. {$orderId} byla přijata.</p>\r\n    <p style=\"margin-bottom: 20px;\">V příloze naleznete fakturu s detaily vaší objednávky.</p>\r\n    <h2 style=\"font-size: 16px; font-weight: bold; margin-bottom: 10px;\">Shrnutí objednávky</h2>\r\n    <ul style=\"list-style: none; padding: 0; margin-bottom: 20px;\">\r\n        <li style=\"margin-bottom: 5px;\"><strong>Mezisoučet položek:</strong> {$itemsSubtotal|number:2,\",\",\" \"} Kč</li>\r\n        <li style=\"margin-bottom: 5px;\"><strong>Doprava ({$order.shipping}):</strong> {$shippingCost|number:2,\",\",\" \"} Kč</li>\r\n        <li style=\"margin-bottom: 5px;\"><strong>Platba ({$order.payment}):</strong> {$paymentCost|number:2,\",\",\" \"} Kč</li>\r\n        <li style=\"margin-bottom: 5px;\"><strong>Celková částka:</strong> {($itemsSubtotal + $order.additional_cost)|number:2,\",\",\" \"} Kč</li>\r\n    </ul>\r\n    <p style=\"margin-bottom: 10px;\">Děkujeme za váš nákup!</p>\r\n    <p style=\"font-size: 12px; color: #666;\">Pokud máte jakékoli dotazy, kontaktujte nás na <a href=\"mailto:okurkyvmalinovce@seznam.cz\" style=\"color: #007bff;\">okurkyvmalinovce@seznam.cz</a>.</p>\r\n</body>\r\n</html>',	NULL,	NULL,	'2025-07-10 21:54:32',	NULL,	'2025-07-10 21:54:32');
+
 DROP TABLE IF EXISTS `feature_options`;
 CREATE TABLE `feature_options` (
   `id` int NOT NULL AUTO_INCREMENT,
@@ -175,7 +161,9 @@ INSERT INTO `feature_options` (`id`, `feature_id`, `name`, `price`, `created_at`
 (24,	12,	'2 Sloty',	45.00,	'2025-07-09 19:47:06'),
 (25,	12,	'Žádný',	0.00,	'2025-07-09 19:47:37'),
 (30,	18,	'Ano',	30.00,	'2025-07-09 20:05:52'),
-(31,	18,	'Ne',	0.00,	'2025-07-09 20:05:58');
+(31,	18,	'Ne',	0.00,	'2025-07-09 20:05:58'),
+(36,	21,	'1',	0.00,	'2025-07-10 18:07:59'),
+(37,	21,	'2',	0.00,	'2025-07-10 18:08:02');
 
 DROP TABLE IF EXISTS `features`;
 CREATE TABLE `features` (
@@ -189,7 +177,8 @@ CREATE TABLE `features` (
 INSERT INTO `features` (`id`, `name`, `created_at`) VALUES
 (12,	'Držák karet',	'2025-07-09 19:45:56'),
 (16,	'Clona přední kamery',	'2025-07-09 19:46:07'),
-(18,	'Krytka nabíjecího portu',	'2025-07-09 19:46:27');
+(18,	'Krytka nabíjecího portu',	'2025-07-09 19:46:27'),
+(21,	'test',	'2025-07-10 18:07:49');
 
 DROP TABLE IF EXISTS `gallery`;
 CREATE TABLE `gallery` (
@@ -249,7 +238,8 @@ INSERT INTO `model_colors` (`model_id`, `color_id`) VALUES
 (4,	3),
 (1,	4),
 (2,	4),
-(5,	4);
+(5,	4),
+(1,	10);
 
 DROP TABLE IF EXISTS `model_features`;
 CREATE TABLE `model_features` (
@@ -270,7 +260,8 @@ INSERT INTO `model_features` (`model_id`, `feature_id`, `feature_option_id`) VAL
 (4,	16,	18),
 (1,	12,	25),
 (4,	12,	25),
-(1,	18,	31);
+(1,	18,	31),
+(1,	21,	37);
 
 DROP TABLE IF EXISTS `models`;
 CREATE TABLE `models` (
@@ -303,76 +294,57 @@ CREATE TABLE `order_case` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 INSERT INTO `order_case` (`order_id`, `case_id`, `quantity`) VALUES
-(11,	11,	1),
-(11,	10,	1),
-(11,	6,	1),
-(11,	7,	1),
-(11,	8,	1),
-(11,	9,	1),
-(12,	13,	1),
-(13,	18,	2),
-(14,	19,	1),
-(15,	20,	1),
-(16,	23,	1),
-(16,	22,	1),
-(17,	29,	1),
-(22,	34,	1),
-(23,	35,	1),
-(24,	25,	1),
-(24,	24,	1),
-(25,	36,	1),
-(26,	36,	1),
-(27,	39,	1),
-(27,	38,	1),
-(27,	37,	1),
-(28,	39,	1),
-(28,	38,	1),
-(28,	37,	1),
-(29,	39,	1),
-(29,	38,	1),
-(29,	37,	1),
-(30,	40,	1),
-(31,	52,	1),
-(31,	51,	1),
-(32,	63,	1),
-(32,	55,	1);
+(36,	28,	1),
+(37,	30,	1),
+(38,	31,	1),
+(39,	32,	1);
 
 DROP TABLE IF EXISTS `orders`;
 CREATE TABLE `orders` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `user_id` int DEFAULT NULL,
+  `user_id` int unsigned DEFAULT NULL,
   `firstname` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `lastname` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `email` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `phone` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `address` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `city` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `state` enum('KOSIK','OBJEDNANO','DORUCENO') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-  `payment` enum('PREVOD','DOBIRKA') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `psc` varchar(16) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `payment` enum('PREVOD','DOBIRKA') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `shipping` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `delivery_point` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `additional_cost` decimal(10,2) DEFAULT '0.00',
+  `state` enum('KOSIK','OBJEDNANO','DORUCENO') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `variable_symbol` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
   PRIMARY KEY (`id`),
-  KEY `user_id` (`user_id`)
+  UNIQUE KEY `variable_symbol` (`variable_symbol`),
+  KEY `user_id` (`user_id`),
+  CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-INSERT INTO `orders` (`id`, `user_id`, `firstname`, `lastname`, `email`, `address`, `city`, `state`, `payment`, `psc`, `created_at`) VALUES
-(11,	3,	'',	'',	'',	'ulice 2',	'praha',	'OBJEDNANO',	NULL,	NULL,	'2025-06-24 16:40:51'),
-(12,	2,	'',	'',	'',	'prablova 921',	'Ostrava',	'OBJEDNANO',	NULL,	NULL,	'2025-06-24 17:07:48'),
-(13,	6,	'',	'',	'',	'231',	'brno',	'OBJEDNANO',	NULL,	NULL,	'2025-06-24 20:12:18'),
-(14,	3,	'',	'',	'',	'Nádražní 23',	'Praha',	'OBJEDNANO',	NULL,	NULL,	'2025-06-26 08:43:23'),
-(15,	3,	'',	'',	'',	'Nádražní 23',	'Praha 3',	'OBJEDNANO',	NULL,	'110 03',	'2025-06-26 08:45:02'),
-(16,	3,	'',	'',	'',	'Nádražní 23',	'Praha',	'OBJEDNANO',	NULL,	'110 03',	'2025-06-29 13:58:17'),
-(17,	NULL,	'',	'',	'',	'YXXYXY',	'YYYY',	'OBJEDNANO',	NULL,	'2131',	'2025-06-30 14:12:44'),
-(22,	NULL,	'asda',	'sd',	'',	'asdas',	'da',	'OBJEDNANO',	NULL,	'asd',	'2025-06-30 14:36:48'),
-(23,	NULL,	'a',	'a',	'',	'a',	'a',	'OBJEDNANO',	NULL,	'a',	'2025-06-30 14:37:21'),
-(24,	3,	'administrátor',	'veliký',	'',	'Nádražní 23',	'Praha',	'OBJEDNANO',	NULL,	'110 03',	'2025-06-30 14:37:31'),
-(25,	3,	'administrátor',	'veliký',	'admin@mail.com',	'Nádražní 23',	'Praha',	'OBJEDNANO',	NULL,	'110 03',	'2025-06-30 15:54:56'),
-(26,	3,	'administrátor',	'veliký',	'dostals64@gmail.com',	'Nádražní 23',	'Praha',	'OBJEDNANO',	NULL,	'110 03',	'2025-06-30 15:55:24'),
-(27,	3,	'administrátor',	'veliký',	'dostals64@gmail.com',	'Nádražní 23',	'Praha',	'OBJEDNANO',	NULL,	'110 03',	'2025-06-30 16:00:51'),
-(28,	3,	'administrátor',	'veliký',	'dostals64@gmail.com',	'Nádražní 23',	'Praha',	'OBJEDNANO',	NULL,	'110 03',	'2025-06-30 16:02:43'),
-(29,	3,	'administrátor',	'veliký',	'dostals64@gmail.com',	'Nádražní 23',	'Praha',	'OBJEDNANO',	NULL,	'110 03',	'2025-06-30 16:04:34'),
-(30,	3,	'administrátor',	'veliký',	'dostals64@gmail.com',	'Nádražní 23',	'Praha',	'OBJEDNANO',	NULL,	'110 03',	'2025-06-30 16:08:48'),
-(31,	9,	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'Konopáčská 465',	'Heřmanův Městec',	'OBJEDNANO',	'PREVOD',	'53803',	'2025-07-04 17:54:40'),
-(32,	9,	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'shrekova bazina 13',	'Praha',	'OBJEDNANO',	'PREVOD',	'53803',	'2025-07-07 10:27:34');
+INSERT INTO `orders` (`id`, `user_id`, `firstname`, `lastname`, `email`, `phone`, `address`, `city`, `psc`, `payment`, `shipping`, `delivery_point`, `additional_cost`, `state`, `created_at`, `variable_symbol`) VALUES
+(36,	9,	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'666777888',	'shrekova bazina 13',	'Praha',	'53803',	'PREVOD',	'ZASILKOVNA',	'sokolská 799 hermanuv mestec',	70.00,	'OBJEDNANO',	'2025-07-11 07:31:53',	'202507110823'),
+(37,	9,	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'666777888',	'shrekova bazina 13',	'Praha',	'53803',	'DOBIRKA',	'ZASILKOVNA',	'sokolská 799 hermanuv mestec',	110.00,	'OBJEDNANO',	'2025-07-11 07:34:07',	'202507112143'),
+(38,	9,	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'666777888',	'shrekova bazina 13',	'Praha',	'53803',	'DOBIRKA',	'ZASILKOVNA',	'sokolská 799 hermanuv mestec',	110.00,	'OBJEDNANO',	'2025-07-11 07:35:49',	'202507117212'),
+(39,	9,	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'666777888',	'shrekova bazina 13',	'Praha',	'53803',	'PREVOD',	'ZASILKOVNA',	'sokolská 799 hermanuv mestec',	70.00,	'OBJEDNANO',	'2025-07-11 07:49:56',	'202507112228');
+
+DROP TABLE IF EXISTS `shipping`;
+CREATE TABLE `shipping` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `code` varchar(50) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `cost` decimal(10,2) NOT NULL,
+  `description` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `code` (`code`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+INSERT INTO `shipping` (`id`, `code`, `name`, `cost`, `description`, `created_at`) VALUES
+(1,	'CESKA_POSTA',	'Česká pošta',	100.00,	'Doručení prostřednictvím České pošty',	'2025-07-10 21:06:00'),
+(2,	'ZASILKOVNA',	'Zásilkovna',	70.00,	'Doručení na výdejní místo Zásilkovny',	'2025-07-10 21:06:00'),
+(3,	'BALIKOVNA',	'Balíkovna',	65.00,	'Doručení na výdejní místo Balíkovny',	'2025-07-10 21:06:00');
 
 DROP TABLE IF EXISTS `users`;
 CREATE TABLE `users` (
