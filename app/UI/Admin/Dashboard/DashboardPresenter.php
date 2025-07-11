@@ -1,22 +1,22 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\UI\Admin\Dashboard;
 
 use Nette;
 use App\Model\OrderFacade;
-
+use App\MailSender\MailSender;
 
 final class DashboardPresenter extends Nette\Application\UI\Presenter
 {
     private OrderFacade $orderFacade;
+    private MailSender $mailSender;
 
-
-    public function __construct(OrderFacade $orderFacade)
+    public function __construct(OrderFacade $orderFacade, MailSender $mailSender)
     {
         parent::__construct();
         $this->orderFacade = $orderFacade;
+        $this->mailSender = $mailSender;
     }
 
     protected function startup(): void
@@ -38,33 +38,54 @@ final class DashboardPresenter extends Nette\Application\UI\Presenter
     {
     }
 
-    public function renderDetail(): void
+    public function renderDetail(int $id): void
     {
+        $orderData = $this->orderFacade->getOrderDetails($id);
+        if (!$orderData) {
+            $this->flashMessage('Objednávka nenalezena.', 'error');
+            $this->redirect('orders');
+        }
+        $this->template->orderData = $orderData;
     }
 
-        public function renderOrders(): void
+    public function renderOrders(): void
     {
-        $orders = $this->orderFacade->getAllOrders();
+        $status = $this->getParameter('status');
+        $this->template->orders = $this->orderFacade->getOrdersWithDetails($status);
+        $this->template->currentStatus = $status;
+    }
 
-        $orderData = [];
-        foreach ($orders as $order) {
-            $caseIds = $this->database->table('order_case')
-                ->where('order_id', $order->id)
-                ->fetchPairs(null, 'case_id');
+    public function handleChangeState(int $orderId, string $newState): void
+    {
+        try {
+            $this->orderFacade->updateOrderState($orderId, $newState);
+            $orderData = $this->orderFacade->getOrderDetails($orderId);
+            $order = $orderData['order'];
+            $recipientName = $order->firstname . ' ' . $order->lastname;
+            $recipientEmail = $order->email;
 
-            $cases = $this->database->table('cases')
-                ->where('id', $caseIds)
-                ->fetchAll();
+            switch ($newState) {
+                case 'ZAPLACENO':
+                    $this->mailSender->sendPaymentConfirmationEmail($recipientEmail, $recipientName, $order);
+                    break;
+                case 'ODESLANO':
+                    $this->mailSender->sendShippedEmail($recipientEmail, $recipientName, $order);
+                    break;
+                case 'DORUCENO':
+                    $this->mailSender->sendReadyForPickupEmail($recipientEmail, $recipientName, $order);
+                    break;
+                case 'VYZVEDNUTO':
+                    $this->mailSender->sendPickedUpEmail($recipientEmail, $recipientName, $order);
+                    break;
+            }
 
-            $user = $this->database->table('users')->get($order->user_id);
-
-            $orderData[] = [
-                'order' => $order,
-                'cases' => $cases,
-                'user' => $user,
-            ];
+            $this->flashMessage('Stav objednávky byl aktualizován.', 'success');
+        } catch (\InvalidArgumentException $e) {
+            $this->flashMessage('Chyba: ' . $e->getMessage(), 'error');
+        } catch (\Throwable $e) {
+            $this->flashMessage('Chyba při odesílání e-mailu: ' . $e->getMessage(), 'error');
+            error_log("Error sending email for order $orderId: " . $e->getMessage());
         }
-
-        $this->template->orders = $orderData;
+        $this->redirect('detail', $orderId);
     }
 }

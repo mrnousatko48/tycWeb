@@ -1,52 +1,224 @@
 {block content}
-<h1>Seznam objednávek</h1>
+<div class="max-w-6xl mx-auto p-6 bg-gray-100 min-h-screen">
+    <style>
+        :root {
+            --primary-color: #2563eb;
+            --primary-hover: #1d4ed8;
+            --text-dark: #1f2937;
+            --text-muted: #6b7280;
+            --border-color: #e5e7eb;
+            --bg-white: #ffffff;
+            --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
 
-{if !$orders || count($orders) === 0}
-    <p>Žádné objednávky.</p>
-{else}
-<table class="min-w-full table-auto border-collapse border border-gray-300">
-    <thead>
-        <tr>
-            <th class="border border-gray-300 px-4 py-2">ID objednávky</th>
-            <th class="border border-gray-300 px-4 py-2">Uživatel</th>
-            <th class="border border-gray-300 px-4 py-2">Jméno</th>
-            <th class="border border-gray-300 px-4 py-2">Pouzdra</th>
-            <th class="border border-gray-300 px-4 py-2">Adresa</th>
-            <th class="border border-gray-300 px-4 py-2">Datum objednávky</th>
-        </tr>
-    </thead>
-    <tbody>
-        {foreach $orders as $orderData}
-        <tr>
-            <td class="border border-gray-300 px-4 py-2">{$orderData['order']->id}</td>
-            <td class="border border-gray-300 px-4 py-2">
-                {$orderData['user']?->email ?? $orderData['order']->user_id}
-            </td>
-            <td class="border border-gray-300 px-4 py-2">{$orderData['order']->firstname} {$orderData['order']->lastname}</td>
-            <td class="border border-gray-300 px-4 py-2">
-                {if count($orderData['cases']) > 0}
-                    <ul class="list-disc pl-5">
-                        {foreach $orderData['cases'] as $case}
-                            <li>
-                                {$case->manufacturer} {$case->model} ({$case->color})
-                                {if $case->port_cover}(Krytka portu){/if}
-                                {if $case->card_holder}(Držák karet){/if}
-                            </li>
-                        {/foreach}
-                    </ul>
-                {else}
-                    Žádné pouzdra
-                {/if}
-            </td>
-            <td class="border border-gray-300 px-4 py-2">
-                {$orderData['order']->address}, {$orderData['order']->city}, {$orderData['order']->psc}
-            </td>
-            <td class="border border-gray-300 px-4 py-2">
-                {$orderData['order']->created_at|date:'j. n. Y H:i'}
-            </td>
-        </tr>
-        {/foreach}
-    </tbody>
-</table>
-{/if}
+        body {
+            font-family: 'Inter', system-ui, sans-serif;
+            color: var(--text-dark);
+            line-height: 1.5;
+        }
+
+        .container {
+            max-width: 80rem;
+            margin: 0 auto;
+            padding: 1.5rem;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .header h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text-dark);
+        }
+
+        .filter-container {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .filter-label {
+            font-weight: 500;
+            color: var(--text-dark);
+        }
+
+        .filter-select {
+            border: 1px solid var(--border-color);
+            border-radius: 0.375rem;
+            padding: 0.5rem 0.75rem;
+            background: var(--bg-white);
+            color: var(--text-dark);
+            font-size: 0.875rem;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .filter-select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.2);
+        }
+
+        .table-container {
+            overflow-x: auto;
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            box-shadow: var(--shadow-sm);
+            background: var(--bg-white);
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table thead {
+            background: #f9fafb;
+        }
+
+        .table th {
+            padding: 0.75rem 1.5rem;
+            text-align: left;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--text-dark);
+        }
+
+        .table tbody tr {
+            transition: background 0.2s ease;
+            cursor: pointer;
+        }
+
+        .table tbody tr:hover {
+            background: #f9fafb;
+        }
+
+        .table td {
+            padding: 1rem 1.5rem;
+            font-size: 0.95rem;
+            color: var(--text-dark);
+        }
+
+        .order-link {
+            color: var(--primary-color);
+            font-weight: 500;
+            text-decoration: none;
+        }
+
+        .order-link:hover {
+            text-decoration: underline;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .no-data {
+            background: var(--bg-white);
+            border: 1px solid var(--border-color);
+            border-radius: 0.5rem;
+            padding: 1.5rem;
+            text-align: center;
+            color: var(--text-muted);
+            font-style: italic;
+            font-size: 0.95rem;
+        }
+
+        @media (max-width: 640px) {
+            .table th, .table td {
+                padding: 0.75rem;
+                font-size: 0.875rem;
+            }
+
+            .header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 1rem;
+            }
+
+            .filter-container {
+                width: 100%;
+            }
+
+            .filter-select {
+                width: 100%;
+            }
+        }
+    </style>
+
+    <div class="header">
+        <h1>Seznam objednávek</h1>
+        <div class="filter-container">
+            <label for="statusFilter" class="filter-label">Filtrovat podle stavu:</label>
+            <select id="statusFilter" onchange="window.location.href='?status=' + this.value" class="filter-select">
+                <option value="" {if !$currentStatus}selected{/if}>Všechny</option>
+                <option value="KOSIK" {if $currentStatus === 'KOSIK'}selected{/if}>Košík</option>
+                <option value="OBJEDNANO" {if $currentStatus === 'OBJEDNANO'}selected{/if}>Objednáno</option>
+                <option value="ZAPLACENO" {if $currentStatus === 'ZAPLACENO'}selected{/if}>Zaplaceno</option>
+                <option value="ODESLANO" {if $currentStatus === 'ODESLANO'}selected{/if}>Odesláno</option>
+                <option value="DORUCENO" {if $currentStatus === 'DORUCENO'}selected{/if}>Připraveno</option>
+                <option value="VYZVEDNUTO" {if $currentStatus === 'VYZVEDNUTO'}selected{/if}>Vyzvednuto</option>
+            </select>
+        </div>
+    </div>
+
+    {if !$orders || count($orders) === 0}
+        <div class="no-data">Žádné objednávky.</div>
+    {else}
+        <div class="table-container">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Objednávka</th>
+                        <th>Zákazník</th>
+                        <th>Datum</th>
+                        <th>Stav</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {foreach $orders as $orderData}
+                        <tr onclick="window.location.href='{link detail $orderData['order']->id}'">
+                            <td>
+                                <a href="{link detail $orderData['order']->id}" class="order-link" onclick="event.stopPropagation()">
+                                    #{$orderData['order']->id}
+                                </a>
+                            </td>
+                            <td>
+                                {$orderData['user']?->email ?? 'Host (' . $orderData['order']->email . ')'}
+                            </td>
+                            <td>
+                                {$orderData['order']->created_at|date:'j. n. Y H:i'}
+                            </td>
+                            <td>
+                                <span class="status-badge
+                                    {if $orderData['order']->state === 'KOSIK'}bg-yellow-100 text-yellow-800
+                                    {elseif $orderData['order']->state === 'OBJEDNANO'}bg-blue-100 text-blue-800
+                                    {elseif $orderData['order']->state === 'ZAPLACENO'}bg-green-100 text-green-800
+                                    {elseif $orderData['order']->state === 'ODESLANO'}bg-purple-100 text-purple-800
+                                    {elseif $orderData['order']->state === 'DORUCENO'}bg-orange-100 text-orange-800
+                                    {elseif $orderData['order']->state === 'VYZVEDNUTO'}bg-gray-100 text-gray-800{/if}">
+                                    {if $orderData['order']->state === 'KOSIK'}Košík
+                                    {elseif $orderData['order']->state === 'OBJEDNANO'}Objednáno
+                                    {elseif $orderData['order']->state === 'ZAPLACENO'}Zaplaceno
+                                    {elseif $orderData['order']->state === 'ODESLANO'}Odesláno
+                                    {elseif $orderData['order']->state === 'DORUCENO'}Připraveno
+                                    {elseif $orderData['order']->state === 'VYZVEDNUTO'}Vyzvednuto{/if}
+                                </span>
+                            </td>
+                        </tr>
+                    {/foreach}
+                </tbody>
+            </table>
+        </div>
+    {/if}
+</div>
 {/block}

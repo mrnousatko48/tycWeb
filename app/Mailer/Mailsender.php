@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace App\MailSender;
 
@@ -14,7 +15,6 @@ class MailSender
         private Mailer $mailer,
         private OrderFacade $orderFacade
     ) {
-    
     }
 
     public function createRegistrationEmail(string $email, string $username): Message
@@ -69,50 +69,49 @@ class MailSender
         $this->mailer->send($mail);
     }
 
-   public function sendInvoiceEmail(string $recipientEmail, string $recipientName, \Nette\Database\Table\ActiveRow $order, array $orderItems): void
-{
-    $latte = new Engine();
+    public function sendInvoiceEmail(string $recipientEmail, string $recipientName, \Nette\Database\Table\ActiveRow $order, array $orderItems): void
+    {
+        $latte = new Engine();
 
-    $itemsSubtotal = 0;
-    foreach ($orderItems as $item) {
-        $itemsSubtotal += $item->total_price * $item->quantity;
+        $itemsSubtotal = 0;
+        foreach ($orderItems as $item) {
+            $itemsSubtotal += $item->total_price * $item->quantity;
+        }
+
+        $shippingInfo = $this->orderFacade->getShippingInfo($order->shipping);
+        $shippingCost = $shippingInfo ? $shippingInfo['cost'] : 0.0;
+
+        $paymentCost = $order->payment === 'DOBIRKA' ? 40.0 : 0.0;
+        $total = $itemsSubtotal + $shippingCost + $paymentCost;
+
+        $htmlInvoice = $latte->renderToString(__DIR__ . '/invoice.latte', [
+            'order' => $order,
+            'items' => $orderItems,
+            'recipient' => $recipientName,
+            'itemsSubtotal' => $itemsSubtotal,
+            'shippingCost' => $shippingCost,
+            'paymentCost' => $paymentCost,
+            'total' => $total,
+        ]);
+
+        $mpdf = new Mpdf();
+        $mpdf->WriteHTML($htmlInvoice);
+        $pdfContent = $mpdf->Output('', \Mpdf\Output\Destination::STRING_RETURN);
+
+        $htmlBody = $latte->renderToString(__DIR__ . '/invoiceEmail.latte', [
+            'recipient' => $recipientName,
+            'orderId' => $order->id,
+        ]);
+
+        $mail = new Message;
+        $mail->setFrom('okurkyvmalinovce@seznam.cz')
+            ->addTo($recipientEmail)
+            ->setSubject('Faktura za vaši objednávku č. ' . $order->id)
+            ->setHtmlBody($htmlBody)
+            ->addAttachment("faktura-{$order->id}.pdf", $pdfContent, 'application/pdf');
+
+        $this->mailer->send($mail);
     }
-
-    $shippingInfo = $this->orderFacade->getShippingInfo($order->shipping);
-    $shippingCost = $shippingInfo ? $shippingInfo['cost'] : 0.0;
-
-    $paymentCost = $order->payment === 'DOBIRKA' ? 40.0 : 0.0;
-    $total = $itemsSubtotal + $shippingCost + $paymentCost;
-
-    $htmlInvoice = $latte->renderToString(__DIR__ . '/invoice.latte', [
-        'order' => $order,
-        'items' => $orderItems,
-        'recipient' => $recipientName,
-        'itemsSubtotal' => $itemsSubtotal,
-        'shippingCost' => $shippingCost,
-        'paymentCost' => $paymentCost,
-        'total' => $total,
-    ]);
-
-    $mpdf = new Mpdf();
-    $mpdf->WriteHTML($htmlInvoice);
-    $pdfContent = $mpdf->Output('', \Mpdf\Output\Destination::STRING_RETURN);
-
-    $htmlBody = $latte->renderToString(__DIR__ . '/invoiceEmail.latte', [
-        'recipient' => $recipientName,
-        'orderId' => $order->id,
-    ]);
-
-    $mail = new Message;
-    $mail->setFrom('okurkyvmalinovce@seznam.cz')
-        ->addTo($recipientEmail)
-        ->setSubject('Faktura za vaši objednávku č. ' . $order->id)
-        ->setHtmlBody($htmlBody)
-        ->addAttachment("faktura-{$order->id}.pdf", $pdfContent, 'application/pdf');
-
-    $this->mailer->send($mail);
-}
-
 
     public function sendPasswordResetEmail(string $email, string $resetCode): void
     {
@@ -129,6 +128,88 @@ class MailSender
         $mail->setFrom('okurkyvmalinovce@seznam.cz')
             ->addTo($email)
             ->setSubject('Reset hesla')
+            ->setHtmlBody($html);
+
+        $this->mailer->send($mail);
+    }
+
+    public function sendPaymentConfirmationEmail(string $recipientEmail, string $recipientName, \Nette\Database\Table\ActiveRow $order): void
+    {
+        $latte = new Engine();
+        $mail = new Message;
+
+        $params = [
+            'recipient' => $recipientName,
+            'orderId' => $order->id,
+            'variableSymbol' => $order->variable_symbol,
+        ];
+
+        $html = $latte->renderToString(__DIR__ . '/paymentConfirmation.latte', $params);
+
+        $mail->setFrom('okurkyvmalinovce@seznam.cz')
+            ->addTo($recipientEmail)
+            ->setSubject('Potvrzení přijetí platby za objednávku č. ' . $order->id)
+            ->setHtmlBody($html);
+
+        $this->mailer->send($mail);
+    }
+
+    public function sendShippedEmail(string $recipientEmail, string $recipientName, \Nette\Database\Table\ActiveRow $order): void
+    {
+        $latte = new Engine();
+        $mail = new Message;
+
+        $params = [
+            'recipient' => $recipientName,
+            'orderId' => $order->id,
+        ];
+
+        $html = $latte->renderToString(__DIR__ . '/shipped.latte', $params);
+
+        $mail->setFrom('okurkyvmalinovce@seznam.cz')
+            ->addTo($recipientEmail)
+            ->setSubject('Vaše objednávka č. ' . $order->id . ' byla odeslána')
+            ->setHtmlBody($html);
+
+        $this->mailer->send($mail);
+    }
+
+    public function sendReadyForPickupEmail(string $recipientEmail, string $recipientName, \Nette\Database\Table\ActiveRow $order): void
+    {
+        $latte = new Engine();
+        $mail = new Message;
+
+        $params = [
+            'recipient' => $recipientName,
+            'orderId' => $order->id,
+            'deliveryPoint' => $order->delivery_point ?? 'Není uvedeno dodací místo',
+        ];
+
+        $html = $latte->renderToString(__DIR__ . '/readyForPickup.latte', $params);
+
+        $mail->setFrom('okurkyvmalinovce@seznam.cz')
+            ->addTo($recipientEmail)
+            ->setSubject('Vaše objednávka č. ' . $order->id . ' je připravena k vyzvednutí')
+            ->setHtmlBody($html);
+
+        $this->mailer->send($mail);
+    }
+
+    public function sendPickedUpEmail(string $recipientEmail, string $recipientName, \Nette\Database\Table\ActiveRow $order): void
+    {
+        $latte = new Engine();
+        $mail = new Message;
+
+        $params = [
+            'recipient' => $recipientName,
+            'orderId' => $order->id,
+        ];
+
+        $html = $latte->renderToString(__DIR__ . '/pickedUp.latte', $params);
+
+        $mail->setFrom('okurkyvmalinovce@seznam.cz')
+            ->addTo($recipientEmail)
+            ->setSubject('Vaše objednávka č. ' . $order->id . ' byla vyzvednuta')
             ->setHtmlBody($html);
 
         $this->mailer->send($mail);

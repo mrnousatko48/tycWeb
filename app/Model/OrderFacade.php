@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\Model;
@@ -19,12 +18,181 @@ final class OrderFacade
         $this->session = $session;
     }
 
+    /**
+     * Generate a unique variable symbol
+     */
     private function generateVariableSymbol(): string
-{
-    // Example: current date + random 4-digit number (e.g., 202507112345)
-    return date('Ymd') . str_pad((string)random_int(0, 9999), 4, '0', STR_PAD_LEFT);
-}
+    {
+        return date('Ymd') . str_pad((string)random_int(0, 9999), 4, '0', STR_PAD_LEFT);
+    }
 
+    /**
+     * Calculate additional cost based on shipping and payment
+     */
+    public function calculateAdditionalCost(string $shipping, string $payment): float
+    {
+        $shippingRow = $this->database->table('shipping')
+            ->where('code', $shipping)
+            ->fetch();
+
+        $shippingCost = $shippingRow ? (float)$shippingRow->cost : 0.0;
+        $paymentCost = $payment === 'DOBIRKA' ? 40.0 : 0.0;
+        return $shippingCost + $paymentCost;
+    }
+
+    /**
+     * Fetch orders with details, optionally filtered by status
+     */
+    public function getOrdersWithDetails(?string $status = null): array
+    {
+        $query = $this->database->table('orders')
+            ->order('created_at DESC');
+
+        if ($status !== null) {
+            $query->where('state', $status);
+        }
+
+        $orders = $query->fetchAll();
+        $orderData = [];
+
+        foreach ($orders as $order) {
+            $orderCases = $this->database->table('order_case')
+                ->where('order_id', $order->id)
+                ->fetchAll();
+
+            $caseIds = array_column(iterator_to_array($orderCases), 'case_id');
+            $cases = $this->database->table('cases')
+                ->where('id', $caseIds)
+                ->fetchAll();
+
+            $user = $order->user_id ? $this->database->table('users')->get($order->user_id) : null;
+
+            $orderData[] = [
+                'order' => $order,
+                'cases' => $this->processCases($orderCases, $cases),
+                'user' => $user,
+            ];
+        }
+
+        return $orderData;
+    }
+
+    /**
+     * Fetch details for a specific order
+     */
+    public function getOrderDetails(int $orderId): ?array
+    {
+        $order = $this->database->table('orders')->get($orderId);
+        if (!$order) {
+            return null;
+        }
+
+        $orderCases = $this->database->table('order_case')
+            ->where('order_id', $orderId)
+            ->fetchAll();
+
+        $caseIds = array_column(iterator_to_array($orderCases), 'case_id');
+        $cases = $this->database->table('cases')
+            ->where('id', $caseIds)
+            ->fetchAll();
+
+        $user = $order->user_id ? $this->database->table('users')->get($order->user_id) : null;
+
+        return [
+            'order' => $order,
+            'cases' => $this->processCases($orderCases, $cases),
+            'user' => $user,
+        ];
+    }
+
+    /**
+     * Process cases to handle JSON features and include quantities
+     */
+    private function processCases(iterable $orderCases, iterable $cases): array
+    {
+        $processedCases = [];
+        $caseMap = [];
+        foreach ($cases as $case) {
+            $caseMap[$case->id] = $case;
+        }
+
+        foreach ($orderCases as $orderCase) {
+            $case = $caseMap[$orderCase->case_id] ?? null;
+            if ($case) {
+                $features = json_decode($case->features, true) ?? [];
+                // Handle nested 'features' key
+                if (isset($features['features']) && is_string($features['features'])) {
+                    $features = json_decode($features['features'], true) ?? $features;
+                }
+                // Clean feature keys
+                $cleanFeatures = [];
+                foreach ($features as $key => $value) {
+                    $cleanKey = str_replace('_', ' ', $key);
+                    $cleanKey = mb_convert_case($cleanKey, MB_CASE_TITLE, 'UTF-8');
+                    $cleanFeatures[$cleanKey] = $value;
+                }
+                $processedCases[] = (object)[
+                    'id' => $case->id,
+                    'manufacturer' => $case->manufacturer,
+                    'model' => $case->model,
+                    'color' => $case->color,
+                    'total_price' => $case->total_price,
+                    'features' => $cleanFeatures,
+                    'state' => $case->state,
+                    'user_id' => $case->user_id,
+                    'created_at' => $case->created_at,
+                    'quantity' => $orderCase->quantity,
+                ];
+            }
+        }
+        return $processedCases;
+    }
+
+    /**
+     * Update order state and synchronize case states
+     */
+    public function updateOrderState(int $orderId, string $newState): void
+    {
+        $validStates = ['OBJEDNANO', 'ZAPLACENO', 'ODESLANO', 'DORUCENO', 'VYZVEDNUTO'];
+        if (!in_array($newState, $validStates)) {
+            throw new \InvalidArgumentException("Invalid state: $newState");
+        }
+
+        $order = $this->database->table('orders')->get($orderId);
+        if (!$order) {
+            throw new \InvalidArgumentException("Order $orderId not found");
+        }
+
+        $currentStateIndex = array_search($order->state, $validStates);
+        $newStateIndex = array_search($newState, $validStates);
+
+        if ($currentStateIndex === false || $newStateIndex !== $currentStateIndex + 1) {
+            throw new \InvalidArgumentException("Cannot transition from {$order->state} to $newState");
+        }
+
+        $this->database->beginTransaction();
+        try {
+            $this->database->table('orders')
+                ->where('id', $orderId)
+                ->update(['state' => $newState]);
+
+            $caseIds = $this->database->table('order_case')
+                ->where('order_id', $orderId)
+                ->fetchPairs(null, 'case_id');
+
+            if (!empty($caseIds)) {
+                $this->database->table('cases')
+                    ->where('id', $caseIds)
+                    ->update(['state' => $newState]);
+            }
+
+            $this->database->commit();
+        } catch (\Throwable $e) {
+            $this->database->rollBack();
+            error_log("Error updating order state for order $orderId: " . $e->getMessage());
+            throw $e;
+        }
+    }
 
     public function createOrder(int $userId, string $firstname, string $lastname, string $email, string $phone, string $address, string $city, string $psc, string $payment, array $caseQuantities, string $shipping, ?string $deliveryPoint = null): ActiveRow
     {
@@ -52,7 +220,7 @@ final class OrderFacade
                 'additional_cost' => $additionalCost,
                 'state' => 'OBJEDNANO',
                 'created_at' => new \DateTime(),
-                'variable_symbol' => $variableSymbol, // ADD THIS
+                'variable_symbol' => $variableSymbol,
             ]);
 
             foreach ($caseQuantities as $caseId => $quantity) {
@@ -75,6 +243,7 @@ final class OrderFacade
             return $order;
         } catch (\Throwable $e) {
             $this->database->rollBack();
+            error_log("Error creating order: " . $e->getMessage());
             throw $e;
         }
     }
@@ -105,7 +274,7 @@ final class OrderFacade
                 'additional_cost' => $additionalCost,
                 'state' => 'OBJEDNANO',
                 'created_at' => new \DateTime(),
-                'variable_symbol' => $variableSymbol, // ADD THIS
+                'variable_symbol' => $variableSymbol,
             ]);
 
             foreach ($caseQuantities as $caseId => $quantity) {
@@ -120,19 +289,9 @@ final class OrderFacade
             return $order;
         } catch (\Throwable $e) {
             $this->database->rollBack();
+            error_log("Error creating guest order: " . $e->getMessage());
             throw $e;
         }
-    }
-
-    public function calculateAdditionalCost(string $shipping, string $payment): float
-    {
-        $shippingRow = $this->database->table('shipping')
-            ->where('code', $shipping)
-            ->fetch();
-
-        $shippingCost = $shippingRow ? (float)$shippingRow->cost : 0.0;
-        $paymentCost = $payment === 'DOBIRKA' ? 40.0 : 0.0;
-        return $shippingCost + $paymentCost;
     }
 
     public function getShippingInfo(string $shippingCode): ?array
@@ -290,17 +449,14 @@ final class OrderFacade
         foreach ($orderCases as $orderCase) {
             $case = $this->database->table('cases')->get($orderCase->case_id);
             if ($case) {
-                $features = $case->features ? json_decode($case->features, true) : [];
+                $features = json_decode($case->features, true) ?? [];
                 if (isset($features['features']) && is_string($features['features'])) {
-                    $features = json_decode($features['features'], true) ?: $features;
+                    $features = json_decode($features['features'], true) ?? $features;
                 }
-
-                // Preprocess feature keys: replace underscores with spaces and capitalize
                 $cleanFeatures = [];
                 foreach ($features as $key => $value) {
                     $cleanKey = str_replace('_', ' ', $key);
-                    $cleanKey = mb_strtolower($cleanKey);
-                    $cleanKey = ucfirst($cleanKey);
+                    $cleanKey = mb_convert_case($cleanKey, MB_CASE_TITLE, 'UTF-8');
                     $cleanFeatures[$cleanKey] = $value;
                 }
 
