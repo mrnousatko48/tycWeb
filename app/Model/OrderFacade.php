@@ -11,13 +11,20 @@ use Nette\Http\Session;
 final class OrderFacade
 {
     private Explorer $database;
-    private Session $session; 
+    private Session $session;
 
     public function __construct(Explorer $database, Session $session)
     {
         $this->database = $database;
-        $this->session = $session; 
+        $this->session = $session;
     }
+
+    private function generateVariableSymbol(): string
+{
+    // Example: current date + random 4-digit number (e.g., 202507112345)
+    return date('Ymd') . str_pad((string)random_int(0, 9999), 4, '0', STR_PAD_LEFT);
+}
+
 
     public function createOrder(int $userId, string $firstname, string $lastname, string $email, string $phone, string $address, string $city, string $psc, string $payment, array $caseQuantities, string $shipping, ?string $deliveryPoint = null): ActiveRow
     {
@@ -29,6 +36,7 @@ final class OrderFacade
 
         try {
             $additionalCost = $this->calculateAdditionalCost($shipping, $payment);
+            $variableSymbol = $this->generateVariableSymbol();
             $order = $this->database->table('orders')->insert([
                 'user_id' => $userId,
                 'firstname' => $firstname,
@@ -44,6 +52,7 @@ final class OrderFacade
                 'additional_cost' => $additionalCost,
                 'state' => 'OBJEDNANO',
                 'created_at' => new \DateTime(),
+                'variable_symbol' => $variableSymbol, // ADD THIS
             ]);
 
             foreach ($caseQuantities as $caseId => $quantity) {
@@ -80,6 +89,7 @@ final class OrderFacade
 
         try {
             $additionalCost = $this->calculateAdditionalCost($shipping, $payment);
+            $variableSymbol = $this->generateVariableSymbol();
             $order = $this->database->table('orders')->insert([
                 'user_id' => null,
                 'firstname' => $firstname,
@@ -95,6 +105,7 @@ final class OrderFacade
                 'additional_cost' => $additionalCost,
                 'state' => 'OBJEDNANO',
                 'created_at' => new \DateTime(),
+                'variable_symbol' => $variableSymbol, // ADD THIS
             ]);
 
             foreach ($caseQuantities as $caseId => $quantity) {
@@ -113,7 +124,7 @@ final class OrderFacade
         }
     }
 
-    private function calculateAdditionalCost(string $shipping, string $payment): float
+    public function calculateAdditionalCost(string $shipping, string $payment): float
     {
         $shippingRow = $this->database->table('shipping')
             ->where('code', $shipping)
@@ -122,6 +133,22 @@ final class OrderFacade
         $shippingCost = $shippingRow ? (float)$shippingRow->cost : 0.0;
         $paymentCost = $payment === 'DOBIRKA' ? 40.0 : 0.0;
         return $shippingCost + $paymentCost;
+    }
+
+    public function getShippingInfo(string $shippingCode): ?array
+    {
+        $shippingRow = $this->database->table('shipping')
+            ->where('code', $shippingCode)
+            ->fetch();
+
+        return $shippingRow ? ['cost' => (float)$shippingRow->cost, 'name' => $shippingRow->name] : null;
+    }
+
+    public function isValidShippingCode(string $shippingCode): bool
+    {
+        return $this->database->table('shipping')
+            ->where('code', $shippingCode)
+            ->count('*') > 0;
     }
 
     public function getShippingOptions(): array
@@ -264,12 +291,26 @@ final class OrderFacade
             $case = $this->database->table('cases')->get($orderCase->case_id);
             if ($case) {
                 $features = $case->features ? json_decode($case->features, true) : [];
+                if (isset($features['features']) && is_string($features['features'])) {
+                    $features = json_decode($features['features'], true) ?: $features;
+                }
+
+                // Preprocess feature keys: replace underscores with spaces and capitalize
+                $cleanFeatures = [];
+                foreach ($features as $key => $value) {
+                    $cleanKey = str_replace('_', ' ', $key);
+                    $cleanKey = mb_strtolower($cleanKey);
+                    $cleanKey = ucfirst($cleanKey);
+                    $cleanFeatures[$cleanKey] = $value;
+                }
+
                 $result[] = (object)[
                     'id' => $case->id,
                     'manufacturer' => $case->manufacturer,
                     'model' => $case->model,
                     'color' => $case->color,
-                    'features' => $features,
+                    'total_price' => $case->total_price,
+                    'features' => $cleanFeatures,
                     'quantity' => $orderCase->quantity,
                 ];
             }

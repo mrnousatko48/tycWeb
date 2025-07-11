@@ -6,19 +6,19 @@ namespace App\UI\Front\Cart;
 
 use App\UI\Front\BaseFrontPresenter;
 use Nette\Application\UI\Form;
-use Nette\Database\Explorer;
 use App\MailSender\MailSender;
+
 
 final class CartPresenter extends BaseFrontPresenter
 {
-    private Explorer $database;
     private MailSender $mailSender;
 
-    public function __construct(Explorer $database, MailSender $mailSender)
+
+    public function __construct( MailSender $mailSender)
     {
         parent::__construct();
-        $this->database = $database;
         $this->mailSender = $mailSender;
+
     }
 
     private function cleanFeatureKey(string $key): string
@@ -53,16 +53,14 @@ final class CartPresenter extends BaseFrontPresenter
         foreach ($cases as $case) {
             $caseArray = $case->toArray();
             $features = $case->features ? json_decode($case->features, true) : [];
+            if (isset($features['features']) && is_string($features['features'])) {
+                $features = json_decode($features['features'], true) ?: $features;
+            }
 
             $cleanFeatures = [];
-            if (!empty($features) && isset($features['features'])) {
-                $innerFeatures = json_decode($features['features'], true);
-                if (json_last_error() === JSON_ERROR_NONE) {
-                    foreach ($innerFeatures as $key => $value) {
-                        $cleanKey = $this->cleanFeatureKey($key);
-                        $cleanFeatures[$cleanKey] = $value;
-                    }
-                }
+            foreach ($features as $key => $value) {
+                $cleanKey = $this->cleanFeatureKey($key);
+                $cleanFeatures[$cleanKey] = $value;
             }
 
             $caseArray['features'] = $cleanFeatures;
@@ -94,16 +92,14 @@ final class CartPresenter extends BaseFrontPresenter
         foreach ($cases as $case) {
             $caseArray = $case->toArray();
             $features = $case->features ? json_decode($case->features, true) : [];
+            if (isset($features['features']) && is_string($features['features'])) {
+                $features = json_decode($features['features'], true) ?: $features;
+            }
 
             $cleanFeatures = [];
-            if (!empty($features) && isset($features['features'])) {
-                $innerFeatures = json_decode($features['features'], true);
-                if (json_last_error() === JSON_ERROR_NONE) {
-                    foreach ($innerFeatures as $key => $value) {
-                        $cleanKey = $this->cleanFeatureKey($key);
-                        $cleanFeatures[$cleanKey] = $value;
-                    }
-                }
+            foreach ($features as $key => $value) {
+                $cleanKey = $this->cleanFeatureKey($key);
+                $cleanFeatures[$cleanKey] = $value;
             }
 
             $caseArray['features'] = $cleanFeatures;
@@ -141,16 +137,14 @@ final class CartPresenter extends BaseFrontPresenter
         foreach ($cases as $case) {
             $caseArray = $case->toArray();
             $features = $case->features ? json_decode($case->features, true) : [];
+            if (isset($features['features']) && is_string($features['features'])) {
+                $features = json_decode($features['features'], true) ?: $features;
+            }
 
             $cleanFeatures = [];
-            if (!empty($features) && isset($features['features'])) {
-                $innerFeatures = json_decode($features['features'], true);
-                if (json_last_error() === JSON_ERROR_NONE) {
-                    foreach ($innerFeatures as $key => $value) {
-                        $cleanKey = $this->cleanFeatureKey($key);
-                        $cleanFeatures[$cleanKey] = $value;
-                    }
-                }
+            foreach ($features as $key => $value) {
+                $cleanKey = $this->cleanFeatureKey($key);
+                $cleanFeatures[$cleanKey] = $value;
             }
 
             $caseArray['features'] = $cleanFeatures;
@@ -160,8 +154,9 @@ final class CartPresenter extends BaseFrontPresenter
             $itemsSubtotal += $case->total_price * $quantity;
         }
 
-        $shippingRow = $this->database->table('shipping')->where('code', $session->shipping)->fetch();
-        $shippingCost = $shippingRow ? (float)$shippingRow->cost : 0.0;
+        $shippingInfo = $this->orderFacade->getShippingInfo($session->shipping);
+        $shippingCost = $shippingInfo ? (float)$shippingInfo['cost'] : 0.0;
+        $shippingName = $shippingInfo ? $shippingInfo['name'] : 'Není vybráno';
         $paymentCost = $session->payment === 'DOBIRKA' ? 40.0 : 0.0;
         $totalCartValue = $itemsSubtotal + $shippingCost + $paymentCost;
 
@@ -171,12 +166,12 @@ final class CartPresenter extends BaseFrontPresenter
         $this->template->shippingCost = $shippingCost;
         $this->template->paymentCost = $paymentCost;
         $this->template->totalCartValue = $totalCartValue;
-        $this->template->shipping = $shippingRow ? $shippingRow->name : 'Není vybráno';
+        $this->template->shipping = $shippingName;
         $this->template->payment = $session->payment === 'DOBIRKA' ? 'Dobírka' : 'Bankovní převod';
         $this->template->delivery_point = $session->delivery_point ?? 'Není zadáno';
     }
 
-    protected function createComponentSendOrderForm(): Form
+        protected function createComponentSendOrderForm(): Form
     {
         $form = new Form;
 
@@ -222,6 +217,10 @@ final class CartPresenter extends BaseFrontPresenter
             ->setHtmlAttribute('placeholder', 'Zadejte své PSČ')
             ->setDefaultValue($user ? $user->psc : '');
 
+        $form->addHidden('order_token', bin2hex(random_bytes(16))); // Unique token to prevent duplicate submissions
+
+        $form->addProtection('Formulář expiroval, prosím odešlete znovu.'); // CSRF protection
+
         $form->addSubmit('submit', 'Dokončit objednávku')
             ->setHtmlAttribute('class', 'btn px-6 py-3 rounded-xl text-base font-semibold transition transform hover:scale-105')
             ->setHtmlAttribute('style', 'background-color: var(--color-primary); color: var(--button-text);');
@@ -246,6 +245,16 @@ final class CartPresenter extends BaseFrontPresenter
             $this->redirect('Cart:order');
             return;
         }
+
+        // Check for duplicate submission using order_token
+        $orderToken = $values->order_token;
+        $sessionToken = $session->order_token ?? null;
+        if ($sessionToken && $sessionToken === $orderToken) {
+            $this->flashMessage('Objednávka již byla zpracována.', 'warning');
+            $this->redirect('Home:default');
+            return;
+        }
+        $session->order_token = $orderToken;
 
         $userId = $this->getUser()->isLoggedIn() ? (int)$this->getUser()->getId() : null;
         $payment = $session->payment;
@@ -287,7 +296,8 @@ final class CartPresenter extends BaseFrontPresenter
             $recipientName = $values->firstname . ' ' . $values->lastname;
             $this->mailSender->sendInvoiceEmail($values->email, $recipientName, $order, $items);
 
-            unset($session->quantities, $session->shipping, $session->payment, $session->additionalCost, $session->delivery_point);
+            // Clear session to prevent resubmission
+            unset($session->quantities, $session->shipping, $session->payment, $session->additionalCost, $session->delivery_point, $session->order_token);
             $this->flashMessage('Objednávka byla úspěšně dokončena a faktura odeslána.', 'success');
             $this->redirect('Home:default');
         } catch (\InvalidArgumentException $e) {
@@ -387,9 +397,8 @@ final class CartPresenter extends BaseFrontPresenter
             return;
         }
 
-        // Validate shipping code
-        $shippingRow = $this->database->table('shipping')->where('code', $values->shipping)->fetch();
-        if (!$shippingRow) {
+        // Validate shipping code via OrderFacade
+        if (!$this->orderFacade->isValidShippingCode($values->shipping)) {
             $this->flashMessage('Neplatný způsob dopravy.', 'danger');
             $this->redirect('this');
             return;
@@ -399,9 +408,8 @@ final class CartPresenter extends BaseFrontPresenter
         $session->payment = $values->payment;
         $session->delivery_point = $values->delivery_point ?: null;
 
-        $shippingCost = (float)$shippingRow->cost;
-        $paymentCost = $values->payment === 'DOBIRKA' ? 40.0 : 0.0;
-        $session->additionalCost = $shippingCost + $paymentCost;
+        $additionalCost = $this->orderFacade->calculateAdditionalCost($values->shipping, $values->payment);
+        $session->additionalCost = $additionalCost;
 
         $this->redirect('Cart:info');
     }

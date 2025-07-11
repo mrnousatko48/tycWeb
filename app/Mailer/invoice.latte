@@ -1,43 +1,45 @@
+{block content}
 <style>
     body {
         font-family: DejaVu Sans, sans-serif;
         font-size: 12px;
         color: #333;
     }
-
     .header {
         text-align: center;
         margin-bottom: 20px;
     }
-
-    .details, .items {
+    .details, .items, .summary {
         width: 100%;
         margin-bottom: 20px;
         border-collapse: collapse;
     }
-
-    .details td {
+    .details td, .summary td {
         padding: 5px;
         vertical-align: top;
     }
-
     .items th, .items td {
         border: 1px solid #999;
         padding: 6px;
         text-align: left;
     }
-
     .items th {
         background-color: #f2f2f2;
     }
-
+    .summary th {
+        background-color: #f2f2f2;
+        padding: 6px;
+        text-align: left;
+    }
     h1 {
         font-size: 20px;
         margin-bottom: 5px;
     }
-
     hr {
         margin: 20px 0;
+    }
+    .payment-details {
+        margin-top: 20px;
     }
 </style>
 
@@ -54,6 +56,16 @@
             {$order->address}<br>
             {$order->city}, {$order->psc}
         </td>
+        <td>
+            <strong>Kontaktní údaje:</strong><br>
+            E-mail: {$order->email}<br>
+            Telefon: {$order->phone}
+        </td>
+    </tr>
+    <tr>
+        <td><strong>Způsob dopravy:</strong><br>{$order->shipping}</td>
+        <td><strong>Místo doručení:</strong><br>{$order->delivery_point ?: 'Není zadáno'}</td>
+        <td><strong>Způsob platby:</strong><br>{$order->payment == 'DOBIRKA' ? 'Dobírka' : 'Bankovní převod'}</td>
     </tr>
 </table>
 
@@ -67,9 +79,10 @@
             <th>Výrobce</th>
             <th>Model</th>
             <th>Barva</th>
-            <th>Zakrytí portů</th>
-            <th>Držák karty</th>
+            <th>Vlastnosti</th>
             <th>Množství</th>
+            <th>Cena za kus (Kč)</th>
+            <th>Celkem (Kč)</th>
         </tr>
     </thead>
     <tbody>
@@ -80,20 +93,59 @@
                 <td>{$item->manufacturer}</td>
                 <td>{$item->model}</td>
                 <td>{$item->color}</td>
-                <td>{$item->port_cover ? 'Ano' : 'Ne'}</td>
                 <td>
-                    {if $item->card_holder === 0}
-                        Žádný
-                    {elseif $item->card_holder === 1}
-                        Jednoduchý
-                    {elseif $item->card_holder === 2}
-                        Dvojitý
-                    {else}
-                        Neznámý
-                    {/if}
+                    {foreach $item->features as $key => $value}
+                        {$key}: {$value}<br>
+                    {/foreach}
                 </td>
                 <td>{$item->quantity}</td>
+                <td>{number_format($item->total_price, 2, ',', ' ')}</td>
+                <td>{number_format($item->total_price * $item->quantity, 2, ',', ' ')}</td>
             </tr>
         {/foreach}
     </tbody>
 </table>
+
+<table class="summary">
+    <thead>
+        <tr>
+            <th colspan="2">Shrnutí nákladů</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Mezisoučet položek:</td>
+            <td>{number_format($itemsSubtotal, 2, ',', ' ')} Kč</td>
+        </tr>
+        <tr>
+            <td>Doprava ({$order->shipping}):</td>
+            <td>{number_format($shippingCost, 2, ',', ' ')} Kč</td>
+        </tr>
+        <tr>
+            <td>Platba ({$order->payment == 'DOBIRKA' ? 'Dobírka' : 'Bankovní převod'}):</td>
+            <td>{number_format($paymentCost, 2, ',', ' ')} Kč</td>
+        </tr>
+        <tr>
+            <td><strong>Celkem:</strong></td>
+            <td><strong>{number_format($total, 2, ',', ' ')} Kč</strong></td>
+        </tr>
+    </tbody>
+</table>
+
+<div class="payment-details">
+    <h2>Platební údaje</h2>
+    {if $order->payment == 'PREVOD'}
+        <p>
+            <strong>Bankovní účet:</strong> 1234567890/0800 (Česká spořitelna)<br>
+            <strong>Variabilní symbol:</strong> {$order->variable_symbol}<br>
+            <strong>Částka:</strong> {number_format($total, 2, ',', ' ')} Kč<br>
+        </p>
+    {else}
+        <p>
+            <strong>Platba při převzetí:</strong><br>
+            Částka: {number_format($total, 2, ',', ' ')} Kč<br>
+            Prosím, připravte si uvedenou částku v hotovosti při převzetí zásilky.
+        </p>
+    {/if}
+</div>
+{/block}
