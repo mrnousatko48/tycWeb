@@ -1,4 +1,17 @@
-REATE TABLE `banner` (
+-- Adminer 4.8.1 MySQL 9.1.0 dump
+
+SET NAMES utf8;
+SET time_zone = '+00:00';
+SET foreign_key_checks = 0;
+SET sql_mode = 'NO_AUTO_VALUE_ON_ZERO';
+
+SET NAMES utf8mb4;
+
+CREATE DATABASE `WEB2` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
+USE `WEB2`;
+
+DROP TABLE IF EXISTS `banner`;
+CREATE TABLE `banner` (
   `id` int NOT NULL AUTO_INCREMENT,
   `content_type` enum('title','description','image','button_text','button_link') NOT NULL,
   `content_text` text,
@@ -23,7 +36,7 @@ CREATE TABLE `cases` (
   `color` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `total_price` decimal(10,2) DEFAULT '0.00',
   `features` json DEFAULT NULL,
-  `state` enum('KOSIK','OBJEDNANO','DORUCENO') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
+  `state` enum('KOSIK','OBJEDNANO','ZAPLACENO','ODESLANO','DORUCENO','VYZVEDNUTO') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `user_id` int unsigned DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
@@ -42,8 +55,9 @@ INSERT INTO `cases` (`id`, `manufacturer`, `model`, `color`, `total_price`, `fea
 (28,	'Apple',	'iPhone 13',	'Červená',	559.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ne\\\",\\\"test\\\":\\\"2\\\"}\"}',	'OBJEDNANO',	9,	'2025-07-11 06:29:43'),
 (29,	'Apple',	'iPhone 13',	'Červená',	529.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ne\\\",\\\"test\\\":\\\"2\\\"}\"}',	'KOSIK',	NULL,	'2025-07-11 06:41:21'),
 (30,	'Apple',	'iPhone 13',	'Modrá',	589.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\",\\\"test\\\":\\\"1\\\"}\"}',	'OBJEDNANO',	9,	'2025-07-11 07:33:47'),
-(31,	'Apple',	'iPhone 13',	'fialova',	634.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\",\\\"test\\\":\\\"1\\\"}\"}',	'OBJEDNANO',	9,	'2025-07-11 07:35:26'),
-(32,	'Apple',	'iPhone 13',	'Černá',	634.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\",\\\"test\\\":\\\"1\\\"}\"}',	'OBJEDNANO',	9,	'2025-07-11 07:49:40');
+(31,	'Apple',	'iPhone 13',	'fialova',	634.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\",\\\"test\\\":\\\"1\\\"}\"}',	'ZAPLACENO',	9,	'2025-07-11 07:35:26'),
+(32,	'Apple',	'iPhone 13',	'Černá',	634.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\",\\\"test\\\":\\\"1\\\"}\"}',	'VYZVEDNUTO',	9,	'2025-07-11 07:49:40'),
+(33,	'Apple',	'iPhone 13',	'Černá',	559.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\",\\\"test\\\":\\\"2\\\"}\"}',	'KOSIK',	9,	'2025-07-11 11:22:17');
 
 DROP TABLE IF EXISTS `colors`;
 CREATE TABLE `colors` (
@@ -77,32 +91,22 @@ CREATE TABLE `contact_info` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 INSERT INTO `contact_info` (`id`, `name`, `address`, `ico`, `phone`, `email`, `map_embed`) VALUES
-(1,	'Karel Dvořák',	'shrekova bazina 13',	'12345678',	'123 456 789',	'email@email.cz',	'<iframe src=\"https://www.google.com/maps/embed?pb=...\" width=\"100%\" height=\"300\" style=\"border:0; border-radius:8px;\" allowfullscreen=\"\" loading=\"lazy\"></iframe>');
+(1,	'Karel Dvořák.',	'shrekova bazina 13',	'12345678',	'123 456 789',	'email@email.cz',	'<iframe src=\"https://www.google.com/maps/embed?pb=...\" width=\"100%\" height=\"300\" style=\"border:0; border-radius:8px;\" allowfullscreen=\"\" loading=\"lazy\"></iframe>');
 
 DROP TABLE IF EXISTS `customization`;
 CREATE TABLE `customization` (
   `id` int NOT NULL AUTO_INCREMENT,
-  `content_type` varchar(50) NOT NULL,
-  `content_text` text,
-  `image_path` varchar(255) DEFAULT NULL,
+  `title` varchar(255) NOT NULL,
+  `description` text NOT NULL,
+  `image_path` varchar(255) NOT NULL,
   `ordering` int DEFAULT '0',
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `content_type_ordering` (`content_type`,`ordering`)
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-INSERT INTO `customization` (`id`, `content_type`, `content_text`, `image_path`, `ordering`) VALUES
-(1,	'title',	'Přizpůsobte si svůj kryt',	NULL,	1),
-(2,	'feature1_title',	'Ochranná krytka portu',	NULL,	2),
-(3,	'feature1_description',	'Chraňte port před prachem a nečistotami s odnímatelnou krytkou.',	NULL,	3),
-(4,	'feature1_image',	NULL,	'/uploads/home/krytka.jpg',	4),
-(5,	'feature2_title',	'Clona přední kamery',	NULL,	5),
-(6,	'feature2_description',	'Soukromí na prvním místě',	NULL,	6),
-(7,	'feature2_image',	NULL,	'/uploads/home/zaslepka.jpg',	7),
-(8,	'feature3_title',	'Integrované měřítko',	NULL,	8),
-(9,	'feature3_description',	'Praktické měřítko pro každodenní použití přímo na krytu.',	NULL,	9),
-(10,	'feature3_image',	NULL,	'/uploads/home/pravitko.jpg',	10),
-(11,	'button_text',	'Začít navrhovat',	NULL,	11),
-(12,	'button_link',	'detail',	NULL,	12);
+INSERT INTO `customization` (`id`, `title`, `description`, `image_path`, `ordering`) VALUES
+(1,	'Ochranná krytka portu',	'Chraňte port před prachem a nečistotami s odnímatelnou krytkou.',	'/uploads/home/krytka.jpg',	2),
+(2,	'Clona přední kamery',	'Soukromí na prvním místě',	'/uploads/home/zaslepka.jpg',	5),
+(3,	'Integrované měřítko',	'Praktické měřítko pro každodenní použití přímo na krytu.',	'/uploads/home/pravitko.jpg',	8);
 
 DROP TABLE IF EXISTS `durability`;
 CREATE TABLE `durability` (
@@ -190,10 +194,10 @@ CREATE TABLE `gallery` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 INSERT INTO `gallery` (`id`, `image`, `alt_text`, `ordering`) VALUES
-(1,	'/uploads/home/pisek.png',	'Kryt 1',	1),
-(2,	'/uploads/home/showcase.jpg',	'Kryt 2',	2),
-(3,	'/uploads/home/showcase1.jpg',	'Kryt 3',	3),
-(4,	'/uploads/home/showcase2.jpg',	'Kryt 4',	4);
+(1,	'/uploads/home/pisek.png',	'Kryt 1',	3),
+(2,	'/uploads/home/showcase.jpg',	'Kryt 2',	1),
+(3,	'/uploads/home/showcase1.jpg',	'Kryt 3',	4),
+(4,	'/uploads/home/showcase2.jpg',	'Kryt 4',	2);
 
 DROP TABLE IF EXISTS `manufacturers`;
 CREATE TABLE `manufacturers` (
@@ -209,7 +213,6 @@ INSERT INTO `manufacturers` (`id`, `name`, `created_at`) VALUES
 (2,	'Samsung',	'2025-07-03 16:52:35'),
 (3,	'Xiaomi',	'2025-07-03 16:52:35'),
 (4,	'Lenovo',	'2025-07-08 20:36:34'),
-(6,	'hujavej',	'2025-07-08 20:36:51'),
 (7,	'test',	'2025-07-09 13:11:16');
 
 DROP TABLE IF EXISTS `model_colors`;
@@ -314,7 +317,7 @@ CREATE TABLE `orders` (
   `shipping` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `delivery_point` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `additional_cost` decimal(10,2) DEFAULT '0.00',
-  `state` enum('KOSIK','OBJEDNANO','DORUCENO') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+  `state` enum('KOSIK','OBJEDNANO','ZAPLACENO','ODESLANO','DORUCENO','VYZVEDNUTO') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `variable_symbol` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
   PRIMARY KEY (`id`),
@@ -326,8 +329,8 @@ CREATE TABLE `orders` (
 INSERT INTO `orders` (`id`, `user_id`, `firstname`, `lastname`, `email`, `phone`, `address`, `city`, `psc`, `payment`, `shipping`, `delivery_point`, `additional_cost`, `state`, `created_at`, `variable_symbol`) VALUES
 (36,	9,	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'666777888',	'shrekova bazina 13',	'Praha',	'53803',	'PREVOD',	'ZASILKOVNA',	'sokolská 799 hermanuv mestec',	70.00,	'OBJEDNANO',	'2025-07-11 07:31:53',	'202507110823'),
 (37,	9,	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'666777888',	'shrekova bazina 13',	'Praha',	'53803',	'DOBIRKA',	'ZASILKOVNA',	'sokolská 799 hermanuv mestec',	110.00,	'OBJEDNANO',	'2025-07-11 07:34:07',	'202507112143'),
-(38,	9,	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'666777888',	'shrekova bazina 13',	'Praha',	'53803',	'DOBIRKA',	'ZASILKOVNA',	'sokolská 799 hermanuv mestec',	110.00,	'OBJEDNANO',	'2025-07-11 07:35:49',	'202507117212'),
-(39,	9,	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'666777888',	'shrekova bazina 13',	'Praha',	'53803',	'PREVOD',	'ZASILKOVNA',	'sokolská 799 hermanuv mestec',	70.00,	'OBJEDNANO',	'2025-07-11 07:49:56',	'202507112228');
+(38,	9,	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'666777888',	'shrekova bazina 13',	'Praha',	'53803',	'DOBIRKA',	'ZASILKOVNA',	'sokolská 799 hermanuv mestec',	110.00,	'ZAPLACENO',	'2025-07-11 07:35:49',	'202507117212'),
+(39,	9,	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'666777888',	'shrekova bazina 13',	'Praha',	'53803',	'PREVOD',	'ZASILKOVNA',	'sokolská 799 hermanuv mestec',	70.00,	'VYZVEDNUTO',	'2025-07-11 07:49:56',	'202507112228');
 
 DROP TABLE IF EXISTS `shipping`;
 CREATE TABLE `shipping` (
@@ -373,3 +376,5 @@ INSERT INTO `users` (`id`, `username`, `firstname`, `lastname`, `email`, `passwo
 (7,	'bakub',	'Kuba',	'Syč',	'bakua@mail.com',	'$2y$10$ZVF9RfycPsVhpryvQf50zePtoXVFCl4.6bUzZKxiSIdpdCguW4Eri',	'UZIVATEL',	NULL,	NULL,	NULL,	'2025-06-24 19:29:28',	NULL,	NULL),
 (8,	'igor',	'igor',	'rucicka',	'igor@mail.com',	'$2y$10$bEiEpKsd.RXoA7yvEk9QdOZ9LC9zdlX7MpgYnGDJ7S52QVI5U5Flm',	'UZIVATEL',	NULL,	NULL,	NULL,	'2025-06-29 14:10:39',	NULL,	NULL),
 (9,	'martin',	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'$2y$10$IL5Fv2uV.ltlOl7k61KAh.BzQnm4tCrgGaCBuPO/qlm36uoHDyItC',	'ADMIN',	'shrekova bazina 13',	'Praha',	'53803',	'2025-07-03 16:48:05',	NULL,	NULL);
+
+-- 2025-07-11 14:27:49

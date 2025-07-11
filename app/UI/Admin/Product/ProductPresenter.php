@@ -42,45 +42,45 @@ final class ProductPresenter extends Nette\Application\UI\Presenter
         $this->template->isAjax = $this->isAjax();
     }
 
-   public function createComponentModelForm(): Form
-{
-    $form = new Form;
+    public function createComponentModelForm(): Form
+    {
+        $form = new Form;
 
-    $form->addSelect('manufacturer_id', 'Výrobce:', 
-        $this->modelFacade->getManufacturers()->fetchPairs('id', 'name'))
-        ->setPrompt('Vyberte výrobce')
-        ->setRequired('Prosím, vyberte výrobce.');
+        $form->addSelect('manufacturer_id', 'Výrobce:', 
+            $this->modelFacade->getManufacturers()->fetchPairs('id', 'name'))
+            ->setPrompt('Vyberte výrobce')
+            ->setRequired('Prosím, vyberte výrobce.');
 
-    $form->addText('name', 'Název modelu:')
-        ->setRequired('Prosím, zadejte název modelu.');
+        $form->addText('name', 'Název modelu:')
+            ->setRequired('Prosím, zadejte název modelu.');
 
-    $form->addText('price', 'Základní cena (CZK):')
-        ->setRequired('Prosím, zadejte základní cenu.')
-        ->addRule($form::FLOAT, 'Cena musí být platné číslo.')
-        ->setDefaultValue('0.00');
+        $form->addText('price', 'Základní cena (CZK):')
+            ->setRequired('Prosím, zadejte základní cenu.')
+            ->addRule($form::FLOAT, 'Cena musí být platné číslo.')
+            ->setDefaultValue('0.00');
 
-    $form->addMultiSelect('color_ids', 'Dostupné barvy:', 
-        $this->modelFacade->getColors()->fetchPairs('id', 'name'))
-        ->setHtmlAttribute('multiple')
-        ->setRequired('Vyberte alespoň jednu barvu.');
+        $form->addMultiSelect('color_ids', 'Dostupné barvy:', 
+            $this->modelFacade->getColors()->fetchPairs('id', 'name'))
+            ->setHtmlAttribute('multiple')
+            ->setRequired('Vyberte alespoň jednu barvu.');
 
-    $features = $this->modelFacade->getFeatures()->fetchPairs('id', 'name');
-    $featureOptions = [];
-    foreach ($features as $featureId => $featureName) {
-        $options = $this->modelFacade->getFeatureOptions($featureId);
-        $featureOptions[$featureId] = array_combine(
-            array_map(fn($opt) => "$featureId:$opt[id]", $options),
-            array_map(fn($opt) => "$featureName: {$opt['name']}", $options)
-        );
+        $features = $this->modelFacade->getFeatures()->fetchPairs('id', 'name');
+        $featureOptions = [];
+        foreach ($features as $featureId => $featureName) {
+            $options = $this->modelFacade->getFeatureOptions($featureId);
+            $featureOptions[$featureId] = array_combine(
+                array_map(fn($opt) => "$featureId:$opt[id]", $options),
+                array_map(fn($opt) => "$featureName: {$opt['name']}", $options)
+            );
+        }
+        $form->addMultiSelect('feature_options', 'Dostupné vlastnosti:', $featureOptions)
+            ->setHtmlAttribute('multiple');
+
+        $form->addSubmit('save', 'Uložit model');
+
+        $form->onSuccess[] = [$this, 'modelFormSucceeded'];
+        return $form;
     }
-    $form->addMultiSelect('feature_options', 'Dostupné vlastnosti:', $featureOptions)
-        ->setHtmlAttribute('multiple');
-
-    $form->addSubmit('save', 'Uložit model');
-
-    $form->onSuccess[] = [$this, 'modelFormSucceeded'];
-    return $form;
-}
 
     public function modelFormSucceeded(Form $form, array $values): void
     {
@@ -234,10 +234,63 @@ final class ProductPresenter extends Nette\Application\UI\Presenter
         }
 
         if ($this->isAjax()) {
+            $this->redrawControl('manufacturersTable');
             $this->redrawControl('manufacturersSelect');
             $this->redrawControl('flashes');
         } else {
             $this->redirect('models');
+        }
+    }
+
+    public function createComponentManufacturerEditForm(): Form
+    {
+        $form = new Form;
+
+        $form->addHidden('id');
+
+        $form->addText('name', 'Název výrobce:')
+            ->setRequired('Prosím, zadejte název výrobce.');
+
+        $form->addSubmit('save', 'Upravit výrobce');
+
+        $form->onSuccess[] = [$this, 'manufacturerEditFormSucceeded'];
+        return $form;
+    }
+
+    public function manufacturerEditFormSucceeded(Form $form, array $values): void
+    {
+        try {
+            $this->modelFacade->updateManufacturer((int)$values['id'], $values['name']);
+            $this->flashMessage('Výrobce byl úspěšně upraven!', 'success');
+        } catch (\Exception $e) {
+            $this->flashMessage($e->getMessage(), 'error');
+        }
+
+        if ($this->isAjax()) {
+            $this->template->manufacturers = $this->modelFacade->getManufacturers();
+            $this->redrawControl('manufacturersTable');
+            $this->redrawControl('manufacturersSelect');
+            $this->redrawControl('flashes');
+        } else {
+            $this->redirect('models');
+        }
+    }
+
+    public function handleEditManufacturer(int $manufacturerId): void
+    {
+        $manufacturer = $this->modelFacade->getManufacturer($manufacturerId);
+        if (!$manufacturer) {
+            $this->flashMessage('Výrobce neexistuje.', 'error');
+            $this->redirect('models');
+        }
+
+        $this['manufacturerEditForm']->setDefaults([
+            'id' => $manufacturer->id,
+            'name' => $manufacturer->name,
+        ]);
+
+        if ($this->isAjax()) {
+            $this->redrawControl('manufacturerEditForm');
         }
     }
 
@@ -307,8 +360,6 @@ final class ProductPresenter extends Nette\Application\UI\Presenter
         }
     }
 
-
-    # Creating feature option form with price input
     public function createComponentFeatureOptionForm(): Form
     {
         $form = new Form;
@@ -332,7 +383,6 @@ final class ProductPresenter extends Nette\Application\UI\Presenter
         return $form;
     }
 
-    # Handling feature option form submission
     public function featureOptionFormSucceeded(Form $form, array $values): void
     {
         try {
@@ -361,7 +411,6 @@ final class ProductPresenter extends Nette\Application\UI\Presenter
         }
     }
 
-    # Creating feature option edit form
     public function createComponentFeatureOptionEditForm(): Form
     {
         $form = new Form;
@@ -387,7 +436,6 @@ final class ProductPresenter extends Nette\Application\UI\Presenter
         return $form;
     }
 
-    # Handling feature option edit form submission
     public function featureOptionEditFormSucceeded(Form $form, array $values): void
     {
         try {
@@ -407,10 +455,8 @@ final class ProductPresenter extends Nette\Application\UI\Presenter
         }
     }
 
-    # Handling edit feature option action
     public function handleEditFeatureOption(int $optionId): void
     {
-
         $option = $this->modelFacade->getAllFeatureOptions()->get($optionId);
         if (!$option) {
             $this->flashMessage('Možnost neexistuje.', 'error');
@@ -494,25 +540,24 @@ final class ProductPresenter extends Nette\Application\UI\Presenter
         }
     }
 
-public function handleDeleteModel(int $modelId): void
-{
-    try {
-        $this->modelFacade->deleteModel($modelId);
-        $this->flashMessage('Model byl úspěšně smazán!', 'success');
-    } catch (\Exception $e) {
-        $this->flashMessage($e->getMessage(), 'error');
-    }
+    public function handleDeleteModel(int $modelId): void
+    {
+        try {
+            $this->modelFacade->deleteModel($modelId);
+            $this->flashMessage('Model byl úspěšně smazán!', 'success');
+        } catch (\Exception $e) {
+            $this->flashMessage($e->getMessage(), 'error');
+        }
 
-    if ($this->isAjax()) {
-        // Use null if selectedManufacturerId is not set
-        $manufacturerId = $this->template->selectedManufacturerId ?? null;
-        $this->template->models = $this->modelFacade->getModels($manufacturerId);
-        $this->redrawControl('modelsTable');
-        $this->redrawControl('flashes');
-    } else {
-        $this->redirect('models');
+        if ($this->isAjax()) {
+            $manufacturerId = $this->template->selectedManufacturerId ?? null;
+            $this->template->models = $this->modelFacade->getModels($manufacturerId);
+            $this->redrawControl('modelsTable');
+            $this->redrawControl('flashes');
+        } else {
+            $this->redirect('models');
+        }
     }
-}
 
     public function handleDeleteManufacturer(int $manufacturerId): void
     {
@@ -527,6 +572,7 @@ public function handleDeleteModel(int $modelId): void
             $this->template->manufacturers = $this->modelFacade->getManufacturers();
             $this->template->models = $this->modelFacade->getModels();
             $this->template->selectedManufacturerId = null;
+            $this->redrawControl('manufacturersTable');
             $this->redrawControl('manufacturersSelect');
             $this->redrawControl('modelsTable');
             $this->redrawControl('flashes');
@@ -535,3 +581,4 @@ public function handleDeleteModel(int $modelId): void
         }
     }
 }
+?>

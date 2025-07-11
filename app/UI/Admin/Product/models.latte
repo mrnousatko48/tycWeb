@@ -4,7 +4,7 @@
 
     <div class="mb-4">
         <label for="manufacturerFilter" class="form-label fw-bold">Filtrovat podle výrobce:</label>
-        <select id="manufacturerFilter" class="form-select" onchange="filterModels(this.value)">
+        <select class="form-select" onchange="filterModels(this.value)" n:snippet="manufacturersSelect">
             <option value="">Všichni výrobci</option>
             {foreach $manufacturers as $manufacturer}
                 <option value="{$manufacturer->id}" n:if="$manufacturer->id == $selectedManufacturerId" selected>
@@ -31,6 +31,31 @@
                     {control modelForm}
                 </div>
             </div>
+        </div>
+    </div>
+
+    <div class="card shadow-sm mb-5">
+        <div class="card-header fw-bold">Seznam výrobců</div>
+        <div class="card-body table-responsive" n:snippet="manufacturersTable">
+            <table class="table table-striped table-hover align-middle">
+                <thead class="table-light">
+                    <tr>
+                        <th>Název</th>
+                        <th>Akce</th>
+                    </tr>
+                </thead>
+                <tbody>
+                {foreach $manufacturers as $manufacturer}
+                    <tr>
+                        <td>{$manufacturer->name}</td>
+                        <td>
+                            <a href="{link editManufacturer! $manufacturer->id}" class="btn btn-sm btn-primary ajax edit-manufacturer" data-bs-toggle="modal" data-bs-target="#editManufacturerModal">✏️ Upravit</a>
+                            <a href="{link deleteManufacturer! $manufacturer->id}" class="ajax btn btn-danger btn-sm">🗑 Smazat</a>
+                        </td>
+                    </tr>
+                {/foreach}
+                </tbody>
+            </table>
         </div>
     </div>
 
@@ -76,6 +101,21 @@
                 {/foreach}
                 </tbody>
             </table>
+        </div>
+    </div>
+
+    <!-- Modal for editing manufacturers -->
+    <div class="modal fade" id="editManufacturerModal" tabindex="-1" aria-labelledby="editManufacturerModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editManufacturerModalLabel">Upravit výrobce</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zavřít"></button>
+                </div>
+                <div class="modal-body" n:snippet="manufacturerEditForm">
+                    {control manufacturerEditForm}
+                </div>
+            </div>
         </div>
     </div>
 
@@ -133,8 +173,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 for (let snip in json.snippets) {
                     document.getElementById(snip).innerHTML = json.snippets[snip];
                 }
-                if (form.closest('#editModelModal')) {
-                    bootstrap.Modal.getInstance(document.getElementById('editModelModal')).hide();
+                if (form.closest('#editModelModal') || form.closest('#editManufacturerModal')) {
+                    bootstrap.Modal.getInstance(document.getElementById(form.closest('#editModelModal') ? 'editModelModal' : 'editManufacturerModal')).hide();
                 }
             } catch (error) {
                 console.error('Chyba:', error);
@@ -162,16 +202,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Initialize Select2 for all selects in the modal
-    $('#editModelModal').on('shown.bs.modal', function () {
+    // Initialize Select2 for all selects in both modals
+    $('#editModelModal, #editManufacturerModal').on('shown.bs.modal', function () {
         $(this).find('select').select2({
             dropdownParent: $(this),
             width: '100%'
         });
     });
 
-    // Destroy Select2 when modal is hidden to prevent memory leaks
-    $('#editModelModal').on('hidden.bs.modal', function () {
+    // Destroy Select2 when modals are hidden to prevent memory leaks
+    $('#editModelModal, #editManufacturerModal').on('hidden.bs.modal', function () {
         $(this).find('select').select2('destroy');
     });
 });

@@ -5,10 +5,9 @@ services:
 	- App\MailSender\MailSender
 
 
+
 search:
 	-	in: %appDir%
 		classes:
 			- *Factory
 			- *Facade
-
-			

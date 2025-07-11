@@ -4,30 +4,24 @@ declare(strict_types=1);
 
 namespace App\Core;
 
-use Nette;
 use Nette\Application\Routers\RouteList;
-use Nette\Application\Routers\Route;
 
 final class RouterFactory
 {
-	use Nette\StaticClass;
+    public static function createRouter(): RouteList
+    {
+        $router = new RouteList;
 
-	public static function createRouter(): RouteList
-	{
-		$router = new RouteList;
+        // Admin modul
+        $adminRouter = new RouteList('Admin');
+        $adminRouter->addRoute('admin/<presenter>/<action>[/<id>]', 'Dashboard:default');
+        $router->add($adminRouter);
 
-		$router->addRoute('admin/<presenter>/<action>[/<id>]', [
-			'module' => 'Admin',
-			'presenter' => 'Dashboard',
-			'action' => 'default',
-		]);
+        // Front modul
+        $frontRouter = new RouteList('Front');
+        $frontRouter->addRoute('<presenter>/<action>[/<id>]', 'Home:default');
+        $router->add($frontRouter);
 
-		$router->addRoute('<presenter>/<action>[/<id>]', [
-			'module' => 'Front',
-			'presenter' => 'Home',
-			'action' => 'default',
-		]);
-
-		return $router;
-	}
+        return $router;
+    }
 }
