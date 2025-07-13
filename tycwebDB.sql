@@ -1,16 +1,3 @@
--- Adminer 4.8.1 MySQL 9.1.0 dump
-
-SET NAMES utf8;
-SET time_zone = '+00:00';
-SET foreign_key_checks = 0;
-SET sql_mode = 'NO_AUTO_VALUE_ON_ZERO';
-
-SET NAMES utf8mb4;
-
-CREATE DATABASE `WEB2` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
-USE `WEB2`;
-
-DROP TABLE IF EXISTS `banner`;
 CREATE TABLE `banner` (
   `id` int NOT NULL AUTO_INCREMENT,
   `content_type` enum('title','description','image','button_text','button_link') NOT NULL,
@@ -24,7 +11,7 @@ CREATE TABLE `banner` (
 INSERT INTO `banner` (`id`, `content_type`, `content_text`, `image_path`, `ordering`) VALUES
 (1,	'title',	'Odolné 3D tisknuté kryty',	NULL,	1),
 (2,	'description',	'Vytvořte si pevný a stylový kryt s pokročilou 3D tiskovou technologií a vlastním designem.',	NULL,	2),
-(3,	'image',	NULL,	'/uploads/home/2.jpg',	3),
+(3,	'image',	NULL,	'/www/uploads/home/6873e208e7adb_Obrazek-WhatsApp-2025-07-12-v-07.06.31-ae69212d.webp',	3),
 (4,	'button_text',	'Navrhnout kryt',	NULL,	4),
 (5,	'button_link',	'detail',	NULL,	5);
 
@@ -104,9 +91,7 @@ CREATE TABLE `customization` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 INSERT INTO `customization` (`id`, `title`, `description`, `image_path`, `ordering`) VALUES
-(1,	'Ochranná krytka portu',	'Chraňte port před prachem a nečistotami s odnímatelnou krytkou.',	'/uploads/home/krytka.jpg',	2),
-(2,	'Clona přední kamery',	'Soukromí na prvním místě',	'/uploads/home/zaslepka.jpg',	5),
-(3,	'Integrované měřítko',	'Praktické měřítko pro každodenní použití přímo na krytu.',	'/uploads/home/pravitko.jpg',	8);
+(8,	'test',	'dassda',	'/www/uploads/home/6873e436bbb5b_r6bwd7wd.webp',	1);
 
 DROP TABLE IF EXISTS `durability`;
 CREATE TABLE `durability` (
@@ -123,7 +108,7 @@ INSERT INTO `durability` (`id`, `content_type`, `content_text`, `image_path`, `o
 (1,	'title',	'Odolnost navržená pro život',	NULL,	1),
 (2,	'description1',	'Naše kryty zvládnou pád, prach i dobrodružství díky precizní 3D tiskové technologii',	NULL,	2),
 (3,	'description2',	'Vyrobeny z odolných, ekologických materiálů s perfektním přizpůsobením pro váš telefon.',	NULL,	3),
-(4,	'image',	NULL,	'/uploads/home/sekera.jpg',	4);
+(4,	'image',	NULL,	'/www/uploads/home/6873e220ce872_Yellow-Black-Simple-Creative-Agency-Logo.webp',	4);
 
 DROP TABLE IF EXISTS `email_templates`;
 CREATE TABLE `email_templates` (
@@ -152,6 +137,7 @@ CREATE TABLE `feature_options` (
   `feature_id` int NOT NULL,
   `name` varchar(50) NOT NULL,
   `price` decimal(10,2) DEFAULT '0.00',
+  `image_path` varchar(255) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_feature_option` (`feature_id`,`name`),
@@ -159,15 +145,15 @@ CREATE TABLE `feature_options` (
   CONSTRAINT `feature_options_ibfk_1` FOREIGN KEY (`feature_id`) REFERENCES `features` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-INSERT INTO `feature_options` (`id`, `feature_id`, `name`, `price`, `created_at`) VALUES
-(16,	16,	'Ano',	30.00,	'2025-07-09 19:46:47'),
-(18,	16,	'Ne',	0.00,	'2025-07-09 19:46:50'),
-(24,	12,	'2 Sloty',	45.00,	'2025-07-09 19:47:06'),
-(25,	12,	'Žádný',	0.00,	'2025-07-09 19:47:37'),
-(30,	18,	'Ano',	30.00,	'2025-07-09 20:05:52'),
-(31,	18,	'Ne',	0.00,	'2025-07-09 20:05:58'),
-(36,	21,	'1',	0.00,	'2025-07-10 18:07:59'),
-(37,	21,	'2',	0.00,	'2025-07-10 18:08:02');
+INSERT INTO `feature_options` (`id`, `feature_id`, `name`, `price`, `image_path`, `created_at`) VALUES
+(16,	16,	'Ano',	30.00,	'/uploads/features/camera_cover_yes.jpg',	'2025-07-09 19:46:47'),
+(18,	16,	'Ne',	0.00,	'/uploads/features/camera_cover_no.jpg',	'2025-07-09 19:46:50'),
+(24,	12,	'2 Sloty',	45.00,	'/uploads/features/card_holder_2_slots.jpg',	'2025-07-09 19:47:06'),
+(25,	12,	'Žádný',	0.00,	'/uploads/features/no_card_holder.jpg',	'2025-07-09 19:47:37'),
+(30,	18,	'Ano',	30.00,	'/uploads/features/charging_port_cover_yes.jpg',	'2025-07-09 20:05:52'),
+(31,	18,	'Ne',	0.00,	'/uploads/features/charging_port_cover_no.jpg',	'2025-07-09 20:05:58'),
+(36,	21,	'1',	0.00,	'/uploads/features/test_1.jpg',	'2025-07-10 18:07:59'),
+(37,	21,	'2',	0.00,	'/uploads/features/test_2.jpg',	'2025-07-10 18:08:02');
 
 DROP TABLE IF EXISTS `features`;
 CREATE TABLE `features` (
@@ -194,9 +180,9 @@ CREATE TABLE `gallery` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 INSERT INTO `gallery` (`id`, `image`, `alt_text`, `ordering`) VALUES
-(1,	'/uploads/home/pisek.png',	'Kryt 1',	3),
+(1,	'/uploads/home/pisek.png',	'Kryt 1',	4),
 (2,	'/uploads/home/showcase.jpg',	'Kryt 2',	1),
-(3,	'/uploads/home/showcase1.jpg',	'Kryt 3',	4),
+(3,	'/uploads/home/showcase1.jpg',	'Kryt 3',	6),
 (4,	'/uploads/home/showcase2.jpg',	'Kryt 4',	2);
 
 DROP TABLE IF EXISTS `manufacturers`;
@@ -273,17 +259,18 @@ CREATE TABLE `models` (
   `name` varchar(100) NOT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `price` decimal(10,2) NOT NULL DEFAULT '0.00' COMMENT 'Base price of the model',
+  `model_file_path` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `manufacturer_id` (`manufacturer_id`),
   CONSTRAINT `models_ibfk_1` FOREIGN KEY (`manufacturer_id`) REFERENCES `manufacturers` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-INSERT INTO `models` (`id`, `manufacturer_id`, `name`, `created_at`, `price`) VALUES
-(1,	1,	'iPhone 13',	'2025-07-03 16:52:35',	529.99),
-(2,	1,	'iPhone 14',	'2025-07-03 16:52:35',	617.00),
-(3,	2,	'Galaxy S22',	'2025-07-03 16:52:35',	500.00),
-(4,	2,	'Galaxy S23',	'2025-07-03 16:52:35',	510.00),
-(5,	3,	'Mi 12',	'2025-07-03 16:52:35',	199.99);
+INSERT INTO `models` (`id`, `manufacturer_id`, `name`, `created_at`, `price`, `model_file_path`) VALUES
+(1,	1,	'iPhone 13',	'2025-07-03 16:52:35',	529.99,	'3D/scene.gltf'),
+(2,	1,	'iPhone 14',	'2025-07-03 16:52:35',	617.00,	'/3D/scene.gltf'),
+(3,	2,	'Galaxy S22',	'2025-07-03 16:52:35',	500.00,	'/3D/scene.gltf'),
+(4,	2,	'Galaxy S23',	'2025-07-03 16:52:35',	510.00,	'/3D/scene.gltf'),
+(5,	3,	'Mi 12',	'2025-07-03 16:52:35',	199.99,	'/3D/scene.gltf');
 
 DROP TABLE IF EXISTS `order_case`;
 CREATE TABLE `order_case` (
@@ -376,5 +363,3 @@ INSERT INTO `users` (`id`, `username`, `firstname`, `lastname`, `email`, `passwo
 (7,	'bakub',	'Kuba',	'Syč',	'bakua@mail.com',	'$2y$10$ZVF9RfycPsVhpryvQf50zePtoXVFCl4.6bUzZKxiSIdpdCguW4Eri',	'UZIVATEL',	NULL,	NULL,	NULL,	'2025-06-24 19:29:28',	NULL,	NULL),
 (8,	'igor',	'igor',	'rucicka',	'igor@mail.com',	'$2y$10$bEiEpKsd.RXoA7yvEk9QdOZ9LC9zdlX7MpgYnGDJ7S52QVI5U5Flm',	'UZIVATEL',	NULL,	NULL,	NULL,	'2025-06-29 14:10:39',	NULL,	NULL),
 (9,	'martin',	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'$2y$10$IL5Fv2uV.ltlOl7k61KAh.BzQnm4tCrgGaCBuPO/qlm36uoHDyItC',	'ADMIN',	'shrekova bazina 13',	'Praha',	'53803',	'2025-07-03 16:48:05',	NULL,	NULL);
-
--- 2025-07-11 14:27:49
