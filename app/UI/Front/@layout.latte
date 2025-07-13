@@ -90,7 +90,9 @@ footer {
     position: sticky;
     top: 0;
     width: 100%;
-    background-color: var(--color-background); /* Use theme background */
+    background-color: var(--color-background); /* Use
+
+theme background */
     backdrop-filter: blur(10px);             /* Frosted glass effect */
     -webkit-backdrop-filter: blur(10px);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -139,14 +141,31 @@ nav a:hover {
     justify-content: center;
     align-items: center;
 }
+
+.logo-dark {
+    display: none;
+}
+
+.logo-light {
+    display: none;
+}
+
+[data-theme="light"] .logo-light {
+    display: block;
+}
+
+[data-theme="dark"] .logo-dark {
+    display: block;
+}
     </style>
 </head>
 <body class="flex flex-col min-h-screen" data-theme="dark">
 <header class="site-header">
     <div class="container mx-auto px-4 flex justify-between items-center">
-        <h1 class="text-2xl font-semibold text-[var(--color-text)]">
-            <a href="{$basePath}/" class="hover:text-[var(--color-accent)] transition">OPNX3D</a>
-        </h1>
+            <a href="{$basePath}/" class="hover:text-[var(--color-accent)] transition">
+                <img src="{$basePath}{$logos['dark']}" alt="OPNX3D Logo" class="logo-dark h-10 w-auto">
+                <img src="{$basePath}{$logos['light']}" alt="OPNX3D Logo" class="logo-light h-10 w-auto">
+            </a>
         <nav class="flex items-center space-x-6 text-lg font-medium relative">
         
             {if $user->isLoggedIn()}

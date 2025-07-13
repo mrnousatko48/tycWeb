@@ -4,19 +4,16 @@ declare(strict_types=1);
 namespace App\UI\Front\Home;
 
 use Nette\Application\UI\Form;
-use App\Model\PageFacade;
 use Nette\Http\Session;
 use App\UI\Front\BaseFrontPresenter;
 
 final class HomePresenter extends BaseFrontPresenter
 {
-    private PageFacade $pageFacade;
     private Session $session;
 
-    public function __construct(PageFacade $pageFacade, Session $session)
+    public function __construct( Session $session)
     {
         parent::__construct();
-        $this->pageFacade = $pageFacade;
         $this->session = $session;
     }
 

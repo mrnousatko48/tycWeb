@@ -17,6 +17,40 @@ class PageFacade
         $this->database = $database;
     }
 
+
+
+    public function getLogos(): array
+    {
+        $logos = $this->database->table('logos')->fetchAll();
+        $result = [
+            'light' => '',
+            'dark' => ''
+        ];
+        foreach ($logos as $logo) {
+            $result[$logo->theme] = $logo->image_path;
+        }
+        return $result;
+    }
+
+    /**
+     * Update logo for a specific theme.
+     */
+    public function updateLogo(string $theme, ?FileUpload $image = null): void
+    {
+        if ($image instanceof FileUpload && $image->isOk()) {
+            $currentLogo = $this->database->table('logos')->where('theme', $theme)->fetch();
+            $imagePath = ImageUploader::uploadImage($image, 'uploads/logo', $currentLogo ? $currentLogo->image_path : null);
+            $data = ['image_path' => $imagePath];
+
+            $existing = $this->database->table('logos')->where('theme', $theme)->fetch();
+            if ($existing) {
+                $this->database->table('logos')->where('theme', $theme)->update($data);
+            } else {
+                $this->database->table('logos')->insert(array_merge($data, ['theme' => $theme]));
+            }
+        }
+    }
+    
     /**
      * Fetch all content for a given section, ordered by ordering.
      */

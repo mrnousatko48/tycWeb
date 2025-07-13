@@ -38,6 +38,12 @@ final class EditPresenter extends Presenter
     {
     }
 
+    public function renderLogos(): void
+    {
+        $this->template->logos = $this->pageFacade->getLogos();
+        $this->template->setFile(__DIR__ . '/Templates/logos.latte');
+    }
+
     /**
      * Render the Banner Section edit page.
      */
@@ -344,6 +350,37 @@ public function createComponentBannerForm(): Form
             'Edit:contact'
         );
 
+        return $form;
+    }
+
+    public function createComponentLogoForm(): Form
+    {
+        $form = new Form;
+        $form->addUpload('logo_light', 'Logo pro světlý režim:')
+             ->addRule(Form::IMAGE, 'Soubor musí být obrázek (JPEG, PNG, GIF, WebP).')
+             ->setHtmlAttribute('class', 'form-control');
+        $form->addUpload('logo_dark', 'Logo pro tmavý režim:')
+             ->addRule(Form::IMAGE, 'Soubor musí být obrázek (JPEG, PNG, GIF, WebP).')
+             ->setHtmlAttribute('class', 'form-control');
+        $form->addSubmit('save', 'Uložit loga')
+             ->getControlPrototype()->addClass('btn btn-primary');
+
+        $form->onSuccess[] = function (Form $form, $values) {
+            try {
+                if ($values->logo_light->isOk()) {
+                    $this->pageFacade->updateLogo('light', $values->logo_light);
+                }
+                if ($values->logo_dark->isOk()) {
+                    $this->pageFacade->updateLogo('dark', $values->logo_dark);
+                }
+                $this->flashMessage('Loga byla úspěšně aktualizována.', 'success');
+            } catch (\Exception $e) {
+                $this->flashMessage('Chyba při ukládání log: ' . $e->getMessage(), 'danger');
+            }
+            $this->redirect('logos');
+        };
+
+        $form->getElementPrototype()->enctype = 'multipart/form-data';
         return $form;
     }
 }

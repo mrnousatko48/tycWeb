@@ -185,6 +185,18 @@ INSERT INTO `gallery` (`id`, `image`, `alt_text`, `ordering`) VALUES
 (3,	'/uploads/home/showcase1.jpg',	'Kryt 3',	6),
 (4,	'/uploads/home/showcase2.jpg',	'Kryt 4',	2);
 
+DROP TABLE IF EXISTS `logos`;
+CREATE TABLE `logos` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `theme` varchar(10) NOT NULL,
+  `image_path` varchar(255) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+INSERT INTO `logos` (`id`, `theme`, `image_path`) VALUES
+(1,	'light',	'/www/uploads/logo/logoLight.png'),
+(2,	'dark',	'/www/uploads/logo/logoDark.png');
+
 DROP TABLE IF EXISTS `manufacturers`;
 CREATE TABLE `manufacturers` (
   `id` int NOT NULL AUTO_INCREMENT,
@@ -259,18 +271,17 @@ CREATE TABLE `models` (
   `name` varchar(100) NOT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `price` decimal(10,2) NOT NULL DEFAULT '0.00' COMMENT 'Base price of the model',
-  `model_file_path` varchar(255) DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `manufacturer_id` (`manufacturer_id`),
   CONSTRAINT `models_ibfk_1` FOREIGN KEY (`manufacturer_id`) REFERENCES `manufacturers` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-INSERT INTO `models` (`id`, `manufacturer_id`, `name`, `created_at`, `price`, `model_file_path`) VALUES
-(1,	1,	'iPhone 13',	'2025-07-03 16:52:35',	529.99,	'3D/scene.gltf'),
-(2,	1,	'iPhone 14',	'2025-07-03 16:52:35',	617.00,	'/3D/scene.gltf'),
-(3,	2,	'Galaxy S22',	'2025-07-03 16:52:35',	500.00,	'/3D/scene.gltf'),
-(4,	2,	'Galaxy S23',	'2025-07-03 16:52:35',	510.00,	'/3D/scene.gltf'),
-(5,	3,	'Mi 12',	'2025-07-03 16:52:35',	199.99,	'/3D/scene.gltf');
+INSERT INTO `models` (`id`, `manufacturer_id`, `name`, `created_at`, `price`) VALUES
+(1,	1,	'iPhone 13',	'2025-07-03 16:52:35',	529.99),
+(2,	1,	'iPhone 14',	'2025-07-03 16:52:35',	617.00),
+(3,	2,	'Galaxy S22',	'2025-07-03 16:52:35',	500.00),
+(4,	2,	'Galaxy S23',	'2025-07-03 16:52:35',	510.00),
+(5,	3,	'Mi 12',	'2025-07-03 16:52:35',	199.99);
 
 DROP TABLE IF EXISTS `order_case`;
 CREATE TABLE `order_case` (
