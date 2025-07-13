@@ -77,12 +77,15 @@ class PageFacade
      */
     public function updateBannerSection(array $values): void
     {
-        $image = $values['image'] ?? null;
-        if ($image instanceof FileUpload && $image->isOk()) {
+        // Handle image upload
+        if (!empty($values['image']) && $values['image'] instanceof FileUpload && $values['image']->isOk()) {
             $currentImage = $this->getBannerSection()->image ?? null;
-            $imagePath = ImageUploader::uploadImage($image, 'Uploads/home', $currentImage);
-            $this->updateSectionContent('banner', 'image', null, $imagePath);
+            $imagePath = ImageUploader::uploadImage($values['image'], 'uploads/home', $currentImage);
+            if ($imagePath) {
+                $this->updateSectionContent('banner', 'image', null, $imagePath);
+            }
         }
+        // Update other fields
         $fields = ['title', 'description', 'button_text', 'button_link'];
         foreach ($fields as $field) {
             if (isset($values[$field])) {
@@ -117,7 +120,7 @@ class PageFacade
         $image = $values['image'] ?? null;
         if ($image instanceof FileUpload && $image->isOk()) {
             $currentImage = $this->getDurabilitySection()->image ?? null;
-            $imagePath = ImageUploader::uploadImage($image, 'Uploads/home', $currentImage);
+            $imagePath = ImageUploader::uploadImage($image, 'uploads/home', $currentImage);
             $this->updateSectionContent('durability', 'image', null, $imagePath);
         }
         $fields = ['title', 'description1', 'description2'];
@@ -146,7 +149,7 @@ class PageFacade
         if (!$image->isOk()) {
             throw new \Exception('Musíte nahrát platný obrázek.');
         }
-        $imagePath = ImageUploader::uploadImage($image, 'Uploads/home', null);
+        $imagePath = ImageUploader::uploadImage($image, 'uploads/home', null);
 
         $maxOrdering = $this->database->table('customization')
             ->select('MAX(ordering) AS max_ordering')
@@ -168,8 +171,8 @@ class PageFacade
     {
         $customization = $this->database->table('customization')->get($id);
         if ($customization) {
-            if ($customization->image_path && file_exists(__DIR__ . '/../../web' . $customization->image_path)) {
-                unlink(__DIR__ . '/../../web' . $customization->image_path);
+            if ($customization->image_path && file_exists(__DIR__ . '/../../www' . $customization->image_path)) {
+                unlink(__DIR__ . '/../../www' . $customization->image_path);
             }
             $customization->delete();
         }
@@ -194,7 +197,7 @@ class PageFacade
         if (!$image instanceof FileUpload || !$image->isOk()) {
             throw new \Exception('Valid image file is required.');
         }
-        $imagePath = ImageUploader::uploadImage($image, 'Uploads/gallery', null);
+        $imagePath = ImageUploader::uploadImage($image, 'uploads/gallery', null);
         $altText = $values['alt_text'] ?? null;
         $ordering = (int)($values['ordering'] ?? 0);
 

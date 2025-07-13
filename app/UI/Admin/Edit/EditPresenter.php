@@ -6,6 +6,7 @@ namespace App\UI\Admin\Edit;
 use Nette\Application\UI\Presenter;
 use Nette\Application\UI\Form;
 use App\Model\PageFacade;
+use Nette\Http\FileUpload;
 use App\Utils\ImageUploader;
 
 /**
@@ -142,46 +143,43 @@ final class EditPresenter extends Presenter
     /**
      * Create a form to edit the Banner Section.
      */
-    public function createComponentBannerForm(): Form
-    {
-        $banner = $this->pageFacade->getBannerSection();
-        $fields = [
-            'title' => ['type' => 'text', 'label' => 'Nadpis:', 'required' => true],
-            'description' => ['type' => 'textArea', 'label' => 'Popis:', 'required' => true],
-            'button_text' => ['type' => 'text', 'label' => 'Text tlačítka:', 'required' => true],
-            'button_link' => ['type' => 'text', 'label' => 'Odkaz tlačítka:', 'required' => true],
-            'image' => [
-                'type' => 'upload',
-                'label' => 'Obrázek:',
-                'required' => false,
-            ],
-        ];
+    /**
+ * Create a form to edit the Banner Section.
+ */
+public function createComponentBannerForm(): Form
+{
+    $banner = $this->pageFacade->getBannerSection();
+    $fields = [
+        'title' => ['type' => 'text', 'label' => 'Nadpis:', 'required' => true],
+        'description' => ['type' => 'textArea', 'label' => 'Popis:', 'required' => true],
+        'button_text' => ['type' => 'text', 'label' => 'Text tlačítka:', 'required' => true],
+        'button_link' => ['type' => 'text', 'label' => 'Odkaz tlačítka:', 'required' => true],
+        'image' => [
+            'type' => 'upload',
+            'label' => 'Obrázek:',
+            'required' => false,
+        ],
+    ];
 
-        $form = $this->createEditForm(
-            (object)$banner,
-            $fields,
-            function ($values) {
-                $image = $values['image'] ?? null;
-                if ($image instanceof FileUpload && $image->isOk()) {
-                    $currentImage = $this->pageFacade->getBannerSection()->image ?? null;
-                    $imagePath = ImageUploader::uploadImage($image, 'Uploads/home', $currentImage);
-                    $values['image'] = $imagePath;
-                } else {
-                    unset($values['image']);
-                }
-                $this->pageFacade->updateBannerSection($values);
-            },
-            'Banner byl úspěšně aktualizován.',
-            'Edit:banner'
-        );
+    $form = $this->createEditForm(
+        (object)$banner,
+        $fields,
+        function ($values) {
+            $this->pageFacade->updateBannerSection((array)$values);
+            $this->flashMessage('Banner byl úspěšně aktualizován.', 'success');
+            $this->redirect('Edit:banner');
+        },
+        'Banner byl úspěšně aktualizován.',
+        'Edit:banner'
+    );
 
-        $form['image']
-            ->setHtmlAttribute('class', 'form-control')
-            ->addRule(Form::IMAGE, 'Soubor musí být obrázek (JPEG, PNG, GIF, WebP).');
+    $form['image']
+        ->setHtmlAttribute('class', 'form-control')
+        ->addRule(Form::IMAGE, 'Soubor musí být obrázek (JPEG, PNG, GIF, WebP).');
 
-        $form->getElementPrototype()->enctype = 'multipart/form-data';
-        return $form;
-    }
+    $form->getElementPrototype()->enctype = 'multipart/form-data';
+    return $form;
+}
 
     /**
      * Create a form to edit the Durability Section.
@@ -200,23 +198,17 @@ final class EditPresenter extends Presenter
             ],
         ];
 
-        $form = $this->createEditForm(
-            (object)$durability,
-            $fields,
-            function ($values) {
-                $image = $values['image'] ?? null;
-                if ($image instanceof FileUpload && $image->isOk()) {
-                    $currentImage = $this->pageFacade->getDurabilitySection()->image ?? null;
-                    $imagePath = ImageUploader::uploadImage($image, 'Uploads/home', $currentImage);
-                    $values['image'] = $imagePath;
-                } else {
-                    unset($values['image']);
-                }
-                $this->pageFacade->updateDurabilitySection($values);
-            },
-            'Sekce odolnosti byla úspěšně aktualizována.',
-            'Edit:durability'
-        );
+    $form = $this->createEditForm(
+        (object)$durability,
+        $fields,
+        function ($values) {
+            $this->pageFacade->updateDurabilitySection((array)$values);
+            $this->flashMessage('Změny byly uloženy', 'success');
+            $this->redirect('Edit:banner');
+        },
+        'Změny byly uloženy',
+        'Edit:banner'
+    );
 
         $form['image']
             ->setHtmlAttribute('class', 'form-control')

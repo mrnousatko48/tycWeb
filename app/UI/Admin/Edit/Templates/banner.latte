@@ -14,7 +14,7 @@
         margin-bottom: 2rem;
     }
     .banner-preview {
-        background: url({$banner->image ?? '/uploads/home/2.jpg'}) no-repeat center/cover;
+        background: url({$banner->image | noescape}?t={time()}) no-repeat center/cover;
         min-height: 300px;
         display: flex;
         align-items: center;
@@ -46,7 +46,7 @@
         <div class="banner-preview">
             <div class="overlay"></div>
             <div class="banner-content">
-                <h1 class="text-3xl font-bold mb-4">{$banner->title}</h1>
+                <h1 class="text-3xl font-bold mb-4">{$banner->title}</h1> <!-- Fixed: Use $banner->title -->
                 <p class="text-lg mb-6">{$banner->description}</p>
                 <a href="{$banner->button_link}" class="btn btn-primary">{$banner->button_text}</a>
             </div>
