@@ -48,9 +48,9 @@
     <div class="w-full">
         <div class="space-y-6">
             <div class="space-y-6">
-                <h1 class="text-3xl font-semibold text-gray-900">Kryt na telefon</h1>
+                <h1 class="text-3xl font-semibold">Kryt na telefon</h1>
                 <p class="text-lg text-gray-600">Vyberte si svůj styl a přizpůsobte si kryt podle svých potřeb.</p>
-                <div class="text-xl font-medium text-gray-900">
+                <div class="text-xl font-medium">
                     Celková cena: <span id="total-price">0 Kč</span>
                     <div id="price-breakdown" class="text-sm text-gray-600 mt-1"></div>
                 </div>
@@ -58,7 +58,7 @@
 
                 {form caseForm}
                     <div>
-                        <h2 class="text-xl font-medium text-gray-900">Model telefonu</h2>
+                        <h2 class="text-xl font-medium">Model telefonu</h2>
                         <div class="mt-2 flex space-x-3">
                             {input manufacturer class => 'px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 focus:ring-2 focus:ring-black transition'}
                             {input model class => 'px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 focus:ring-2 focus:ring-black transition', data-colors-url => '/endpoint/model-colors?modelId=#', data-features-url => '/endpoint/model-features?modelId=#', data-price-url => '/endpoint/model-price?modelId=#'}
@@ -66,7 +66,7 @@
                     </div>
 
                     <div>
-                        <h2 class="text-xl font-medium text-gray-900">Barva</h2>
+                        <h2 class="text-xl font-medium">Barva</h2>
                         <div id="color-buttons" class="mt-2 flex space-x-3">
                             <!-- Color buttons will be inserted here by JavaScript -->
                         </div>
@@ -228,7 +228,7 @@
                 featureDiv.className = 'mt-4';
 
                 const h2 = document.createElement('h2');
-                h2.className = 'text-xl font-medium text-gray-900';
+                h2.className = 'text-xl font-medium';
                 h2.innerText = featureName;
                 featureDiv.appendChild(h2);
 

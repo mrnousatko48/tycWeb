@@ -4,45 +4,10 @@ declare(strict_types=1);
 namespace App\UI\Front\Home;
 
 use Nette\Application\UI\Form;
-use Nette\Http\Session;
 use App\UI\Front\BaseFrontPresenter;
 
 final class HomePresenter extends BaseFrontPresenter
 {
-    private Session $session;
-
-    public function __construct( Session $session)
-    {
-        parent::__construct();
-        $this->session = $session;
-    }
-
-    public function startup(): void
-    {
-        parent::startup();
-        $savedTheme = $this->getHttpRequest()->getCookie('theme');
-        if ($savedTheme === 'dark') {
-            $this->template->darkMode = true;
-        } elseif ($savedTheme === 'light') {
-            $this->template->darkMode = false;
-        } else {
-            $this->template->darkMode = $this->isDarkModePreferred();
-        }
-    }
-
-    public function isDarkModePreferred(): bool
-    {
-        return $this->getHttpRequest()->isAjax() ? false : (bool)preg_match('/dark/', $this->getHttpRequest()->getHeader('Sec-CH-Prefers-Color-Scheme') ?: '');
-    }
-
-    public function handleToggleTheme(): void
-    {
-        $currentTheme = $this->getHttpRequest()->getCookie('theme') ?: ($this->isDarkModePreferred() ? 'dark' : 'light');
-        $newTheme = $currentTheme === 'light' ? 'dark' : 'light';
-        $this->getHttpResponse()->setCookie('theme', $newTheme, '30 days');
-        $this->redirect('this');
-    }
-
     public function renderDefault(): void
     {
         $this->template->banner = $this->pageFacade->getSectionContent('banner');
@@ -105,6 +70,7 @@ final class HomePresenter extends BaseFrontPresenter
         $values = $form->getValues();
         bdump($values);
         error_log('Form submitted with values: ' . print_r($values, true));
+
         try {
             $manufacturerId = (int)$values['manufacturer'];
             $modelId = (int)$values['model'];
@@ -137,6 +103,7 @@ final class HomePresenter extends BaseFrontPresenter
 
             $userId = $this->getUser()->isLoggedIn() ? $this->getUser()->getId() : null;
             error_log('Creating case with data: ' . print_r($caseData, true));
+
             $this->orderFacade->createCase($caseData, $userId);
 
             $this->flashMessage('Položka byla přidána do košíku.', 'success');
