@@ -4,18 +4,17 @@ declare(strict_types=1);
 namespace App\UI\Front\Home;
 
 use Nette\Application\UI\Form;
-use Nette\Http\Session;
 use App\UI\Front\BaseFrontPresenter;
 
 final class HomePresenter extends BaseFrontPresenter
 {
-    private Session $session;
 
-    public function __construct( Session $session)
+
+    public function __construct()
     {
-        parent::__construct();
-        $this->session = $session;
+        parent::__construct(); 
     }
+
 
     public function startup(): void
     {
