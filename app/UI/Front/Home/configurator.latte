@@ -1,55 +1,70 @@
 {block content}
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        @tailwind base;
+        @tailwind components;
+        @tailwind utilities;
+
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            @apply bg-gray-50;
         }
+
         .selected {
             @apply ring-2 ring-black ring-offset-2;
         }
+
+        @layer utilities {
+            @keyframes fade-in-up {
+                from {
+                    opacity: 0;
+                    transform: translateY(20px);
+                }
+                to {
+                    opacity: 1;
+                    transform: translateY(0);
+                }
+            }
+
+            .animate-fade-in-up {
+                animation: fade-in-up 0.6s ease-out both;
+            }
+        }
     </style>
-<div class="max-w-6xl mx-auto px-4 py-6 grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
-    <!-- Gallery -->
-    <div class="w-full">
-        <div class="relative h-72 md:h-96">
-            <div class="overflow-hidden rounded-2xl shadow-lg h-full">
-                <div class="flex h-full transition-transform duration-700 ease-in-out" id="carousel-track">
-                    <img src="/www/uploads/home/showcase.jpg" class="w-full flex-shrink-0 object-cover h-full" alt="Product Image 1">
-                    <img src="/www/uploads/home/showcase1.jpg" class="w-full flex-shrink-0 object-cover h-full" alt="Product Image 2">
-                    <img src="/www/uploads/home/showcase2.jpg" class="w-full flex-shrink-0 object-cover h-full" alt="Product Image 3">
-                    <img src="/www/uploads/home/showcase3.jpg" class="w-full flex-shrink-0 object-cover h-full" alt="Product Image 4">
+
+    <div class="max-w-6xl mx-auto px-4 py-6 grid grid-cols-1 md:grid-cols-2 gap-8 items-start animate-fade-in-up">
+
+        <div class="w-full">
+            <div class="relative h-72 md:h-96">
+                <div class="overflow-hidden rounded-2xl shadow-lg h-full">
+                    <div class="flex h-full transition-transform duration-700 ease-in-out" id="carousel-track">
+                        <img src="/www/uploads/home/showcase.jpg" class="w-full flex-shrink-0 object-cover h-full" alt="Product Image 1">
+                        <img src="/www/uploads/home/showcase1.jpg" class="w-full flex-shrink-0 object-cover h-full" alt="Product Image 2">
+                        <img src="/www/uploads/home/showcase2.jpg" class="w-full flex-shrink-0 object-cover h-full" alt="Product Image 3">
+                        <img src="/www/uploads/home/showcase3.jpg" class="w-full flex-shrink-0 object-cover h-full" alt="Product Image 4">
+                    </div>
                 </div>
+
+                <button onclick="prevSlide()" class="absolute top-1/2 -left-4 transform -translate-y-1/2 bg-black bg-opacity-40 hover:bg-opacity-70 text-white rounded-full p-2">
+                    &#8592;
+                </button>
+                <button onclick="nextSlide()" class="absolute top-1/2 -right-4 transform -translate-y-1/2 bg-black bg-opacity-40 hover:bg-opacity-70 text-white rounded-full p-2">
+                    &#8594;
+                </button>
             </div>
 
-            <!-- Navigation buttons -->
-            <button onclick="prevSlide()" class="absolute top-1/2 -left-4 transform -translate-y-1/2 bg-black bg-opacity-40 hover:bg-opacity-70 text-white rounded-full p-2">
-                &#8592;
-            </button>
-            <button onclick="nextSlide()" class="absolute top-1/2 -right-4 transform -translate-y-1/2 bg-black bg-opacity-40 hover:bg-opacity-70 text-white rounded-full p-2">
-                &#8594;
-            </button>
+            <div class="flex justify-center mt-3 space-x-2" id="carousel-dots">
+                <button onclick="goToSlide(0)" class="w-3 h-3 bg-gray-400 rounded-full"></button>
+                <button onclick="goToSlide(1)" class="w-3 h-3 bg-gray-300 rounded-full"></button>
+                <button onclick="goToSlide(2)" class="w-3 h-3 bg-gray-300 rounded-full"></button>
+                <button onclick="goToSlide(3)" class="w-3 h-3 bg-gray-300 rounded-full"></button>
+            </div>
         </div>
 
-        <!-- Dots -->
-        <div class="flex justify-center mt-3 space-x-2" id="carousel-dots">
-            <button onclick="goToSlide(0)" class="w-3 h-3 bg-gray-400 rounded-full"></button>
-            <button onclick="goToSlide(1)" class="w-3 h-3 bg-gray-300 rounded-full"></button>
-            <button onclick="goToSlide(2)" class="w-3 h-3 bg-gray-300 rounded-full"></button>
-            <button onclick="goToSlide(3)" class="w-3 h-3 bg-gray-300 rounded-full"></button>
-        </div>
-    </div>
-
-
-
-<!-- Add Alpine.js for interactivity (if not already included) -->
-<script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-
-    <div class="w-full">
-        <div class="space-y-6">
-            <div class="space-y-6">
+        <div class="w-full animate-fade-in-up">
+            <div class="space-y-8">
                 <h1 class="text-3xl font-semibold">Kryt na telefon</h1>
                 <p class="text-lg text-gray-400">Vyberte si svůj styl a přizpůsobte si kryt podle svých potřeb.</p>
+
                 <div class="text-xl font-medium">
                     Celková cena: <span id="total-price">0 Kč</span>
                     <div id="price-breakdown" class="text-sm text-gray-400 mt-1"></div>
@@ -59,291 +74,277 @@
                 {form caseForm}
                     <div>
                         <h2 class="text-xl font-medium">Model telefonu</h2>
-                        <div class="mt-2 flex space-x-3">
-                            {input manufacturer class => 'px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 focus:ring-2 focus:ring-black transition'}
-                            {input model class => 'px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 focus:ring-2 focus:ring-black transition', data-colors-url => '/endpoint/model-colors?modelId=#', data-features-url => '/endpoint/model-features?modelId=#', data-price-url => '/endpoint/model-price?modelId=#'}
+                        <div class="mt-2 flex flex-wrap gap-3">
+                            {input manufacturer class => 'px-4 py-3 bg-white border border-gray-300 text-gray-800 rounded-xl shadow-sm hover:border-black focus:ring-2 focus:ring-black transform hover:scale-[1.02] focus:scale-[1.02] transition duration-200 ease-out'}
+                            {input model class => 'px-4 py-3 bg-white border border-gray-300 text-gray-800 rounded-xl shadow-sm hover:border-black focus:ring-2 focus:ring-black transform hover:scale-[1.02] focus:scale-[1.02] transition duration-200 ease-out', data-colors-url => '/endpoint/model-colors?modelId=#', data-features-url => '/endpoint/model-features?modelId=#', data-price-url => '/endpoint/model-price?modelId=#'}
                         </div>
                     </div>
 
                     <div>
-                        <h2 class="text-xl font-medium">Barva</h2>
+                        <h2 class="text-xl font-medium mt-4">Barva</h2>
                         <div id="color-buttons" class="mt-2 flex space-x-3">
-                            <!-- Color buttons will be inserted here by JavaScript -->
                         </div>
                     </div>
                     {input color type => 'hidden', id => 'frm-caseForm-color'}
 
                     <div id="features">
-                        <!-- Feature sections will be inserted here by JavaScript -->
                     </div>
 
                     <div>
                         {input features type => 'hidden', id => 'frm-caseForm-features'}
                         {input total_price type => 'hidden', id => 'frm-caseForm-total_price'}
-                        {input submit class => 'w-full py-3 bg-black text-white rounded-lg hover:bg-gray-800 focus:ring-2 focus:ring-black transition mt-6'}
-
+                        {input submit class => 'w-full py-3 bg-black text-white rounded-xl hover:bg-gray-800 transform hover:scale-[1.02] transition duration-200 ease-out mt-6'}
                     </div>
                 {/form}
             </div>
+        </div>
+    </div>
 
+<script n:syntax=off>
+let basePrice = 0;
+let featurePrices = {};
+let selectedFeatures = {};
 
-    <script n:syntax=off>
-    let basePrice = 0;
-    let featurePrices = {};
-    let selectedFeatures = {};
+document.querySelectorAll('select[data-depends]').forEach((childSelect) => {
+    let parentSelect = childSelect.form[childSelect.dataset.depends];
+    let url = childSelect.dataset.url;
+    let items = JSON.parse(childSelect.dataset.items || 'null');
 
-    document.querySelectorAll('select[data-depends]').forEach((childSelect) => {
-        let parentSelect = childSelect.form[childSelect.dataset.depends];
-        let url = childSelect.dataset.url;
-        let items = JSON.parse(childSelect.dataset.items || 'null');
+    parentSelect.addEventListener('change', () => {
+        if (items) {
+            updateSelectbox(childSelect, items[parentSelect.value]);
+        }
+        if (url) {
+            fetch(url.replace(encodeURIComponent('#'), encodeURIComponent(parentSelect.value)))
+                .then((response) => response.json())
+                .then((data) => updateSelectbox(childSelect, data));
+        }
+    });
+});
 
-        parentSelect.addEventListener('change', () => {
-            if (items) {
-                updateSelectbox(childSelect, items[parentSelect.value]);
-            }
-            if (url) {
-                fetch(url.replace(encodeURIComponent('#'), encodeURIComponent(parentSelect.value)))
-                    .then((response) => response.json())
-                    .then((data) => updateSelectbox(childSelect, data));
-            }
-        });
+function updateSelectbox(select, items) {
+    select.innerHTML = '';
+    let defaultOption = document.createElement('option');
+    defaultOption.setAttribute('value', '');
+    defaultOption.setAttribute('disabled', 'disabled');
+    defaultOption.setAttribute('selected', 'selected');
+    defaultOption.innerText = select.dataset.prompt || 'Vyberte';
+    select.appendChild(defaultOption);
+    for (let id in items) {
+        let el = document.createElement('option');
+        el.setAttribute('value', id);
+        el.innerText = items[id];
+        select.appendChild(el);
+    }
+    select.disabled = Object.keys(items).length === 0;
+}
+
+function toggleSelection(button) {
+    const featureId = button.dataset.feature;
+    const group = button.parentElement.parentElement.querySelectorAll(`button[data-feature="${featureId}"]`);
+
+    group.forEach(btn => {
+        btn.classList.remove('ring-2', 'ring-black', 'ring-offset-2');
     });
 
-    function updateSelectbox(select, items) {
-        select.innerHTML = '';
-        let defaultOption = document.createElement('option');
-        defaultOption.setAttribute('value', '');
-        defaultOption.setAttribute('disabled', 'disabled');
-        defaultOption.setAttribute('selected', 'selected');
-        defaultOption.innerText = select.dataset.prompt || 'Vyberte';
-        select.appendChild(defaultOption);
-        for (let id in items) {
-            let el = document.createElement('option');
-            el.setAttribute('value', id);
-            el.innerText = items[id];
-            select.appendChild(el);
-        }
-        select.disabled = Object.keys(items).length === 0;
+    button.classList.add('ring-2', 'ring-black', 'ring-offset-2');
+    selectedFeatures[featureId] = {
+        name: button.dataset.value,
+        price: parseFloat(button.dataset.price) || 0
+    };
+
+    updateFeaturesInput();
+    updateTotalPrice();
+}
+
+function updateFeaturesInput() {
+    const features = {};
+    for (const [featureId, data] of Object.entries(selectedFeatures)) {
+        features[featureId] = data.name;
     }
+    document.getElementById('frm-caseForm-features').value = JSON.stringify(features);
+}
 
-    function toggleSelection(button) {
-        const featureId = button.dataset.feature;
-        const group = button.parentElement.parentElement.querySelectorAll(`button[data-feature="${featureId}"]`);
+document.getElementById('frm-caseForm-model').addEventListener('change', function () {
+    let modelId = this.value;
+    if (modelId) {
+        let colorsUrl = this.dataset.colorsUrl.replace('#', encodeURIComponent(modelId));
+        let featuresUrl = this.dataset.featuresUrl.replace('#', encodeURIComponent(modelId));
+        let priceUrl = this.dataset.priceUrl.replace('#', encodeURIComponent(modelId));
 
-        group.forEach(btn => {
-            btn.classList.remove('ring-2', 'ring-black', 'ring-offset-2');
-        });
+        Promise.all([
+            fetch(colorsUrl)
+                .then(response => response.json())
+                .then(colors => updateColorButtons(colors)),
+            fetch(featuresUrl)
+                .then(response => response.json())
+                .then(features => updateFeatureButtons(features)),
+            fetch(priceUrl)
+                .then(response => response.json())
+                .then(data => {
+                    basePrice = data.price || 0;
+                    updateTotalPrice();
+                })
+        ]).catch(error => console.error('Error fetching data:', error));
 
-        button.classList.add('ring-2', 'ring-black', 'ring-offset-2');
-        selectedFeatures[featureId] = {
-            name: button.dataset.value,
-            price: parseFloat(button.dataset.price) || 0
-        };
-
-        updateFeaturesInput();
-        updateTotalPrice();
-    }
-
-    function updateFeaturesInput() {
-        const features = {};
-        for (const [featureId, data] of Object.entries(selectedFeatures)) {
-            features[featureId] = data.name;
-        }
-        document.getElementById('frm-caseForm-features').value = JSON.stringify(features);
-    }
-
-    document.getElementById('frm-caseForm-model').addEventListener('change', function () {
-        let modelId = this.value;
-        if (modelId) {
-            let colorsUrl = this.dataset.colorsUrl.replace('#', encodeURIComponent(modelId));
-            let featuresUrl = this.dataset.featuresUrl.replace('#', encodeURIComponent(modelId));
-            let priceUrl = this.dataset.priceUrl.replace('#', encodeURIComponent(modelId));
-
-            Promise.all([
-                fetch(colorsUrl)
-                    .then(response => response.json())
-                    .then(colors => updateColorButtons(colors)),
-                fetch(featuresUrl)
-                    .then(response => response.json())
-                    .then(features => updateFeatureButtons(features)),
-                fetch(priceUrl)
-                    .then(response => response.json())
-                    .then(data => {
-                        basePrice = data.price || 0;
-                        updateTotalPrice();
-                    })
-            ]).catch(error => console.error('Error fetching data:', error));
-
-            const manufacturerSelect = document.getElementById('frm-caseForm-manufacturer');
-            const modelSelect = this;
-            const selectedDevice = document.getElementById('selected-device');
-            if (manufacturerSelect.value && modelId) {
-                selectedDevice.textContent = `${manufacturerSelect.options[manufacturerSelect.selectedIndex].text} ${modelSelect.options[modelSelect.selectedIndex].text}`;
-            } else {
-                selectedDevice.textContent = 'Vyberte výrobce a model';
-            }
+        const manufacturerSelect = document.getElementById('frm-caseForm-manufacturer');
+        const modelSelect = this;
+        const selectedDevice = document.getElementById('selected-device');
+        if (manufacturerSelect.value && modelId) {
+            selectedDevice.textContent = `${manufacturerSelect.options[manufacturerSelect.selectedIndex].text} ${modelSelect.options[modelSelect.selectedIndex].text}`;
         } else {
-            basePrice = 0;
-            featurePrices = {};
-            selectedFeatures = {};
-            updateColorButtons([]);
-            updateFeatureButtons([]);
-            updateTotalPrice();
-            document.getElementById('selected-device').textContent = 'Vyberte výrobce a model';
+            selectedDevice.textContent = 'Vyberte výrobce a model';
         }
-    });
-
-    // ✅ Reset prices & UI when manufacturer is changed
-    document.getElementById('frm-caseForm-manufacturer').addEventListener('change', function () {
-        const modelSelect = document.getElementById('frm-caseForm-model');
-        modelSelect.value = '';
-        modelSelect.disabled = false;
-
+    } else {
         basePrice = 0;
-        selectedFeatures = {};
         featurePrices = {};
-
+        selectedFeatures = {};
         updateColorButtons([]);
         updateFeatureButtons([]);
         updateTotalPrice();
-
-        document.getElementById('frm-caseForm-color').value = '';
-        document.getElementById('frm-caseForm-features').value = '';
-        document.getElementById('frm-caseForm-total_price').value = '';
         document.getElementById('selected-device').textContent = 'Vyberte výrobce a model';
-    });
+    }
+});
 
-    function updateColorButtons(colors) {
-        const container = document.getElementById('color-buttons');
-        container.innerHTML = '';
-        colors.forEach(color => {
+document.getElementById('frm-caseForm-manufacturer').addEventListener('change', function () {
+    const modelSelect = document.getElementById('frm-caseForm-model');
+    modelSelect.value = '';
+    modelSelect.disabled = false;
+
+    basePrice = 0;
+    selectedFeatures = {};
+    featurePrices = {};
+
+    updateColorButtons([]);
+    updateFeatureButtons([]);
+    updateTotalPrice();
+
+    document.getElementById('frm-caseForm-color').value = '';
+    document.getElementById('frm-caseForm-features').value = '';
+    document.getElementById('frm-caseForm-total_price').value = '';
+    document.getElementById('selected-device').textContent = 'Vyberte výrobce a model';
+});
+
+function updateColorButtons(colors) {
+    const container = document.getElementById('color-buttons');
+    container.innerHTML = '';
+    colors.forEach(color => {
+        const button = document.createElement('button');
+        button.setAttribute('type', 'button');
+        button.setAttribute('data-color', color.name);
+        button.className = `w-10 h-10 rounded-full bg-[${color.hex_code}] hover:ring-2 hover:ring-offset-2 hover:ring-gray-400 transition animate-fade-in-up`;
+        button.title = color.name;
+        button.addEventListener('click', function () {
+            document.querySelectorAll('#color-buttons button').forEach(btn => {
+                btn.classList.remove('ring-2', 'ring-black', 'ring-offset-2');
+            });
+            this.classList.add('ring-2', 'ring-black', 'ring-offset-2');
+            document.getElementById('frm-caseForm-color').value = this.dataset.color;
+        });
+        container.appendChild(button);
+    });
+    if (colors.length > 0) {
+        container.firstChild.classList.add('ring-2', 'ring-black', 'ring-offset-2');
+        document.getElementById('frm-caseForm-color').value = colors[0].name;
+    }
+}
+
+function updateFeatureButtons(features) {
+    const container = document.getElementById('features');
+    container.innerHTML = '';
+    featurePrices = {};
+    selectedFeatures = {};
+
+    for (const [featureName, options] of Object.entries(features)) {
+        const featureId = featureName.replace(/\s+/g, '_').toLowerCase();
+        const featureDiv = document.createElement('div');
+        featureDiv.className = 'mt-4 animate-fade-in-up';
+
+        const h2 = document.createElement('h2');
+        h2.className = 'text-xl font-medium';
+        h2.innerText = featureName;
+        featureDiv.appendChild(h2);
+
+        const buttonDiv = document.createElement('div');
+        buttonDiv.className = 'mt-2 flex flex-wrap gap-3';
+
+        options.forEach(option => {
+            const optionDiv = document.createElement('div');
+            optionDiv.className = 'flex flex-col items-center';
+
             const button = document.createElement('button');
             button.setAttribute('type', 'button');
-            button.setAttribute('data-color', color.name);
-            button.className = `w-10 h-10 rounded-full bg-[${color.hex_code}] hover:ring-2 hover:ring-offset-2 hover:ring-gray-400 transition`;
-            button.title = color.name;
-            button.addEventListener('click', function () {
-                document.querySelectorAll('#color-buttons button').forEach(btn => {
-                    btn.classList.remove('ring-2', 'ring-black', 'ring-offset-2');
-                });
-                this.classList.add('ring-2', 'ring-black', 'ring-offset-2');
-                document.getElementById('frm-caseForm-color').value = this.dataset.color;
-            });
-            container.appendChild(button);
+            button.setAttribute('data-feature', featureId);
+            button.setAttribute('data-value', option.name);
+            button.setAttribute('data-price', option.price);
+            button.className = 'px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition animate-fade-in-up';
+            button.innerText = option.name;
+            button.addEventListener('click', function () { toggleSelection(this); });
+
+            optionDiv.appendChild(button);
+
+            if (option.price > 0) {
+                const priceSpan = document.createElement('span');
+                priceSpan.className = 'text-sm text-gray-500 mt-1 animate-fade-in-up';
+                priceSpan.innerText = `+${option.price.toFixed(2)} Kč`;
+                optionDiv.appendChild(priceSpan);
+            }
+
+            buttonDiv.appendChild(optionDiv);
+
+            featurePrices[featureId] = featurePrices[featureId] || {};
+            featurePrices[featureId][option.name] = option.price;
         });
-        if (colors.length > 0) {
-            container.firstChild.classList.add('ring-2', 'ring-black', 'ring-offset-2');
-            document.getElementById('frm-caseForm-color').value = colors[0].name;
-        }
+
+        featureDiv.appendChild(buttonDiv);
+        container.appendChild(featureDiv);
     }
+}
 
-    function updateFeatureButtons(features) {
-        const container = document.getElementById('features');
-        container.innerHTML = '';
-        featurePrices = {};
-        selectedFeatures = {};
-
-        for (const [featureName, options] of Object.entries(features)) {
-            const featureId = featureName.replace(/\s+/g, '_').toLowerCase();
-            const featureDiv = document.createElement('div');
-            featureDiv.className = 'mt-4';
-
-            const h2 = document.createElement('h2');
-            h2.className = 'text-xl font-medium';
-            h2.innerText = featureName;
-            featureDiv.appendChild(h2);
-
-            const buttonDiv = document.createElement('div');
-            buttonDiv.className = 'mt-2 flex flex-wrap gap-3';
-
-            options.forEach(option => {
-                const optionDiv = document.createElement('div');
-                optionDiv.className = 'flex flex-col items-center';
-
-                const button = document.createElement('button');
-                button.setAttribute('type', 'button');
-                button.setAttribute('data-feature', featureId);
-                button.setAttribute('data-value', option.name);
-                button.setAttribute('data-price', option.price);
-                button.className = 'px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition';
-                button.innerText = option.name;
-                button.addEventListener('click', function () { toggleSelection(this); });
-
-                optionDiv.appendChild(button);
-
-                if (option.price > 0) {
-                    const priceSpan = document.createElement('span');
-                    priceSpan.className = 'text-sm text-gray-500 mt-1';
-                    priceSpan.innerText = `+${option.price.toFixed(2)} Kč`;
-                    optionDiv.appendChild(priceSpan);
-                }
-
-                buttonDiv.appendChild(optionDiv);
-
-                featurePrices[featureId] = featurePrices[featureId] || {};
-                featurePrices[featureId][option.name] = option.price;
-            });
-
-            featureDiv.appendChild(buttonDiv);
-            container.appendChild(featureDiv);
-
-            // Auto-select first option
-            if (options.length > 0) {
-                const firstButton = buttonDiv.querySelector('button');
-                toggleSelection(firstButton);
-            }
-        }
+function updateTotalPrice() {
+    let total = basePrice;
+    for (const featureId in selectedFeatures) {
+        total += selectedFeatures[featureId].price;
     }
+    document.getElementById('total-price').textContent = `${total.toFixed(2)} Kč`;
 
-    function updateTotalPrice() {
-        let total = basePrice;
-        let breakdown = basePrice > 0 ? [`Základní cena: ${basePrice.toFixed(2)} Kč`] : [];
-
-        for (const [feature, data] of Object.entries(selectedFeatures)) {
-            if (data.price > 0) {
-                total += data.price;
-                breakdown.push(`${data.name}: +${data.price.toFixed(2)} Kč`);
-            }
-        }
-
-        document.getElementById('total-price').textContent = total.toFixed(2) + ' Kč';
-        document.getElementById('frm-caseForm-total_price').value = total.toFixed(2);
-        document.getElementById('price-breakdown').innerHTML = breakdown.length > 0 ? breakdown.join('<br>') : 'Vyberte model pro zobrazení ceny';
+    let breakdown = `Základní cena: ${basePrice.toFixed(2)} Kč`;
+    for (const featureId in selectedFeatures) {
+        breakdown += `, ${selectedFeatures[featureId].name}: +${selectedFeatures[featureId].price.toFixed(2)} Kč`;
     }
+    document.getElementById('price-breakdown').textContent = breakdown;
 
-    // Carousel logic
-    let currentSlide = 0;
-    const track = document.getElementById('carousel-track');
-    const dots = document.getElementById('carousel-dots').children;
-    const totalSlides = track.children.length;
+    document.getElementById('frm-caseForm-total_price').value = total.toFixed(2);
+}
 
-    function updateCarousel() {
-        const width = track.clientWidth;
-        track.style.transform = `translateX(-${currentSlide * width}px)`;
-        for (let i = 0; i < dots.length; i++) {
-            dots[i].classList.remove('bg-gray-400');
-            dots[i].classList.add('bg-gray-300');
-        }
-        dots[currentSlide].classList.remove('bg-gray-300');
-        dots[currentSlide].classList.add('bg-gray-400');
-    }
+let currentIndex = 0;
+const track = document.getElementById('carousel-track');
+const dots = document.querySelectorAll('#carousel-dots button');
+const totalSlides = dots.length;
 
-    function nextSlide() {
-        currentSlide = (currentSlide + 1) % totalSlides;
-        updateCarousel();
-    }
+function updateCarousel() {
+    const slideWidth = track.clientWidth / totalSlides;
+    track.style.transform = `translateX(-${currentIndex * slideWidth}px)`;
+    dots.forEach((dot, index) => {
+        dot.classList.toggle('bg-gray-400', index === currentIndex);
+        dot.classList.toggle('bg-gray-300', index !== currentIndex);
+    });
+}
 
-    function prevSlide() {
-        currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
-        updateCarousel();
-    }
+function prevSlide() {
+    currentIndex = (currentIndex - 1 + totalSlides) % totalSlides;
+    updateCarousel();
+}
 
-    function goToSlide(index) {
-        currentSlide = index;
-        updateCarousel();
-    }
+function nextSlide() {
+    currentIndex = (currentIndex + 1) % totalSlides;
+    updateCarousel();
+}
 
-    setInterval(nextSlide, 5000);
+function goToSlide(index) {
+    currentIndex = index;
+    updateCarousel();
+}
+
+updateCarousel();
 </script>
-
-{/block}
