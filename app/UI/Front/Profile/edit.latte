@@ -1,4 +1,12 @@
 {block content}
-<a n:href="default" class="btn btn-primary">Zpět</a>
-{control editProfileForm}
-{/block content}
+<div class="container mt-4">
+    <a n:href="default" class="btn btn-primary mb-3">Zpět</a>
+
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h5 class="card-title">Upravit profil</h5>
+            {control editProfileForm}
+        </div>
+    </div>
+</div>
+{/block}

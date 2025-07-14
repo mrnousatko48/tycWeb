@@ -1,28 +1,44 @@
 {block content}
-  <dl>
-    <dt>Uživatelské jméno:</dt>
-    <dd>{$profileUser->username}</dd>
-
-    <dt>Jméno:</dt>
-    <dd>{$profileUser->firstname}</dd>
-
-    <dt>Příjmení:</dt>
-    <dd>{$profileUser->lastname}</dd>
-
-    <dt>Email:</dt>
-    <dd>{$profileUser->email}</dd>
-
-    <dt>Adresa:</dt>
-    <dd>{$profileUser->address}</dd>
-
-    <dt>Město:</dt>
-    <dd>{$profileUser->city}</dd>
-      
-    <dt>PSČ:</dt>
-    <dd>{$profileUser->psc}</dd>
-
-</dl>
-<a n:href="edit" class="btn btn-primary">Upravit profil</a>
-<a n:href="changePassword" class="btn btn-outline-primary">Změna hesla</a>
-  
+<div class="container mx-auto px-4">
+    <div class="profile-card shadow-md w-full max-w-4xl mx-auto my-8 bg-[var(--color-secondary)] rounded-lg">
+        <div class="p-8">
+            <h2 class="text-3xl font-semibold mb-8 text-center text-[var(--color-text)]">Profil uživatele</h2>
+            <dl class="grid grid-cols-1 gap-y-4 text-center text-[var(--color-text)]">
+                <div>
+                    <dt class="uppercase font-semibold">Uživatelské jméno:</dt>
+                    <dd>{$profileUser->username}</dd>
+                </div>
+                <div>
+                    <dt class="uppercase font-semibold">Jméno:</dt>
+                    <dd>{$profileUser->firstname}</dd>
+                </div>
+                <div>
+                    <dt class="uppercase font-semibold">Příjmení:</dt>
+                    <dd>{$profileUser->lastname}</dd>
+                </div>
+                <div>
+                    <dt class="uppercase font-semibold">Email:</dt>
+                    <dd>{$profileUser->email}</dd>
+                </div>
+                <div>
+                    <dt class="uppercase font-semibold">Adresa:</dt>
+                    <dd>{$profileUser->address}</dd>
+                </div>
+                <div>
+                    <dt class="uppercase font-semibold">Město:</dt>
+                    <dd>{$profileUser->city}</dd>
+                </div>
+                <div>
+                    <dt class="uppercase font-semibold">PSČ:</dt>
+                    <dd>{$profileUser->psc}</dd>
+                </div>
+            </dl>
+            <div class="btn-container flex justify-center gap-6 mt-8">
+                <a n:href="edit" class="btn btn-primary shadow-md hover:shadow-lg">Upravit profil</a>
+                <a n:href="changePassword" class="btn btn-outline-primary shadow-md hover:shadow-lg">Změna hesla</a>
+                <a n:href="history" class="btn btn-outline-primary shadow-md hover:shadow-lg">Historie objednávek</a>
+            </div>
+        </div>
+    </div>
+</div>
 {/block}
