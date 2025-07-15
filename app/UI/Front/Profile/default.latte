@@ -1,29 +1,50 @@
 {block content}
-  <dl>
-    <dt>Uživatelské jméno:</dt>
-    <dd>{$profileUser->username}</dd>
 
-    <dt>Jméno:</dt>
-    <dd>{$profileUser->firstname}</dd>
+<section class="max-w-xl mx-auto my-10 p-6 rounded-lg shadow-md bg-[var(--color-background)] transition-colors duration-300">
+  <h1 class="text-3xl font-bold mb-5 text-[var(--color-text)] text-center">Profil</h1>
 
-    <dt>Příjmení:</dt>
-    <dd>{$profileUser->lastname}</dd>
+  <dl class="space-y-2 text-center">
+    <div>
+      <dt class="font-semibold text-[var(--color-primary)] leading-tight">Uživatelské jméno:</dt>
+      <dd class="mt-0.5 text-[var(--color-text)] leading-snug">{$profileUser->username}</dd>
+    </div>
 
-    <dt>Email:</dt>
-    <dd>{$profileUser->email}</dd>
+    <div>
+      <dt class="font-semibold text-[var(--color-primary)] leading-tight">Jméno:</dt>
+      <dd class="mt-0.5 text-[var(--color-text)] leading-snug">{$profileUser->firstname}</dd>
+    </div>
 
-    <dt>Adresa:</dt>
-    <dd>{$profileUser->address}</dd>
+    <div>
+      <dt class="font-semibold text-[var(--color-primary)] leading-tight">Příjmení:</dt>
+      <dd class="mt-0.5 text-[var(--color-text)] leading-snug">{$profileUser->lastname}</dd>
+    </div>
 
-    <dt>Město:</dt>
-    <dd>{$profileUser->city}</dd>
-      
-    <dt>PSČ:</dt>
-    <dd>{$profileUser->psc}</dd>
+    <div>
+      <dt class="font-semibold text-[var(--color-primary)] leading-tight">Email:</dt>
+      <dd class="mt-0.5 text-[var(--color-text)] leading-snug">{$profileUser->email}</dd>
+    </div>
 
-</dl>
-<a n:href="edit" class="btn btn-primary">Upravit profil</a>
-<a n:href="changePassword" class="btn btn-outline-primary">Změna hesla</a>
-<a n:href="history" class="btn btn-outline-primary shadow-md hover:shadow-lg">Historie objednávek</a>
-  
+    <div>
+      <dt class="font-semibold text-[var(--color-primary)] leading-tight">Adresa:</dt>
+      <dd class="mt-0.5 text-[var(--color-text)] leading-snug">{$profileUser->address}</dd>
+    </div>
+
+    <div>
+      <dt class="font-semibold text-[var(--color-primary)] leading-tight">Město:</dt>
+      <dd class="mt-0.5 text-[var(--color-text)] leading-snug">{$profileUser->city}</dd>
+    </div>
+
+    <div>
+      <dt class="font-semibold text-[var(--color-primary)] leading-tight">PSČ:</dt>
+      <dd class="mt-0.5 text-[var(--color-text)] leading-snug">{$profileUser->psc}</dd>
+    </div>
+  </dl>
+
+  <div class="mt-8 flex justify-center gap-4 flex-wrap">
+    <a n:href="edit" class="btn btn-primary px-6 py-3 text-base">Upravit profil</a>
+    <a n:href="changePassword" class="btn btn-outline-primary px-6 py-3 text-base">Změna hesla</a>
+    <a n:href="history" class="btn btn-outline-primary shadow-md hover:shadow-lg px-6 py-3 text-base">Historie objednávek</a>
+  </div>
+</section>
+
 {/block}

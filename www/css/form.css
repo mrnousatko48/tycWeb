@@ -1,0 +1,178 @@
+/* form.css */
+
+/* Basic form container styling */
+form {
+    max-width: 600px;
+    margin: 1.5rem auto;
+    padding: 1.5rem;
+    background-color: var(--color-background);
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 10px rgb(0 0 0 / 0.05);
+    color: var(--color-text);
+    font-family: inherit;
+    transition: background-color 0.3s ease, color 0.3s ease;
+  }
+  
+  /* Labels */
+  label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.4rem;
+    color: var(--color-primary);
+    font-size: 1rem;
+    cursor: pointer;
+  }
+  
+  /* Inputs, selects, textareas */
+  input[type="text"],
+  input[type="email"],
+  input[type="password"],
+  input[type="number"],
+  input[type="tel"],
+  input[type="url"],
+  input[type="search"],
+  select,
+  textarea {
+    width: 100%;
+    padding: 0.6rem 0.9rem;
+    font-size: 1rem;
+    border: 1.5px solid var(--color-secondary);
+    border-radius: 0.5rem;
+    background-color: var(--color-background);
+    color: var(--color-text);
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    font-family: inherit;
+    resize: vertical;
+    box-sizing: border-box;
+  }
+  
+  input:focus,
+  select:focus,
+  textarea:focus {
+    outline: none;
+    border-color: var(--color-primary);
+    box-shadow: 0 0 5px var(--color-primary);
+    background-color: var(--color-secondary);
+    color: var(--color-text);
+  }
+  
+  /* Placeholder styling */
+  input::placeholder,
+  textarea::placeholder {
+    color: var(--color-secondary);
+    opacity: 1;
+  }
+  
+  /* Disabled inputs */
+  input:disabled,
+  select:disabled,
+  textarea:disabled {
+    background-color: var(--color-secondary);
+    color: var(--color-text);
+    cursor: not-allowed;
+  }
+  
+  /* Fieldsets and legends */
+  fieldset {
+    border: 1.5px solid var(--color-secondary);
+    border-radius: 0.75rem;
+    padding: 1rem 1.5rem;
+    margin-bottom: 1.5rem;
+  }
+  
+  legend {
+    padding: 0 0.5rem;
+    font-weight: 700;
+    color: var(--color-primary);
+    font-size: 1.1rem;
+  }
+  
+  /* Help text or hints */
+  .form-hint {
+    font-size: 0.875rem;
+    color: var(--color-secondary);
+    margin-top: 0.25rem;
+  }
+  
+  /* Error messages */
+  .form-error {
+    font-size: 0.875rem;
+    color: #ef4444; /* Tailwind red-500 */
+    margin-top: 0.25rem;
+  }
+  
+  /* Buttons inside forms */
+  form button,
+  form input[type="submit"],
+  form input[type="reset"] {
+    display: inline-block;
+    background-color: var(--color-primary);
+    color: var(--button-text);
+    font-weight: 600;
+    padding: 0.7rem 1.6rem;
+    font-size: 1rem;
+    border: none;
+    border-radius: 0.5rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    user-select: none;
+    margin-top: 1rem;
+  }
+  
+  form button:hover,
+  form input[type="submit"]:hover,
+  form input[type="reset"]:hover {
+    background-color: var(--color-accent);
+    box-shadow: 0 0 12px var(--color-accent);
+  }
+  
+  form button:disabled,
+  form input[type="submit"]:disabled,
+  form input[type="reset"]:disabled {
+    background-color: var(--color-secondary);
+    cursor: not-allowed;
+    box-shadow: none;
+  }
+  
+  /* Checkbox and radio inputs with labels */
+  input[type="checkbox"],
+  input[type="radio"] {
+    margin-right: 0.5rem;
+    cursor: pointer;
+    accent-color: var(--color-primary);
+  }
+  
+  input[type="checkbox"]:disabled,
+  input[type="radio"]:disabled {
+    accent-color: var(--color-secondary);
+    cursor: not-allowed;
+  }
+  
+  /* Inline checkbox/radio group label */
+  .checkbox-group,
+  .radio-group {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.75rem;
+    font-size: 1rem;
+    color: var(--color-text);
+  }
+  
+  /* Responsive */
+  @media (max-width: 480px) {
+    form {
+      padding: 1rem;
+      margin: 1rem 1rem;
+    }
+  
+    label,
+    input[type="text"],
+    input[type="email"],
+    input[type="password"],
+    select,
+    textarea,
+    button {
+      font-size: 0.95rem;
+    }
+  }
+  

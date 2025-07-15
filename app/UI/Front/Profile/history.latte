@@ -1,5 +1,7 @@
 {block content}
-<h1 class="mb-4">Historie objednávek</h1>
+<a n:href="default" class="btn btn-primary">Zpět</a>
+<h1 class="text-3xl font-bold mb-5 text-[var(--color-text)] text-center">Historie objednávek</h1>
+
 
 {if !$orders || count($orders) === 0}
     <div class="alert alert-info">Nemáte žádné objednávky.</div>
