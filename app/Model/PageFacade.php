@@ -253,8 +253,8 @@ class PageFacade
     {
         $image = $this->database->table('gallery')->get($id);
         if ($image) {
-            if ($image->image && file_exists(__DIR__ . '/../../web' . $image->image)) {
-                unlink(__DIR__ . '/../../web' . $image->image);
+            if ($image->image && file_exists(__DIR__ . '/../../' . $image->image)) {
+                unlink(__DIR__ . '/../../' . $image->image);
             }
             $image->delete();
         }

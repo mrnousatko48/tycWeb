@@ -48,7 +48,9 @@ final class HomePresenter extends BaseFrontPresenter
         $this->template->contact = $this->pageFacade->getContactInfo();
     }
 
-    public function renderDetail(): void
+
+
+    public function renderConfigurator(): void
     {
         $this->template->manufacturers = $this->pageFacade->getManufacturers();
         // Optionally, pass initial images if a default model is pre-selected
