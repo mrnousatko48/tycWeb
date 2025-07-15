@@ -105,7 +105,7 @@ final class ProfilePresenter extends BaseFrontPresenter
         $this->redirect('default');
     }
 
-    public function renderHistory(): void
+    public function renderOrders(): void
     {
         $userId = $this->user->getId();
 
