@@ -40,4 +40,10 @@ class EndpointPresenter extends Nette\Application\UI\Presenter
         $this->sendJson(['price' => $model ? (float)$model->price : 0.00]);
         $this->terminate();
     }
+
+    public function actionModelImages($modelId): void
+{
+    $this->sendJson($this->pageFacade->getImagesByModel((int)$modelId));
+    $this->terminate();
+}
 }
