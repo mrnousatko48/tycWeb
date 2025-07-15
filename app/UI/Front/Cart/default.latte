@@ -45,21 +45,18 @@
 .step.completed .step-number {
     background-color: var(--color-accent);
 }
+
 .step:not(:last-child)::after {
     content: '';
     position: absolute;
     top: 2.5rem;
-    left: calc(50% + 1.25rem); /* Center of step + half of step-number (1rem) + margin-right (0.25rem) */
-    width: calc(100% - 2.5rem); /* Full step width minus step-number diameter and margins */
+    left: calc(50% + 1.25rem);
+    width: calc(100% - 2.5rem);
     height: 4px;
     background-color: var(--color-secondary);
     z-index: -1;
 }
 
-.step.completed:not(:last-child)::after,
-.step.active:not(:last-child)::after {
-    background-color: var(--color-accent);
-}
 .features-list {
     list-style: none;
     padding-left: 0;
@@ -103,14 +100,19 @@
         </div>
     </div>
 </div>
-<h2 class="text-2xl font-bold text-[var(--color-text)] mb-6">Shrnutí košíku</h2>
-{if empty($cases)}
-    <div class="text-center py-16 px-6 bg-[var(--color-background)] rounded-2xl shadow-2xl">
-        <p class="text-2xl font-medium text-[var(--color-text)] mb-6">Nemáte žádné kryty v košíku.</p>
-        <a href="{$basePath}/" class="inline-block btn px-6 py-3 rounded-xl text-lg font-semibold transition hover:scale-105" style="background-color: var(--color-primary); color: var(--button-text);">Pokračovat v nákupu</a>
-    </div>
-{else}
-    <form action="{$presenter->link('CreateOrder')}" method="post" class="bg-[var(--color-background)] p-8 rounded-3xl shadow-2xl overflow-x-auto">
+
+    {if empty($cases)}
+        <div class="container mx-auto max-w-2xl px-4">
+            <h2 class="text-2xl font-bold text-[var(--color-text)] mb-6 text-center">Shrnutí košíku</h2>
+            <div class="text-center py-16 px-6 bg-[var(--color-background)] rounded-2xl shadow-2xl">
+                <p class="text-2xl font-medium text-[var(--color-text)] mb-6">Nemáte žádné kryty v košíku.</p>
+                <a n:href="Home:configurator" class="inline-block btn px-6 py-3 rounded-xl text-lg font-semibold transition hover:scale-105" style="background-color: var(--color-primary); color: var(--button-text);">Navrhnout kryt</a>
+            </div>
+        </div>
+    {else}
+    <div class="container mx-auto max-w-2xl px-4">
+        <h2 class="text-2xl font-bold text-[var(--color-text)] mb-6 text-center">Shrnutí košíku</h2>
+        <form action="{$presenter->link('CreateOrder')}" method="post" class="bg-[var(--color-background)] p-8 rounded-3xl shadow-2xl overflow-x-auto">
         <div class="space-y-6">
             {foreach $cases as $case}
                 <div class="bg-white dark:bg-[var(--color-secondary)] text-[var(--color-text)] shadow transition hover:shadow-lg duration-300 rounded-2xl p-6" data-case-id="{$case->id}" data-price="{$case->total_price}">

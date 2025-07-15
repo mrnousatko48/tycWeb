@@ -1,8 +1,10 @@
 {block content}
 <style>
+/* Progress Bar */
 .progress-bar {
     background-color: var(--color-background);
 }
+
 .step {
     flex: 1;
     text-align: center;
@@ -10,7 +12,10 @@
     color: var(--color-text-secondary);
     position: relative;
     z-index: 1;
+    white-space: nowrap;
+    min-width: 0;
 }
+
 @media (max-width: 640px) {
     .step {
         font-size: 0.9rem;
@@ -22,13 +27,16 @@
         margin-right: 0.3rem;
     }
 }
+
 .step.active {
     color: var(--color-primary);
     font-weight: bold;
 }
+
 .step.completed {
     color: var(--color-accent);
 }
+
 .step-number {
     display: inline-block;
     width: 2rem;
@@ -39,26 +47,36 @@
     color: white;
     margin-right: 0.5rem;
 }
+
 .step.active .step-number {
     background-color: var(--color-primary);
 }
+
 .step.completed .step-number {
     background-color: var(--color-accent);
 }
+
 .step:not(:last-child)::after {
     content: '';
     position: absolute;
     top: 2.5rem;
-    left: 50%;
-    width: 50%;
+    left: calc(50% + 1.25rem);
+    width: calc(100% - 2.5rem);
     height: 4px;
-    background-color: var(--color-secondary);
+    background-color: var(--color-accent);  /* lighter blue */
     z-index: -1;
 }
-.step.completed:not(:last-child)::after,
+
 .step.active:not(:last-child)::after {
+    background-color: var(--color-primary);
+}
+
+.step.completed:not(:last-child)::after {
     background-color: var(--color-accent);
 }
+
+
+/* Collapsible section */
 .collapsible-header {
     cursor: pointer;
     background-color: var(--color-secondary);
@@ -68,25 +86,32 @@
     font-weight: 600;
     color: var(--color-text);
 }
+
 @media (max-width: 640px) {
     .collapsible-header {
         font-size: 1rem;
     }
 }
+
 .collapsible-content {
     display: none;
 }
+
 .collapsible-content.open {
     display: block;
 }
+
+/* Form styles */
 .form-container {
     max-width: 500px;
     margin: 0 auto;
 }
+
 .form-field {
     position: relative;
     margin-bottom: 1rem;
 }
+
 .form-field label {
     position: absolute;
     top: 0.8rem;
@@ -98,6 +123,7 @@
     background-color: var(--color-background);
     padding: 0 0.2rem;
 }
+
 .form-field input {
     width: 100%;
     padding: 0.8rem 1rem;
@@ -112,11 +138,13 @@
     -moz-appearance: none;
     appearance: none;
 }
+
 .form-field input:focus {
     outline: none;
     border-color: var(--color-accent);
     box-shadow: 0 0 0 3px rgba(var(--color-accent-rgb), 0.2);
 }
+
 .form-field input:not(:placeholder-shown) + label,
 .form-field input:focus + label {
     top: -0.4rem;
@@ -124,70 +152,99 @@
     font-size: 0.7rem;
     color: var(--color-primary);
 }
+
 .form-field input[required]:not(:focus):not(:placeholder-shown):invalid {
     border-color: #e53e3e;
     box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.2);
 }
+
 .form-field .btn {
     width: 100%;
     text-align: center;
 }
+
 @media (max-width: 640px) {
     .form-field input {
         padding: 0.6rem 0.8rem;
         font-size: 0.9rem;
     }
+
     .form-field label {
         font-size: 0.8rem;
         top: 0.6rem;
     }
+
     .form-field input:not(:placeholder-shown) + label,
     .form-field input:focus + label {
         font-size: 0.65rem;
         top: -0.3rem;
     }
 }
+
+/* Order Summary */
 .order-summary {
     font-size: 0.95rem;
 }
+
 @media (max-width: 640px) {
     .order-summary {
         font-size: 0.9rem;
     }
 }
+
 .cost-breakdown {
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
     margin-top: 1rem;
 }
+
 .cost-item {
     display: flex;
     justify-content: space-between;
     padding: 0.5rem 0;
 }
+
 .cost-item.total {
     border-top: 2px solid var(--color-secondary);
     padding-top: 1rem;
     font-weight: bold;
 }
+
 .features-list {
-    margin-top: 0.5rem;
-    padding-left: 1rem;
+    list-style: none;
+    padding-left: 0;
+    margin: 0;
 }
-.features-list li {
+
+.feature-item {
+    background-color: var(--color-background-secondary, #f9fafb);
+    color: var(--color-text-secondary, #6b7280);
     font-size: 0.9rem;
-    color: var(--color-text-secondary);
-    list-style-type: disc;
+    line-height: 1.3;
+    border-radius: 0.5rem;
+    padding: 0.5rem 1rem;
+    transition: background-color 0.3s ease;
+    user-select: none;
 }
-@media (max-width: 640px) {
-    .features-list {
-        padding-left: 0.8rem;
-    }
-    .features-list li {
-        font-size: 0.85rem;
-    }
+
+.feature-item:hover {
+    background-color: var(--color-accent-light, #dbeafe);
 }
+
+.feature-label {
+    font-weight: 600;
+    color: var(--color-text-secondary, #4b5563);
+}
+
+.feature-value {
+    color: var(--color-text, #111827);
+}
+
+.bg-white:hover {
+    box-shadow: 0 8px 24px rgb(0 0 0 / 0.12);
+}
+
 </style>
 
 <div class="progress-bar bg-[var(--color-background)] p-4 mb-8 rounded-lg shadow">
