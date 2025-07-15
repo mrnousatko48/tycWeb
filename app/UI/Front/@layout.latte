@@ -11,6 +11,8 @@
     </title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
     <style>
 :root {
     /* Light mode */
@@ -157,6 +159,39 @@ nav a:hover {
 [data-theme="dark"] .logo-dark {
     display: block;
 }
+
+.gallery-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 1.5rem;
+    padding: 1rem 0;
+}
+
+.gallery-item {
+    width: 250px;
+    position: relative;
+    overflow: hidden;
+    border-radius: 0.75rem;
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.gallery-item img {
+    width: 100%;
+    max-height: 400px;
+    object-fit: cover;
+    aspect-ratio: 4 / 3;
+    border-radius: 0.75rem;
+    display: block;
+}
+
+.gallery-item:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+
+
+
     </style>
 </head>
 <body class="flex flex-col min-h-screen" data-theme="dark">
@@ -166,42 +201,50 @@ nav a:hover {
                 <img src="{$basePath}{$logos['dark']}" alt="OPNX3D Logo" class="logo-dark h-10 w-auto">
                 <img src="{$basePath}{$logos['light']}" alt="OPNX3D Logo" class="logo-light h-10 w-auto">
             </a>
-        <nav class="flex items-center space-x-6 text-lg font-medium relative">
-        
-            {if $user->isLoggedIn()}
-                <div class="relative">
-                    <button id="dropdownButton" class="flex items-center gap-2 rounded-full focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]">
-                        <img src="/www/uploads/user/default.jpg" alt="avatar" class="rounded-full w-8 h-8">
-                        <span class="text-sm text-[var(--color-text)] font-semibold">{$user->identity->username}</span>
-                        <svg class="w-4 h-4 fill-current text-[var(--color-text)]" viewBox="0 0 20 20"><path d="M5.5 7l4.5 4 4.5-4H5.5z"/></svg>
-                    </button>
-                    <div id="dropdownMenu" class="hidden absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-[var(--color-background)] ring-1 ring-black ring-opacity-5 z-50">
-                        {if $user->isInRole('ADMIN')}
-                        <a n:href=":Admin:Dashboard:default" class="block px-4 py-2 text-sm text-[var(--color-text)] hover:bg-[var(--color-secondary)]">Administrace</a>
-                        {/if}
-                        <a n:href="Profile:default" class="block px-4 py-2 text-sm text-[var(--color-text)] hover:bg-[var(--color-secondary)]">Účet</a>
-                        <a n:href="Sign:out" class="block px-4 py-2 text-sm text-red-500 hover:bg-[var(--color-secondary)]">Odhlásit se</a>
-                    </div>
-                </div>
-            {else}
-                <a n:href="Sign:in" class="hover:text-[var(--color-accent)] transition">Přihlášení</a>
-            {/if}
-            
-            <a n:href="Cart:default" class="hover:text-[var(--color-accent)] transition relative flex items-center">
-                <i class="fas fa-shopping-cart text-xl"></i>
-                <span n:if="$cartCount > 0" class="absolute -top-2 -right-3 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                    {$cartCount}
-                </span>
-            </a>
+       <nav class="flex items-center space-x-6 text-sm font-medium relative">
+    <a n:href="Home:default" class="hover:text-[var(--color-accent)] transition">Domů</a>
+    <a n:href="Home:gallery" class="hover:text-[var(--color-accent)] transition">Galerie</a>
+    <a href="{$basePath}{link Home:default}#contact" class="hover:text-[var(--color-accent)] transition">Kontakty</a>
+    <a n:href="Home:configurator" class="hover:text-[var(--color-accent)] transition">Navrhnout kryt</a>
 
-            <div class="flex justify-center flex-grow">
-                <button id="theme-toggle" class="btn btn-accent shadow-md hover:shadow-lg flex items-center justify-center w-10 h-10 p-0 rounded-full">
-                    <i class="theme-icon fas fa-sun sun-icon"></i>
-                    <i class="theme-icon fas fa-moon moon-icon"></i>
+
+
+
+        {if $user->isLoggedIn()}
+            <div class="relative">
+                <button id="dropdownButton" class="flex items-center gap-2 rounded-full focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]">
+                    <img src="/www/uploads/user/default.jpg" alt="avatar" class="rounded-full w-8 h-8">
+                    <span class="text-sm text-[var(--color-text)] font-semibold">{$user->identity->username}</span>
+                    <svg class="w-4 h-4 fill-current text-[var(--color-text)]" viewBox="0 0 20 20"><path d="M5.5 7l4.5 4 4.5-4H5.5z"/></svg>
                 </button>
+                <div id="dropdownMenu" class="hidden absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-[var(--color-background)] ring-1 ring-black ring-opacity-5 z-50">
+                    {if $user->isInRole('ADMIN')}
+                    <a n:href=":Admin:Dashboard:default" class="block px-4 py-2 text-sm text-[var(--color-text)] hover:bg-[var(--color-secondary)]">Administrace</a>
+                    {/if}
+                    <a n:href="Profile:default" class="block px-4 py-2 text-sm text-[var(--color-text)] hover:bg-[var(--color-secondary)]">Účet</a>
+                    <a n:href="Sign:out" class="block px-4 py-2 text-sm text-red-500 hover:bg-[var(--color-secondary)]">Odhlásit se</a>
+                </div>
             </div>
-    
-        </nav>
+        {else}
+            <a n:href="Sign:in" class="hover:text-[var(--color-accent)] transition">Přihlášení</a>
+        {/if}
+
+        <a n:href="Cart:default" class="hover:text-[var(--color-accent)] transition relative flex items-center">
+            <i class="fas fa-shopping-cart text-xl"></i>
+            <span n:if="$cartCount > 0" class="absolute -top-2 -right-3 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                {$cartCount}
+            </span>
+        </a>
+
+        <div class="flex justify-center flex-grow">
+            <button id="theme-toggle" class="btn btn-accent shadow-md hover:shadow-lg flex items-center justify-center w-10 h-10 p-0 rounded-full">
+                <i class="theme-icon fas fa-sun sun-icon"></i>
+                <i class="theme-icon fas fa-moon moon-icon"></i>
+            </button>
+        </div>
+
+    </nav>
+
     </div>
 </header>
 <main class="flex-1 pt-0">

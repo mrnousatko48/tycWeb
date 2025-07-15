@@ -149,4 +149,10 @@ final class HomePresenter extends BaseFrontPresenter
             $this->redirect('this');
         }
     }
+
+    public function renderGallery(): void
+    {
+        $this->template->gallery = $this->pageFacade->getGalleryImages();
+    }
+
 }

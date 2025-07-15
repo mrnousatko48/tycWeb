@@ -1,0 +1,11 @@
+{block content}
+    <h1>Galerie</h1>
+
+    <div class="gallery-grid">
+        {foreach $gallery as $image}
+            <div class="gallery-item">
+                <img src="{$image->image}" alt="{$image->alt_text}">
+            </div>
+        {/foreach}
+    </div>
+{/block}
