@@ -51,28 +51,36 @@ final class ProfilePresenter extends BaseFrontPresenter
         $form = new Form;
 
         $form->addText('username', 'Uživatelské jméno:')
-            ->setRequired();
+            ->setRequired()
+            ->setHtmlAttribute('class', 'form-control');
 
         $form->addText('firstname', 'Jméno:')
-            ->setRequired();
+            ->setRequired()
+            ->setHtmlAttribute('class', 'form-control');
 
         $form->addText('lastname', 'Příjmení:')
-            ->setRequired();
+            ->setRequired()
+            ->setHtmlAttribute('class', 'form-control');
 
         $form->addEmail('email', 'Email:')
-            ->setRequired();
+            ->setRequired()
+            ->setHtmlAttribute('class', 'form-control');
 
         $form->addText('address', 'Adresa:')
-            ->setNullable();
+            ->setNullable()
+            ->setHtmlAttribute('class', 'form-control');
 
         $form->addText('city', 'Město:')
-            ->setNullable();
-
-        $form->addText('psc', 'PSČ:') // Přidáno pole PSČ
             ->setNullable()
-            ->addRule($form::PATTERN, 'Zadejte platné PSČ (např. 12345 nebo 123 45)', '^\d{3}\s?\d{2}$');
+            ->setHtmlAttribute('class', 'form-control');
 
-        $form->addSubmit('save', 'Uložit změny');
+        $form->addText('psc', 'PSČ:')
+            ->setNullable()
+            ->addRule($form::PATTERN, 'Zadejte platné PSČ (např. 12345 nebo 123 45)', '^\d{3}\s?\d{2}$')
+            ->setHtmlAttribute('class', 'form-control');
+
+        $form->addSubmit('save', 'Uložit změny')
+            ->setHtmlAttribute('class', 'btn btn-success');
 
         $form->onSuccess[] = [$this, 'editProfileFormSucceeded'];
 
@@ -82,8 +90,11 @@ final class ProfilePresenter extends BaseFrontPresenter
             $form->setDefaults($userRow->toArray());
         }
 
+        $form->getElementPrototype()->addAttributes(['class' => 'needs-validation', 'novalidate' => true]);
+
         return $form;
     }
+
 
     public function editProfileFormSucceeded(Form $form, \stdClass $values): void
     {
@@ -134,23 +145,41 @@ final class ProfilePresenter extends BaseFrontPresenter
     {
         $form = new Form;
 
+        // Bootstrap 5 classes for layout and form controls
+        $form->getElementPrototype()->addAttributes(['class' => 'needs-validation', 'novalidate' => true]);
+
         $form->addPassword('currentPassword', 'Aktuální heslo:')
-            ->setRequired('Zadejte aktuální heslo.');
+            ->setRequired('Zadejte aktuální heslo.')
+            ->setHtmlAttribute('class', 'form-control');
 
         $form->addPassword('newPassword', 'Nové heslo:')
             ->setRequired('Zadejte nové heslo.')
-            ->addRule($form::MIN_LENGTH, 'Heslo musí mít alespoň %d znaků.', 6);
+            ->addRule($form::MIN_LENGTH, 'Heslo musí mít alespoň %d znaků.', 6)
+            ->setHtmlAttribute('class', 'form-control');
 
         $form->addPassword('newPasswordConfirm', 'Potvrďte nové heslo:')
             ->setRequired('Potvrďte nové heslo.')
-            ->addRule($form::EQUAL, 'Hesla se musí shodovat.', $form['newPassword']);
+            ->addRule($form::EQUAL, 'Hesla se musí shodovat.', $form['newPassword'])
+            ->setHtmlAttribute('class', 'form-control');
 
-        $form->addSubmit('save', 'Změnit heslo');
+        $form->addSubmit('save', 'Změnit heslo')
+            ->setHtmlAttribute('class', 'btn btn-warning');
 
         $form->onSuccess[] = [$this, 'changePasswordFormSucceeded'];
 
+        // Optional: Apply wrapper layout manually
+        $renderer = $form->getRenderer();
+        $renderer->wrappers['controls']['container'] = null;
+        $renderer->wrappers['pair']['container'] = 'div class="mb-3"';
+        $renderer->wrappers['pair']['.error'] = 'has-error';
+        $renderer->wrappers['control']['container'] = null;
+        $renderer->wrappers['label']['container'] = null;
+        $renderer->wrappers['control']['description'] = 'span class="form-text"';
+        $renderer->wrappers['control']['errorcontainer'] = 'span class="invalid-feedback d-block"';
+
         return $form;
     }
+
 
     public function changePasswordFormSucceeded(Form $form, \stdClass $values): void
     {

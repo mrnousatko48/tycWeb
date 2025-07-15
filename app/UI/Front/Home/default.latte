@@ -1,112 +1,154 @@
 {block content}
 <style>
-    .fixed-img {
-        width: 100%;
-        max-height: 300px;
-        object-fit: cover;
-        aspect-ratio: 16 / 9;
+.fixed-img {
+    width: 100%;
+    max-height: 300px;
+    object-fit: cover;
+    aspect-ratio: 16 / 9;
+}
+.banner-section {
+    min-height: 100vh;
+    background: url({foreach $banner as $item}{if $item->content_type == 'image'}{$item->image_path}{/if}{/foreach}) no-repeat center/cover;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+}
+.banner-content {
+    text-align: center;
+    z-index: 1;
+    padding: 1.5rem;
+    max-width: 80%;
+}
+.section-img {
+    width: 100%;
+    max-height: 350px;
+    object-fit: cover;
+    aspect-ratio: 4 / 3;
+    border-radius: 0.75rem;
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+}
+[data-theme="light"] .banner-section .banner-content h1,
+[data-theme="light"] .banner-section .banner-content p {
+    color: white;
+}
+.gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    padding: 1rem 0;
+    justify-content: center;
+    max-width: 900px;
+    margin: 0 auto;
+    justify-items: center;
+}
+.gallery-grid:has(:nth-child(3):last-child) {
+    grid-template-columns: repeat(2, minmax(250px, 1fr));
+    max-width: 600px;
+    justify-content: center;
+    margin: 0 auto;
+}
+.gallery-grid:has(:nth-child(3):last-child) .gallery-item:nth-child(3) {
+    grid-column: 1 / -1;
+    justify-self: center;
+    max-width: 50%;
+}
+.gallery-item {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+}
+.gallery-item img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+    max-height: 450px;
+    object-fit: cover;
+    aspect-ratio: 4 / 3;
+    border-radius: 0.75rem;
+}
+.gallery-item:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+}
+.grid.grid-cols-1.md\:grid-cols-3.gap-6 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+    justify-content: center;
+}
+.grid.grid-cols-1.md\:grid-cols-2.gap-6.items-center {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.5rem;
+    justify-content: center;
+}
+.p-4.rounded-xl.shadow-md.hover\:shadow-lg {
+    display: inline-block;
+    max-width: 100%;
+}
+.contact {
+    background-color: #f8f9fa;
+    padding: 4rem 0;
+    border-top: 1px solid #e5e7eb;
+}
+.contact h2 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    font-weight: 700;
+    color: #1f2937;
+}
+.contact p {
+    font-size: 1.125rem;
+    color: #4b5563;
+}
+.contact .contact-info {
+    background-color: #ffffff;
+    padding: 2rem;
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+.contact .contact-info:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+.contact .contact-info p {
+    font-size: 1.1rem;
+    margin-bottom: 1.2rem;
+    display: flex;
+    align-items: center;
+}
+.contact .contact-info i {
+    color: #007bff;
+    font-size: 1.25rem;
+    margin-right: 0.75rem;
+    flex-shrink: 0;
+}
+.contact .contact-info a {
+    color: #007bff;
+    text-decoration: none;
+    transition: color 0.3s ease, text-decoration 0.3s ease;
+}
+.contact .contact-info a:hover {
+    text-decoration: underline;
+    color: #0056b3;
+}
+.contact iframe {
+    border-radius: 0.75rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+}
+@media (max-width: 768px) {
+    .gallery-grid:has(:nth-child(3):last-child) {
+        grid-template-columns: 1fr;
     }
-    .banner-section {
-        min-height: 100vh;
-        background: url({foreach $banner as $item}{if $item->content_type == 'image'}{$item->image_path}{/if}{/foreach}) no-repeat center/cover;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        position: relative;
-    }
-    .banner-content {
-        text-align: center;
-        z-index: 1;
-        padding: 1.5rem;
+    .gallery-grid:has(:nth-child(3):last-child) .gallery-item:nth-child(3) {
         max-width: 80%;
     }
-    .section-img {
-        width: 100%;
-        max-height: 350px;
-        object-fit: cover;
-        aspect-ratio: 4 / 3;
-        border-radius: 0.75rem;
-    }
-    [data-theme="light"] .banner-section .banner-content h1,
-    [data-theme="light"] .banner-section .banner-content p {
-        color: white;
-    }
-    .gallery-grid {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        grid-template-rows: repeat(2, auto);
-        gap: 1.5rem;
-        padding: 1rem 0;
-    }
-    .gallery-item {
-        position: relative;
-        overflow: hidden;
-        border-radius: 0.75rem;
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    .gallery-item img {
-        width: 100%;
-        max-height: 350px;
-        object-fit: cover;
-        aspect-ratio: 4 / 3;
-        border-radius: 0.75rem;
-        display: block;
-    }
-    .gallery-item:hover {
-        transform: scale(1.05);
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
-    }
-    .contact {
-        background-color: #f8f9fa;
-        padding: 4rem 0;
-        border-top: 1px solid #e5e7eb;
-    }
-    .contact h2 {
-        font-size: 2.5rem;
-        margin-bottom: 1rem;
-        font-weight: 700;
-        color: #1f2937;
-    }
-    .contact p {
-        font-size: 1.125rem;
-        color: #4b5563;
-    }
-    .contact .contact-info {
-        background-color: #ffffff;
-        padding: 2rem;
-        border-radius: 0.75rem;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-        transition: transform 0.3s ease, box-shadow 0.3s ease;
-    }
-    .contact .contact-info:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
-    }
-    .contact .contact-info p {
-        font-size: 1.1rem;
-        margin-bottom: 1.2rem;
-        display: flex;
-        align-items: center;
-    }
-    .contact .contact-info i {
-        color: #007bff;
-        font-size: 1.25rem;
-        margin-right: 0.75rem;
-        flex-shrink: 0;
-    }
-    .contact .contact-info a {
-        color: #007bff;
-        text-decoration: none;
-        transition: color 0.3s ease, text-decoration 0.3s ease;
-    }
-    .contact .contact-info a:hover {
-        text-decoration: underline;
-        color: #0056b3;
-    }
-    .contact iframe {
-        border-radius: 0.75rem;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
-    }
+}
 </style>
 
 <section class="banner-section relative">
@@ -145,9 +187,9 @@
 <section class="py-12">
     <div class="container mx-auto px-4">
         <h2 class="text-3xl font-semibold text-center border-b border-[var(--color-accent)] pb-3 mb-6">Přizpůsobte si svůj kryt</h2>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 justify-center">
             {foreach $customizations as $customization}
-                <div class="p-4 rounded-xl shadow-md hover:shadow-lg transition text-center">
+                <div class="p-4 rounded-xl shadow-md hover:shadow-lg transition text-center inline-block max-w-full">
                     <img src="{$customization->image_path}" alt="{$customization->title}" class="section-img mb-3">
                     <h3 class="text-xl font-semibold mb-2">{$customization->title}</h3>
                     <p>{$customization->description}</p>
@@ -155,12 +197,11 @@
             {/foreach}
         </div>
         <div class="text-center mt-8">
-            <a n:href="detail" class="btn btn-accent shadow-md hover:shadow-lg">Začít navrhovat</a>
+            <a n:href="configurator" class="btn btn-accent shadow-md hover:shadow-lg">Začít navrhovat</a>
         </div>
     </div>
 </section>
-
-<section class="py-12">
+<section class="py-12" id="gallery">
     <div class="container mx-auto px-4">
         <h2 class="text-3xl font-semibold text-center border-b border-[var(--color-accent)] pb-3 mb-6">Galerie našich krytů</h2>
         <div class="gallery-grid">
@@ -173,10 +214,10 @@
     </div>
 </section>
 
-<section class="contact">
+<section id="contact" class="contact">
     <div class="container mx-auto px-4">
         <h2 class="text-center">Kontakt</h2>
-        <p class="text-center text-gray-600 mb-8">Máte otázky? Neváhejte nás kontaktovat.</p>
+        <p class="text-center mb-8">Máte otázky? Neváhejte nás kontaktovat.</p>
         <div class="flex flex-col md:flex-row md:space-x-8">
             <div class="contact-info mb-8 md:mb-0 flex-1">
                 <p><i class="fas fa-user"></i> <strong>{$contact->name}</strong></p>

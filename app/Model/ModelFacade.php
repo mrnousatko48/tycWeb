@@ -4,8 +4,6 @@ namespace App\Model;
 use Nette\Database\Explorer;
 use Nette\Database\Table\ActiveRow;
 use Nette\Database\UniqueConstraintViolationException;
-use Nette\Http\FileUpload;
-use App\Utils\ImageUploader;
 
 class ModelFacade
 {
@@ -62,11 +60,6 @@ class ModelFacade
             $query->where('manufacturer_id', $manufacturerId);
         }
         return $query;
-    }
-
-        public function getModelById(int $id): ?ActiveRow
-    {
-        return $this->database->table('models')->get($id);
     }
 
     public function getModel(int $id): ?ActiveRow
@@ -141,6 +134,8 @@ class ModelFacade
         } catch (UniqueConstraintViolationException $e) {
             $this->database->rollBack();
             throw new \Exception("Model '{$data['name']}' already exists for this manufacturer.");
+
+
         } catch (\Exception $e) {
             $this->database->rollBack();
             throw $e;
@@ -297,39 +292,6 @@ class ModelFacade
         return $this->database->table('model_features')
             ->where('model_id', $modelId)
             ->fetchAll();
-    }
-
-    // ---- IMAGES ----
-    public function getModelImages(int $modelId): \Nette\Database\Table\Selection
-    {
-        return $this->database->table('model_images')
-            ->where('model_id', $modelId)
-            ->order('created_at DESC');
-    }
-
-    public function addModelImage(int $modelId, FileUpload $file): ?ActiveRow
-    {
-        $uploadDir = 'uploads/models/' . $modelId;
-        $imagePath = ImageUploader::uploadImage($file, $uploadDir);
-        if ($imagePath) {
-            return $this->database->table('model_images')->insert([
-                'model_id' => $modelId,
-                'image_path' => $imagePath,
-            ]);
-        }
-        return null;
-    }
-
-    public function deleteModelImage(int $imageId): void
-    {
-        $image = $this->database->table('model_images')->get($imageId);
-        if ($image) {
-            $filePath = __DIR__ . '/../../' . $image->image_path;
-            if (file_exists($filePath)) {
-                unlink($filePath);
-            }
-            $image->delete();
-        }
     }
 }
 ?>

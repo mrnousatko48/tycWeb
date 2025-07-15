@@ -408,21 +408,4 @@ class PageFacade
         $model = $this->database->table('models')->get($id);
         return $model ? $model->name : '';
     }
-
-        public function getImagesByModel(int $modelId): array
-    {
-        $images = $this->database->table('model_images')
-            ->where('model_id', $modelId)
-            ->fetchAll();
-
-        $result = [];
-        foreach ($images as $image) {
-            $result[] = [
-                'image_path' => $image->image_path,
-                'alt_text' => 'Image for model ID ' . $modelId // Adjust alt text as needed
-            ];
-        }
-
-        return $result;
-    }
 }

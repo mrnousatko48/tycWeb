@@ -36,6 +36,7 @@ final class EditPresenter extends Presenter
      */
     public function renderDefault(): void
     {
+        $this->template->setFile(__DIR__ . '/Templates/default.latte');
     }
 
     public function renderLogos(): void

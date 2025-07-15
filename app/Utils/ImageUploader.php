@@ -61,38 +61,23 @@ class ImageUploader
             return null;
         }
 
-        // Convert palette-based images to true color to support WebP
-        if (!imageistruecolor($imageResource)) {
-            $width = imagesx($imageResource);
-            $height = imagesy($imageResource);
-            $trueColorImage = imagecreatetruecolor($width, $height);
-            if ($trueColorImage === false) {
-                imagedestroy($imageResource);
-                unlink($tempPath);
-                return null;
+        // Correct orientation for JPEG images
+        if ($type === IMAGETYPE_JPEG && function_exists('exif_read_data')) {
+            $exif = @exif_read_data($tempPath);
+            if ($exif && isset($exif['Orientation'])) {
+                switch ($exif['Orientation']) {
+                    case 3:
+                        $imageResource = imagerotate($imageResource, 180, 0);
+                        break;
+                    case 6:
+                        $imageResource = imagerotate($imageResource, -90, 0);
+                        break;
+                    case 8:
+                        $imageResource = imagerotate($imageResource, 90, 0);
+                        break;
+                }
             }
-            // Preserve transparency for PNG and GIF
-            imagealphablending($trueColorImage, false);
-            imagesavealpha($trueColorImage, true);
-            $transparent = imagecolorallocatealpha($trueColorImage, 0, 0, 0, 127);
-            imagefill($trueColorImage, 0, 0, $transparent);
-            imagecopy($trueColorImage, $imageResource, 0, 0, 0, 0, $width, $height);
-            imagedestroy($imageResource);
-            $imageResource = $trueColorImage;
         }
-
-        // Define new filename with .webp extension
-        $newFileName = $uniqueName . '.webp';
-        $newRelativePath = $absoluteUploadDir . '/' . $newFileName;
-        $newDbPath = '/www/' . ltrim($uploadDir, '/') . '/' . $newFileName;
-
-        // Convert and save image as WebP (quality set to 80)
-        if (!imagewebp($imageResource, $newRelativePath, 80)) {
-            imagedestroy($imageResource);
-            unlink($tempPath);
-            return null;
-        }
-        imagedestroy($imageResource);
 
         // Define new filename with .webp extension
         $newFileName = $uniqueName . '.webp';
