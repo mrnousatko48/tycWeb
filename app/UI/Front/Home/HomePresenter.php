@@ -20,6 +20,9 @@ final class HomePresenter extends BaseFrontPresenter
     public function renderDetail(): void
     {
         $this->template->manufacturers = $this->pageFacade->getManufacturers();
+        // Optionally, pass initial images if a default model is pre-selected
+        // For example, if you want to show images for a default model (e.g., model ID 1):
+        // $this->template->initialImages = $this->pageFacade->getImagesByModel(1);
     }
 
     protected function createComponentCaseForm(): Form
@@ -44,6 +47,7 @@ final class HomePresenter extends BaseFrontPresenter
             ->setHtmlAttribute('data-colors-url', $this->link('Endpoint:modelColors', ['modelId' => '#']))
             ->setHtmlAttribute('data-features-url', $this->link('Endpoint:modelFeatures', ['modelId' => '#']))
             ->setHtmlAttribute('data-price-url', $this->link('Endpoint:modelPrice', ['modelId' => '#']))
+            ->setHtmlAttribute('data-images-url', $this->link('Endpoint:modelImages', ['modelId' => '#'])) // Added
             ->setRequired('Prosím vyberte model.');
 
         $form->addHidden('color')->setRequired('Prosím vyberte barvu.');
