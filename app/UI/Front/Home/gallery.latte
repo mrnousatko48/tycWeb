@@ -1,15 +1,13 @@
 {block content}
 <section id="galerie" class="gallery py-5">
     <div class="container">
-        <h2 class="text-center mb-5">Galerie</h2>
-        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+        <h1 class="text-center mb-5">Galerie</h1>
+        <div class="gallery-grid">
             {foreach $gallery as $image}
-                <div class="col gallery-item">
-                    <div class="card h-100 border-0 shadow-sm">
-                        <a href="{$image->image}" data-lightbox="gallery" data-alt="{$image->alt_text}">
-                            <img src="{$image->image}" class="card-img-top" alt="{$image->alt_text}" loading="lazy">
-                        </a>
-                    </div>
+                <div class="gallery-item">
+                    <a href="{$image->image}" data-lightbox="gallery" data-alt="{$image->alt_text}">
+                        <img src="{$image->image}" alt="{$image->alt_text}" loading="lazy">
+                    </a>
                 </div>
             {/foreach}
         </div>
@@ -18,6 +16,13 @@
 
 <!-- Lightbox CSS -->
 <style>
+    h1 {
+    font-size: 2.5rem;
+    margin-bottom: 1rem;
+    font-weight: 700;
+    color: var(--color-text);
+    }
+
     .lightbox {
         display: none;
         position: fixed;
@@ -46,7 +51,7 @@
         font-size: 3.5rem;
         color: white;
         background: rgba(0, 0, 0, 0.5);
-        border-radius: 50%;
+        border-radius: 0;
         width: 70px;
         height: 70px;
         display: flex;
@@ -55,16 +60,51 @@
         cursor: pointer;
         user-select: none;
         transition: background 0.3s;
+        z-index: 1001;
     }
     .lightbox-nav:hover {
         background: rgba(0, 0, 0, 0.8);
     }
-    .lightbox-prev {
-        left: 10px;
-    }
-    .lightbox-next {
-        right: 10px;
-    }
+.lightbox-prev {
+    position: fixed;
+    top: 50%;
+    left: 0;
+    transform: translateY(-50%);
+    font-size: 3.5rem;
+    color: white;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 0;
+    width: 70px;
+    height: 70px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.3s;
+    z-index: 1001;
+}
+
+.lightbox-next {
+    position: fixed;
+    top: 50%;
+    right: 0;
+    transform: translateY(-50%);
+    font-size: 3.5rem;
+    color: white;
+    background: rgba(0, 0, 0, 0.5);
+    border-radius: 0;
+    width: 70px;
+    height: 70px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    user-select: none;
+    transition: background 0.3s;
+    z-index: 1001;
+}
+
     .lightbox-close {
         position: absolute;
         top: 20px;
@@ -81,6 +121,7 @@
         cursor: pointer;
         user-select: none;
         transition: background 0.3s;
+        z-index: 1001;
     }
     .lightbox-close:hover {
         background: rgba(0, 0, 0, 0.8);
