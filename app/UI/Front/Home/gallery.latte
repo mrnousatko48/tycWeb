@@ -1,11 +1,145 @@
 {block content}
-    <h1>Galerie</h1>
-
-    <div class="gallery-grid">
-        {foreach $gallery as $image}
-            <div class="gallery-item">
-                <img src="{$image->image}" alt="{$image->alt_text}">
-            </div>
-        {/foreach}
+<section id="galerie" class="gallery py-5">
+    <div class="container">
+        <h2 class="text-center mb-5">Galerie</h2>
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            {foreach $gallery as $image}
+                <div class="col gallery-item">
+                    <div class="card h-100 border-0 shadow-sm">
+                        <a href="{$image->image}" data-lightbox="gallery" data-alt="{$image->alt_text}">
+                            <img src="{$image->image}" class="card-img-top" alt="{$image->alt_text}" loading="lazy">
+                        </a>
+                    </div>
+                </div>
+            {/foreach}
+        </div>
     </div>
+</section>
+
+<!-- Lightbox CSS -->
+<style>
+    .lightbox {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        justify-content: center;
+        align-items: center;
+    }
+    .lightbox img {
+        max-width: 90%;
+        max-height: 80%;
+        border: 5px solid white;
+        border-radius: 5px;
+    }
+    .lightbox.active {
+        display: flex;
+    }
+    .lightbox-nav {
+        position: fixed;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 3.5rem;
+        color: white;
+        background: rgba(0, 0, 0, 0.5);
+        border-radius: 50%;
+        width: 70px;
+        height: 70px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        user-select: none;
+        transition: background 0.3s;
+    }
+    .lightbox-nav:hover {
+        background: rgba(0, 0, 0, 0.8);
+    }
+    .lightbox-prev {
+        left: 10px;
+    }
+    .lightbox-next {
+        right: 10px;
+    }
+    .lightbox-close {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        font-size: 2rem;
+        color: white;
+        background: rgba(0, 0, 0, 0.5);
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        user-select: none;
+        transition: background 0.3s;
+    }
+    .lightbox-close:hover {
+        background: rgba(0, 0, 0, 0.8);
+    }
+</style>
+
+<!-- Lightbox JavaScript -->
+<script n:syntax=off>
+    document.addEventListener('DOMContentLoaded', function() {
+        const lightbox = document.createElement('div');
+        lightbox.className = 'lightbox';
+        document.body.appendChild(lightbox);
+
+        const images = document.querySelectorAll('a[data-lightbox="gallery"]');
+        let currentIndex = 0;
+
+        function showImage(index) {
+            if (index >= 0 && index < images.length) {
+                currentIndex = index;
+                const image = images[index];
+                lightbox.innerHTML = `
+                    <span class="lightbox-prev">←</span>
+                    <img src="${image.getAttribute('href')}" alt="${image.getAttribute('data-alt')}">
+                    <span class="lightbox-next">→</span>
+                    <span class="lightbox-close">×</span>
+                `;
+                lightbox.classList.add('active');
+            }
+        }
+
+        images.forEach((image, index) => {
+            image.addEventListener('click', e => {
+                e.preventDefault();
+                showImage(index);
+            });
+        });
+
+        lightbox.addEventListener('click', e => {
+            if (e.target.classList.contains('lightbox-prev')) {
+                showImage(currentIndex - 1);
+            } else if (e.target.classList.contains('lightbox-next')) {
+                showImage(currentIndex + 1);
+            } else if (e.target.classList.contains('lightbox-close') || e.target.classList.contains('lightbox')) {
+                lightbox.classList.remove('active');
+            }
+        });
+
+        // Keyboard navigation
+        document.addEventListener('keydown', e => {
+            if (lightbox.classList.contains('active')) {
+                if (e.key === 'ArrowLeft') {
+                    showImage(currentIndex - 1);
+                } else if (e.key === 'ArrowRight') {
+                    showImage(currentIndex + 1);
+                } else if (e.key === 'Escape') {
+                    lightbox.classList.remove('active');
+                }
+            }
+        });
+    });
+</script>
 {/block}
