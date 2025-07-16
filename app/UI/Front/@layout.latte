@@ -92,10 +92,8 @@ footer {
     position: sticky;
     top: 0;
     width: 100%;
-    background-color: var(--color-background); /* Use
-
-theme background */
-    backdrop-filter: blur(10px);             /* Frosted glass effect */
+    background-color: var(--color-background);
+    backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
     z-index: 1000;
@@ -104,12 +102,12 @@ theme background */
 }
 
 [data-theme="light"] .site-header {
-    background-color: #FFFFFF; /* White background in light mode */
+    background-color: #FFFFFF;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 footer a[aria-label="Instagram"]:hover {
-    color: #E1306C; /* Instagram pink */
+    color: #E1306C;
 }
 
 nav a {
@@ -121,12 +119,12 @@ nav a:hover {
 }
 
 #dropdownMenu {
-    background-color: var(--color-background); /* Solid background for dropdown */
+    background-color: var(--color-background);
     border: 1px solid var(--color-secondary);
 }
 
 [data-theme="light"] #dropdownMenu {
-    background-color: #FFFFFF; /* White background for dropdown in light mode */
+    background-color: #FFFFFF;
     border: 1px solid #E5E7EB;
 }
 
@@ -197,62 +195,138 @@ h2 {
     color: var(--color-text);
 }
 
+/* Hamburger Menu Styles */
+.hamburger-menu {
+    display: none;
+}
 
+#hamburger-toggle {
+    display: none;
+    font-size: 1.5rem;
+    color: var(--color-text);
+    background: none;
+    border: none;
+    cursor: pointer;
+}
 
-    </style>
+.nav-menu {
+    display: flex;
+    align-items: center;
+    space-x-6;
+}
+
+@media (max-width: 640px) {
+    .hamburger-menu {
+        display: block;
+    }
+
+    #hamburger-toggle {
+        display: block;
+    }
+
+    .nav-menu {
+        display: flex;
+        flex-direction: column;
+    gap: 0.5rem;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        right: 0;
+        background-color: var(--color-background);
+        border-top: 1px solid var(--color-secondary);
+        flex-direction: column;
+        padding: 1rem;
+        z-index: 999;
+    }
+
+    .nav-menu.open {
+        display: flex;
+    }
+
+    .nav-menu a {
+        padding: 0.75rem;
+        width: 100%;
+        text-align: center;
+        font-size: 1rem;
+        color: var(--color-text);
+        margin: 0.5rem 0; /* Added spacing between links */
+    }
+
+    .nav-menu a:hover {
+        background-color: var(--color-secondary);
+        color: var(--color-accent);
+    }
+}
+</style>
 </head>
 <body class="flex flex-col min-h-screen" data-theme="dark">
 <header class="site-header">
     <div class="container mx-auto px-4 flex justify-between items-center">
-            <a href="{$basePath}/" class="hover:text-[var(--color-accent)] transition">
-                <img src="{$basePath}{$logos['dark']}" alt="OPNX3D Logo" class="logo-dark h-10 w-auto">
-                <img src="{$basePath}{$logos['light']}" alt="OPNX3D Logo" class="logo-light h-10 w-auto">
-            </a>
-       <nav class="flex items-center space-x-6 text-sm font-medium relative">
-    <a n:href="Home:default" class="hover:text-[var(--color-accent)] transition">Domů</a>
-    <a n:href="Home:gallery" class="hover:text-[var(--color-accent)] transition">Galerie</a>
-    <a href="{$basePath}{link Home:default}#contact" class="hover:text-[var(--color-accent)] transition">Kontakty</a>
-    <a n:href="Home:configurator" class="hover:text-[var(--color-accent)] transition">Navrhnout kryt</a>
-
-
-
-
-        {if $user->isLoggedIn()}
-            <div class="relative">
-                <button id="dropdownButton" class="flex items-center gap-2 rounded-full focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]">
-                    <img src="/www/uploads/user/default.jpg" alt="avatar" class="rounded-full w-8 h-8">
-                    <span class="text-sm text-[var(--color-text)] font-semibold">{$user->identity->username}</span>
-                    <svg class="w-4 h-4 fill-current text-[var(--color-text)]" viewBox="0 0 20 20"><path d="M5.5 7l4.5 4 4.5-4H5.5z"/></svg>
-                </button>
-                <div id="dropdownMenu" class="hidden absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-[var(--color-background)] ring-1 ring-black ring-opacity-5 z-50">
-                    {if $user->isInRole('ADMIN')}
-                    <a n:href=":Admin:Dashboard:default" class="block px-4 py-2 text-sm text-[var(--color-text)] hover:bg-[var(--color-secondary)]">Administrace</a>
-                    {/if}
-                    <a n:href="Profile:default" class="block px-4 py-2 text-sm text-[var(--color-text)] hover:bg-[var(--color-secondary)]">Účet</a>
-                    <a n:href="Profile:orders" class="block px-4 py-2 text-sm text-[var(--color-text)] hover:bg-[var(--color-secondary)]">Objednávky</a>
-                    <a n:href="Sign:out" class="block px-4 py-2 text-sm text-red-500 hover:bg-[var(--color-secondary)]">Odhlásit se</a>
-                </div>
-            </div>
-        {else}
-            <a n:href="Sign:in" class="hover:text-[var(--color-accent)] transition">Přihlášení</a>
-        {/if}
-
-        <a n:href="Cart:default" class="hover:text-[var(--color-accent)] transition relative flex items-center">
-            <i class="fas fa-shopping-cart text-xl"></i>
-            <span n:if="$cartCount > 0" class="absolute -top-2 -right-3 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                {$cartCount}
-            </span>
+        <a href="{$basePath}/" class="hover:text-[var(--color-accent)] transition">
+            <img src="{$basePath}{$logos['dark']}" alt="OPNX3D Logo" class="logo-dark h-10 w-auto">
+            <img src="{$basePath}{$logos['light']}" alt="OPNX3D Logo" class="logo-light h-10 w-auto">
         </a>
-
-        <div class="flex justify-center flex-grow">
-            <button id="theme-toggle" class="btn btn-accent shadow-md hover:shadow-lg flex items-center justify-center w-10 h-10 p-0 rounded-full">
-                <i class="theme-icon fas fa-sun sun-icon"></i>
-                <i class="theme-icon fas fa-moon moon-icon"></i>
+        <nav class="flex items-center space-x-6 text-sm font-medium relative">
+            <button id="hamburger-toggle" class="hamburger-menu">
+                <i class="fas fa-bars"></i>
             </button>
-        </div>
+            <div class="nav-menu hidden sm:flex sm:space-x-6">
+                <a n:href="Home:default" class="hover:text-[var(--color-accent)] transition">Domů</a>
+                <a n:href="Home:gallery" class="hover:text-[var(--color-accent)] transition">Galerie</a>
+                <a href="{$basePath}{link Home:default}#contact" class="hover:text-[var(--color-accent)] transition">Kontakty</a>
+                <a n:href="Home:configurator" class="hover:text-[var(--color-accent)] transition">Navrhnout kryt</a>
+            </div>
 
-    </nav>
+            {if $user->isLoggedIn()}
+                <div class="relative">
+                    <button id="dropdownButton" class="flex items-center gap-2 rounded-full focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]">
+                        <img src="/www/uploads/user/default.jpg" alt="avatar" class="rounded-full w-8 h-8">
+                        <span class="text-sm text-[var(--color-text)] font-semibold">{$user->identity->username}</span>
+                        <svg class="w-4 h-4 fill-current text-[var(--color-text)]" viewBox="0 0 20 20"><path d="M5.5 7l4.5 4 4.5-4H5.5z"/></svg>
+                    </button>
+                    <div id="dropdownMenu" class="hidden absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-[var(--color-background)] ring-1 ring-black ring-opacity-5 z-50">
+                        {if $user->isInRole('ADMIN')}
+                            <a n:href=":Admin:Dashboard:default" class="flex items-center gap-3 px-4 py-2 text-sm text-[var(--color-text)] hover:bg-[var(--color-secondary)] transition">
+                                <i class="fas fa-tools text-[var(--color-accent)] w-4 text-center"></i>
+                                Administrace
+                            </a>
+                            {/if}
 
+                            <a n:href="Profile:default" class="flex items-center gap-3 px-4 py-2 text-sm text-[var(--color-text)] hover:bg-[var(--color-secondary)] transition">
+                                <i class="fas fa-user-circle text-[var(--color-accent)] w-4 text-center"></i>
+                                Účet
+                            </a>
+
+                            <a n:href="Profile:orders" class="flex items-center gap-3 px-4 py-2 text-sm text-[var(--color-text)] hover:bg-[var(--color-secondary)] transition">
+                                <i class="fas fa-box text-[var(--color-accent)] w-4 text-center"></i>
+                                Objednávky
+                            </a>
+
+                            <a n:href="Sign:out" class="flex items-center gap-3 px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-50 hover:text-red-700 transition">
+                                <i class="fas fa-sign-out-alt w-4 text-center"></i>
+                                Odhlásit se
+                            </a>
+
+                    </div>
+                </div>
+            {else}
+                <a n:href="Sign:in" class="hover:text-[var(--color-accent)] transition">Přihlášení</a>
+            {/if}
+
+            <a n:href="Cart:default" class="hover:text-[var(--color-accent)] transition relative flex items-center">
+                <i class="fas fa-shopping-cart text-xl"></i>
+                <span n:if="$cartCount > 0" class="absolute -top-2 -right-3 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                    {$cartCount}
+                </span>
+            </a>
+
+            <div class="flex justify-center flex-grow">
+                <button id="theme-toggle" class="btn btn-accent shadow-md hover:shadow-lg flex items-center justify-center w-10 h-10 p-0 rounded-full">
+                    <i class="theme-icon fas fa-sun sun-icon"></i>
+                    <i class="theme-icon fas fa-moon moon-icon"></i>
+                </button>
+            </div>
+        </nav>
     </div>
 </header>
 <main class="flex-1 pt-0">
@@ -279,6 +353,8 @@ h2 {
 document.addEventListener('DOMContentLoaded', () => {
     const dropdownButton = document.getElementById('dropdownButton');
     const dropdownMenu = document.getElementById('dropdownMenu');
+    const hamburgerToggle = document.getElementById('hamburger-toggle');
+    const navMenu = document.querySelector('.nav-menu');
 
     if (dropdownButton && dropdownMenu) {
         dropdownButton.addEventListener('click', (e) => {
@@ -289,6 +365,18 @@ document.addEventListener('DOMContentLoaded', () => {
         document.addEventListener('click', (e) => {
             if (!dropdownMenu.contains(e.target) && !dropdownButton.contains(e.target)) {
                 dropdownMenu.classList.add('hidden');
+            }
+        });
+    }
+
+    if (hamburgerToggle && navMenu) {
+        hamburgerToggle.addEventListener('click', () => {
+            navMenu.classList.toggle('open');
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!navMenu.contains(e.target) && !hamburgerToggle.contains(e.target)) {
+                navMenu.classList.remove('open');
             }
         });
     }

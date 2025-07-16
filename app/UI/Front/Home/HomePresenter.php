@@ -13,32 +13,6 @@ final class HomePresenter extends BaseFrontPresenter
         parent::__construct(); 
     }
 
-    public function startup(): void
-    {
-        parent::startup();
-        $savedTheme = $this->getHttpRequest()->getCookie('theme');
-        if ($savedTheme === 'dark') {
-            $this->template->darkMode = true;
-        } elseif ($savedTheme === 'light') {
-            $this->template->darkMode = false;
-        } else {
-            $this->template->darkMode = $this->isDarkModePreferred();
-        }
-    }
-
-    public function isDarkModePreferred(): bool
-    {
-        return $this->getHttpRequest()->isAjax() ? false : (bool)preg_match('/dark/', $this->getHttpRequest()->getHeader('Sec-CH-Prefers-Color-Scheme') ?: '');
-    }
-
-    public function handleToggleTheme(): void
-    {
-        $currentTheme = $this->getHttpRequest()->getCookie('theme') ?: ($this->isDarkModePreferred() ? 'dark' : 'light');
-        $newTheme = $currentTheme === 'light' ? 'dark' : 'light';
-        $this->getHttpResponse()->setCookie('theme', $newTheme, '30 days');
-        $this->redirect('this');
-    }
-
     public function renderDefault(): void
     {
         $this->template->banner = $this->pageFacade->getSectionContent('banner');
@@ -48,14 +22,9 @@ final class HomePresenter extends BaseFrontPresenter
         $this->template->contact = $this->pageFacade->getContactInfo();
     }
 
-
-
     public function renderConfigurator(): void
     {
         $this->template->manufacturers = $this->pageFacade->getManufacturers();
-        // Optionally, pass initial images if a default model is pre-selected
-        // For example, if you want to show images for a default model (e.g., model ID 1):
-        // $this->template->initialImages = $this->pageFacade->getImagesByModel(1);
     }
 
     protected function createComponentCaseForm(): Form
@@ -80,7 +49,7 @@ final class HomePresenter extends BaseFrontPresenter
             ->setHtmlAttribute('data-colors-url', $this->link('Endpoint:modelColors', ['modelId' => '#']))
             ->setHtmlAttribute('data-features-url', $this->link('Endpoint:modelFeatures', ['modelId' => '#']))
             ->setHtmlAttribute('data-price-url', $this->link('Endpoint:modelPrice', ['modelId' => '#']))
-            ->setHtmlAttribute('data-images-url', $this->link('Endpoint:modelImages', ['modelId' => '#'])) // Added
+            ->setHtmlAttribute('data-images-url', $this->link('Endpoint:modelImages', ['modelId' => '#']))
             ->setRequired('Prosím vyberte model.');
 
         $form->addHidden('color')->setRequired('Prosím vyberte barvu.');
@@ -105,8 +74,6 @@ final class HomePresenter extends BaseFrontPresenter
     public function processForm(Form $form): void
     {
         $values = $form->getValues();
-        bdump($values);
-        error_log('Form submitted with values: ' . print_r($values, true));
         try {
             $manufacturerId = (int)$values['manufacturer'];
             $modelId = (int)$values['model'];
@@ -138,7 +105,6 @@ final class HomePresenter extends BaseFrontPresenter
             ];
 
             $userId = $this->getUser()->isLoggedIn() ? $this->getUser()->getId() : null;
-            error_log('Creating case with data: ' . print_r($caseData, true));
             $this->orderFacade->createCase($caseData, $userId);
 
             $this->flashMessage('Položka byla přidána do košíku.', 'success');
@@ -146,7 +112,7 @@ final class HomePresenter extends BaseFrontPresenter
         } catch (\Exception $e) {
             error_log('Error in processForm: ' . $e->getMessage());
             $this->flashMessage('Chyba při přidávání do košíku: ' . $e->getMessage(), 'error');
-            $this->redirect('this');
+            $this->redirect('Cart:default');
         }
     }
 
@@ -154,5 +120,4 @@ final class HomePresenter extends BaseFrontPresenter
     {
         $this->template->gallery = $this->pageFacade->getGalleryImages();
     }
-
 }

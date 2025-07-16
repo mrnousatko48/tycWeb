@@ -1,9 +1,83 @@
 {block content}
-<link rel="stylesheet" href="{$basePath}/www/css/form.css">
-<a n:href="default" class="btn btn-primary">Zpět</a>
-<h1 class="text-3xl font-bold mb-5 text-[var(--color-text)] text-center">Změna údajů</h1>
+<section class="max-w-3xl mx-auto my-8 px-4 sm:px-6 py-8 rounded-2xl bg-[var(--color-background)] border border-[var(--color-secondary)] shadow-md transition-all duration-300 profile-card sm:hover:shadow-lg">
+  <h1 class="text-3xl sm:text-4xl font-bold mb-6 text-[var(--color-text)] text-center tracking-tight">Změna údajů</h1>
 
-<div class="form-wrapper">
-  {control editProfileForm}
-</div>
-{/block content}
+  <div class="form-wrapper px-4 sm:px-6">
+    {control editProfileForm}
+  </div>
+
+  <div class="mt-8 flex flex-col sm:flex-row justify-center gap-4 sm:gap-6 flex-wrap">
+    <a n:href="default" class="btn btn-outline-primary px-6 py-3 text-sm sm:text-base font-medium rounded-lg hover:shadow-md hover:bg-[var(--color-primary)] hover:text-[var(--button-text)] transition-all duration-200 w-full sm:w-auto text-center">Zpět</a>
+  </div>
+</section>
+
+<style>
+.form-wrapper {
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+.form-wrapper form {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.form-wrapper label {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--color-primary);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.form-wrapper input,
+.form-wrapper select,
+.form-wrapper textarea {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid var(--color-secondary);
+  border-radius: 0.5rem;
+  background-color: var(--color-background);
+  color: var(--color-text);
+  font-size: 1rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-wrapper input:focus,
+.form-wrapper select:focus,
+.form-wrapper textarea:focus {
+  outline: none;
+  border-color: var(--color-accent);
+  box-shadow: 0 0 0 3px rgba(var(--color-accent), 0.2);
+}
+
+.form-wrapper input[type="submit"] {
+  background-color: var(--color-primary);
+  color: var(--button-text);
+  font-weight: 500;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.5rem;
+  border: none;
+  cursor: pointer;
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+
+.form-wrapper input[type="submit"]:hover {
+  background-color: var(--color-accent);
+  transform: translateY(-2px);
+}
+
+@media (max-width: 640px) {
+  .form-wrapper input,
+  .form-wrapper select,
+  .form-wrapper textarea {
+    font-size: 0.875rem;
+  }
+
+  .form-wrapper input[type="submit"] {
+    padding: 0.75rem 1rem;
+  }
+}
+</style>
+{/block}

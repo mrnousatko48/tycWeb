@@ -1,7 +1,158 @@
 {block content}
+<style>
+/* General styles */
+.alert-info {
+    background-color: var(--color-secondary);
+    color: var(--color-text);
+    border: 1px solid var(--color-accent);
+    padding: 1.25rem;
+    border-radius: 0.75rem;
+    text-align: center;
+    font-size: 1rem;
+    position: relative;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.alert-info::before {
+    content: 'ℹ️';
+    font-size: 1.2rem;
+    margin-right: 0.5rem;
+    vertical-align: middle;
+}
+
+.table {
+    background-color: var(--color-background);
+    color: var(--color-text);
+    border-radius: 0.75rem;
+    overflow: hidden;
+}
+
+.table-light {
+    background-color: var(--color-secondary);
+    color: var(--color-text);
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+.table th {
+    padding: 1rem;
+}
+
+.table td {
+    padding: 1rem;
+    font-size: 0.95rem;
+}
+
+.table-hover tbody tr:hover {
+    background-color: var(--color-accent-light, rgba(var(--color-accent-rgb), 0.1));
+    transition: background-color 0.2s ease;
+}
+
+.badge {
+    font-size: 0.85rem;
+    padding: 0.6rem 1rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
+    text-transform: uppercase;
+}
+
+.btn-primary {
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    border-radius: 0.5rem;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.btn-primary:hover {
+    transform: translateY(-2px);
+    background-color: var(--color-accent);
+}
+
+h1 {
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+}
+
+/* Mobile-specific styles */
+@media (max-width: 640px) {
+    h1 {
+        font-size: 1.8rem;
+        margin-bottom: 1rem;
+    }
+
+    .btn-primary {
+        padding: 0.6rem 1rem;
+        font-size: 0.9rem;
+    }
+
+    .alert-info {
+        font-size: 0.9rem;
+        padding: 1rem;
+    }
+
+    .table-responsive {
+        overflow-x: auto;
+    }
+
+    .table {
+        display: block;
+        width: 100%;
+    }
+
+    .table thead {
+        display: none; /* Hide table headers on mobile */
+    }
+
+    .table tbody {
+        display: block;
+    }
+
+    .table tr {
+        display: block;
+        margin-bottom: 1.5rem;
+        border: 1px solid var(--color-secondary);
+        border-radius: 0.75rem;
+        padding: 1rem;
+        background-color: var(--color-background);
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    }
+
+    .table td {
+        display: block;
+        text-align: left;
+        padding: 0.75rem 0;
+        border: none;
+        font-size: 0.9rem;
+    }
+
+    /* Add labels before each cell for clarity */
+    .table td:before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: var(--color-text-secondary);
+        display: block;
+        margin-bottom: 0.3rem;
+        font-size: 0.85rem;
+    }
+
+    .table td ul {
+        padding-left: 1rem;
+    }
+
+    .table td strong, .table td small {
+        font-size: 0.85rem;
+    }
+
+    .badge {
+        font-size: 0.8rem;
+        padding: 0.5rem 0.8rem;
+    }
+}
+</style>
+
 <a n:href="default" class="btn btn-primary">Zpět</a>
 <h1 class="text-3xl font-bold mb-5 text-[var(--color-text)] text-center">Objednávky</h1>
-
 
 {if !$orders || count($orders) === 0}
     <div class="alert alert-info">Nemáte žádné objednávky.</div>
@@ -22,25 +173,25 @@
             <tbody>
             {foreach $orders as $orderData}
                 <tr>
-                    <td>{$orderData['order']->id}</td>
-                    <td>
+                    <td data-label="#">{$orderData['order']->id}</td>
+                    <td data-label="Adresa">
                         {$orderData['order']->address}<br>
                         {$orderData['order']->city}, {$orderData['order']->psc}
                     </td>
-                    <td>
+                    <td data-label="Stav">
                         {switch $orderData['order']->state}
                             {case 'KOSIK'} <span class="badge bg-secondary">Košík</span>
                             {case 'OBJEDNANO'} <span class="badge bg-warning text-dark">Objednáno</span>
                             {case 'ZAPLACENO'} <span class="badge bg-success">Zaplaceno</span>
                             {case 'ODESLANO'} <span class="badge bg-info text-dark">Odesláno</span>
                             {case 'DORUCENO'} <span class="badge bg-primary">Doručeno</span>
-                            {case 'VYZVEDNUTO'} <span class="badge bg-dark">Vyzdvihnuto</span>
+                            {case 'VYZVEDNUTO'} <span class="badge bg-dark">Vyzvednuto</span>
                             {default} <span class="badge bg-light text-muted">Neznámý</span>
                         {/switch}
                     </td>
-                    <td>{$orderData['order']->payment ?? '—'}</td>
-                    <td>{$orderData['order']->created_at|date:'j. n. Y H:i'}</td>
-                    <td>
+                    <td data-label="Platba">{$orderData['order']->payment ?? '—'}</td>
+                    <td data-label="Datum">{$orderData['order']->created_at|date:'j. n. Y H:i'}</td>
+                    <td data-label="Položky">
                         {if count($orderData['cases']) > 0}
                             <ul class="mb-0 ps-3">
                                 {foreach $orderData['cases'] as $case}
@@ -48,13 +199,18 @@
                                         <strong>{$case->manufacturer} {$case->model}</strong>
                                         <small class="text-muted">({$case->color})</small>
                                         <br>
-                                        {var $features = json_decode($case->features ?? '{}', true)}
-                                        {if is_array($features)}
-                                            <ul class="small ps-3 mb-1">
+                                        {var $outerFeatures = json_decode($case->features ?? '{}', true)}
+                                        {var $features = isset($outerFeatures['features']) ? json_decode($outerFeatures['features'] ?? '{}', true) : []}
+                                        {if is_array($features) && count($features) > 0}
+                                            <ul class="small ps-3 mb-1 list-disc">
                                                 {foreach $features as $key => $value}
-                                                    <li><strong>{$key|capitalize}</strong>: {$value}</li>
+                                                    <li>
+                                                        <span class="font-semibold">{$key|replace:'_',' '|capitalize}:</span> {$value}
+                                                    </li>
                                                 {/foreach}
                                             </ul>
+                                        {else}
+                                            <small class="text-muted">Žádné vlastnosti</small>
                                         {/if}
                                     </li>
                                 {/foreach}
@@ -63,7 +219,7 @@
                             <em>Žádné položky</em>
                         {/if}
                     </td>
-                    <td>
+                    <td data-label="Celková cena">
                         {var $total = 0}
                         {foreach $orderData['cases'] as $case}
                             {do $total += $case->total_price}

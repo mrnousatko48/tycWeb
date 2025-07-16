@@ -1,4 +1,5 @@
 <?php
+declare(strict_types=1);
 
 namespace App\UI\Front;
 
@@ -21,6 +22,16 @@ abstract class BaseFrontPresenter extends Presenter
     {
         parent::startup();
 
+        // Dark theme logic
+        $savedTheme = $this->getHttpRequest()->getCookie('theme');
+        if ($savedTheme === 'dark') {
+            $this->template->darkMode = true;
+        } elseif ($savedTheme === 'light') {
+            $this->template->darkMode = false;
+        } else {
+            $this->template->darkMode = $this->isDarkModePreferred();
+        }
+
         // Calculate cartCount for all front presenters
         if ($this->getUser()->isLoggedIn()) {
             $userId = (int) $this->getUser()->getId();
@@ -36,5 +47,18 @@ abstract class BaseFrontPresenter extends Presenter
 
         // Fetch logo paths for light and dark themes
         $this->template->logos = $this->pageFacade->getLogos();
+    }
+
+    protected function isDarkModePreferred(): bool
+    {
+        return $this->getHttpRequest()->isAjax() ? false : (bool)preg_match('/dark/', $this->getHttpRequest()->getHeader('Sec-CH-Prefers-Color-Scheme') ?: '');
+    }
+
+    public function handleToggleTheme(): void
+    {
+        $currentTheme = $this->getHttpRequest()->getCookie('theme') ?: ($this->isDarkModePreferred() ? 'dark' : 'light');
+        $newTheme = $currentTheme === 'light' ? 'dark' : 'light';
+        $this->getHttpResponse()->setCookie('theme', $newTheme, '30 days');
+        $this->redirect('this');
     }
 }

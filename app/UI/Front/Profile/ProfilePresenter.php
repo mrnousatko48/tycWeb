@@ -108,25 +108,20 @@ final class ProfilePresenter extends BaseFrontPresenter
     public function renderOrders(): void
     {
         $userId = $this->user->getId();
-
         $orders = $this->orderFacade->getOrdersByUserId($userId);
-
         $orderData = [];
         foreach ($orders as $order) {
             $caseIds = $this->database->table('order_case')
                 ->where('order_id', $order->id)
                 ->fetchPairs(null, 'case_id');
-
             $cases = $this->database->table('cases')
                 ->where('id', $caseIds)
                 ->fetchAll();
-
             $orderData[] = [
                 'order' => $order,
                 'cases' => $cases,
             ];
         }
-
         $this->template->orders = $orderData;
     }
 
