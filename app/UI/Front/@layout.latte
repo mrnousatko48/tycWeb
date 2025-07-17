@@ -12,23 +12,25 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
     <style>
 :root {
-    --color-text: #1F2937;
-    --color-background: #F3F4F6;
-    --color-primary: #0284C7;
-    --color-secondary: #E5E7EB;
-    --color-accent: #0EA5E9;
+    /* Light mode */
+    --color-text: #1F2937;         /* Tmavě šedá pro text */
+    --color-background: #F3F4F6;   /* Světlé pozadí */
+    --color-primary: #0284C7;      /* Modrá pro primární */
+    --color-secondary: #E5E7EB;    /* Světle šedá sekundární */
+    --color-accent: #0EA5E9;       /* Jasná modrá */
     --button-text: #ffffff;
 }
 
 [data-theme="dark"] {
-    --color-text: #E0F2FE;
-    --color-background: #0F172A;
-    --color-primary: #0EA5E9;
-    --color-secondary: #1E293B;
-    --color-accent: #38BDF8;
-    --button-text: #ffffff;
+    --color-text: #E0F2FE;         /* Světlá ledová modrá pro text */
+    --color-background: #0F172A;   /* Tmavě námořnická modrá pozadí */
+    --color-primary: #0EA5E9;      /* Jasná neonová modrá */
+    --color-secondary: #1E293B;    /* Tmavá modrošedá sekundární */
+    --color-accent: #38BDF8;       /* Elektrická nebeská modrá */
+    --button-text: #ffffff;  
 }
 
 .banner-content h1,
@@ -193,6 +195,7 @@ h2 {
     color: var(--color-text);
 }
 
+/* Hamburger Menu Styles */
 .hamburger-menu {
     display: none;
 }
@@ -224,13 +227,14 @@ h2 {
     .nav-menu {
         display: flex;
         flex-direction: column;
-        gap: 0.5rem;
+    gap: 0.5rem;
         position: absolute;
         top: 100%;
         left: 0;
         right: 0;
         background-color: var(--color-background);
         border-top: 1px solid var(--color-secondary);
+        flex-direction: column;
         padding: 1rem;
         z-index: 999;
     }
@@ -240,12 +244,13 @@ h2 {
     }
 
     .nav-menu a {
+ liquid: 
         padding: 0.75rem;
         width: 100%;
         text-align: center;
         font-size: 1rem;
         color: var(--color-text);
-        margin: 0.5rem 0;
+        margin: 0.5rem 0; /* Added spacing between links */
     }
 
     .nav-menu a:hover {
@@ -253,7 +258,7 @@ h2 {
         color: var(--color-accent);
     }
 }
-    </style>
+</style>
 </head>
 <body class="flex flex-col min-h-screen" data-theme="dark">
 <header class="site-header">
@@ -286,26 +291,30 @@ h2 {
                                 <i class="fas fa-tools text-[var(--color-accent)] w-4 text-center"></i>
                                 Administrace
                             </a>
-                        {/if}
-                        <a n:href="Profile:default" class="flex items-center gap-3 px-4 py-2 text-sm text-[var(--color-text)] hover:bg-[var(--color-secondary)] transition">
-                            <i class="fas fa-user-circle text-[var(--color-accent)] w-4 text-center"></i>
-                            Účet
-                        </a>
-                        <a n:href="Profile:orders" class="flex items-center gap-3 px-4 py-2 text-sm text-[var(--color-text)] hover:bg-[var(--color-secondary)] transition">
-                            <i class="fas fa-box text-[var(--color-accent)] w-4 text-center"></i>
-                            Objednávky
-                        </a>
-                        <a n:href="Sign:out" class="flex items-center gap-3 px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-50 hover:text-red-700 transition">
-                            <i class="fas fa-sign-out-alt w-4 text-center"></i>
-                            Odhlásit se
-                        </a>
+                            {/if}
+
+                            <a n:href="Profile:default" class="flex items-center gap-3 px-4 py-2 text-sm text-[var(--color-text)] hover:bg-[var(--color-secondary)] transition">
+                                <i class="fas fa-user-circle text-[var(--color-accent)] w-4 text-center"></i>
+                                Účet
+                            </a>
+
+                            <a n:href="Profile:orders" class="flex items-center gap-3 px-4 py-2 text-sm text-[var(--color-text)] hover:bg-[var(--color-secondary)] transition">
+                                <i class="fas fa-box text-[var(--color-accent)] w-4 text-center"></i>
+                                Objednávky
+                            </a>
+
+                            <a n:href="Sign:out" class="flex items-center gap-3 px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-50 hover:text-red-700 transition">
+                                <i class="fas fa-sign-out-alt w-4 text-center"></i>
+                                Odhlásit se
+                            </a>
+
                     </div>
                 </div>
             {else}
                 <a n:href="Sign:in" class="hover:text-[var(--color-accent)] transition">Přihlášení</a>
             {/if}
 
-            <a n:href="Cart:default" class="hover:text-[var(--color-accent)] transition relative flex items-center">
+            <a n:href="Cart:default" class="hover:text-[var(--color-accent)] transition relative flex items-center" aria-label="Cart">
                 <i class="fas fa-shopping-cart text-xl"></i>
                 <span n:if="$cartCount > 0" class="absolute -top-2 -right-3 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                     {$cartCount}
@@ -313,7 +322,7 @@ h2 {
             </a>
 
             <div class="flex justify-center flex-grow">
-                <button id="theme-toggle" class="btn btn-accent shadow-md hover:shadow-lg flex items-center justify-center w-10 h-10 p-0 rounded-full">
+                <button id="theme-toggle" aria-label="Toggle dark mode" class="btn btn-accent shadow-md hover:shadow-lg flex items-center justify-center w-10 h-10 p-0 rounded-full">
                     <i class="theme-icon fas fa-sun sun-icon"></i>
                     <i class="theme-icon fas fa-moon moon-icon"></i>
                 </button>
@@ -344,10 +353,10 @@ h2 {
         <div class="border-t border-[var(--color-secondary)] pt-4">
             <h3 class="text-lg font-semibold mb-3 text-center">Podmínky a ustanovení</h3>
             <div class="flex flex-col sm:flex-row justify-center gap-4 sm:gap-6 text-sm">
-                <a n:href="Home:legal, 'obchodni-podminky'" class="hover:text-[var(--color-accent)] transition">Obchodní podmínky</a>
-                <a n:href="Home:legal, 'ochrana-osobnich-udaju'" class="hover:text-[var(--color-accent)] transition">Ochrana osobních údajů</a>
-                <a n:href="Home:legal, 'reklamacni-rad'" class="hover:text-[var(--color-accent)] transition">Reklamační řád</a>
-                <a n:href="Home:legal, 'odstoupeni-od-smlouvy'" class="hover:text-[var(--color-accent)] transition">Odstoupení od smlouvy</a>
+                <a href="{$basePath}/obchodni-podminky" class="hover:text-[var(--color-accent)] transition">Obchodní podmínky</a>
+                <a href="{$basePath}/ochrana-osobnich-udaju" class="hover:text-[var(--color-accent)] transition">Ochrana osobních údajů</a>
+                <a href="{$basePath}/reklamacni-rad" class="hover:text-[var(--color-accent)] transition">Reklamační řád</a>
+                <a href="{$basePath}/odstoupeni-od-smlouvy" class="hover:text-[var(--color-accent)] transition">Odstoupení od smlouvy</a>
             </div>
         </div>
     </div>
@@ -399,5 +408,4 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 </script>
-</body>
 </html>

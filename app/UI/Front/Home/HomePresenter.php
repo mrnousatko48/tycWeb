@@ -11,11 +11,10 @@ final class HomePresenter extends BaseFrontPresenter
 {
     private ModelFacade $modelFacade;
 
-    public function __construct( ModelFacade $modelFacade)
-    {
-        parent::__construct();
-        $this->modelFacade = $modelFacade;
-    }
+    public function injectModelFacade(ModelFacade $modelFacade): void
+        {
+            $this->modelFacade = $modelFacade;
+        }
 
     public function renderDefault(): void
     {
