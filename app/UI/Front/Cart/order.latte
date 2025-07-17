@@ -296,11 +296,12 @@ document.addEventListener('DOMContentLoaded', function() {
     const deliveryPointField = document.getElementById('delivery-point-field');
     
     function toggleDeliveryPoint() {
-        if (shippingSelect.value === 'ZASILKOVNA' || shippingSelect.value === 'BALIKOVNA') {
-            deliveryPointField.classList.add('visible');
-        } else {
-            deliveryPointField.classList.remove('visible');
-        }
+        if (['ZASILKOVNA', 'BALIKOVNA', 'CESKA_POSTA'].includes(shippingSelect.value)) {
+    deliveryPointField.classList.add('visible');
+} else {
+    deliveryPointField.classList.remove('visible');
+}
+
     }
     
     shippingSelect.addEventListener('change', toggleDeliveryPoint);

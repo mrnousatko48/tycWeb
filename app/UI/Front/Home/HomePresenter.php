@@ -5,12 +5,16 @@ namespace App\UI\Front\Home;
 
 use Nette\Application\UI\Form;
 use App\UI\Front\BaseFrontPresenter;
+use App\Model\ModelFacade;
 
 final class HomePresenter extends BaseFrontPresenter
 {
-    public function __construct()
+    private ModelFacade $modelFacade;
+
+    public function __construct( ModelFacade $modelFacade)
     {
-        parent::__construct(); 
+        parent::__construct();
+        $this->modelFacade = $modelFacade;
     }
 
     public function renderDefault(): void
@@ -24,7 +28,7 @@ final class HomePresenter extends BaseFrontPresenter
 
     public function renderConfigurator(): void
     {
-        $this->template->manufacturers = $this->pageFacade->getManufacturers();
+        $this->template->manufacturers = $this->modelFacade->getManufacturers();
     }
 
     public function renderLegal(string $section): void
@@ -40,7 +44,7 @@ final class HomePresenter extends BaseFrontPresenter
     {
         $form = new Form;
 
-        $manufacturers = $this->pageFacade->getManufacturers();
+        $manufacturers = $this->modelFacade->getManufacturers();
         $manufacturerItems = [];
         foreach ($manufacturers as $manufacturer) {
             $manufacturerItems[$manufacturer->id] = $manufacturer->name;
@@ -70,7 +74,7 @@ final class HomePresenter extends BaseFrontPresenter
         $form->onAnchor[] = function () use ($model, $manufacturer) {
             $model->setItems(
                 $manufacturer->getValue()
-                    ? $this->pageFacade->getModelsByManufacturer((int)$manufacturer->getValue())
+                    ? $this->modelFacade->getModelsByManufacturer((int)$manufacturer->getValue())
                     : []
             );
         };
@@ -98,8 +102,8 @@ final class HomePresenter extends BaseFrontPresenter
                 throw new \Exception('Invalid features format.');
             }
 
-            $manufacturerName = $this->pageFacade->getManufacturerNameById($manufacturerId);
-            $modelName = $this->pageFacade->getModelNameById($modelId);
+            $manufacturerName = $this->modelFacade->getManufacturerNameById($manufacturerId);
+            $modelName = $this->modelFacade->getModelNameById($modelId);
 
             if (!$manufacturerName || !$modelName) {
                 throw new \Exception('Invalid manufacturer or model selected.');

@@ -2,48 +2,60 @@
 namespace App\UI\Front\Endpoint;
 
 use Nette;
-use App\Model\PageFacade;
+use App\Model\modelFacade;
 
 class EndpointPresenter extends Nette\Application\UI\Presenter
 {
     public function __construct(
-        private PageFacade $pageFacade,
+        private ModelFacade $modelFacade,
     ) {}
 
     public function actionManufacturers($typeId = null): void
     {
-        $this->sendJson($this->pageFacade->getManufacturers($typeId));
+        $this->sendJson($this->modelFacade->getManufacturers($typeId));
         $this->terminate();
     }
 
     public function actionModels($manufacturerId): void
     {
-        $this->sendJson($this->pageFacade->getModelsByManufacturer((int)$manufacturerId));
+        $this->sendJson($this->modelFacade->getModelsByManufacturer((int)$manufacturerId));
         $this->terminate();
     }
     
     public function actionModelColors($modelId): void
     {
-        $this->sendJson($this->pageFacade->getColorsByModel((int)$modelId));
+        $this->sendJson($this->modelFacade->getColorsByModel((int)$modelId));
         $this->terminate();
     }
 
     public function actionModelFeatures($modelId): void
     {
-        $this->sendJson($this->pageFacade->getFeaturesByModel((int)$modelId));
+        $this->sendJson($this->modelFacade->getFeaturesByModel((int)$modelId));
         $this->terminate();
     }
 
     public function actionModelPrice($modelId): void
     {
-        $model = $this->pageFacade->getModelById((int)$modelId);
+        $model = $this->modelFacade->getModelById((int)$modelId);
         $this->sendJson(['price' => $model ? (float)$model->price : 0.00]);
         $this->terminate();
     }
 
-    public function actionModelImages($modelId): void
+public function actionModelImages($modelId): void
 {
-    $this->sendJson($this->pageFacade->getImagesByModel((int)$modelId));
+    if ($modelId && $this->modelFacade->getModelById((int)$modelId)) {
+        $images = $this->modelFacade->getImagesByModel((int)$modelId);
+    } else {
+        $defaultImages = $this->modelFacade->getDefaultImages();
+        $images = [];
+        foreach ($defaultImages as $image) {
+            $images[] = [
+                'image_path' => $image->image_path,
+                'alt_text' => 'Default Product Image ' . $image->id
+            ];
+        }
+    }
+    $this->sendJson($images);
     $this->terminate();
 }
 }

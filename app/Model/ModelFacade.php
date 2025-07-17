@@ -54,6 +54,12 @@ class ModelFacade
         $this->database->table('manufacturers')->get($id)?->delete();
     }
 
+    public function getManufacturerNameById(int $id): string
+    {
+        $manufacturer = $this->database->table('manufacturers')->get($id);
+        return $manufacturer ? $manufacturer->name : '';
+    }
+
     // ---- MODELS ----
     public function getModels(?int $manufacturerId = null): \Nette\Database\Table\Selection
     {
@@ -64,14 +70,27 @@ class ModelFacade
         return $query;
     }
 
-        public function getModelById(int $id): ?ActiveRow
+    public function getModelsByManufacturer(int $manufacturerId): array
+    {
+        $query = $this->database->table('models')
+            ->where('manufacturer_id', $manufacturerId)
+            ->order('name ASC');
+        $models = [];
+        foreach ($query->fetchAll() as $model) {
+            $models[$model->id] = $model->name;
+        }
+        return $models;
+    }
+
+    public function getModelById(int $id): ?ActiveRow
     {
         return $this->database->table('models')->get($id);
     }
 
-    public function getModel(int $id): ?ActiveRow
+    public function getModelNameById(int $id): string
     {
-        return $this->database->table('models')->get($id);
+        $model = $this->database->table('models')->get($id);
+        return $model ? $model->name : '';
     }
 
     public function addModel(array $data): ActiveRow
@@ -150,6 +169,79 @@ class ModelFacade
     public function deleteModel(int $id): void
     {
         $this->database->table('models')->get($id)?->delete();
+    }
+
+    public function getColorsByModel(int $modelId): array
+    {
+        $modelColors = $this->database->table('model_colors')
+            ->where('model_id', $modelId)
+            ->fetchPairs('color_id', null);
+
+        if (!$modelColors) {
+            return [];
+        }
+
+        $colors = $this->database->table('colors')
+            ->where('id', array_keys($modelColors))
+            ->fetchAll();
+
+        $result = [];
+        foreach ($colors as $color) {
+            $result[] = [
+                'name' => $color->name,
+                'hex_code' => $color->hex_code
+            ];
+        }
+
+        return $result;
+    }
+
+    public function getFeaturesByModel(int $modelId): array
+    {
+        $features = $this->database->table('model_features')
+            ->where('model_id', $modelId)
+            ->fetchPairs('feature_id', null);
+
+        if (!$features) {
+            return [];
+        }
+
+        $featureData = $this->database->table('features')
+            ->where('id', array_keys($features))
+            ->fetchPairs('id', 'name');
+
+        $options = $this->database->table('feature_options')
+            ->where('feature_id', array_keys($features))
+            ->order('feature_id')
+            ->fetchAll();
+
+        $result = [];
+        foreach ($options as $option) {
+            $featureName = $featureData[$option->feature_id];
+            $result[$featureName][] = [
+                'name' => $option->name,
+                'price' => (float)$option->price
+            ];
+        }
+
+        return $result;
+    }
+
+    public function getImagesByModel(int $modelId): array
+    {
+        $images = $this->database->table('model_images')
+            ->where('model_id', $modelId)
+            ->fetchAll();
+
+        $result = [];
+        foreach ($images as $image) {
+            $result[] = [
+                'image_path' => $image->image_path,
+                'alt_text' => 'Image for model ID ' . $modelId
+            ];
+        }
+
+        return $result;
     }
 
     // ---- COLORS ----
@@ -331,7 +423,7 @@ class ModelFacade
             $image->delete();
         }
     }
-    
+
     public function getDefaultImages(): \Nette\Database\Table\Selection
     {
         return $this->database->table('default_images')->order('created_at DESC');
@@ -361,4 +453,3 @@ class ModelFacade
         }
     }
 }
-?>

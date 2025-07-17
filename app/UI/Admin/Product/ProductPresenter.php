@@ -238,7 +238,7 @@ final class ProductPresenter extends Nette\Application\UI\Presenter
 
     public function handleEditModel(int $modelId): void
     {
-        $model = $this->modelFacade->getModel($modelId);
+        $model = $this->modelFacade->getModelById($modelId);
         if (!$model) {
             $this->flashMessage('Model neexistuje.', 'error');
             $this->redirect('models');
@@ -653,8 +653,6 @@ final class ProductPresenter extends Nette\Application\UI\Presenter
     public function imageFormSucceeded(Form $form, array $values): void
     {
         $modelId = (int)$values['model_id'];
-        bdump($modelId);
-
         try {
             $image = $this->modelFacade->addModelImage($modelId, $values['image']);
             if ($image) {

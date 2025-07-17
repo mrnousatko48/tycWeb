@@ -1,163 +1,254 @@
 {block content}
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @tailwind base;
-        @tailwind components;
-        @tailwind utilities;
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+    @tailwind base;
+    @tailwind components;
+    @tailwind utilities;
 
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-        }
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+    }
 
-        .selected {
-            @apply ring-2 ring-[var(--color-accent)] ring-offset-2;
-        }
+    .selected {
+        @apply ring-2 ring-[var(--color-accent)] ring-offset-2;
+    }
 
-        @layer utilities {
-            @keyframes fade-in-up {
-                from {
-                    opacity: 0;
-                    transform: translateY(20px);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateY(0);
-                }
+    @layer utilities {
+        @keyframes fade-in-up {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
             }
-
-            .animate-fade-in-up {
-                animation: fade-in-up 0.6s ease-out both;
+            to {
+                opacity: 1;
+                transform: translateY(0);
             }
         }
 
-        /* Ensure buttons adapt to theme */
-        .carousel-nav {
-            background-color: var(--color-primary);
-            color: var(--button-text);
+        .animate-fade-in-up {
+            animation: fade-in-up 0.6s ease-out both;
         }
+    }
 
-        .carousel-nav:hover {
-            background-color: var(--color-accent);
-        }
+    .carousel-nav {
+        background-color: var(--color-primary);
+        color: var(--button-text);
+    }
 
-        .carousel-dot {
-            background-color: var(--color-secondary);
-        }
+    .carousel-nav:hover {
+        background-color: var(--color-accent);
+    }
 
-        .carousel-dot.active {
-            background-color: var(--color-primary);
-        }
+    .carousel-dot {
+        background-color: var(--color-secondary);
+    }
 
-        .form-select {
-            background-color: var(--color-background);
-            color: var(--color-text);
-            border-color: var(--color-secondary);
-        }
+    .carousel-dot.active {
+        background-color: var(--color-primary);
+    }
 
-        .form-select:hover {
-            border-color: var(--color-accent);
-        }
+    .form-select {
+        background-color: var(--color-background);
+        color: var(--color-text);
+        border-color: var(--color-secondary);
+    }
 
-        .form-select:focus {
-            ring-color: var(--color-accent);
-        }
+    .form-select:hover {
+        border-color: var(--color-accent);
+    }
 
-        .feature-button {
-            background-color: var(--color-secondary);
-            color: var(--color-text);
-        }
+    .form-select:focus {
+        ring-color: var(--color-accent);
+    }
 
-        .feature-button:hover {
-            background-color: var(--color-accent);
-        }
+    .feature-button {
+        background-color: var(--color-secondary);
+        color: var(--color-text);
+    }
 
-        .submit-button {
-            background-color: var(--color-primary);
-            color: var(--button-text);
-        }
+    .feature-button:hover {
+        background-color: var(--color-accent);
+    }
 
-        .submit-button:hover {
-            background-color: var(--color-accent);
-        }
+    .submit-button {
+        background-color: var(--color-primary);
+        color: var(--button-text);
+    }
 
-        /* Adjust text colors for better contrast in dark mode */
-        [data-theme="dark"] .text-gray-400 {
-            color: var(--color-text);
-        }
+    .submit-button:hover {
+        background-color: var(--color-accent);
+    }
 
-        [data-theme="dark"] .text-gray-500 {
-            color: var(--color-secondary);
-        }
-    </style>
+    [data-theme="dark"] .text-gray-400 {
+        color: var(--color-text);
+    }
 
-    <div class="max-w-6xl mx-auto px-4 py-12 grid grid-cols-1 md:grid-cols-2 gap-12 items-center animate-fade-in-up">
+    [data-theme="dark"] .text-gray-500 {
+        color: var(--color-secondary);
+    }
 
-        <div class="w-full">
-            <div class="relative h-96 md:h-[500px]">
-                <div class="overflow-hidden rounded-2xl shadow-lg h-full">
-                    <div class="flex h-full transition-transform duration-700 ease-in-out" id="carousel-track">
-                        <!-- Images will be inserted here by JavaScript -->
-                    </div>
+    .carousel-container {
+        align-items: flex-start;
+    }
+
+    .carousel-wrapper {
+        width: 100%;
+        max-width: 500px;
+        margin: 0 auto;
+    }
+
+    .lightbox {
+        display: none;
+        position: fixed;
+        z-index: 1000;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.8);
+        justify-content: center;
+        align-items: center;
+    }
+
+    .lightbox img {
+        max-width: 90%;
+        max-height: 80%;
+        border: 5px solid white;
+        border-radius: 5px;
+    }
+
+    .lightbox.active {
+        display: flex;
+    }
+
+    .lightbox-nav {
+        position: fixed;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 5.5rem; /* Further increased font size for larger arrows */
+        color: white;
+        background: rgba(0, 0, 0, 0.5);
+        border-radius: 0;
+        width: 110px; /* Further increased width */
+        height: 110px; /* Further increased height */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        user-select: none;
+        transition: background 0.3s;
+        z-index: 1001;
+    }
+
+    .lightbox-nav:hover {
+        background: rgba(0, 0, 0, 0.8);
+    }
+
+    .lightbox-prev {
+        left: 0;
+    }
+
+    .lightbox-next {
+        right: 0;
+    }
+
+    .lightbox-close {
+        position: absolute;
+        top: 20px;
+        right: 20px;
+        font-size: 3rem; /* Further increased font size for close button */
+        color: white;
+        background: rgba(0, 0, 0, 0.5);
+        border-radius: 50%;
+        width: 60px; /* Further increased width */
+        height: 60px; /* Further increased height */
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        user-select: none;
+        transition: background 0.3s;
+        z-index: 1001;
+    }
+
+    .lightbox-close:hover {
+        background: rgba(0, 0, 0, 0.8);
+    }
+</style>
+
+<div class="max-w-6xl mx-auto px-4 py-12 grid grid-cols-1 md:grid-cols-2 gap-12 items-start animate-fade-in-up carousel-container">
+    <div class="w-full">
+        <div class="relative carousel-wrapper">
+            <div class="overflow-hidden rounded-2xl shadow-lg h-[500px]">
+                <div class="flex h-full transition-transform duration-700 ease-in-out" id="carousel-track">
+                    <!-- Images will be inserted here by JavaScript -->
                 </div>
-
-                <button onclick="prevSlide()" class="carousel-nav absolute top-1/2 -left-4 transform -translate-y-1/2 rounded-full p-2">
+            </div>
+                <button type="button"
+                    class="carousel-nav carousel-prev absolute top-1/2 -left-4 transform -translate-y-1/2 rounded-full bg-gray-800 bg-opacity-50 text-white p-2 hover:bg-opacity-75 focus:outline-none">
                     ←
                 </button>
-                <button onclick="nextSlide()" class="carousel-nav absolute top-1/2 -right-4 transform -translate-y-1/2 rounded-full p-2">
+                <button type="button"
+                    class="carousel-nav carousel-next absolute top-1/2 -right-4 transform -translate-y-1/2 rounded-full bg-gray-800 bg-opacity-50 text-white p-2 hover:bg-opacity-75 focus:outline-none">
                     →
                 </button>
-            </div>
-
-            <div class="flex justify-center mt-4 space-x-2" id="carousel-dots">
-                <!-- Dots will be inserted here by JavaScript -->
-            </div>
         </div>
-
-        <div class="w-full animate-fade-in-up">
-            <div class="space-y-8">
-                <h1 class="text-3xl font-semibold">Kryt na telefon</h1>
-                <p class="text-lg text-gray-400">Vyberte si svůj styl a přizpůsobte si kryt podle svých potřeb.</p>
-
-                <div class="text-xl font-medium">
-                    Celková cena: <span id="total-price">0 Kč</span>
-                    <div id="price-breakdown" class="text-sm text-gray-400 mt-1"></div>
-                </div>
-                <p class="text-sm text-gray-400">Kompatibilní s: <span id="selected-device">Vyberte výrobce a model</span></p>
-
-                {form caseForm}
-                    <div>
-                        <h2 class="text-xl font-medium">Model telefonu</h2>
-                        <div class="mt-2 flex flex-wrap gap-3">
-                            {input manufacturer class => 'form-select px-4 py-3 rounded-xl shadow-sm hover:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)] transform hover:scale-[1.02] focus:scale-[1.02] transition duration-200 ease-out'}
-                            {input model class => 'form-select px-4 py-3 rounded-xl shadow-sm hover:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)] transform hover:scale-[1.02] focus:scale-[1.02] transition duration-200 ease-out', data-colors-url => '/endpoint/model-colors?modelId=#', data-features-url => '/endpoint/model-features?modelId=#', data-price-url => '/endpoint/model-price?modelId=#', data-images-url => '/endpoint/model-images?modelId=#'}
-                        </div>
-                    </div>
-
-                    <div>
-                        <h2 class="text-xl font-medium mt-4">Barva</h2>
-                        <div id="color-buttons" class="mt-2 flex space-x-3">
-                        </div>
-                    </div>
-                    {input color type => 'hidden', id => 'frm-caseForm-color'}
-
-                    <div id="features">
-                    </div>
-
-                    <div>
-                        {input features type => 'hidden', id => 'frm-caseForm-features'}
-                        {input total_price type => 'hidden', id => 'frm-caseForm-total_price'}
-                        {input submit class => 'submit-button w-full py-3 rounded-xl transform hover:scale-[1.02] transition duration-200 ease-out mt-6'}
-                    </div>
-                {/form}
-            </div>
+        <div class="flex justify-center mt-4 space-x-2" id="carousel-dots">
+            <!-- Dots will be inserted here by JavaScript -->
         </div>
     </div>
+
+    <div class="w-full animate-fade-in-up">
+        <div class="space-y-8">
+            <h1 class="text-3xl font-semibold">Kryt na telefon</h1>
+            <p class="text-lg text-gray-400">Vyberte si svůj styl a přizpůsobte si kryt podle svých potřeb.</p>
+
+            <div class="text-xl font-medium">
+                Celková cena: <span id="total-price">0 Kč</span>
+                <div id="price-breakdown" class="text-sm text-gray-400 mt-1"></div>
+            </div>
+            <p class="text-sm text-gray-400">Kompatibilní s: <span id="selected-device">Vyberte výrobce a model</span></p>
+
+            {form caseForm}
+                <div>
+                    <h2 class="text-xl font-medium">Model telefonu</h2>
+                    <div class="mt-2 flex flex-wrap gap-3">
+                        {input manufacturer class => 'form-select px-4 py-3 rounded-xl shadow-sm hover:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)] transform hover:scale-[1.02] focus:scale-[1.02] transition duration-200 ease-out'}
+                        {input model class => 'form-select px-4 py-3 rounded-xl shadow-sm hover:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)] transform hover:scale-[1.02] focus:scale-[1.02] transition duration-200 ease-out', data-colors-url => '/endpoint/model-colors?modelId=#', data-features-url => '/endpoint/model-features?modelId=#', data-price-url => '/endpoint/model-price?modelId=#', data-images-url => '/endpoint/model-images?modelId=#'}
+                    </div>
+                </div>
+
+                <div>
+                    <h2 class="text-xl font-medium mt-4">Barva</h2>
+                    <div id="color-buttons" class="mt-2 flex space-x-3">
+                    </div>
+                </div>
+                {input color type => 'hidden', id => 'frm-caseForm-color'}
+
+                <div id="features">
+                </div>
+
+                <div>
+                    {input features type => 'hidden', id => 'frm-caseForm-features'}
+                    {input total_price type => 'hidden', id => 'frm-caseForm-total_price'}
+                    {input submit class => 'submit-button w-full py-3 rounded-xl transform hover:scale-[1.02] transition duration-200 ease-out mt-6'}
+                </div>
+            {/form}
+        </div>
+    </div>
+</div>
+
+<div id="lightbox" class="lightbox">
+    <!-- Lightbox content will be inserted here by JavaScript -->
+</div>
 
 <script n:syntax=off>
 let basePrice = 0;
 let featurePrices = {};
 let selectedFeatures = {};
 let currentImages = [];
+let currentSlide = 0;
+let totalSlides = currentImages.length || 1;
 
 document.querySelectorAll('select[data-depends]').forEach((childSelect) => {
     let parentSelect = childSelect.form[childSelect.dataset.depends];
@@ -358,11 +449,6 @@ function updateFeatureButtons(features) {
 
         featureDiv.appendChild(buttonDiv);
         container.appendChild(featureDiv);
-
-        if (options.length > 0) {
-            const firstButton = buttonDiv.querySelector('button');
-            toggleSelection(firstButton);
-        }
     }
 }
 
@@ -387,43 +473,113 @@ function updateCarouselImages(images) {
     const dotsContainer = document.getElementById('carousel-dots');
     track.innerHTML = '';
     dotsContainer.innerHTML = '';
-    currentImages = images;
+    currentImages = images || [];
     currentSlide = 0;
 
+    if (currentImages.length === 0) {
+        fetch('/endpoint/model-images')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(defaultImages => {
+                renderImages(defaultImages);
+            })
+            .catch(err => {
+                console.error('Failed to load default images:', err);
+                track.innerHTML = '<p class="text-center text-gray-500">No images available</p>';
+            });
+    } else {
+        renderImages(currentImages);
+    }
+}
+
+function renderImages(images) {
+    const track = document.getElementById('carousel-track');
+    const dotsContainer = document.getElementById('carousel-dots');
     if (images.length === 0) {
-        // Fallback to a default image if no images are available
+        track.innerHTML = '<p class="text-center text-gray-500">No images available</p>';
+        return;
+    }
+    track.innerHTML = '';
+    dotsContainer.innerHTML = '';
+
+    images.forEach((image, index) => {
         const img = document.createElement('img');
-        img.src = '/www/uploads/home/default.jpg';
-        img.className = 'w-full flex-shrink-0 object-cover h-full';
-        img.alt = 'Default Product Image';
+        img.src = image.image_path;
+        img.className = 'w-full flex-shrink-0 object-cover h-full cursor-pointer';
+        img.alt = image.alt_text || `Product Image ${index + 1}`;
+        img.setAttribute('data-lightbox', 'gallery');
+        img.setAttribute('data-alt', image.alt_text || `Product Image ${index + 1}`);
+
+        img.addEventListener('click', () => {
+            showImage(index);
+        });
+
         track.appendChild(img);
 
         const dot = document.createElement('button');
         dot.setAttribute('type', 'button');
-        dot.setAttribute('onclick', 'goToSlide(0)');
-        dot.className = 'carousel-dot w-3 h-3 rounded-full active';
+        dot.setAttribute('onclick', `goToSlide(${index})`);
+        dot.className = `carousel-dot w-3 h-3 rounded-full ${index === 0 ? 'active' : ''}`;
         dotsContainer.appendChild(dot);
-    } else {
-        images.forEach((image, index) => {
-            const img = document.createElement('img');
-            img.src = image.image_path;
-            img.className = 'w-full flex-shrink-0 object-cover h-full';
-            img.alt = image.alt_text || `Product Image ${index + 1}`;
-            track.appendChild(img);
+    });
 
-            const dot = document.createElement('button');
-            dot.setAttribute('type', 'button');
-            dot.setAttribute('onclick', `goToSlide(${index})`);
-            dot.className = `carousel-dot w-3 h-3 rounded-full ${index === 0 ? 'active' : ''}`;
-            dotsContainer.appendChild(dot);
-        });
-    }
-
+    setupLightbox();
     updateCarousel();
 }
 
-let currentSlide = 0;
-let totalSlides = currentImages.length || 1;
+function setupLightbox() {
+    const lightbox = document.getElementById('lightbox');
+    const images = document.querySelectorAll('[data-lightbox="gallery"]');
+    let currentIndex = 0;
+
+    function showImage(index) {
+        if (index >= 0 && index < images.length) {
+            currentIndex = index;
+            const image = images[index];
+            lightbox.innerHTML = `
+            <span class="lightbox-prev lightbox-nav">←</span>
+            <img src="${image.src}" alt="${image.getAttribute('data-alt')}">
+            <span class="lightbox-next lightbox-nav">→</span>
+            <span class="lightbox-close lightbox-nav">×</span>
+        `;
+
+            lightbox.classList.add('active');
+        }
+    }
+
+    images.forEach((image, index) => {
+        image.addEventListener('click', e => {
+            e.preventDefault();
+            showImage(index);
+        });
+    });
+
+    lightbox.addEventListener('click', e => {
+        if (e.target.classList.contains('lightbox-prev')) {
+            showImage(currentIndex - 1);
+        } else if (e.target.classList.contains('lightbox-next')) {
+            showImage(currentIndex + 1);
+        } else if (e.target.classList.contains('lightbox-close') || e.target.classList.contains('lightbox')) {
+            lightbox.classList.remove('active');
+        }
+    });
+
+    document.addEventListener('keydown', e => {
+        if (lightbox.classList.contains('active')) {
+            if (e.key === 'ArrowLeft') {
+                showImage(currentIndex - 1);
+            } else if (e.key === 'ArrowRight') {
+                showImage(currentIndex + 1);
+            } else if (e.key === 'Escape') {
+                lightbox.classList.remove('active');
+            }
+        }
+    });
+}
 
 function updateCarousel() {
     const track = document.getElementById('carousel-track');
@@ -460,7 +616,17 @@ function goToSlide(index) {
     updateCarousel();
 }
 
-// Optional auto-slide
+document.addEventListener('DOMContentLoaded', () => {
+    updateCarouselImages([]);
+
+    // Připojení posluchačů k tlačítkům pro šipky
+    const prevButton = document.querySelector('.carousel-prev');
+    const nextButton = document.querySelector('.carousel-next');
+
+    if (prevButton) prevButton.addEventListener('click', prevSlide);
+    if (nextButton) nextButton.addEventListener('click', nextSlide);
+});
+
 setInterval(nextSlide, 5000);
 </script>
 {/block}
