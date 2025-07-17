@@ -1,0 +1,30 @@
+{block content}
+{block css}
+<link rel="stylesheet" href="/www/css/dash.css">
+{/block}
+
+<div class="dashboard-container">
+    <h1>Správa právních stránek</h1>
+    <div class="section-card">
+        <h3>Právní stránky</h3>
+        <table class="w-full border-collapse">
+            <thead>
+                <tr class="bg-[var(--color-secondary)]">
+                    <th class="p-3 text-left">Název</th>
+                    <th class="p-3 text-left">Akce</th>
+                </tr>
+            </thead>
+            <tbody>
+                {foreach $pages as $page}
+                    <tr class="border-b border-[var(--color-secondary)]">
+                        <td class="p-3">{$page->title}</td>
+                        <td class="p-3">
+                            <a n:href="editLegal, $page->section_name" class="btn btn-primary">Upravit</a>
+                        </td>
+                    </tr>
+                {/foreach}
+            </tbody>
+        </table>
+    </div>
+</div>
+{/block}

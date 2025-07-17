@@ -27,6 +27,15 @@ final class HomePresenter extends BaseFrontPresenter
         $this->template->manufacturers = $this->pageFacade->getManufacturers();
     }
 
+    public function renderLegal(string $section): void
+    {
+        $page = $this->pageFacade->getLegalPage($section);
+        if (!$page) {
+            $this->error('Stránka nenalezena', 404);
+        }
+        $this->template->page = $page;
+    }
+
     protected function createComponentCaseForm(): Form
     {
         $form = new Form;

@@ -425,4 +425,45 @@ class PageFacade
 
         return $result;
     }
+
+public function getLegalPage(string $sectionName): ?object
+    {
+        return $this->database->table('legal_pages')
+            ->where('section_name', $sectionName)
+            ->fetch();
+    }
+
+    /**
+     * Fetch all legal pages.
+     */
+    public function getLegalPages(): array
+    {
+        return $this->database->table('legal_pages')
+            ->order('title ASC')
+            ->fetchAll();
+    }
+
+    /**
+     * Update or insert legal page content.
+     */
+    public function updateLegalPage(string $sectionName, string $title, string $content): void
+    {
+        $data = [
+            'section_name' => $sectionName,
+            'title' => $title,
+            'content' => $content
+        ];
+
+        $existing = $this->database->table('legal_pages')
+            ->where('section_name', $sectionName)
+            ->fetch();
+
+        if ($existing) {
+            $this->database->table('legal_pages')
+                ->where('section_name', $sectionName)
+                ->update($data);
+        } else {
+            $this->database->table('legal_pages')->insert($data);
+        }
+    }
 }

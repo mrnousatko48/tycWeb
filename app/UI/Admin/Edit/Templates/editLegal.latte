@@ -1,0 +1,40 @@
+{block content}
+{block css}
+<link rel="stylesheet" href="/www/css/dash.css">
+<script src="https://cdn.ckeditor.com/ckeditor5/43.0.0/ckeditor5.js"></script>
+<style>
+    .ck-editor__editable {
+        min-height: 400px;
+        font-family: 'Inter', sans-serif;
+    }
+</style>
+{/block}
+
+<div class="dashboard-container">
+    <h1>Upravit stránku: {$page->title}</h1>
+    <div class="section-card">
+        {control legalForm}
+    </div>
+</div>
+
+{block scripts}
+<script n:syntax=off>
+    document.addEventListener('DOMContentLoaded', () => {
+        ClassicEditor
+            .create(document.querySelector('.wysiwyg-editor'), {
+                toolbar: {
+                    items: [
+                        'heading', '|',
+                        'bold', 'italic', 'link', 'bulletedList', 'numberedList', '|',
+                        'undo', 'redo'
+                    ]
+                },
+                language: 'cs',
+                licenseKey: ''
+            })
+            .catch(error => {
+                console.error('CKEditor initialization error:', error);
+            });
+    });
+</script>
+{/block}

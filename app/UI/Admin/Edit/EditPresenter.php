@@ -9,9 +9,6 @@ use App\Model\PageFacade;
 use Nette\Http\FileUpload;
 use App\Utils\ImageUploader;
 
-/**
- * EditPresenter provides admin pages for editing landing page sections.
- */
 final class EditPresenter extends Presenter
 {
     private PageFacade $pageFacade;
@@ -25,15 +22,12 @@ final class EditPresenter extends Presenter
     protected function startup(): void
     {
         parent::startup();
-        if (!$this->user->isLoggedIn()) {
+        if (!$this->user->isLoggedIn() || !$this->user->isInRole('ADMIN')) {
             $this->flashMessage('Nemáš přístup🚫', 'danger');
             $this->redirect(':Front:Home:default');
         }
     }
 
-    /**
-     * Default dashboard view with navigation buttons.
-     */
     public function renderDefault(): void
     {
         $this->template->setFile(__DIR__ . '/Templates/default.latte');
@@ -45,54 +39,53 @@ final class EditPresenter extends Presenter
         $this->template->setFile(__DIR__ . '/Templates/logos.latte');
     }
 
-    /**
-     * Render the Banner Section edit page.
-     */
     public function renderBanner(): void
     {
         $this->template->banner = $this->pageFacade->getBannerSection();
         $this->template->setFile(__DIR__ . '/Templates/banner.latte');
     }
 
-    /**
-     * Render the Durability Section edit page.
-     */
     public function renderDurability(): void
     {
         $this->template->durability = $this->pageFacade->getDurabilitySection();
         $this->template->setFile(__DIR__ . '/Templates/durability.latte');
     }
 
-    /**
-     * Render the Customization Section edit page.
-     */
     public function renderCustomization(): void
     {
         $this->template->customizations = $this->pageFacade->getCustomizations();
         $this->template->setFile(__DIR__ . '/Templates/customization.latte');
     }
 
-    /**
-     * Render the Gallery Section edit page.
-     */
     public function renderGallery(): void
     {
         $this->template->galleryImages = $this->pageFacade->getGalleryImages();
         $this->template->setFile(__DIR__ . '/Templates/gallery.latte');
     }
 
-    /**
-     * Render the Contact Section edit page.
-     */
     public function renderContact(): void
     {
         $this->template->contact = $this->pageFacade->getContactInfo();
         $this->template->setFile(__DIR__ . '/Templates/contact.latte');
     }
 
-    /**
-     * Action to delete a gallery image.
-     */
+    public function renderLegalPages(): void
+    {
+        $this->template->pages = $this->pageFacade->getLegalPages();
+        $this->template->setFile(__DIR__ . '/Templates/legalPages.latte');
+    }
+
+    public function actionEditLegal(string $section): void
+    {
+        $page = $this->pageFacade->getLegalPage($section);
+        if (!$page) {
+            $this->error('Stránka nenalezena', 404);
+        }
+        $this['legalForm']->setDefaults($page->toArray());
+        $this->template->page = $page;
+        $this->template->setFile(__DIR__ . '/Templates/editLegal.latte');
+    }
+
     public function actionDeleteGalleryImage(int $id): void
     {
         $this->pageFacade->deleteGalleryImage($id);
@@ -100,9 +93,6 @@ final class EditPresenter extends Presenter
         $this->redirect('gallery');
     }
 
-    /**
-     * Action to delete a customization.
-     */
     public function actionDeleteCustomization(int $id): void
     {
         $this->pageFacade->deleteCustomization($id);
@@ -110,9 +100,6 @@ final class EditPresenter extends Presenter
         $this->redirect('customization');
     }
 
-    /**
-     * Helper method to build an edit form.
-     */
     private function createEditForm(
         object $entity,
         array $fields,
@@ -147,50 +134,39 @@ final class EditPresenter extends Presenter
         return $form;
     }
 
-    /**
-     * Create a form to edit the Banner Section.
-     */
-    /**
- * Create a form to edit the Banner Section.
- */
-public function createComponentBannerForm(): Form
-{
-    $banner = $this->pageFacade->getBannerSection();
-    $fields = [
-        'title' => ['type' => 'text', 'label' => 'Nadpis:', 'required' => true],
-        'description' => ['type' => 'textArea', 'label' => 'Popis:', 'required' => true],
-        'button_text' => ['type' => 'text', 'label' => 'Text tlačítka:', 'required' => true],
-        'button_link' => ['type' => 'text', 'label' => 'Odkaz tlačítka:', 'required' => true],
-        'image' => [
-            'type' => 'upload',
-            'label' => 'Obrázek:',
-            'required' => false,
-        ],
-    ];
+    public function createComponentBannerForm(): Form
+    {
+        $banner = $this->pageFacade->getBannerSection();
+        $fields = [
+            'title' => ['type' => 'text', 'label' => 'Nadpis:', 'required' => true],
+            'description' => ['type' => 'textArea', 'label' => 'Popis:', 'required' => true],
+            'button_text' => ['type' => 'text', 'label' => 'Text tlačítka:', 'required' => true],
+            'button_link' => ['type' => 'text', 'label' => 'Odkaz tlačítka:', 'required' => true],
+            'image' => [
+                'type' => 'upload',
+                'label' => 'Obrázek:',
+                'required' => false,
+            ],
+        ];
 
-    $form = $this->createEditForm(
-        (object)$banner,
-        $fields,
-        function ($values) {
-            $this->pageFacade->updateBannerSection((array)$values);
-            $this->flashMessage('Banner byl úspěšně aktualizován.', 'success');
-            $this->redirect('Edit:banner');
-        },
-        'Banner byl úspěšně aktualizován.',
-        'Edit:banner'
-    );
+        $form = $this->createEditForm(
+            (object)$banner,
+            $fields,
+            function ($values) {
+                $this->pageFacade->updateBannerSection((array)$values);
+            },
+            'Banner byl úspěšně aktualizován.',
+            'Edit:banner'
+        );
 
-    $form['image']
-        ->setHtmlAttribute('class', 'form-control')
-        ->addRule(Form::IMAGE, 'Soubor musí být obrázek (JPEG, PNG, GIF, WebP).');
+        $form['image']
+            ->setHtmlAttribute('class', 'form-control')
+            ->addRule(Form::IMAGE, 'Soubor musí být obrázek (JPEG, PNG, GIF, WebP).');
 
-    $form->getElementPrototype()->enctype = 'multipart/form-data';
-    return $form;
-}
+        $form->getElementPrototype()->enctype = 'multipart/form-data';
+        return $form;
+    }
 
-    /**
-     * Create a form to edit the Durability Section.
-     */
     public function createComponentDurabilityForm(): Form
     {
         $durability = $this->pageFacade->getDurabilitySection();
@@ -205,17 +181,15 @@ public function createComponentBannerForm(): Form
             ],
         ];
 
-    $form = $this->createEditForm(
-        (object)$durability,
-        $fields,
-        function ($values) {
-            $this->pageFacade->updateDurabilitySection((array)$values);
-            $this->flashMessage('Změny byly uloženy', 'success');
-            $this->redirect('Edit:banner');
-        },
-        'Změny byly uloženy',
-        'Edit:banner'
-    );
+        $form = $this->createEditForm(
+            (object)$durability,
+            $fields,
+            function ($values) {
+                $this->pageFacade->updateDurabilitySection((array)$values);
+            },
+            'Změny byly uloženy',
+            'Edit:durability'
+        );
 
         $form['image']
             ->setHtmlAttribute('class', 'form-control')
@@ -225,9 +199,6 @@ public function createComponentBannerForm(): Form
         return $form;
     }
 
-    /**
-     * Create a form to add a new customization.
-     */
     public function createComponentAddCustomizationForm(): Form
     {
         $form = new Form;
@@ -258,9 +229,6 @@ public function createComponentBannerForm(): Form
         return $form;
     }
 
-    /**
-     * Create a form to add/edit Gallery images.
-     */
     public function createComponentGalleryForm(): Form
     {
         $form = new Form;
@@ -292,9 +260,6 @@ public function createComponentBannerForm(): Form
         return $form;
     }
 
-    /**
-     * Create a form to update gallery order.
-     */
     public function createComponentGalleryOrderForm(): Form
     {
         $form = new Form;
@@ -318,9 +283,6 @@ public function createComponentBannerForm(): Form
         return $form;
     }
 
-    /**
-     * Create a form to edit the Contact Information.
-     */
     public function createComponentContactForm(): Form
     {
         $contact = $this->pageFacade->getContactInfo();
@@ -384,4 +346,52 @@ public function createComponentBannerForm(): Form
         $form->getElementPrototype()->enctype = 'multipart/form-data';
         return $form;
     }
+    public function createComponentLegalForm(): Form
+{
+    $form = new Form;
+
+    $form->addText('section_name', 'Název sekce:')
+        ->setRequired('Zadejte název sekce.')
+        ->addRule(Form::PATTERN, 'Pouze malá písmena a pomlčky.', '^[a-z-]+$')
+        ->setHtmlAttribute('class', 'form-control')
+        ->setHtmlAttribute('readonly', true);
+
+    $form->addText('title', 'Titulek:')
+        ->setRequired('Zadejte titulek.')
+        ->setHtmlAttribute('class', 'form-control');
+
+    $form->addTextArea('content', 'Obsah:')
+        ->setRequired('Zadejte obsah.')
+        ->setHtmlAttribute('class', 'form-control wysiwyg-editor');
+
+    $form->addSubmit('save', 'Uložit')
+        ->getControlPrototype()->addClass('btn btn-primary');
+
+    $form->onSuccess[] = [$this, 'processLegalForm'];
+
+    return $form;
+}
+
+
+public function processLegalForm(Form $form, \stdClass $values): void
+{
+    // Validace obsahu – není výjimka, jen běžná kontrola
+    if (empty(trim($values->content))) {
+        $form->addError('Obsah nesmí být prázdný.');
+        $this->redrawControl('flashes');
+        return;
+    }
+
+    try {
+        $this->pageFacade->updateLegalPage($values->section_name, $values->title, $values->content);
+        $this->flashMessage('Stránka byla úspěšně aktualizována.', 'success');
+        $this->redirect('legalPages');
+    } catch (\Exception $e) {
+        error_log('LegalForm error: ' . $e->getMessage());
+        $form->addError('Nepodařilo se uložit změny: ' . $e->getMessage());
+        $this->redrawControl('flashes');
+    }
+}
+
+
 }
