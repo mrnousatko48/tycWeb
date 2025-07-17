@@ -17,10 +17,6 @@ final class ProductPresenter extends Nette\Application\UI\Presenter
         $this->modelFacade = $modelFacade;
     }
 
-    public function renderDefault(): void
-    {
-    }
-
     public function renderColors(): void
     {
         $this->template->colors = $this->modelFacade->getColors();
@@ -51,7 +47,6 @@ final class ProductPresenter extends Nette\Application\UI\Presenter
 
         $images = $this->modelFacade->getModelImages($modelId);
 
-        // Nastavíme výchozí hodnoty do formuláře
         $this['imageForm']->setDefaults([
             'model_id' => $modelId,
         ]);
@@ -60,6 +55,47 @@ final class ProductPresenter extends Nette\Application\UI\Presenter
         $this->template->images = $images;
     }
 
+    public function renderDefaultImages(): void
+    {
+        $defaultImages = $this->modelFacade->getDefaultImages();
+        $this['defaultImageForm']->setDefaults([]);
+        $this->template->defaultImages = $defaultImages;
+    }
+
+    public function createComponentDefaultImageForm(): Form
+    {
+        $form = new Form;
+        $form->addUpload('image', 'Globální defaultní obrázek:')
+            ->setRequired('Prosím, vyberte globální defaultní obrázek.')
+            ->addRule(Form::IMAGE, 'Soubor musí být obrázek (JPEG, PNG, GIF).')
+            ->addRule(Form::MIME_TYPE, 'Soubor musí být JPEG, PNG nebo GIF.', ['image/jpeg', 'image/png', 'image/gif']);
+
+        $form->addSubmit('save', 'Nahrát obrázek');
+        $form->onSuccess[] = [$this, 'defaultImageFormSucceeded'];
+        return $form;
+    }
+
+    public function defaultImageFormSucceeded(Form $form, array $values): void
+    {
+        try {
+            $image = $this->modelFacade->addDefaultImage($values['image']);
+            if ($image) {
+                $this->flashMessage('Defaultní obrázek byl úspěšně nahrán!', 'success');
+            } else {
+                $this->flashMessage('Nepodařilo se nahrát defaultní obrázek.', 'error');
+            }
+        } catch (\Exception $e) {
+            $this->flashMessage($e->getMessage(), 'error');
+        }
+
+        if ($this->isAjax()) {
+            $this->template->defaultImages = $this->modelFacade->getDefaultImages();
+            $this->redrawControl('defaultImagesList');
+            $this->redrawControl('flashes');
+        } else {
+            $this->redirect('this');
+        }
+    }
 
     public function createComponentModelForm(): Form
     {
@@ -599,6 +635,7 @@ final class ProductPresenter extends Nette\Application\UI\Presenter
             $this->redirect('models');
         }
     }
+
     public function createComponentImageForm(): Form
     {
         $form = new Form;
@@ -607,56 +644,69 @@ final class ProductPresenter extends Nette\Application\UI\Presenter
             ->addRule(Form::IMAGE, 'Soubor musí být obrázek (JPEG, PNG, GIF).')
             ->addRule(Form::MIME_TYPE, 'Soubor musí být JPEG, PNG nebo GIF.', ['image/jpeg', 'image/png', 'image/gif']);
             
-        $form->addHidden('model_id'); // ← tady přidáš modelId
+        $form->addHidden('model_id');
         $form->addSubmit('save', 'Nahrát obrázek');
         $form->onSuccess[] = [$this, 'imageFormSucceeded'];
         return $form;
     }
 
     public function imageFormSucceeded(Form $form, array $values): void
-{
-    $modelId = (int) $values['model_id']; // získání ID z hidden inputu
-    bdump($modelId);
+    {
+        $modelId = (int)$values['model_id'];
+        bdump($modelId);
 
-    try {
-        $image = $this->modelFacade->addModelImage($modelId, $values['image']);
-        if ($image) {
-            $this->flashMessage('Obrázek byl úspěšně nahrán!', 'success');
-        } else {
-            $this->flashMessage('Nepodařilo se nahrát obrázek.', 'error');
+        try {
+            $image = $this->modelFacade->addModelImage($modelId, $values['image']);
+            if ($image) {
+                $this->flashMessage('Obrázek byl úspěšně nahrán!', 'success');
+            } else {
+                $this->flashMessage('Nepodařilo se nahrát obrázek.', 'error');
+            }
+        } catch (\Exception $e) {
+            $this->flashMessage($e->getMessage(), 'error');
         }
-    } catch (\Exception $e) {
-        $this->flashMessage($e->getMessage(), 'error');
+
+        if ($this->isAjax()) {
+            $this->template->images = $this->modelFacade->getModelImages($modelId);
+            $this->redrawControl('imagesList');
+            $this->redrawControl('flashes');
+        } else {
+            $this->redirect('this');
+        }
     }
 
-    if ($this->isAjax()) {
-        $this->template->images = $this->modelFacade->getModelImages($modelId);
-        $this->redrawControl('imagesList');
-        $this->redrawControl('flashes');
-    } else {
-        $this->redirect('this');
+    public function handleDeleteImage(int $imageId): void
+    {
+        try {
+            $this->modelFacade->deleteModelImage($imageId);
+            $this->flashMessage('Obrázek byl úspěšně smazán.', 'success');
+        } catch (\Exception $e) {
+            $this->flashMessage('Nepodařilo se smazat obrázek: ' . $e->getMessage(), 'error');
+        }
+
+        if ($this->isAjax()) {
+            $this->redrawControl('imagesList');
+            $this->redrawControl('flashes');
+        } else {
+            $this->redirect('this');
+        }
+    }
+
+    public function handleDeleteDefaultImage(int $imageId): void
+    {
+        try {
+            $this->modelFacade->deleteDefaultImage($imageId);
+            $this->flashMessage('Globální defaultní obrázek byl úspěšně smazán.', 'success');
+        } catch (\Exception $e) {
+            $this->flashMessage('Nepodařilo se smazat globální defaultní obrázek: ' . $e->getMessage(), 'error');
+        }
+
+        if ($this->isAjax()) {
+            $this->template->defaultImages = $this->modelFacade->getDefaultImages();
+            $this->redrawControl('defaultImagesList');
+            $this->redrawControl('flashes');
+        } else {
+            $this->redirect('this');
+        }
     }
 }
-
-
-public function handleDeleteImage(int $imageId): void
-{
-    try {
-        $this->modelFacade->deleteModelImage($imageId);
-        $this->flashMessage('Obrázek byl úspěšně smazán.', 'success');
-    } catch (\Exception $e) {
-        $this->flashMessage('Nepodařilo se smazat obrázek: ' . $e->getMessage(), 'error');
-    }
-
-    if ($this->isAjax()) {
-        $this->redrawControl('imagesList');
-        $this->redrawControl('flashes');
-    } else {
-        $this->redirect('this');
-    }
-}
-
-
-
-}
-?>

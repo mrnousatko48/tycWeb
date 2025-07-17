@@ -1,0 +1,38 @@
+{block content}
+<div class="container mt-4">
+    <h2 class="mb-4">Správa obrázků</h2>
+
+    <div class="mb-4">
+        <a href="{link Product:models}" class="btn btn-secondary">Zpět na modely</a>
+    </div>
+
+    <div class="card shadow-sm mb-5">
+        <div class="card-header fw-bold">Nahrát nový defaultní obrázek</div>
+        <div class="card-body">
+            {control defaultImageForm}
+        </div>
+    </div>
+
+    <div class="card shadow-sm">
+        <div class="card-header fw-bold">Seznam defaultních obrázků</div>
+        <div class="card-body" n:snippet="defaultImagesList">
+            {if $defaultImages->count()}
+                <div class="row g-4">
+                    {foreach $defaultImages as $defaultImage}
+                        <div class="col-md-3">
+                            <div class="card">
+                                <img src="{$defaultImage->image_path}" class="card-img-top" alt="Globální defaultní obrázek" style="height: 200px; object-fit: cover;">
+                                <div class="card-body">
+                                    <a href="{link deleteDefaultImage! $defaultImage->id}" class="ajax btn btn-danger btn-sm w-100">🗑 Smazat</a>
+                                </div>
+                            </div>
+                        </div>
+                    {/foreach}
+                </div>
+            {else}
+                <p>Žádné defaultní obrázky nebyly nalezeny.</p>
+            {/if}
+        </div>
+    </div>
+</div>
+{/block}

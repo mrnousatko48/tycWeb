@@ -331,5 +331,34 @@ class ModelFacade
             $image->delete();
         }
     }
+    
+    public function getDefaultImages(): \Nette\Database\Table\Selection
+    {
+        return $this->database->table('default_images')->order('created_at DESC');
+    }
+
+    public function addDefaultImage(FileUpload $file): ?ActiveRow
+    {
+        $uploadDir = '/uploads/default';
+        $imagePath = ImageUploader::uploadImage($file, $uploadDir);
+        if ($imagePath) {
+            return $this->database->table('default_images')->insert([
+                'image_path' => $imagePath,
+            ]);
+        }
+        return null;
+    }
+
+    public function deleteDefaultImage(int $imageId): void
+    {
+        $image = $this->database->table('default_images')->get($imageId);
+        if ($image) {
+            $filePath = __DIR__ . '/../../' . $image->image_path;
+            if (file_exists($filePath)) {
+                unlink($filePath);
+            }
+            $image->delete();
+        }
+    }
 }
 ?>
