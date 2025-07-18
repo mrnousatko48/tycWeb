@@ -31,7 +31,7 @@ class MailSender
 
         $html = $latte->renderToString(__DIR__ . '/registration.latte', $params);
 
-        $mail->setFrom('okurkyvmalinovce@seznam.cz')
+        $mail->setFrom('opnx3d@seznam.cz')
             ->addTo($email)
             ->setSubject('Vítejte! Registrace byla úspěšná')
             ->setHtmlBody($html);
@@ -51,8 +51,8 @@ class MailSender
 
         $html = $latte->renderToString(__DIR__ . '/newUser.latte', $params);
 
-        $mail->setFrom('okurkyvmalinovce@seznam.cz')
-            ->addTo('okurkyvmalinovce@seznam.cz')
+        $mail->setFrom('opnx3d@seznam.cz')
+            ->addTo('opnx3d@seznam.cz')
             ->setSubject('Nová registrace uživatele')
             ->setHtmlBody($html);
 
@@ -111,7 +111,7 @@ class MailSender
         ]);
 
         $mail = new Message;
-        $mail->setFrom('okurkyvmalinovce@seznam.cz')
+        $mail->setFrom('opnx3d@seznam.cz')
             ->addTo($recipientEmail)
             ->setSubject('Faktura za vaši objednávku č. ' . $order->id)
             ->setHtmlBody($htmlBody)
@@ -132,7 +132,7 @@ class MailSender
 
         $html = $latte->renderToString(__DIR__ . '/passreset.latte', $params);
 
-        $mail->setFrom('okurkyvmalinovce@seznam.cz')
+        $mail->setFrom('opnx3d@seznam.cz')
             ->addTo($email)
             ->setSubject('Reset hesla')
             ->setHtmlBody($html);
@@ -153,7 +153,7 @@ class MailSender
 
         $html = $latte->renderToString(__DIR__ . '/paymentConfirmation.latte', $params);
 
-        $mail->setFrom('okurkyvmalinovce@seznam.cz')
+        $mail->setFrom('opnx3d@seznam.cz')
             ->addTo($recipientEmail)
             ->setSubject('Potvrzení přijetí platby za objednávku č. ' . $order->id)
             ->setHtmlBody($html);
@@ -173,7 +173,7 @@ class MailSender
 
         $html = $latte->renderToString(__DIR__ . '/shipped.latte', $params);
 
-        $mail->setFrom('okurkyvmalinovce@seznam.cz')
+        $mail->setFrom('opnx3d@seznam.cz')
             ->addTo($recipientEmail)
             ->setSubject('Vaše objednávka č. ' . $order->id . ' byla odeslána')
             ->setHtmlBody($html);
@@ -194,7 +194,7 @@ class MailSender
 
         $html = $latte->renderToString(__DIR__ . '/readyForPickup.latte', $params);
 
-        $mail->setFrom('okurkyvmalinovce@seznam.cz')
+        $mail->setFrom('opnx3d@seznam.cz')
             ->addTo($recipientEmail)
             ->setSubject('Vaše objednávka č. ' . $order->id . ' je připravena k vyzvednutí')
             ->setHtmlBody($html);
@@ -214,7 +214,7 @@ class MailSender
 
         $html = $latte->renderToString(__DIR__ . '/pickedUp.latte', $params);
 
-        $mail->setFrom('okurkyvmalinovce@seznam.cz')
+        $mail->setFrom('opnx3d@seznam.cz')
             ->addTo($recipientEmail)
             ->setSubject('Vaše objednávka č. ' . $order->id . ' byla vyzvednuta')
             ->setHtmlBody($html);
@@ -253,8 +253,8 @@ class MailSender
         ]);
     
         $mail = new Message;
-        $mail->setFrom('okurkyvmalinovce@seznam.cz')
-            ->addTo('okurkyvmalinovce@seznam.cz') // Admin email
+        $mail->setFrom('opnx3d@seznam.cz')
+            ->addTo('opnx3d@seznam.cz') // Admin email
             ->setSubject('Nová objednávka č. ' . $order->id)
             ->setHtmlBody($html);
     
