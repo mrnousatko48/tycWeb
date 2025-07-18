@@ -7,17 +7,21 @@ namespace App\UI\Front\Cart;
 use App\UI\Front\BaseFrontPresenter;
 use Nette\Application\UI\Form;
 use App\MailSender\MailSender;
+use Nette\Database\Context;
 
 
 final class CartPresenter extends BaseFrontPresenter
 {
     private MailSender $mailSender;
+    private $database;
 
 
-    public function __construct( MailSender $mailSender)
+
+    public function __construct( MailSender $mailSender, Context $database)
     {
         parent::__construct();
         $this->mailSender = $mailSender;
+        $this->database = $database;
 
     }
 
@@ -171,63 +175,75 @@ final class CartPresenter extends BaseFrontPresenter
         $this->template->delivery_point = $session->delivery_point ?? 'Není zadáno';
     }
 
-        protected function createComponentSendOrderForm(): Form
-    {
-        $form = new Form;
+    protected function createComponentSendOrderForm(): Form
+{
+    $form = new Form;
+    
+    // Get the current user session object
+    $user = $this->getUser()->isLoggedIn() ? $this->getUser()->getIdentity() : null;
 
-        $user = $this->getUser()->isLoggedIn() ? $this->getUser()->getIdentity() : null;
-
-        $form->addText('firstname', 'Jméno:')
-            ->setRequired('Zadejte své jméno')
-            ->setHtmlAttribute('id', 'firstname-field')
-            ->setDefaultValue($user ? $user->firstname : '');
-
-        $form->addText('lastname', 'Příjmení:')
-            ->setRequired('Zadejte své příjmení')
-            ->setHtmlAttribute('id', 'lastname-field')
-            ->setDefaultValue($user ? $user->lastname : '');
-
-        $form->addEmail('email', 'E-mail:')
-            ->setRequired('Zadejte svůj e-mail')
-            ->setHtmlAttribute('id', 'email-field')
-            ->setHtmlAttribute('placeholder', 'Zadejte svůj e-mail')
-            ->setDefaultValue($user ? $user->email : '');
-
-        $form->addText('phone', 'Telefon:')
-            ->setRequired('Zadejte své telefonní číslo')
-            ->setHtmlAttribute('id', 'phone-field')
-            ->setHtmlAttribute('placeholder', 'Zadejte své telefonní číslo')
-            ->setDefaultValue($user ? $user->phone : '');
-
-        $form->addText('address', 'Adresa:')
-            ->setRequired('Zadejte svou adresu')
-            ->setHtmlAttribute('id', 'address-field')
-            ->setHtmlAttribute('placeholder', 'Zadejte svou adresu')
-            ->setDefaultValue($user ? $user->address : '');
-
-        $form->addText('city', 'Město:')
-            ->setRequired('Zadejte své město')
-            ->setHtmlAttribute('id', 'city-field')
-            ->setHtmlAttribute('placeholder', 'Zadejte své město')
-            ->setDefaultValue($user ? $user->city : '');
-
-        $form->addText('psc', 'PSČ:')
-            ->setRequired('Zadejte své PSČ')
-            ->setHtmlAttribute('id', 'psc-field')
-            ->setHtmlAttribute('placeholder', 'Zadejte své PSČ')
-            ->setDefaultValue($user ? $user->psc : '');
-
-        $form->addHidden('order_token', bin2hex(random_bytes(16))); // Unique token to prevent duplicate submissions
-
-        $form->addProtection('Formulář expiroval, prosím odešlete znovu.'); // CSRF protection
-
-        $form->addSubmit('submit', 'Dokončit objednávku')
-            ->setHtmlAttribute('class', 'btn px-6 py-3 rounded-xl text-base font-semibold transition transform hover:scale-105')
-            ->setHtmlAttribute('style', 'background-color: var(--color-primary); color: var(--button-text);');
-
-        $form->onSuccess[] = [$this, 'sendOrderFormSucceeded'];
-        return $form;
+    // If user is logged in, you should fetch the latest user data from the database to ensure it's up-to-date
+    if ($user) {
+        // Fetch user data from the database
+        $userData = $this->database->table('users')->get($user->getId());
+    } else {
+        $userData = null;
     }
+
+    // Set up form fields with default values from user session or database
+    $form->addText('firstname', 'Jméno:')
+        ->setRequired('Zadejte své jméno')
+        ->setHtmlAttribute('id', 'firstname-field')
+        ->setDefaultValue($userData ? $userData->firstname : '');
+
+    $form->addText('lastname', 'Příjmení:')
+        ->setRequired('Zadejte své příjmení')
+        ->setHtmlAttribute('id', 'lastname-field')
+        ->setDefaultValue($userData ? $userData->lastname : '');
+
+    $form->addEmail('email', 'E-mail:')
+        ->setRequired('Zadejte svůj e-mail')
+        ->setHtmlAttribute('id', 'email-field')
+        ->setHtmlAttribute('placeholder', 'Zadejte svůj e-mail')
+        ->setDefaultValue($userData ? $userData->email : '');
+
+    $form->addText('phone', 'Telefon:')
+        ->setRequired('Zadejte své telefonní číslo')
+        ->setHtmlAttribute('id', 'phone-field')
+        ->setHtmlAttribute('placeholder', 'Zadejte své telefonní číslo')
+        ->setDefaultValue($userData && isset($userData->phone) ? $userData->phone : '');
+
+    $form->addText('address', 'Adresa:')
+        ->setRequired('Zadejte svou adresu')
+        ->setHtmlAttribute('id', 'address-field')
+        ->setHtmlAttribute('placeholder', 'Zadejte svou adresu')
+        ->setDefaultValue($userData && isset($userData->address) ? $userData->address : '');
+
+    $form->addText('city', 'Město:')
+        ->setRequired('Zadejte své město')
+        ->setHtmlAttribute('id', 'city-field')
+        ->setHtmlAttribute('placeholder', 'Zadejte své město')
+        ->setDefaultValue($userData && isset($userData->city) ? $userData->city : '');
+
+    $form->addText('psc', 'PSČ:')
+        ->setRequired('Zadejte své PSČ')
+        ->setHtmlAttribute('id', 'psc-field')
+        ->setHtmlAttribute('placeholder', 'Zadejte své PSČ')
+        ->setDefaultValue($userData && isset($userData->psc) ? $userData->psc : '');
+
+    $form->addHidden('order_token', bin2hex(random_bytes(16))); // Unique token to prevent duplicate submissions
+    
+    $form->addProtection('Formulář expiroval, prosím odešlete znovu.'); // CSRF protection
+    
+    $form->addSubmit('submit', 'Dokončit objednávku')
+        ->setHtmlAttribute('class', 'btn px-6 py-3 rounded-xl text-base font-semibold transition transform hover:scale-105')
+        ->setHtmlAttribute('style', 'background-color: var(--color-primary); color: var(--button-text);');
+
+    // If the form is successfully submitted, handle the form data
+    $form->onSuccess[] = [$this, 'sendOrderFormSucceeded'];
+
+    return $form;
+}
 
     public function sendOrderFormSucceeded(Form $form, \stdClass $values): void
     {

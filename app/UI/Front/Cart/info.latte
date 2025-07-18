@@ -260,44 +260,56 @@
 </div>
 
 <div class="bg-[var(--color-background)] p-6 rounded-2xl shadow-lg form-container">
-    <div class="form-section">
-        <a href="{link Cart:order}" class="text-[var(--color-primary)] hover:underline mb-3 inline-block text-sm">Zpět na dopravu a platbu</a>
+   <div class="form-section">
+        <a href="{link Cart:order}" class="text-[var(--color-primary)] hover:underline mb-3 inline-block text-sm">
+            Zpět na dopravu a platbu
+        </a>
         <h2 class="text-xl font-bold text-[var(--color-text)] mb-4">Osobní údaje</h2>
+
         <form n:name="sendOrderForm" class="space-y-3">
+
             <div class="form-field">
-                <input n:name="firstname" id="firstname-field" placeholder=" ">
+                <input type="text" n:name="firstname" id="firstname-field" placeholder=" ">
                 <label for="firstname-field">Jméno</label>
             </div>
+
             <div class="form-field">
-                <input n:name="lastname" id="lastname-field" placeholder=" ">
+                <input type="text" n:name="lastname" id="lastname-field" placeholder=" ">
                 <label for="lastname-field">Příjmení</label>
             </div>
+
             <div class="form-field">
-                <input n:name="email" id="email-field" placeholder=" ">
+                <input type="email" n:name="email" id="email-field" placeholder=" ">
                 <label for="email-field">E-mail</label>
             </div>
+
             <div class="form-field">
-                <input n:name="phone" id="phone-field" placeholder=" ">
+                <input type="text" n:name="phone" id="phone-field" placeholder=" ">
                 <label for="phone-field">Telefon</label>
             </div>
+
             <div class="form-field">
-                <input n:name="address" id="address-field" placeholder=" ">
+                <input type="text" n:name="address" id="address-field" placeholder=" ">
                 <label for="address-field">Adresa</label>
             </div>
+
             <div class="form-field">
-                <input n:name="city" id="city-field" placeholder=" ">
+                <input type="text" n:name="city" id="city-field" placeholder=" ">
                 <label for="city-field">Město</label>
             </div>
+
             <div class="form-field">
-                <input n:name="psc" id="psc-field" placeholder=" ">
+                <input type="text" n:name="psc" id="psc-field" placeholder=" ">
                 <label for="psc-field">PSČ</label>
             </div>
-                        <div class="form-field">
-                <input n:name="submit" type="submit">
-            </div>
-        </form>
 
+            <div class="form-field">
+                <input type="submit" n:name="submit">
+            </div>
+
+        </form>
     </div>
+
     <div class="summary-section">
         <h3>Shrnutí objednávky</h3>
         <div class="space-y-3">

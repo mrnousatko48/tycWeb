@@ -61,6 +61,9 @@ final class ProfilePresenter extends BaseFrontPresenter
 
         $form->addEmail('email', 'Email:')
             ->setRequired();
+        
+        $form->addText('phone', 'Telefon:')
+            ->setNullable();
 
         $form->addText('address', 'Adresa:')
             ->setNullable();
@@ -68,7 +71,7 @@ final class ProfilePresenter extends BaseFrontPresenter
         $form->addText('city', 'Město:')
             ->setNullable();
 
-        $form->addText('psc', 'PSČ:') // Přidáno pole PSČ
+        $form->addText('psc', 'PSČ:')
             ->setNullable()
             ->addRule($form::PATTERN, 'Zadejte platné PSČ (např. 12345 nebo 123 45)', '^\d{3}\s?\d{2}$');
 
@@ -96,6 +99,7 @@ final class ProfilePresenter extends BaseFrontPresenter
                 'firstname' => $values->firstname,
                 'lastname' => $values->lastname,
                 'email' => $values->email,
+                'phone' => $values->phone,
                 'address' => $values->address,
                 'city' => $values->city,
                 'psc' => $values->psc,
