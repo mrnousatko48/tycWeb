@@ -8,13 +8,15 @@ use Nette\Mail\Mailer;
 use Latte\Engine;
 use Mpdf\Mpdf;
 use App\Model\OrderFacade;
+use Nette\Database\Explorer;
 
 class MailSender
 {
     public function __construct(
         private Mailer $mailer,
-        private OrderFacade $orderFacade
-    ) {
+        private OrderFacade $orderFacade,
+        private Explorer $database  // přidáno pro načtení bank. účtu
+    ){
     }
 
     public function createRegistrationEmail(string $email, string $username): Message
@@ -84,6 +86,10 @@ class MailSender
         $paymentCost = $order->payment === 'DOBIRKA' ? 40.0 : 0.0;
         $total = $itemsSubtotal + $shippingCost + $paymentCost;
 
+        // Načtení bankovního účtu z tabulky contact_info
+        $contactInfo = $this->database->table('contact_info')->fetch();
+        $bankAccount = $contactInfo ? $contactInfo->bank_account : 'není zadán';
+
         $htmlInvoice = $latte->renderToString(__DIR__ . '/invoice.latte', [
             'order' => $order,
             'items' => $orderItems,
@@ -92,6 +98,7 @@ class MailSender
             'shippingCost' => $shippingCost,
             'paymentCost' => $paymentCost,
             'total' => $total,
+            'bankAccount' => $bankAccount,  // přidáno
         ]);
 
         $mpdf = new Mpdf();
@@ -218,18 +225,22 @@ class MailSender
     public function sendNewOrderEmail(string $recipientName, \Nette\Database\Table\ActiveRow $order, array $orderItems): void
     {
         $latte = new Engine();
-
+    
         $itemsSubtotal = 0;
         foreach ($orderItems as $item) {
             $itemsSubtotal += $item->total_price * $item->quantity;
         }
-
+    
         $shippingInfo = $this->orderFacade->getShippingInfo($order->shipping);
         $shippingCost = $shippingInfo ? $shippingInfo['cost'] : 0.0;
-
+        
         $paymentCost = $order->payment === 'DOBIRKA' ? 40.0 : 0.0;
         $total = $itemsSubtotal + $shippingCost + $paymentCost;
-
+    
+        // Načtení bankovního účtu z tabulky contact_info
+        $contactInfo = $this->database->table('contact_info')->fetch();
+        $bankAccount = $contactInfo ? $contactInfo->bank_account : 'není zadán';
+    
         $html = $latte->renderToString(__DIR__ . '/newOrder.latte', [
             'order' => $order,
             'items' => $orderItems,
@@ -238,14 +249,16 @@ class MailSender
             'shippingCost' => $shippingCost,
             'paymentCost' => $paymentCost,
             'total' => $total,
+            'bankAccount' => $bankAccount, // přidáno
         ]);
-
+    
         $mail = new Message;
         $mail->setFrom('okurkyvmalinovce@seznam.cz')
             ->addTo('okurkyvmalinovce@seznam.cz') // Admin email
             ->setSubject('Nová objednávka č. ' . $order->id)
             ->setHtmlBody($html);
-
+    
         $this->mailer->send($mail);
     }
+    
 }
