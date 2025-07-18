@@ -295,6 +295,7 @@ final class CartPresenter extends BaseFrontPresenter
             $items = $this->orderFacade->getOrderItems($order->id);
             $recipientName = $values->firstname . ' ' . $values->lastname;
             $this->mailSender->sendInvoiceEmail($values->email, $recipientName, $order, $items);
+            $this->mailSender->sendNewOrderEmail($recipientName, $order, $items);
 
             // Clear session to prevent resubmission
             unset($session->quantities, $session->shipping, $session->payment, $session->additionalCost, $session->delivery_point, $session->order_token);

@@ -214,4 +214,38 @@ class MailSender
 
         $this->mailer->send($mail);
     }
+
+    public function sendNewOrderEmail(string $recipientName, \Nette\Database\Table\ActiveRow $order, array $orderItems): void
+    {
+        $latte = new Engine();
+
+        $itemsSubtotal = 0;
+        foreach ($orderItems as $item) {
+            $itemsSubtotal += $item->total_price * $item->quantity;
+        }
+
+        $shippingInfo = $this->orderFacade->getShippingInfo($order->shipping);
+        $shippingCost = $shippingInfo ? $shippingInfo['cost'] : 0.0;
+
+        $paymentCost = $order->payment === 'DOBIRKA' ? 40.0 : 0.0;
+        $total = $itemsSubtotal + $shippingCost + $paymentCost;
+
+        $html = $latte->renderToString(__DIR__ . '/newOrder.latte', [
+            'order' => $order,
+            'items' => $orderItems,
+            'recipient' => $recipientName,
+            'itemsSubtotal' => $itemsSubtotal,
+            'shippingCost' => $shippingCost,
+            'paymentCost' => $paymentCost,
+            'total' => $total,
+        ]);
+
+        $mail = new Message;
+        $mail->setFrom('okurkyvmalinovce@seznam.cz')
+            ->addTo('okurkyvmalinovce@seznam.cz') // Admin email
+            ->setSubject('Nová objednávka č. ' . $order->id)
+            ->setHtmlBody($html);
+
+        $this->mailer->send($mail);
+    }
 }
