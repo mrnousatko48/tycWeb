@@ -47,7 +47,7 @@ Web Server Setup
 
 To quickly dive in, use PHP's built-in server:
 
-	php -S localhost:8000 -t www
+	php -S localhost:8000 -t
 
 Then, open `http://localhost:8000` in your browser to view the welcome page.
 
