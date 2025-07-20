@@ -1,0 +1,42 @@
+{block content}
+<div class="container mt-4">
+    <h1 class="mb-4">E-mailové šablony</h1>
+
+    {if !isset($emailTemplate)}
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Název</th>
+                    <th>Předmět</th>
+                    <th>Příjemce</th>
+                    <th>Akce</th>
+                </tr>
+            </thead>
+            <tbody>
+                {foreach $emailTemplates as $template}
+                    <tr>
+                        <td>{$template->id}</td>
+                        <td>{$template->name}</td>
+                        <td>{$template->subject}</td>
+                        <td>{if $template->recipient_email}{$template->recipient_email}{else}Není zadán{/if}</td>
+                        <td>
+                            <a href="{link emails, id => $template->id}" class="btn btn-sm btn-primary">Upravit</a>
+                        </td>
+                    </tr>
+                {/foreach}
+            </tbody>
+        </table>
+        <div class="mt-4 text-center">
+        <a href="{link default}" class="btn btn-secondary">Zpět na nástěnku</a>
+    </div>
+    {/if}
+    
+
+    {if isset($emailTemplate)}
+        <h2>Upravit: {$emailTemplate['name']}</h2>
+        {control emailTemplateForm}
+        <a href="{link emails}" class="btn btn-secondary mt-3">Zrušit</a>
+    {/if}
+</div>
+{/block}

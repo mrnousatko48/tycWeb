@@ -25,8 +25,31 @@ class EmailFacade
         return $data;
     }
 
-    public function updateTemplate(string $name, array $data): void
+    public function getAllTemplates(): array
     {
-        $this->database->table('email_templates')->where('name', $name)->update($data);
+        return $this->database->table('email_templates')
+            ->order('id ASC')
+            ->fetchAll();
+    }
+
+    public function getTemplateById(int $id): ?array
+    {
+        $row = $this->database->table('email_templates')
+            ->where('id', $id)
+            ->fetch();
+        return $row ? $row->toArray() : null;
+    }
+
+    public function updateTemplate(int $id, array $values): void
+    {
+        $this->database->table('email_templates')
+            ->where('id', $id)
+            ->update([
+                'subject' => $values['subject'],
+                'body' => $values['body'],
+                'recipient_email' => $values['recipient_email'],
+                'admin_phone' => $values['admin_phone'],
+                'updated_at' => new \DateTime(),
+            ]);
     }
 }
