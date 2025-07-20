@@ -15,7 +15,6 @@
         <p><strong>Telefon:</strong> {$contact->phone}</p>
         <p><strong>Email:</strong> {$contact->email}</p>
         <p><strong>Kód mapy:</strong> {$contact->map_embed|noescape}</p>
-        <p><strong>Bankovní účet:</strong> {$contact->bank_account}</p>
       </div>
     </div>
   {/ifset}
@@ -45,10 +44,6 @@
     <div class="form-group mb-3">
       {label map_embed /}
       {input map_embed}
-    </div>
-    <div class="form-group mb-3">
-      {label bank_account /}
-      {input bank_account}
     </div>
     {input save}
   {/form}

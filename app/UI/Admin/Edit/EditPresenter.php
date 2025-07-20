@@ -293,7 +293,6 @@ final class EditPresenter extends Presenter
             'phone' => ['type' => 'text', 'label' => 'Telefon:', 'required' => true],
             'email' => ['type' => 'email', 'label' => 'Email:', 'required' => true],
             'map_embed' => ['type' => 'textArea', 'label' => 'Kód mapy:', 'required' => true],
-            'bank_account' => ['type' => 'textArea', 'label' => 'Bankovní účet:', 'required' => true],
         ];
 
         $form = $this->createEditForm(
@@ -304,7 +303,6 @@ final class EditPresenter extends Presenter
                 'phone' => '',
                 'email' => '',
                 'map_embed' => '',
-                'bank_account' => ''
             ],
             $fields,
             function ($values) use ($contact) {

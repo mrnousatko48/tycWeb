@@ -8,14 +8,12 @@ use Nette\Mail\Mailer;
 use Latte\Engine;
 use Mpdf\Mpdf;
 use App\Model\OrderFacade;
-use Nette\Database\Explorer;
 
 class MailSender
 {
     public function __construct(
         private Mailer $mailer,
         private OrderFacade $orderFacade,
-        private Explorer $database  // přidáno pro načtení bank. účtu
     ){
     }
 
@@ -86,10 +84,6 @@ class MailSender
         $paymentCost = $order->payment === 'DOBIRKA' ? 40.0 : 0.0;
         $total = $itemsSubtotal + $shippingCost + $paymentCost;
 
-        // Načtení bankovního účtu z tabulky contact_info
-        $contactInfo = $this->database->table('contact_info')->fetch();
-        $bankAccount = $contactInfo ? $contactInfo->bank_account : 'není zadán';
-
         $htmlInvoice = $latte->renderToString(__DIR__ . '/invoice.latte', [
             'order' => $order,
             'items' => $orderItems,
@@ -98,7 +92,6 @@ class MailSender
             'shippingCost' => $shippingCost,
             'paymentCost' => $paymentCost,
             'total' => $total,
-            'bankAccount' => $bankAccount,  // přidáno
         ]);
 
         $mpdf = new Mpdf();
@@ -237,9 +230,6 @@ class MailSender
         $paymentCost = $order->payment === 'DOBIRKA' ? 40.0 : 0.0;
         $total = $itemsSubtotal + $shippingCost + $paymentCost;
     
-        // Načtení bankovního účtu z tabulky contact_info
-        $contactInfo = $this->database->table('contact_info')->fetch();
-        $bankAccount = $contactInfo ? $contactInfo->bank_account : 'není zadán';
     
         $html = $latte->renderToString(__DIR__ . '/newOrder.latte', [
             'order' => $order,
@@ -249,7 +239,6 @@ class MailSender
             'shippingCost' => $shippingCost,
             'paymentCost' => $paymentCost,
             'total' => $total,
-            'bankAccount' => $bankAccount, // přidáno
         ]);
     
         $mail = new Message;
