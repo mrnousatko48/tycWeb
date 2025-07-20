@@ -1,107 +1,218 @@
 {block content}
 <style>
 /* General styles */
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    line-height: 1.6;
+    color: var(--color-text);
+}
+
 .alert-info {
-    background-color: var(--color-secondary);
+    background: linear-gradient(135deg, var(--color-secondary) 0%, var(--color-accent) 10%);
     color: var(--color-text);
     border: 1px solid var(--color-accent);
-    padding: 1.25rem;
-    border-radius: 0.75rem;
+    padding: 1.5rem;
+    border-radius: 1rem;
     text-align: center;
-    font-size: 1rem;
+    font-size: 1.1rem;
+    font-weight: 500;
     position: relative;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    margin: 1.5rem auto;
+    max-width: 800px;
 }
 
 .alert-info::before {
-    content: 'ℹ️';
-    font-size: 1.2rem;
-    margin-right: 0.5rem;
+    content: '\f05a'; /* Font Awesome info-circle */
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    font-size: 1.4rem;
+    margin-right: 0.75rem;
     vertical-align: middle;
 }
 
+.table-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 1rem;
+}
+
 .table {
-    background-color: var(--color-background);
+    background-color: var(--color-background); /* Use theme background */
     color: var(--color-text);
-    border-radius: 0.75rem;
+    border-radius: 1rem;
     overflow: hidden;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    border-collapse: separate;
+    border-spacing: 0;
 }
 
 .table-light {
-    background-color: var(--color-secondary);
+    background: linear-gradient(to right, var(--color-secondary), var(--color-accent) 100%);
     color: var(--color-text);
     font-weight: 600;
-    font-size: 1rem;
+    font-size: 1.1rem;
 }
 
 .table th {
-    padding: 1rem;
+    padding: 1.25rem;
+    position: relative;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
 }
 
+.table th::before {
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    margin-right: 0.5rem;
+    color: var(--color-text-secondary);
+}
+
+.table th:nth-child(1)::before { content: '\f0a3'; } /* ID icon */
+.table th:nth-child(2)::before { content: '\f3c5'; } /* Address icon */
+.table th:nth-child(3)::before { content: '\f058'; } /* Status icon */
+.table th:nth-child(4)::before { content: '\f3d1'; } /* Payment icon */
+.table th:nth-child(5)::before { content: '\f073'; } /* Date icon */
+.table th:nth-child(6)::before { content: '\f0c9'; } /* Items icon */
+.table th:nth-child(7)::before { content: '\f53a'; } /* Price icon */
+
 .table td {
-    padding: 1rem;
-    font-size: 0.95rem;
+    padding: 1.25rem;
+    font-size: 1rem;
+    border-bottom: 1px solid var(--color-secondary);
+}
+
+.table tbody tr:nth-child(even) {
+    background-color: rgba(var(--color-secondary), 0.2);
 }
 
 .table-hover tbody tr:hover {
-    background-color: var(--color-accent-light, rgba(var(--color-accent-rgb), 0.1));
-    transition: background-color 0.2s ease;
+    background-color: rgba(var(--color-accent), 0.1);
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    transform: translateY(-2px);
 }
 
 .badge {
-    font-size: 0.85rem;
-    padding: 0.6rem 1rem;
-    border-radius: 0.5rem;
-    font-weight: 500;
+    font-size: 0.9rem;
+    padding: 0.5rem 1rem;
+    border-radius: 2rem;
+    font-weight: 600;
     text-transform: uppercase;
+    position: relative;
+    cursor: help;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
+.badge:hover {
+    transform: scale(1.05);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
+}
+
+.badge::after {
+    content: attr(data-tooltip);
+    position: absolute;
+    bottom: 125%;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--color-dark, #111827);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    font-size: 0.8rem;
+    white-space: nowrap;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.2s ease, visibility 0.2s ease;
+    z-index: 10;
+}
+
+.badge:hover::after {
+    opacity: 1;
+    visibility: visible;
+}
+
+.badge.bg-secondary { background-color: #6b7280; }
+.badge.bg-warning { background-color: #f59e0b; }
+.badge.bg-success { background-color: #22c55e; }
+.badge.bg-info { background-color: #06b6d4; }
+.badge.bg-primary { background-color: var(--color-primary); }
+.badge.bg-dark { background-color: #111827; }
+.badge.bg-light { background-color: var(--color-secondary); }
+
+.badge.bg-secondary::after { content: 'V košíku'; }
+.badge.bg-warning::after { content: 'Čeká na zpracování'; }
+.badge.bg-success::after { content: 'Zaplaceno'; }
+.badge.bg-info::after { content: 'Odesláno'; }
+.badge.bg-primary::after { content: 'Doručeno'; }
+.badge.bg-dark::after { content: 'Vyzvednuto'; }
+.badge.bg-light::after { content: 'Neznámý stav'; }
+
 .btn-primary {
+    display: inline-flex;
+    align-items: center;
     padding: 0.75rem 1.5rem;
     font-size: 1rem;
-    border-radius: 0.5rem;
-    transition: background-color 0.3s ease, transform 0.2s ease;
+    font-weight: 600;
+    border-radius: 0.75rem;
+    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
+    color: var(--button-text);
+    border: none;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.3s ease;
 }
 
 .btn-primary:hover {
     transform: translateY(-2px);
-    background-color: var(--color-accent);
+    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+    background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-primary) 100%);
+}
+
+.btn-primary::before {
+    content: '\f060'; /* Back arrow icon */
+    font-family: 'Font Awesome 5 Free';
+    font-weight: 900;
+    margin-right: 0.5rem;
 }
 
 h1 {
-    font-size: 2rem;
-    font-weight: 700;
-    margin-bottom: 1.5rem;
+    font-size: 2.25rem;
+    font-weight: 800;
+    margin-bottom: 2rem;
+    text-align: center;
+    color: var(--color-text);
+    letter-spacing: -0.025em;
 }
 
 /* Mobile-specific styles */
 @media (max-width: 640px) {
     h1 {
-        font-size: 1.8rem;
-        margin-bottom: 1rem;
+        font-size: 1.75rem;
+        margin-bottom: 1.5rem;
     }
 
     .btn-primary {
-        padding: 0.6rem 1rem;
-        font-size: 0.9rem;
+        padding: 0.6rem 1.25rem;
+        font-size: 0.95rem;
     }
 
     .alert-info {
-        font-size: 0.9rem;
-        padding: 1rem;
+        font-size: 1rem;
+        padding: 1.25rem;
+        margin: 1rem;
     }
 
-    .table-responsive {
-        overflow-x: auto;
+    .table-container {
+        padding: 0.5rem;
     }
 
     .table {
         display: block;
         width: 100%;
+        border: none;
     }
 
     .table thead {
-        display: none; /* Hide table headers on mobile */
+        display: none;
     }
 
     .table tbody {
@@ -112,10 +223,15 @@ h1 {
         display: block;
         margin-bottom: 1.5rem;
         border: 1px solid var(--color-secondary);
-        border-radius: 0.75rem;
-        padding: 1rem;
+        border-radius: 1rem;
+        padding: 1.25rem;
         background-color: var(--color-background);
-        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        transition: transform 0.2s ease;
+    }
+
+    .table tr:hover {
+        transform: translateY(-2px);
     }
 
     .table td {
@@ -123,113 +239,113 @@ h1 {
         text-align: left;
         padding: 0.75rem 0;
         border: none;
-        font-size: 0.9rem;
+        font-size: 0.95rem;
     }
 
-    /* Add labels before each cell for clarity */
     .table td:before {
         content: attr(data-label);
         font-weight: 600;
         color: var(--color-text-secondary);
         display: block;
-        margin-bottom: 0.3rem;
-        font-size: 0.85rem;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+        text-transform: uppercase;
     }
 
     .table td ul {
-        padding-left: 1rem;
+        padding-left: 1.25rem;
     }
 
     .table td strong, .table td small {
-        font-size: 0.85rem;
+        font-size: 0.95rem;
     }
 
     .badge {
-        font-size: 0.8rem;
-        padding: 0.5rem 0.8rem;
+        font-size: 0.85rem;
+        padding: 0.5rem 1rem;
     }
 }
 </style>
 
-<a n:href="default" class="btn btn-primary">Zpět</a>
-<h1 class="text-3xl font-bold mb-5 text-[var(--color-text)] text-center">Objednávky</h1>
+<div class="table-container">
+    <a n:href="default" class="btn btn-primary">Zpět</a>
+    <h1 class="text-3xl font-bold mb-5">Objednávky</h1>
 
-{if !$orders || count($orders) === 0}
-    <div class="alert alert-info">Nemáte žádné objednávky.</div>
-{else}
-    <div class="table-responsive">
-        <table class="table table-bordered table-hover align-middle">
-            <thead class="table-light">
-            <tr>
-                <th>#</th>
-                <th>Adresa</th>
-                <th>Stav</th>
-                <th>Platba</th>
-                <th>Datum</th>
-                <th>Položky</th>
-                <th>Celková cena</th>
-            </tr>
-            </thead>
-            <tbody>
-            {foreach $orders as $orderData}
+    {if !$orders || count($orders) === 0}
+        <div class="alert alert-info">Nemáte žádné objednávky.</div>
+    {else}
+        <div class="table-responsive">
+            <table class="table table-hover align-middle">
+                <thead class="table-light">
                 <tr>
-                    <td data-label="#">{$orderData['order']->id}</td>
-                    <td data-label="Adresa">
-                        {$orderData['order']->address}<br>
-                        {$orderData['order']->city}, {$orderData['order']->psc}
-                    </td>
-                    <td data-label="Stav">
-                        {switch $orderData['order']->state}
-                            {case 'KOSIK'} <span class="badge bg-secondary">Košík</span>
-                            {case 'OBJEDNANO'} <span class="badge bg-warning text-dark">Objednáno</span>
-                            {case 'ZAPLACENO'} <span class="badge bg-success">Zaplaceno</span>
-                            {case 'ODESLANO'} <span class="badge bg-info text-dark">Odesláno</span>
-                            {case 'DORUCENO'} <span class="badge bg-primary">Doručeno</span>
-                            {case 'VYZVEDNUTO'} <span class="badge bg-dark">Vyzvednuto</span>
-                            {default} <span class="badge bg-light text-muted">Neznámý</span>
-                        {/switch}
-                    </td>
-                    <td data-label="Platba">{$orderData['order']->payment ?? '—'}</td>
-                    <td data-label="Datum">{$orderData['order']->created_at|date:'j. n. Y H:i'}</td>
-                    <td data-label="Položky">
-                        {if count($orderData['cases']) > 0}
-                            <ul class="mb-0 ps-3">
-                                {foreach $orderData['cases'] as $case}
-                                    <li>
-                                        <strong>{$case->manufacturer} {$case->model}</strong>
-                                        <small class="text-muted">({$case->color})</small>
-                                        <br>
-                                        {var $outerFeatures = json_decode($case->features ?? '{}', true)}
-                                        {var $features = isset($outerFeatures['features']) ? json_decode($outerFeatures['features'] ?? '{}', true) : []}
-                                        {if is_array($features) && count($features) > 0}
-                                            <ul class="small ps-3 mb-1 list-disc">
-                                                {foreach $features as $key => $value}
-                                                    <li>
-                                                        <span class="font-semibold">{$key|replace:'_',' '|capitalize}:</span> {$value}
-                                                    </li>
-                                                {/foreach}
-                                            </ul>
-                                        {else}
-                                            <small class="text-muted">Žádné vlastnosti</small>
-                                        {/if}
-                                    </li>
-                                {/foreach}
-                            </ul>
-                        {else}
-                            <em>Žádné položky</em>
-                        {/if}
-                    </td>
-                    <td data-label="Celková cena">
-                        {var $total = 0}
-                        {foreach $orderData['cases'] as $case}
-                            {do $total += $case->total_price}
-                        {/foreach}
-                        <strong>{number_format($total, 2, ',', ' ')} Kč</strong>
-                    </td>
+                    <th>ID</th>
+                    <th>Adresa</th>
+                    <th>Stav</th>
+                    <th>Platba</th>
+                    <th>Datum</th>
+                    <th>Položky</th>
+                    <th>Celková cena</th>
                 </tr>
-            {/foreach}
-            </tbody>
-        </table>
-    </div>
-{/if}
+                </thead>
+                <tbody>
+                {foreach $orders as $orderData}
+                    <tr>
+                        <td data-label="ID">{$orderData['order']->id}</td>
+                        <td data-label="Adresa">
+                            {$orderData['order']->address}<br>
+                            {$orderData['order']->city}, {$orderData['order']->psc}
+                        </td>
+                        <td data-label="Stav">
+                            {switch $orderData['order']->state}
+                                {case 'KOSIK'} <span class="badge bg-secondary">Košík</span>
+                                {case 'OBJEDNANO'} <span class="badge bg-warning text-dark">Objednáno</span>
+                                {case 'ZAPLACENO'} <span class="badge bg-success">Zaplaceno</span>
+                                {case 'ODESLANO'} <span class="badge bg-info text-dark">Odesláno</span>
+                                {case 'DORUCENO'} <span class="badge bg-primary">Doručeno</span>
+                                {case 'VYZVEDNUTO'} <span class="badge bg-dark">Vyzvednuto</span>
+                                {default} <span class="badge bg-light text-muted">Neznámý</span>
+                            {/switch}
+                        </td>
+                        <td data-label="Platba">{$orderData['order']->payment ?? '—'}</td>
+                        <td data-label="Datum">{$orderData['order']->created_at|date:'j. n. Y H:i'}</td>
+                        <td data-label="Položky">
+                            {if count($orderData['cases']) > 0}
+                                <ul class="mb-0 ps-3">
+                                    {foreach $orderData['cases'] as $case}
+                                        <li>
+                                            <strong>{$case->manufacturer} {$case->model}</strong>
+                                            <small class="text-muted">({$case->color})</small>
+                                            <br>
+                                            {if is_array($case->features) && count($case->features) > 0}
+                                                <ul class="small ps-3 mb-1 list-disc">
+                                                    {foreach $case->features as $key => $value}
+                                                        <li>
+                                                            <span class="font-semibold">{$key}</span>: {$value}
+                                                        </li>
+                                                    {/foreach}
+                                                </ul>
+                                            {else}
+                                                <small class="text-muted">Žádné vlastnosti</small>
+                                            {/if}
+                                        </li>
+                                    {/foreach}
+                                </ul>
+                            {else}
+                                <em>Žádné položky</em>
+                            {/if}
+                        </td>
+                        <td data-label="Celková cena">
+                            {var $total = 0}
+                            {foreach $orderData['cases'] as $case}
+                                {do $total += $case->total_price}
+                            {/foreach}
+                            <strong>{number_format($total, 2, ',', ' ')} Kč</strong>
+                        </td>
+                    </tr>
+                {/foreach}
+                </tbody>
+            </table>
+        </div>
+    {/if}
+</div>
 {/block}

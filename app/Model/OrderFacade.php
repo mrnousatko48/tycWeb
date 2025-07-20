@@ -320,33 +320,35 @@ final class OrderFacade
         return $options;
     }
 
-    public function getAllOrders(): iterable
+    public function getOrdersByUserId(int $userId): array
     {
-        return $this->database->table('orders')
-            ->order('created_at DESC')
-            ->fetchAll();
-    }
-
-    public function getAllCases(): iterable
-    {
-        return $this->database->table('cases')
-            ->order('created_at DESC')
-            ->fetchAll();
-    }
-
-    public function getOrderCases(int $orderId): iterable
-    {
-        return $this->database->table('order_case')
-            ->where('order_id', $orderId)
-            ->select('cases.*')
-            ->fetchAll();
-    }
-
-    public function getOrdersByUserId(int $userId): \Nette\Database\Table\Selection
-    {
-        return $this->database->table('orders')
+        $query = $this->database->table('orders')
             ->where('user_id', $userId)
             ->order('created_at DESC');
+
+        $orders = $query->fetchAll();
+        $orderData = [];
+
+        foreach ($orders as $order) {
+            $orderCases = $this->database->table('order_case')
+                ->where('order_id', $order->id)
+                ->fetchAll();
+
+            $caseIds = array_column(iterator_to_array($orderCases), 'case_id');
+            $cases = $this->database->table('cases')
+                ->where('id', $caseIds)
+                ->fetchAll();
+
+            $user = $order->user_id ? $this->database->table('users')->get($order->user_id) : null;
+
+            $orderData[] = [
+                'order' => $order,
+                'cases' => $this->processCases($orderCases, $cases),
+                'user' => $user,
+            ];
+        }
+
+        return $orderData;
     }
 
     public function getCasesByIds(array $ids): array
@@ -359,13 +361,6 @@ final class OrderFacade
             ->where('id', $ids)
             ->where('state', 'KOSIK')
             ->fetchAll();
-    }
-
-    public function getCasesByUserId(int $userId): \Nette\Database\Table\Selection
-    {
-        return $this->database->table('cases')
-            ->where('user_id', $userId)
-            ->order('created_at DESC');
     }
 
     public function getCartCasesByUserId(int $userId): \Nette\Database\Table\Selection

@@ -286,14 +286,6 @@ class PageFacade
         $this->database->table('contact_info')->get($id)->update($values);
     }
 
-    /**
-     * Fetch form options (for colors, etc.).
-     */
-    public function getFormOptions(string $type): array
-    {
-        return $this->database->table($type . '_options')->fetchAll();
-    }
-
     public function getLegalPage(string $sectionName): ?object
     {
         return $this->database->table('legal_pages')
