@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\UI\Front\Cart;
@@ -7,15 +6,18 @@ namespace App\UI\Front\Cart;
 use App\UI\Front\BaseFrontPresenter;
 use Nette\Application\UI\Form;
 use App\MailSender\MailSender;
+use App\Model\EmailFacade;
 
 final class CartPresenter extends BaseFrontPresenter
 {
     private MailSender $mailSender;
+    private EmailFacade $emailFacade;
 
-    public function __construct(MailSender $mailSender)
+    public function __construct(MailSender $mailSender, EmailFacade $emailFacade)
     {
         parent::__construct();
         $this->mailSender = $mailSender;
+        $this->emailFacade = $emailFacade;
     }
 
     private function cleanFeatureKey(string $key): string

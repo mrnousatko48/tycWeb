@@ -3,39 +3,22 @@ declare(strict_types=1);
 
 namespace App\UI\Admin\Dashboard;
 
-use Nette;
+use App\UI\Admin\BaseAdminPresenter;
 use App\Model\OrderFacade;
 use App\MailSender\MailSender;
 
-final class DashboardPresenter extends Nette\Application\UI\Presenter
+final class DashboardPresenter extends BaseAdminPresenter
 {
-    private OrderFacade $orderFacade;
-    private MailSender $mailSender;
-
-    public function __construct(OrderFacade $orderFacade, MailSender $mailSender)
-    {
+    public function __construct(
+        private OrderFacade $orderFacade,
+        private MailSender $mailSender
+    ) {
         parent::__construct();
-        $this->orderFacade = $orderFacade;
-        $this->mailSender = $mailSender;
-    }
-
-    protected function startup(): void
-    {
-        parent::startup();
-
-        if (!$this->getUser()->isLoggedIn()) {
-            $this->flashMessage('Nemáš oprávnění.', 'warning');
-            $this->redirect(':Front:Sign:in', ['backlink' => $this->storeRequest()]);
-        }
-
-        if (!$this->getUser()->isInRole('ADMIN')) {
-            $this->flashMessage('Nemáš oprávnění.', 'warning');
-            $this->redirect(':Front:Sign:in');
-        }
     }
 
     public function renderDefault(): void
     {
+        $this->template->orders = $this->orderFacade->getOrdersWithDetails(null);
     }
 
     public function renderDetail(int $id): void
@@ -60,32 +43,50 @@ final class DashboardPresenter extends Nette\Application\UI\Presenter
         try {
             $this->orderFacade->updateOrderState($orderId, $newState);
             $orderData = $this->orderFacade->getOrderDetails($orderId);
+            if (!$orderData) {
+                throw new \InvalidArgumentException('Objednávka nenalezena.');
+            }
+
             $order = $orderData['order'];
             $recipientName = $order->firstname . ' ' . $order->lastname;
             $recipientEmail = $order->email;
 
-            switch ($newState) {
-                case 'ZAPLACENO':
-                    $this->mailSender->sendPaymentConfirmationEmail($recipientEmail, $recipientName, $order);
-                    break;
-                case 'ODESLANO':
-                    $this->mailSender->sendShippedEmail($recipientEmail, $recipientName, $order);
-                    break;
-                case 'DORUCENO':
-                    $this->mailSender->sendReadyForPickupEmail($recipientEmail, $recipientName, $order);
-                    break;
-                case 'VYZVEDNUTO':
-                    $this->mailSender->sendPickedUpEmail($recipientEmail, $recipientName, $order);
-                    break;
+            // Send email based on new state
+            try {
+                switch ($newState) {
+                    case 'ZAPLACENO':
+                        $this->mailSender->sendPaymentConfirmationEmail($recipientEmail, $recipientName, $order);
+                        $this->flashMessage('E-mail s potvrzením platby odeslán.', 'success');
+                        break;
+                    case 'ODESLANO':
+                        $this->mailSender->sendShippedEmail($recipientEmail, $recipientName, $order);
+                        $this->flashMessage('E-mail o odeslání objednávky odeslán.', 'success');
+                        break;
+                    case 'DORUCENO':
+                        $this->mailSender->sendReadyForPickupEmail($recipientEmail, $recipientName, $order);
+                        $this->flashMessage('E-mail o připravení k vyzvednutí odeslán.', 'success');
+                        break;
+                    case 'VYZVEDNUTO':
+                        $this->mailSender->sendPickedUpEmail($recipientEmail, $recipientName, $order);
+                        $this->flashMessage('E-mail o vyzvednutí objednávky odeslán.', 'success');
+                        break;
+                    default:
+                        throw new \InvalidArgumentException("Neplatný stav objednávky: $newState");
+                }
+            } catch (\Exception $e) {
+                error_log("Error sending email for order $orderId (state: $newState): " . $e->getMessage());
+                $this->flashMessage("Chyba při odesílání e-mailu: " . $e->getMessage(), 'warning');
             }
 
             $this->flashMessage('Stav objednávky byl aktualizován.', 'success');
         } catch (\InvalidArgumentException $e) {
+            error_log("Invalid argument for order $orderId: " . $e->getMessage());
             $this->flashMessage('Chyba: ' . $e->getMessage(), 'error');
         } catch (\Throwable $e) {
-            $this->flashMessage('Chyba při odesílání e-mailu: ' . $e->getMessage(), 'error');
-            error_log("Error sending email for order $orderId: " . $e->getMessage());
+            error_log("Unexpected error for order $orderId: " . $e->getMessage());
+            $this->flashMessage('Neočekávaná chyba: ' . $e->getMessage(), 'error');
         }
+
         $this->redirect('detail', $orderId);
     }
 }
