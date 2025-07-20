@@ -6,7 +6,6 @@ namespace App\UI\Front\Sign;
 
 use App\UI\Front\BaseFrontPresenter;
 use Nette;
-use App\Model\UserFacade;
 use App\UI\Accessory\FormFactory;
 use Nette\Application\UI\Form;
 use App\Model\DuplicateNameException;
@@ -17,7 +16,6 @@ final class SignPresenter extends BaseFrontPresenter
 	public string $backlink = '';
 
 	public function __construct(
-		private UserFacade $userFacade,
 		private FormFactory $formFactory,
 		private MailSender $mailSender,
 	) {

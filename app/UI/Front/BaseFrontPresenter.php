@@ -6,16 +6,22 @@ namespace App\UI\Front;
 use Nette\Application\UI\Presenter;
 use App\Model\PageFacade;
 use App\Model\OrderFacade;
+use App\Model\userFacade;
+
 
 abstract class BaseFrontPresenter extends Presenter
 {
     protected OrderFacade $orderFacade;
     protected PageFacade $pageFacade;
+    protected UserFacade $userFacade;
+ 
 
-    public function injectDependencies(OrderFacade $orderFacade, PageFacade $pageFacade): void
+    public function injectDependencies(OrderFacade $orderFacade, PageFacade $pageFacade, UserFacade $userFacade): void
     {
         $this->orderFacade = $orderFacade;
         $this->pageFacade = $pageFacade;
+        $this->userFacade = $userFacade;
+        
     }
 
     protected function startup(): void

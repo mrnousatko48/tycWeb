@@ -4,23 +4,19 @@ declare(strict_types=1);
 
 namespace App\UI\Front\Profile;
 
-
 use App\UI\Front\BaseFrontPresenter;
 use Nette;
 use Nette\Application\UI\Form;
-use Nette\Database\Explorer;
 use Nette\Security\User;
-use App\Model\OrderFacade;
 
 final class ProfilePresenter extends BaseFrontPresenter
 {
-    private Explorer $database;
     private User $user;
 
-    public function __construct(Explorer $database, User $user)
+
+    public function __construct(User $user)
     {
         parent::__construct();
-        $this->database = $database;
         $this->user = $user;
     }
 
@@ -37,7 +33,7 @@ final class ProfilePresenter extends BaseFrontPresenter
     public function renderDefault(): void
     {
         $userId = $this->user->getId();
-        $userRow = $this->database->table('users')->get($userId);
+        $userRow = $this->userFacade->getUserById($userId);
 
         if (!$userRow) {
             $this->error('Uživatel nebyl nalezen.');
@@ -80,7 +76,7 @@ final class ProfilePresenter extends BaseFrontPresenter
         $form->onSuccess[] = [$this, 'editProfileFormSucceeded'];
 
         $userId = $this->user->getId();
-        $userRow = $this->database->table('users')->get($userId);
+        $userRow = $this->userFacade->getUserById($userId);
         if ($userRow) {
             $form->setDefaults($userRow->toArray());
         }
@@ -92,18 +88,16 @@ final class ProfilePresenter extends BaseFrontPresenter
     {
         $userId = $this->user->getId();
 
-        $this->database->table('users')
-            ->where('id', $userId)
-            ->update([
-                'username' => $values->username,
-                'firstname' => $values->firstname,
-                'lastname' => $values->lastname,
-                'email' => $values->email,
-                'phone' => $values->phone,
-                'address' => $values->address,
-                'city' => $values->city,
-                'psc' => $values->psc,
-            ]);
+        $this->userFacade->updateUser($userId, \Nette\Utils\ArrayHash::from([
+            'username' => $values->username,
+            'firstname' => $values->firstname,
+            'lastname' => $values->lastname,
+            'email' => $values->email,
+            'phone' => $values->phone,
+            'address' => $values->address,
+            'city' => $values->city,
+            'psc' => $values->psc,
+        ]));
 
         $this->flashMessage('Profil byl úspěšně aktualizován.', 'success');
         $this->redirect('default');
@@ -113,20 +107,7 @@ final class ProfilePresenter extends BaseFrontPresenter
     {
         $userId = $this->user->getId();
         $orders = $this->orderFacade->getOrdersByUserId($userId);
-        $orderData = [];
-        foreach ($orders as $order) {
-            $caseIds = $this->database->table('order_case')
-                ->where('order_id', $order->id)
-                ->fetchPairs(null, 'case_id');
-            $cases = $this->database->table('cases')
-                ->where('id', $caseIds)
-                ->fetchAll();
-            $orderData[] = [
-                'order' => $order,
-                'cases' => $cases,
-            ];
-        }
-        $this->template->orders = $orderData;
+        $this->template->orders = $orders;
     }
 
     protected function createComponentChangePasswordForm(): Form
@@ -155,34 +136,17 @@ final class ProfilePresenter extends BaseFrontPresenter
     {
         $userId = $this->user->getId();
 
-        $userRow = $this->database->table('users')->get($userId);
+        $userRow = $this->userFacade->getUserById($userId);
         if (!$userRow) {
             $this->error('Uživatel nebyl nalezen.');
         }
 
-        $passwords = $this->user->getAuthenticator();
-        $identity = $this->user->getIdentity();
-
-        $passwords = new \Nette\Security\Passwords();
-
-        if (!$passwords->verify($values->currentPassword, $userRow->password)) {
+        if (!$this->userFacade->verifyPassword($userId, $values->currentPassword)) {
             $form->addError('Aktuální heslo je nesprávné.');
             return;
         }
 
-        // Pokud je hash starší, rehashuj
-        if ($passwords->needsRehash($userRow->password)) {
-            $newHash = $passwords->hash($values->newPassword);
-        } else {
-            $newHash = $passwords->hash($values->newPassword);
-        }
-
-        // Ulož nové heslo do DB
-        $this->database->table('users')
-            ->where('id', $userId)
-            ->update([
-                'password' => $newHash,
-            ]);
+        $this->userFacade->updatePassword($userId, $values->newPassword);
 
         $this->flashMessage('Heslo bylo úspěšně změněno.', 'success');
         $this->redirect('this');
