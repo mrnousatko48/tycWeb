@@ -5,16 +5,19 @@ namespace App\UI\Admin\Product;
 
 use Nette;
 use App\Model\ModelFacade;
+use App\Model\OrderFacade;
 use Nette\Application\UI\Form;
 
 final class ProductPresenter extends Nette\Application\UI\Presenter
 {
     private ModelFacade $modelFacade;
+    private OrderFacade $orderFacade;
 
-    public function __construct(ModelFacade $modelFacade)
+    public function __construct(ModelFacade $modelFacade, OrderFacade $orderFacade)
     {
         parent::__construct();
         $this->modelFacade = $modelFacade;
+        $this->orderFacade = $orderFacade;
     }
 
     public function renderColors(): void
@@ -60,6 +63,13 @@ final class ProductPresenter extends Nette\Application\UI\Presenter
         $defaultImages = $this->modelFacade->getDefaultImages();
         $this['defaultImageForm']->setDefaults([]);
         $this->template->defaultImages = $defaultImages;
+    }
+
+    public function renderShipping(): void
+    {
+        $this->template->vendors = $this->orderFacade->getVendors();
+        $this->template->shippingOptions = $this->orderFacade->getAllShippingOptions();
+        $this->template->isAjax = $this->isAjax();
     }
 
     public function createComponentDefaultImageForm(): Form
@@ -510,6 +520,156 @@ final class ProductPresenter extends Nette\Application\UI\Presenter
         }
     }
 
+    public function createComponentVendorForm(): Form
+    {
+        $form = new Form;
+
+        $form->addText('name', 'Název dopravce:')
+            ->setRequired('Prosím, zadejte název dopravce.');
+
+        $form->addSubmit('save', 'Přidat dopravce');
+
+        $form->onSuccess[] = [$this, 'vendorFormSucceeded'];
+        return $form;
+    }
+
+    public function vendorFormSucceeded(Form $form, array $values): void
+    {
+        try {
+            $this->orderFacade->addVendor($values['name']);
+            $this->flashMessage('Dopravce byl úspěšně přidán!', 'success');
+        } catch (\Exception $e) {
+            $this->flashMessage($e->getMessage(), 'error');
+        }
+
+        if ($this->isAjax()) {
+            $this->template->vendors = $this->orderFacade->getVendors();
+            $this->redrawControl('vendorsTable');
+            $this->redrawControl('shippingOptionForm-vendor_id');
+            $this->redrawControl('flashes');
+        } else {
+            $this->redirect('shipping');
+        }
+    }
+
+    public function createComponentVendorEditForm(): Form
+    {
+        $form = new Form;
+
+        $form->addHidden('id');
+
+        $form->addText('name', 'Název dopravce:')
+            ->setRequired('Prosím, zadejte název dopravce.');
+
+        $form->addSubmit('save', 'Upravit dopravce');
+
+        $form->onSuccess[] = [$this, 'vendorEditFormSucceeded'];
+        return $form;
+    }
+
+    public function vendorEditFormSucceeded(Form $form, array $values): void
+    {
+        try {
+            $this->orderFacade->updateVendor((int)$values['id'], $values['name']);
+            $this->flashMessage('Dopravce byl úspěšně upraven!', 'success');
+        } catch (\Exception $e) {
+            $this->flashMessage($e->getMessage(), 'error');
+        }
+
+        if ($this->isAjax()) {
+            $this->template->vendors = $this->orderFacade->getVendors();
+            $this->redrawControl('vendorsTable');
+            $this->redrawControl('shippingOptionForm-vendor_id');
+            $this->redrawControl('flashes');
+        } else {
+            $this->redirect('shipping');
+        }
+    }
+
+    public function createComponentShippingOptionForm(): Form
+    {
+        $form = new Form;
+
+        $form->addSelect('vendor_id', 'Dopravce:', 
+            $this->orderFacade->getVendors())
+            ->setPrompt('Vyberte dopravce')
+            ->setRequired('Prosím, vyberte dopravce.');
+
+        $form->addText('name', 'Název možnosti dopravy:')
+            ->setRequired('Prosím, zadejte název možnosti dopravy.');
+
+        $form->addText('cost', 'Cena (CZK):')
+            ->setRequired('Prosím, zadejte cenu.')
+            ->addRule($form::FLOAT, 'Cena musí být platné číslo.')
+            ->setDefaultValue('0.00');
+
+        $form->addSubmit('save', 'Přidat možnost dopravy');
+
+        $form->onSuccess[] = [$this, 'shippingOptionFormSucceeded'];
+        return $form;
+    }
+
+    public function shippingOptionFormSucceeded(Form $form, array $values): void
+    {
+        try {
+            $this->orderFacade->addShippingOption($values['vendor_id'], $values['name'], (float)$values['cost']);
+            $this->flashMessage('Možnost dopravy byla úspěšně přidána!', 'success');
+        } catch (\Exception $e) {
+            $this->flashMessage($e->getMessage(), 'error');
+        }
+
+        if ($this->isAjax()) {
+            $this->template->shippingOptions = $this->orderFacade->getAllShippingOptions();
+            $this->redrawControl('shippingOptionsTable');
+            $this->redrawControl('flashes');
+        } else {
+            $this->redirect('shipping');
+        }
+    }
+
+    public function createComponentShippingOptionEditForm(): Form
+    {
+        $form = new Form;
+
+        $form->addHidden('id');
+
+        $form->addSelect('vendor_id', 'Dopravce:', 
+            $this->orderFacade->getVendors())
+            ->setPrompt('Vyberte dopravce')
+            ->setRequired('Prosím, vyberte dopravce.');
+
+        $form->addText('name', 'Název možnosti dopravy:')
+            ->setRequired('Prosím, zadejte název možnosti dopravy.');
+
+        $form->addText('cost', 'Cena (CZK):')
+            ->setRequired('Prosím, zadejte cenu.')
+            ->addRule($form::FLOAT, 'Cena musí být platné číslo.')
+            ->setDefaultValue('0.00');
+
+        $form->addSubmit('save', 'Upravit možnost dopravy');
+
+        $form->onSuccess[] = [$this, 'shippingOptionEditFormSucceeded'];
+        return $form;
+    }
+
+    public function shippingOptionEditFormSucceeded(Form $form, array $values): void
+    {
+        try {
+            $this->orderFacade->updateShippingOption((int)$values['id'], $values['vendor_id'], $values['name'], (float)$values['cost']);
+            $this->flashMessage('Možnost dopravy byla úspěšně upravena!', 'success');
+        } catch (\Exception $e) {
+            $this->flashMessage($e->getMessage(), 'error');
+        }
+
+        if ($this->isAjax()) {
+            $this->template->shippingOptions = $this->orderFacade->getAllShippingOptions();
+            $this->redrawControl('shippingOptionsTable');
+            $this->redrawControl('flashes');
+        } else {
+            $this->redirect('shipping');
+        }
+    }
+
     public function handleEditFeatureOption(int $optionId): void
     {
         $option = $this->modelFacade->getAllFeatureOptions()->get($optionId);
@@ -527,6 +687,44 @@ final class ProductPresenter extends Nette\Application\UI\Presenter
 
         if ($this->isAjax()) {
             $this->redrawControl('featureOptionEditForm');
+        }
+    }
+
+    public function handleEditVendor(int $vendorId): void
+    {
+        $vendor = $this->orderFacade->getVendorById($vendorId);
+        if (!$vendor) {
+            $this->flashMessage('Dopravce neexistuje.', 'error');
+            $this->redirect('shipping');
+        }
+
+        $this['vendorEditForm']->setDefaults([
+            'id' => $vendor->id,
+            'name' => $vendor->name,
+        ]);
+
+        if ($this->isAjax()) {
+            $this->redrawControl('vendorEditForm');
+        }
+    }
+
+    public function handleEditShippingOption(int $optionId): void
+    {
+        $option = $this->orderFacade->getShippingOptionById($optionId);
+        if (!$option) {
+            $this->flashMessage('Možnost dopravy neexistuje.', 'error');
+            $this->redirect('shipping');
+        }
+
+        $this['shippingOptionEditForm']->setDefaults([
+            'id' => $option->id,
+            'vendor_id' => $option->vendor_id,
+            'name' => $option->name,
+            'cost' => $option->cost,
+        ]);
+
+        if ($this->isAjax()) {
+            $this->redrawControl('shippingOptionEditForm');
         }
     }
 
@@ -633,6 +831,45 @@ final class ProductPresenter extends Nette\Application\UI\Presenter
             $this->redrawControl('flashes');
         } else {
             $this->redirect('models');
+        }
+    }
+
+    public function handleDeleteVendor(int $vendorId): void
+    {
+        try {
+            $this->orderFacade->deleteVendor($vendorId);
+            $this->flashMessage('Dopravce byl úspěšně smazán!', 'success');
+        } catch (\Exception $e) {
+            $this->flashMessage($e->getMessage(), 'error');
+        }
+
+        if ($this->isAjax()) {
+            $this->template->vendors = $this->orderFacade->getVendors();
+            $this->template->shippingOptions = $this->orderFacade->getAllShippingOptions();
+            $this->redrawControl('vendorsTable');
+            $this->redrawControl('shippingOptionsTable');
+            $this->redrawControl('shippingOptionForm-vendor_id');
+            $this->redrawControl('flashes');
+        } else {
+            $this->redirect('shipping');
+        }
+    }
+
+    public function handleDeleteShippingOption(int $optionId): void
+    {
+        try {
+            $this->orderFacade->deleteShippingOption($optionId);
+            $this->flashMessage('Možnost dopravy byla úspěšně smazána!', 'success');
+        } catch (\Exception $e) {
+            $this->flashMessage($e->getMessage(), 'error');
+        }
+
+        if ($this->isAjax()) {
+            $this->template->shippingOptions = $this->orderFacade->getAllShippingOptions();
+            $this->redrawControl('shippingOptionsTable');
+            $this->redrawControl('flashes');
+        } else {
+            $this->redirect('shipping');
         }
     }
 

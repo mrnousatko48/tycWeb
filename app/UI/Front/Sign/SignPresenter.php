@@ -102,7 +102,6 @@ final class SignPresenter extends BaseFrontPresenter
                     throw $e;
                 }
                 $this->flashMessage('Registrace se nepodařila. Zkuste to prosím znovu.', 'danger');
-                bdump($e->getMessage());
             }
         };
 

@@ -36,6 +36,17 @@ final class HomePresenter extends BaseFrontPresenter
         if (!$page) {
             $this->error('Stránka nenalezena', 404);
         }
+
+        // Define titles for each section
+        $titles = [
+            'obchodni-podminky' => 'OPNX3D | Obchodní podmínky',
+            'ochrana-osobnich-udaju' => 'OPNX3D | Ochrana osobních údajů',
+            'reklamacni-rad' => 'OPNX3D | Reklamační řád',
+            'odstoupeni-od-smlouvy' => 'OPNX3D | Odstoupení od smlouvy',
+        ];
+
+        // Set the title, default to a generic title if section not found
+        $this->template->title = $titles[$section] ?? 'OPNX3D | Právní informace';
         $this->template->page = $page;
     }
 

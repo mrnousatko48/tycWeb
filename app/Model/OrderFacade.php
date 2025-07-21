@@ -552,6 +552,70 @@ final class OrderFacade
         return $result;
     }
 
+    public function getAllShippingOptions(): \Nette\Database\Table\Selection
+    {
+        return $this->database->table('shipping_options')
+            ->order('vendor_id, name');
+    }
+
+    public function getVendorById(int $vendorId): ?ActiveRow
+    {
+        return $this->database->table('vendors')->get($vendorId);
+    }
+
+    public function getShippingOptionById(int $optionId): ?ActiveRow
+    {
+        return $this->database->table('shipping_options')->get($optionId);
+    }
+
+    public function addVendor(string $name): void
+    {
+        $this->database->table('vendors')->insert([
+            'name' => $name,
+        ]);
+    }
+
+    public function updateVendor(int $vendorId, string $name): void
+    {
+        $this->database->table('vendors')
+            ->where('id', $vendorId)
+            ->update(['name' => $name]);
+    }
+
+    public function deleteVendor(int $vendorId): void
+    {
+        $this->database->table('vendors')
+            ->where('id', $vendorId)
+            ->delete();
+    }
+
+    public function addShippingOption(int $vendorId, string $name, float $cost): void
+    {
+        $this->database->table('shipping_options')->insert([
+            'vendor_id' => $vendorId,
+            'name' => $name,
+            'cost' => $cost,
+        ]);
+    }
+
+    public function updateShippingOption(int $optionId, int $vendorId, string $name, float $cost): void
+    {
+        $this->database->table('shipping_options')
+            ->where('id', $optionId)
+            ->update([
+                'vendor_id' => $vendorId,
+                'name' => $name,
+                'cost' => $cost,
+            ]);
+    }
+
+    public function deleteShippingOption(int $optionId): void
+    {
+        $this->database->table('shipping_options')
+            ->where('id', $optionId)
+            ->delete();
+    }
+
     public function getShippingOptionsByVendor(int $vendorId): array
     {
         $options = $this->database->table('shipping_options')

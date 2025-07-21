@@ -4,10 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>
-        {ifset title}
             {block title}{/block}
-        {/ifset}
-        OPNX3D | obaly na telefony
     </title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
@@ -353,10 +350,10 @@ h2 {
         <div class="border-t border-[var(--color-secondary)] pt-4">
             <h3 class="text-lg font-semibold mb-3 text-center">Podmínky a ustanovení</h3>
             <div class="flex flex-col sm:flex-row justify-center gap-4 sm:gap-6 text-sm">
-                <a href="{$basePath}/obchodni-podminky" class="hover:text-[var(--color-accent)] transition">Obchodní podmínky</a>
-                <a href="{$basePath}/ochrana-osobnich-udaju" class="hover:text-[var(--color-accent)] transition">Ochrana osobních údajů</a>
-                <a href="{$basePath}/reklamacni-rad" class="hover:text-[var(--color-accent)] transition">Reklamační řád</a>
-                <a href="{$basePath}/odstoupeni-od-smlouvy" class="hover:text-[var(--color-accent)] transition">Odstoupení od smlouvy</a>
+                <a n:href="Home:legal, 'obchodni-podminky'" class="hover:text-[var(--color-accent)] transition">Obchodní podmínky</a>
+                <a n:href="Home:legal, 'ochrana-osobnich-udaju'" class="hover:text-[var(--color-accent)] transition">Ochrana osobních údajů</a>
+                <a n:href="Home:legal, 'reklamacni-rad'" class="hover:text-[var(--color-accent)] transition">Reklamační řád</a>
+                <a n:href="Home:legal, 'odstoupeni-od-smlouvy'" class="hover:text-[var(--color-accent)] transition">Odstoupení od smlouvy</a>
             </div>
         </div>
     </div>
