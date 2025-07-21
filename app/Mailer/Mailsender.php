@@ -99,6 +99,7 @@ class MailSender
 
         $shippingInfo = $this->orderFacade->getShippingInfo($order->shipping);
         $shippingCost = $shippingInfo ? $shippingInfo['cost'] : 0.0;
+        $vendorName = $this->orderFacade->getVendorNameByShippingOptionId($order->shipping);
 
         $paymentCost = $order->payment === 'DOBIRKA' ? 40.0 : 0.0;
         $total = $itemsSubtotal + $shippingCost + $paymentCost;
@@ -111,6 +112,7 @@ class MailSender
             'shippingCost' => $shippingCost,
             'paymentCost' => $paymentCost,
             'total' => $total,
+            'vendorName' => $vendorName,
         ];
 
         $latte->setLoader(new \Latte\Loaders\StringLoader());
@@ -302,6 +304,7 @@ class MailSender
 
         $shippingInfo = $this->orderFacade->getShippingInfo($order->shipping);
         $shippingCost = $shippingInfo ? $shippingInfo['cost'] : 0.0;
+        $vendorName = $this->orderFacade->getVendorNameByShippingOptionId($order->shipping);
 
         $paymentCost = $order->payment === 'DOBIRKA' ? 40.0 : 0.0;
         $total = $itemsSubtotal + $shippingCost + $paymentCost;
@@ -314,6 +317,7 @@ class MailSender
             'shippingCost' => $shippingCost,
             'paymentCost' => $paymentCost,
             'total' => $total,
+            'vendorName' => $vendorName,
         ];
 
         $latte->setLoader(new \Latte\Loaders\StringLoader());

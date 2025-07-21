@@ -603,4 +603,16 @@ final class OrderFacade
         $method = $this->database->table('vendor_payment_methods')->get($paymentMethodId);
         return $method ? ['name' => $method->name, 'price' => (float)$method->price] : null;
     }
+
+    public function getVendorNameByShippingOptionId(int $shippingOptionId): string
+    {
+        $shippingOption = $this->database->table('shipping_options')->get($shippingOptionId);
+        if (!$shippingOption || !$shippingOption->vendor_id) {
+            \Tracy\Debugger::barDump($shippingOptionId, 'Invalid or Missing Shipping Option ID');
+            return 'Není vybrán dopravce';
+        }
+
+        $vendor = $this->database->table('vendors')->get($shippingOption->vendor_id);
+        return $vendor ? $vendor->name : 'Není vybrán dopravce';
+    }
 }
