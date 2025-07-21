@@ -27,23 +27,35 @@ final class OrderFacade
     }
 
     /**
-     * Calculate additional cost based on shipping and payment
+     * Calculate additional cost based on shipping option and payment method IDs
      */
-    public function calculateAdditionalCost(string $shipping, string $payment): float
+    public function calculateAdditionalCost(int $shippingOptionId, int $paymentMethodId): float
     {
-        $shippingRow = $this->database->table('shipping')
-            ->where('code', $shipping)
-            ->fetch();
+        $shippingOption = $this->database->table('shipping_options')->get($shippingOptionId);
+        $paymentMethod = $this->database->table('vendor_payment_methods')->get($paymentMethodId);
 
-        $shippingCost = $shippingRow ? (float)$shippingRow->cost : 0.0;
-        $paymentCost = $payment === 'DOBIRKA' ? 40.0 : 0.0;
+        if (!$shippingOption) {
+            \Tracy\Debugger::barDump($shippingOptionId, 'Invalid Shipping Option ID');
+            throw new \InvalidArgumentException("Shipping option ID $shippingOptionId not found.");
+        }
+
+        $shippingCost = (float)$shippingOption->cost;
+        $paymentCost = $paymentMethod ? (float)$paymentMethod->price : 0.0;
+
+        \Tracy\Debugger::barDump([
+            'shippingOptionId' => $shippingOptionId,
+            'shippingCost' => $shippingCost,
+            'paymentMethodId' => $paymentMethodId,
+            'paymentCost' => $paymentCost,
+        ], 'Additional Cost Calculation');
+
         return $shippingCost + $paymentCost;
     }
 
     /**
      * Fetch orders with details, optionally filtered by status
      */
-    public function getOrdersWithDetails(?string $status = null): array
+   public function getOrdersWithDetails(?string $status = null): array
     {
         $query = $this->database->table('orders')
             ->order('created_at DESC');
@@ -67,8 +79,30 @@ final class OrderFacade
 
             $user = $order->user_id ? $this->database->table('users')->get($order->user_id) : null;
 
+            $shippingInfo = $this->getShippingInfo((int)$order->shipping);
+            $paymentInfo = $this->getPaymentInfo((int)$order->payment);
+
             $orderData[] = [
-                'order' => $order,
+                'order' => (object)[
+                    'id' => $order->id,
+                    'user_id' => $order->user_id,
+                    'firstname' => $order->firstname,
+                    'lastname' => $order->lastname,
+                    'email' => $order->email,
+                    'phone' => $order->phone,
+                    'address' => $order->address,
+                    'city' => $order->city,
+                    'psc' => $order->psc,
+                    'payment' => $paymentInfo ? $paymentInfo['name'] : 'Unknown',
+                    'payment_id' => $order->payment,
+                    'shipping' => $shippingInfo ? $shippingInfo['name'] : 'Unknown',
+                    'shipping_id' => $order->shipping,
+                    'delivery_point' => $order->delivery_point,
+                    'additional_cost' => $order->additional_cost,
+                    'state' => $order->state,
+                    'created_at' => $order->created_at,
+                    'variable_symbol' => $order->variable_symbol,
+                ],
                 'cases' => $this->processCases($orderCases, $cases),
                 'user' => $user,
             ];
@@ -98,8 +132,30 @@ final class OrderFacade
 
         $user = $order->user_id ? $this->database->table('users')->get($order->user_id) : null;
 
+        $shippingInfo = $this->getShippingInfo((int)$order->shipping);
+        $paymentInfo = $this->getPaymentInfo((int)$order->payment);
+
         return [
-            'order' => $order,
+            'order' => (object)[
+                'id' => $order->id,
+                'user_id' => $order->user_id,
+                'firstname' => $order->firstname,
+                'lastname' => $order->lastname,
+                'email' => $order->email,
+                'phone' => $order->phone,
+                'address' => $order->address,
+                'city' => $order->city,
+                'psc' => $order->psc,
+                'payment' => $paymentInfo ? $paymentInfo['name'] : 'Unknown',
+                'payment_id' => $order->payment,
+                'shipping' => $shippingInfo ? $shippingInfo['name'] : 'Unknown',
+                'shipping_id' => $order->shipping,
+                'delivery_point' => $order->delivery_point,
+                'additional_cost' => $order->additional_cost,
+                'state' => $order->state,
+                'created_at' => $order->created_at,
+                'variable_symbol' => $order->variable_symbol,
+            ],
             'cases' => $this->processCases($orderCases, $cases),
             'user' => $user,
         ];
@@ -120,11 +176,9 @@ final class OrderFacade
             $case = $caseMap[$orderCase->case_id] ?? null;
             if ($case) {
                 $features = json_decode($case->features, true) ?? [];
-                // Handle nested 'features' key
                 if (isset($features['features']) && is_string($features['features'])) {
                     $features = json_decode($features['features'], true) ?? $features;
                 }
-                // Clean feature keys
                 $cleanFeatures = [];
                 foreach ($features as $key => $value) {
                     $cleanKey = str_replace('_', ' ', $key);
@@ -194,16 +248,24 @@ final class OrderFacade
         }
     }
 
-    public function createOrder(int $userId, string $firstname, string $lastname, string $email, string $phone, string $address, string $city, string $psc, string $payment, array $caseQuantities, string $shipping, ?string $deliveryPoint = null): ActiveRow
+    public function createOrder(int $userId, string $firstname, string $lastname, string $email, string $phone, string $address, string $city, string $psc, int $paymentMethodId, array $caseQuantities, int $shippingOptionId, ?string $deliveryPoint = null): ActiveRow
     {
         if (empty($caseQuantities)) {
             throw new \InvalidArgumentException('Cart cannot be empty.');
         }
 
+        if (!$this->isValidShippingOption($shippingOptionId)) {
+            throw new \InvalidArgumentException('Invalid shipping option.');
+        }
+
+        if (!$this->isValidPaymentMethod($paymentMethodId)) {
+            throw new \InvalidArgumentException('Invalid payment method.');
+        }
+
         $this->database->beginTransaction();
 
         try {
-            $additionalCost = $this->calculateAdditionalCost($shipping, $payment);
+            $additionalCost = $this->calculateAdditionalCost($shippingOptionId, $paymentMethodId);
             $variableSymbol = $this->generateVariableSymbol();
             $order = $this->database->table('orders')->insert([
                 'user_id' => $userId,
@@ -214,8 +276,8 @@ final class OrderFacade
                 'address' => $address,
                 'city' => $city,
                 'psc' => $psc,
-                'payment' => $payment,
-                'shipping' => $shipping,
+                'payment' => $paymentMethodId,
+                'shipping' => $shippingOptionId,
                 'delivery_point' => $deliveryPoint,
                 'additional_cost' => $additionalCost,
                 'state' => 'OBJEDNANO',
@@ -248,16 +310,24 @@ final class OrderFacade
         }
     }
 
-    public function createGuestOrder(string $firstname, string $lastname, string $email, string $phone, string $address, string $city, string $psc, string $payment, array $caseQuantities, string $shipping, ?string $deliveryPoint = null): ActiveRow
+    public function createGuestOrder(string $firstname, string $lastname, string $email, string $phone, string $address, string $city, string $psc, int $paymentMethodId, array $caseQuantities, int $shippingOptionId, ?string $deliveryPoint = null): ActiveRow
     {
         if (empty($caseQuantities)) {
             throw new \InvalidArgumentException('Cart cannot be empty.');
         }
 
+        if (!$this->isValidShippingOption($shippingOptionId)) {
+            throw new \InvalidArgumentException('Invalid shipping option.');
+        }
+
+        if (!$this->isValidPaymentMethod($paymentMethodId)) {
+            throw new \InvalidArgumentException('Invalid payment method.');
+        }
+
         $this->database->beginTransaction();
 
         try {
-            $additionalCost = $this->calculateAdditionalCost($shipping, $payment);
+            $additionalCost = $this->calculateAdditionalCost($shippingOptionId, $paymentMethodId);
             $variableSymbol = $this->generateVariableSymbol();
             $order = $this->database->table('orders')->insert([
                 'user_id' => null,
@@ -268,8 +338,8 @@ final class OrderFacade
                 'address' => $address,
                 'city' => $city,
                 'psc' => $psc,
-                'payment' => $payment,
-                'shipping' => $shipping,
+                'payment' => $paymentMethodId,
+                'shipping' => $shippingOptionId,
                 'delivery_point' => $deliveryPoint,
                 'additional_cost' => $additionalCost,
                 'state' => 'OBJEDNANO',
@@ -294,13 +364,11 @@ final class OrderFacade
         }
     }
 
-    public function getShippingInfo(string $shippingCode): ?array
+        public function getShippingInfo(int $shippingOptionId): ?array
     {
-        $shippingRow = $this->database->table('shipping')
-            ->where('code', $shippingCode)
-            ->fetch();
-
-        return $shippingRow ? ['cost' => (float)$shippingRow->cost, 'name' => $shippingRow->name] : null;
+        $shippingOption = $this->database->table('shipping_options')->get($shippingOptionId);
+        \Tracy\Debugger::barDump($shippingOption ? (array)$shippingOption : null, "Shipping Option Data for ID: $shippingOptionId");
+        return $shippingOption ? ['cost' => (float)$shippingOption->cost, 'name' => $shippingOption->name] : null;
     }
 
     public function isValidShippingCode(string $shippingCode): bool
@@ -468,5 +536,71 @@ final class OrderFacade
         }
 
         return $result;
+    }
+
+    public function getVendors(): array
+    {
+        $vendors = $this->database->table('vendors')
+            ->order('name')
+            ->fetchAll();
+
+        $result = [];
+        foreach ($vendors as $vendor) {
+            $result[$vendor->id] = $vendor->name;
+        }
+
+        return $result;
+    }
+
+    public function getShippingOptionsByVendor(int $vendorId): array
+    {
+        $options = $this->database->table('shipping_options')
+            ->where('vendor_id', $vendorId)
+            ->order('name')
+            ->fetchAll();
+
+        $result = [];
+        foreach ($options as $option) {
+            $result[$option->id] = $option->name;
+        }
+
+        \Tracy\Debugger::barDump($result, "Shipping Options for Vendor ID: $vendorId");
+        return $result;
+    }
+
+    public function getPaymentMethodsByVendor(int $vendorId): array
+    {
+        $methods = $this->database->table('vendor_payment_methods')
+            ->where('vendor_id', $vendorId)
+            ->order('name')
+            ->fetchAll();
+
+        $result = [];
+        foreach ($methods as $method) {
+            $result[$method->id] = sprintf('%s (%s CZK)', $method->name, number_format($method->price, 2));
+        }
+
+        return $result;
+    }
+
+    public function isValidVendor(int $vendorId): bool
+    {
+        return $this->database->table('vendors')->get($vendorId) !== null;
+    }
+
+    public function isValidShippingOption(int $shippingOptionId): bool
+    {
+        return $this->database->table('shipping_options')->get($shippingOptionId) !== null;
+    }
+
+    public function isValidPaymentMethod(int $paymentMethodId): bool
+    {
+        return $this->database->table('vendor_payment_methods')->get($paymentMethodId) !== null;
+    }
+
+    public function getPaymentInfo(int $paymentMethodId): ?array
+    {
+        $method = $this->database->table('vendor_payment_methods')->get($paymentMethodId);
+        return $method ? ['name' => $method->name, 'price' => (float)$method->price] : null;
     }
 }

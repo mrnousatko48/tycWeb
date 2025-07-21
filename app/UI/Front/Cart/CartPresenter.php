@@ -123,8 +123,8 @@ final class CartPresenter extends BaseFrontPresenter
             $this->redirect('Cart:default');
         }
 
-        if (!isset($session->shipping) || !isset($session->payment)) {
-            $this->flashMessage('Prosím, vyberte způsob dopravy a platby.', 'warning');
+        if (!isset($session->vendor) || !isset($session->shippingOption) || !isset($session->paymentMethod)) {
+            $this->flashMessage('Prosím, vyberte dopravce, způsob dopravy a platby.', 'warning');
             $this->redirect('Cart:order');
         }
 
@@ -153,10 +153,14 @@ final class CartPresenter extends BaseFrontPresenter
             $itemsSubtotal += $case->total_price * $quantity;
         }
 
-        $shippingInfo = $this->orderFacade->getShippingInfo($session->shipping);
+        $shippingInfo = $this->orderFacade->getShippingInfo((int)$session->shippingOption);
+        \Tracy\Debugger::barDump($shippingInfo, 'Shipping Info');
         $shippingCost = $shippingInfo ? (float)$shippingInfo['cost'] : 0.0;
         $shippingName = $shippingInfo ? $shippingInfo['name'] : 'Není vybráno';
-        $paymentCost = $session->payment === 'DOBIRKA' ? 40.0 : 0.0;
+        $paymentInfo = $this->orderFacade->getPaymentInfo((int)$session->paymentMethod);
+        \Tracy\Debugger::barDump($paymentInfo, 'Payment Info');
+        $paymentCost = $paymentInfo ? (float)$paymentInfo['price'] : 0.0;
+        $paymentName = $paymentInfo ? $paymentInfo['name'] : 'Není vybráno';
         $totalCartValue = $itemsSubtotal + $shippingCost + $paymentCost;
 
         $this->template->cases = $decodedCases;
@@ -166,25 +170,112 @@ final class CartPresenter extends BaseFrontPresenter
         $this->template->paymentCost = $paymentCost;
         $this->template->totalCartValue = $totalCartValue;
         $this->template->shipping = $shippingName;
-        $this->template->payment = $session->payment === 'DOBIRKA' ? 'Dobírka' : 'Bankovní převod';
+        $this->template->payment = $paymentName;
         $this->template->delivery_point = $session->delivery_point ?? 'Není zadáno';
+    }
+
+    protected function createComponentOrderForm(): Form
+    {
+        $form = new Form;
+        $vendor = $form->addSelect('vendor', 'Dopravce:', $this->orderFacade->getVendors())
+            ->setPrompt('----')
+            ->setRequired('Zvolte dopravce');
+
+        $shippingOption = $form->addSelect('shippingOption', 'Způsob dopravy:')
+            ->setHtmlAttribute('data-depends', $vendor->getHtmlName())
+            ->setHtmlAttribute('data-url', $this->link('Endpoint:shippingOptions', '#'))
+            ->setRequired('Zvolte způsob dopravy');
+
+        $paymentMethod = $form->addSelect('paymentMethod', 'Způsob platby:')
+            ->setHtmlAttribute('data-depends', $vendor->getHtmlName())
+            ->setHtmlAttribute('data-url', $this->link('Endpoint:paymentMethods', '#'))
+            ->setPrompt('----')
+            ->setRequired('Zvolte způsob platby');
+
+        $deliveryPoint = $form->addText('delivery_point', 'Místo doručení (např. název Z-Boxu nebo pobočky):')
+            ->setHtmlAttribute('id', 'delivery-point-input')
+            ->setHtmlAttribute('placeholder', 'Zadejte název Z-Boxu nebo pobočky')
+            ->setRequired(false)
+            ->addCondition(Form::EQUAL, $vendor, ['1', '2']) // Zásilkovna or Balíkovna
+                ->toggle('delivery-point-field');
+
+        $form->onAnchor[] = function () use ($vendor, $shippingOption, $paymentMethod) {
+            $vendorId = $vendor->getValue() ? (int)$vendor->getValue() : null;
+            \Tracy\Debugger::barDump($vendorId, 'Selected Vendor ID');
+
+            // Populate shippingOption
+            $shippingItems = $vendorId
+                ? $this->orderFacade->getShippingOptionsByVendor($vendorId)
+                : [];
+            \Tracy\Debugger::barDump($shippingItems, 'Shipping Options on Anchor');
+            $shippingOption->setItems($shippingItems);
+
+            // Populate paymentMethod
+            $paymentItems = $vendorId
+                ? $this->orderFacade->getPaymentMethodsByVendor($vendorId)
+                : [];
+            \Tracy\Debugger::barDump($paymentItems, 'Payment Methods on Anchor');
+            $paymentMethod->setItems($paymentItems);
+        };
+
+        $form->addSubmit('submit', 'Pokračovat k osobním údajům')
+            ->setHtmlAttribute('class', 'btn px-8 py-4 rounded-2xl text-lg font-bold transition transform hover:scale-105')
+            ->setHtmlAttribute('style', 'background-color: var(--color-primary); color: var(--button-text);');
+
+        $form->onSuccess[] = [$this, 'orderFormSucceeded'];
+        return $form;
+    }
+
+    public function orderFormSucceeded(Form $form, \stdClass $values): void
+    {
+        $session = $this->getSession('order');
+        $quantities = $session->quantities ?? [];
+
+        if (empty($quantities)) {
+            $this->flashMessage('Košík je prázdný.', 'warning');
+            $this->redirect('Cart:default');
+            return;
+        }
+
+        // Validate vendor and shipping option
+        if (!$this->orderFacade->isValidVendor($values->vendor)) {
+            $this->flashMessage('Neplatný dopravce.', 'danger');
+            $this->redirect('this');
+            return;
+        }
+        if (!$this->orderFacade->isValidShippingOption($values->shippingOption)) {
+            $this->flashMessage('Neplatný způsob dopravy.', 'danger');
+            $this->redirect('this');
+            return;
+        }
+        if (!$this->orderFacade->isValidPaymentMethod($values->paymentMethod)) {
+            $this->flashMessage('Neplatný způsob platby.', 'danger');
+            $this->redirect('this');
+            return;
+        }
+
+        $session->vendor = $values->vendor;
+        $session->shippingOption = $values->shippingOption;
+        $session->paymentMethod = $values->paymentMethod;
+        $session->delivery_point = $values->delivery_point ?: null;
+
+        $additionalCost = $this->orderFacade->calculateAdditionalCost($values->shippingOption, $values->paymentMethod);
+        $session->additionalCost = $additionalCost;
+
+        $this->redirect('Cart:info');
     }
 
     protected function createComponentSendOrderForm(): Form
     {
         $form = new Form;
 
-        // Get the current user session object
         $user = $this->getUser()->isLoggedIn() ? $this->getUser()->getIdentity() : null;
-
-        // If user is logged in, fetch the latest user data using UserFacade
         if ($user) {
             $userData = $this->userFacade->getUserById($user->getId());
         } else {
             $userData = null;
         }
 
-        // Set up form fields with default values from user session or database
         $form->addText('firstname', 'Jméno:')
             ->setRequired('Zadejte své jméno')
             ->setHtmlAttribute('id', 'firstname-field')
@@ -225,17 +316,15 @@ final class CartPresenter extends BaseFrontPresenter
             ->setHtmlAttribute('placeholder', 'Zadejte své PSČ')
             ->setDefaultValue($userData && isset($userData->psc) ? $userData->psc : '');
 
-        $form->addHidden('order_token', bin2hex(random_bytes(16))); // Unique token to prevent duplicate submissions
+        $form->addHidden('order_token', bin2hex(random_bytes(16)));
 
-        $form->addProtection('Formulář expiroval, prosím odešlete znovu.'); // CSRF protection
+        $form->addProtection('Formulář expiroval, prosím odešlete znovu.');
 
         $form->addSubmit('submit', 'Dokončit objednávku')
             ->setHtmlAttribute('class', 'btn px-6 py-3 rounded-xl text-base font-semibold transition transform hover:scale-105')
             ->setHtmlAttribute('style', 'background-color: var(--color-primary); color: var(--button-text);');
 
-        // If the form is successfully submitted, handle the form data
         $form->onSuccess[] = [$this, 'sendOrderFormSucceeded'];
-
         return $form;
     }
 
@@ -250,13 +339,12 @@ final class CartPresenter extends BaseFrontPresenter
             return;
         }
 
-        if (!isset($session->shipping) || !isset($session->payment)) {
-            $this->flashMessage('Prosím, vyberte způsob dopravy a platby.', 'warning');
+        if (!isset($session->vendor) || !isset($session->shippingOption) || !isset($session->paymentMethod)) {
+            $this->flashMessage('Prosím, vyberte dopravce, způsob dopravy a platby.', 'warning');
             $this->redirect('Cart:order');
             return;
         }
 
-        // Check for duplicate submission using order_token
         $orderToken = $values->order_token;
         $sessionToken = $session->order_token ?? null;
         if ($sessionToken && $sessionToken === $orderToken) {
@@ -267,8 +355,6 @@ final class CartPresenter extends BaseFrontPresenter
         $session->order_token = $orderToken;
 
         $userId = $this->getUser()->isLoggedIn() ? (int)$this->getUser()->getId() : null;
-        $payment = $session->payment;
-        $shipping = $session->shipping;
 
         try {
             if ($userId) {
@@ -281,9 +367,9 @@ final class CartPresenter extends BaseFrontPresenter
                     $values->address,
                     $values->city,
                     $values->psc,
-                    $payment,
+                    $session->paymentMethod,
                     $quantities,
-                    $shipping,
+                    $session->shippingOption,
                     $session->delivery_point
                 );
             } else {
@@ -295,9 +381,9 @@ final class CartPresenter extends BaseFrontPresenter
                     $values->address,
                     $values->city,
                     $values->psc,
-                    $payment,
+                    $session->paymentMethod,
                     $quantities,
-                    $shipping,
+                    $session->shippingOption,
                     $session->delivery_point
                 );
             }
@@ -307,8 +393,7 @@ final class CartPresenter extends BaseFrontPresenter
             $this->mailSender->sendInvoiceEmail($values->email, $recipientName, $order, $items);
             $this->mailSender->sendNewOrderEmail($recipientName, $order, $items);
 
-            // Clear session to prevent resubmission
-            unset($session->quantities, $session->shipping, $session->payment, $session->additionalCost, $session->delivery_point, $session->order_token);
+            unset($session->quantities, $session->vendor, $session->shippingOption, $session->paymentMethod, $session->additionalCost, $session->delivery_point, $session->order_token);
             $this->flashMessage('Objednávka byla úspěšně dokončena a faktura odeslána.', 'success');
             $this->redirect('Home:default');
         } catch (\InvalidArgumentException $e) {
@@ -363,65 +448,5 @@ final class CartPresenter extends BaseFrontPresenter
 
         $this->flashMessage('Kryt byl přidán do košíku.', 'success');
         $this->redirect('this');
-    }
-
-    protected function createComponentOrderForm(): Form
-    {
-        $form = new Form;
-
-        $form->addSelect('shipping', 'Způsob dopravy:', $this->orderFacade->getShippingOptions())
-            ->setRequired('Zvolte způsob dopravy')
-            ->setHtmlAttribute('id', 'shipping-field');
-
-        $form->addText('delivery_point', 'Místo doručení (např. název Z-Boxu nebo pobočky):')
-            ->setHtmlAttribute('id', 'delivery-point-input')
-            ->setHtmlAttribute('placeholder', 'Zadejte název Z-Boxu nebo pobočky')
-            ->setRequired(false)
-            ->addCondition(Form::EQUAL, $form['shipping'], 'ZASILKOVNA')
-                ->toggle('delivery-point-field')
-            ->addCondition(Form::EQUAL, $form['shipping'], 'BALIKOVNA')
-                ->toggle('delivery-point-field');
-
-        $form->addSelect('payment', 'Způsob platby:', [
-            'PREVOD' => 'Bankovní převod',
-            'DOBIRKA' => 'Dobírka (+40 Kč)',
-        ])
-            ->setRequired('Zvolte způsob platby')
-            ->setHtmlAttribute('id', 'payment-field');
-
-        $form->addSubmit('submit', 'Pokračovat k osobním údajům')
-            ->setHtmlAttribute('class', 'btn px-8 py-4 rounded-2xl text-lg font-bold transition transform hover:scale-105')
-            ->setHtmlAttribute('style', 'background-color: var(--color-primary); color: var(--button-text);');
-
-        $form->onSuccess[] = [$this, 'orderFormSucceeded'];
-        return $form;
-    }
-
-    public function orderFormSucceeded(Form $form, \stdClass $values): void
-    {
-        $session = $this->getSession('order');
-        $quantities = $session->quantities ?? [];
-
-        if (empty($quantities)) {
-            $this->flashMessage('Košík je prázdný.', 'warning');
-            $this->redirect('Cart:default');
-            return;
-        }
-
-        // Validate shipping code via OrderFacade
-        if (!$this->orderFacade->isValidShippingCode($values->shipping)) {
-            $this->flashMessage('Neplatný způsob dopravy.', 'danger');
-            $this->redirect('this');
-            return;
-        }
-
-        $session->shipping = $values->shipping;
-        $session->payment = $values->payment;
-        $session->delivery_point = $values->delivery_point ?: null;
-
-        $additionalCost = $this->orderFacade->calculateAdditionalCost($values->shipping, $values->payment);
-        $session->additionalCost = $additionalCost;
-
-        $this->redirect('Cart:info');
     }
 }

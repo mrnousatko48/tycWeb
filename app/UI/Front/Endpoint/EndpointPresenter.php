@@ -3,11 +3,13 @@ namespace App\UI\Front\Endpoint;
 
 use Nette;
 use App\Model\modelFacade;
+use App\Model\OrderFacade;
 
 class EndpointPresenter extends Nette\Application\UI\Presenter
 {
     public function __construct(
         private ModelFacade $modelFacade,
+        private OrderFacade $orderFacade
     ) {}
 
     public function actionManufacturers($typeId = null): void
@@ -57,5 +59,26 @@ public function actionModelImages($modelId): void
     }
     $this->sendJson($images);
     $this->terminate();
+}
+
+public function actionShippingOptions($vendor): void
+{
+    if (!$vendor || !is_numeric($vendor)) {
+        $this->sendJson([]); // Return empty array for invalid vendor
+        return;
+    }
+    $shippingOptions = $this->orderFacade->getShippingOptionsByVendor((int)$vendor);
+    \Tracy\Debugger::barDump($shippingOptions, "Shipping Options JSON for Vendor: $vendor"); // Debug output
+    $this->sendJson($shippingOptions);
+}
+public function actionPaymentMethods($vendor): void
+{
+    if (!$vendor || !is_numeric($vendor)) {
+        $this->sendJson([]);
+        return;
+    }
+    $paymentMethods = $this->orderFacade->getPaymentMethodsByVendor((int)$vendor);
+    \Tracy\Debugger::barDump($paymentMethods, 'Payment Methods JSON for Vendor: ' . $vendor);
+    $this->sendJson($paymentMethods);
 }
 }

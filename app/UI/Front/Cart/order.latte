@@ -222,24 +222,28 @@
 
 <div class="bg-[var(--color-background)] p-6 rounded-2xl shadow-lg form-container">
     <a href="{link Cart:default}" class="text-[var(--color-primary)] hover:underline mb-3 inline-block text-sm">Zpět do košíku</a>
-    <h2 class="text-xl font-bold text-[var(--color-text)] mb-4">Způsob dopravy a platby</h2>
+    <h2 class="text-xl font-bold text-[var(--color-text)] mb-4">Dopravce, doprava a platba</h2>
     <div class="notification">
         <p class="font-semibold">Upozornění:</p>
-        <p>Vážený zákazníku, jsme nový e-shop a na integraci Balíkovny a Zásilkovny do našeho systému stále pracujeme. Zásilky momentálně odesíláme jako fyzická osoba. Prosím, vyberte způsob dopravy a zadejte název Z-Boxu nebo pobočky, kam chcete balíček doručit. Děkujeme za pochopení.</p>
+        <p>Vážený zákazníku, jsme nový e-shop a na integraci Balíkovny a Zásilkovny do našeho systému stále pracujeme. Zásilky momentálně odesíláme jako fyzická osoba. Prosím, vyberte dopravce, způsob dopravy, platbu a zadejte název Z-Boxu nebo pobočky, kam chcete balíček doručit. Děkujeme za pochopení.</p>
     </div>
 
     <form n:name="orderForm" class="space-y-3">
         <div class="form-field">
-            <select n:name="shipping" id="shipping-field"></select>
-            <label for="shipping-field">Způsob dopravy</label>
+            <select n:name="vendor" id="vendor-field"></select>
+            <label for="vendor-field">Dopravce</label>
+        </div>
+        <div class="form-field">
+            <select n:name="shippingOption" id="shipping-option-field"></select>
+            <label for="shipping-option-field">Způsob dopravy</label>
+        </div>
+        <div class="form-field">
+            <select n:name="paymentMethod" id="payment-method-field"></select>
+            <label for="payment-method-field">Způsob platby</label>
         </div>
         <div class="form-field" id="delivery-point-field">
             <input n:name="delivery_point" id="delivery-point-input" placeholder=" ">
             <label for="delivery-point-input">Místo doručení (např. název Z-Boxu nebo pobočky)</label>
-        </div>
-        <div class="form-field">
-            <select n:name="payment" id="payment-field"></select>
-            <label for="payment-field">Způsob platby</label>
         </div>
         <div class="form-field">
             <input n:name="submit" type="submit">
@@ -255,8 +259,8 @@
             <div class="space-y-3 mt-3">
                 {foreach $cases as $case}
                     <div class="bg-[var(--color-secondary)] text-[var(--color-text)] shadow rounded-xl p-3">
-                        <div class="grid grid-cols-1 md:grid-cols-4 gap-3 ">
-                            <div >
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                            <div>
                                 <h3 class="text-base font-semibold">Výrobce</h3>
                                 <p class="text-sm">{$case->manufacturer}</p>
                             </div>
@@ -283,7 +287,7 @@
     </div>
 </div>
 
-<script>
+<script n:syntax=off>
 function toggleCartSummary() {
     const content = document.getElementById('cart-summary');
     const header = document.querySelector('.collapsible-header span:last-child');
@@ -291,20 +295,56 @@ function toggleCartSummary() {
     header.textContent = content.classList.contains('open') ? '▲' : '▼';
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-    const shippingSelect = document.querySelector('select[name="shipping"]');
-    const deliveryPointField = document.getElementById('delivery-point-field');
-    
-    function toggleDeliveryPoint() {
-        if (['ZASILKOVNA', 'BALIKOVNA', 'CESKA_POSTA'].includes(shippingSelect.value)) {
-    deliveryPointField.classList.add('visible');
-} else {
-    deliveryPointField.classList.remove('visible');
+document.querySelectorAll('select[data-depends]').forEach((childSelect) => {
+    let parentSelect = childSelect.form[childSelect.dataset.depends];
+    let url = childSelect.dataset.url;
+
+    parentSelect.addEventListener('change', () => {
+        if (url) {
+            console.log('Fetching URL:', url.replace(encodeURIComponent('#'), encodeURIComponent(parentSelect.value)));
+            fetch(url.replace(encodeURIComponent('#'), encodeURIComponent(parentSelect.value)))
+                .then((response) => {
+                    if (!response.ok) throw new Error(`Fetch error: ${response.status}`);
+                    return response.json();
+                })
+                .then((data) => {
+                    console.log('Received data:', data);
+                    updateSelectbox(childSelect, data);
+                })
+                .catch((error) => console.error('Fetch failed:', error));
+        }
+    });
+});
+
+function updateSelectbox(select, items) {
+    console.log('Updating select with items:', items);
+    select.innerHTML = '';
+    let prompt = document.createElement('option');
+    prompt.value = '';
+    prompt.innerText = '----';
+    select.appendChild(prompt);
+
+    for (let id in items) {
+        let el = document.createElement('option');
+        el.setAttribute('value', id);
+        el.innerText = items[id];
+        select.appendChild(el);
+    }
 }
 
+document.addEventListener('DOMContentLoaded', function() {
+    const vendorSelect = document.querySelector('select[name="vendor"]');
+    const deliveryPointField = document.getElementById('delivery-point-field');
+
+    function toggleDeliveryPoint() {
+        if (['1', '2'].includes(vendorSelect.value)) { // Zásilkovna or Balíkovna
+            deliveryPointField.classList.add('visible');
+        } else {
+            deliveryPointField.classList.remove('visible');
+        }
     }
-    
-    shippingSelect.addEventListener('change', toggleDeliveryPoint);
+
+    vendorSelect.addEventListener('change', toggleDeliveryPoint);
     toggleDeliveryPoint();
 });
 </script>
