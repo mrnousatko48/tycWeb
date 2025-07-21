@@ -194,10 +194,9 @@ final class CartPresenter extends BaseFrontPresenter
 
         $deliveryPoint = $form->addText('delivery_point', 'Místo doručení (např. název Z-Boxu nebo pobočky):')
             ->setHtmlAttribute('id', 'delivery-point-input')
-            ->setHtmlAttribute('placeholder', 'Zadejte název Z-Boxu nebo pobočky')
-            ->setRequired(false)
-            ->addCondition(Form::EQUAL, $vendor, ['1', '2']) // Zásilkovna or Balíkovna
-                ->toggle('delivery-point-field');
+            ->setHtmlAttribute('placeholder', 'Zadejte název Z-Boxu nebo pobočky, nebo adresa')
+            ->setRequired();
+            
 
         $form->onAnchor[] = function () use ($vendor, $shippingOption, $paymentMethod) {
             $vendorId = $vendor->getValue() ? (int)$vendor->getValue() : null;

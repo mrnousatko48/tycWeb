@@ -561,7 +561,7 @@ final class OrderFacade
 
         $result = [];
         foreach ($options as $option) {
-            $result[$option->id] = $option->name;
+            $result[$option->id] = sprintf('%s (%s Kč)', $option->name, number_format($option->cost, 2, ',', ' '));
         }
 
         \Tracy\Debugger::barDump($result, "Shipping Options for Vendor ID: $vendorId");
