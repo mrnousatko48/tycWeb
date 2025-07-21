@@ -371,23 +371,6 @@ final class OrderFacade
         return $shippingOption ? ['cost' => (float)$shippingOption->cost, 'name' => $shippingOption->name] : null;
     }
 
-    public function isValidShippingCode(string $shippingCode): bool
-    {
-        return $this->database->table('shipping')
-            ->where('code', $shippingCode)
-            ->count('*') > 0;
-    }
-
-    public function getShippingOptions(): array
-    {
-        $options = [];
-        $shippingRows = $this->database->table('shipping')->fetchAll();
-        foreach ($shippingRows as $row) {
-            $options[$row->code] = sprintf('%s (%s Kč)', $row->name, number_format($row->cost, 2, ',', ' '));
-        }
-        return $options;
-    }
-
     public function getOrdersByUserId(int $userId): array
     {
         $query = $this->database->table('orders')

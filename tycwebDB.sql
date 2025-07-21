@@ -46,7 +46,8 @@ INSERT INTO `cases` (`id`, `manufacturer`, `model`, `color`, `total_price`, `fea
 (56,	'Apple',	'iPhone 13',	'Bílá',	634.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\"}\"}',	'OBJEDNANO',	9,	'2025-07-21 16:24:03'),
 (57,	'Apple',	'iPhone 13',	'Bílá',	634.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\"}\"}',	'OBJEDNANO',	9,	'2025-07-21 16:44:30'),
 (58,	'Apple',	'iPhone 13',	'Bílá',	589.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\"}\"}',	'OBJEDNANO',	9,	'2025-07-21 16:46:32'),
-(59,	'Apple',	'iPhone 13',	'Bílá',	574.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ne\\\"}\"}',	'KOSIK',	9,	'2025-07-21 16:47:27');
+(59,	'Apple',	'iPhone 13',	'Bílá',	574.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ne\\\"}\"}',	'KOSIK',	9,	'2025-07-21 16:47:27'),
+(60,	'Apple',	'iPhone 13',	'Bílá',	634.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\"}\"}',	'KOSIK',	9,	'2025-07-21 19:13:31');
 
 DROP TABLE IF EXISTS `colors`;
 CREATE TABLE `colors` (
@@ -389,23 +390,6 @@ INSERT INTO `orders` (`id`, `user_id`, `firstname`, `lastname`, `email`, `phone`
 (57,	9,	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'111222333',	'shrekova bazina 13',	'Praha',	'53803',	1,	1,	'sokolská 799 hermanuv mestec',	0.00,	'OBJEDNANO',	'2025-07-21 16:45:15',	'202507219047'),
 (58,	9,	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'111222333',	'shrekova bazina 13',	'Praha',	'53803',	1,	1,	'sokolská 799 hermanuv mestec',	89.00,	'OBJEDNANO',	'2025-07-21 16:46:54',	'202507216869');
 
-DROP TABLE IF EXISTS `shipping`;
-CREATE TABLE `shipping` (
-  `id` int NOT NULL AUTO_INCREMENT,
-  `code` varchar(50) NOT NULL,
-  `name` varchar(100) NOT NULL,
-  `cost` decimal(10,2) NOT NULL,
-  `description` varchar(255) DEFAULT NULL,
-  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
-  PRIMARY KEY (`id`),
-  UNIQUE KEY `code` (`code`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
-
-INSERT INTO `shipping` (`id`, `code`, `name`, `cost`, `description`, `created_at`) VALUES
-(1,	'CESKA_POSTA',	'Česká pošta',	100.00,	'Doručení prostřednictvím České pošty',	'2025-07-10 21:06:00'),
-(2,	'ZASILKOVNA',	'Zásilkovna',	70.00,	'Doručení na výdejní místo Zásilkovny',	'2025-07-10 21:06:00'),
-(3,	'BALIKOVNA',	'Balíkovna',	65.00,	'Doručení na výdejní místo Balíkovny',	'2025-07-10 21:06:00');
-
 DROP TABLE IF EXISTS `shipping_options`;
 CREATE TABLE `shipping_options` (
   `id` int NOT NULL AUTO_INCREMENT,
@@ -421,7 +405,8 @@ INSERT INTO `shipping_options` (`id`, `vendor_id`, `name`, `cost`) VALUES
 (1,	1,	'Na výdejní místo',	89.00),
 (2,	1,	'Domů kurýrem',	100.00),
 (3,	2,	'Na poštu',	79.00),
-(4,	2,	'Balík do ruky',	120.00);
+(4,	2,	'Balík do ruky',	120.00),
+(5,	2,	'do zahraničí',	10000.00);
 
 DROP TABLE IF EXISTS `users`;
 CREATE TABLE `users` (
@@ -450,7 +435,7 @@ INSERT INTO `users` (`id`, `username`, `firstname`, `lastname`, `email`, `passwo
 (6,	'dostals',	'',	'',	'dostals64@gmail.com',	'$2y$10$RJhN6zE1eZqpGLSBTyFI/OApvmXrcaobEVeOjzfvYmLePRuqrMBRG',	'ADMIN',	NULL,	NULL,	NULL,	'2025-06-24 19:27:29',	241712,	'2025-06-30 21:04:00',	NULL),
 (7,	'bakub',	'Kuba',	'Syč',	'bakua@mail.com',	'$2y$10$ZVF9RfycPsVhpryvQf50zePtoXVFCl4.6bUzZKxiSIdpdCguW4Eri',	'UZIVATEL',	NULL,	NULL,	NULL,	'2025-06-24 19:29:28',	NULL,	NULL,	NULL),
 (8,	'igor',	'igor',	'rucicka',	'igor@mail.com',	'$2y$10$bEiEpKsd.RXoA7yvEk9QdOZ9LC9zdlX7MpgYnGDJ7S52QVI5U5Flm',	'UZIVATEL',	NULL,	NULL,	NULL,	'2025-06-29 14:10:39',	NULL,	NULL,	NULL),
-(9,	'martin',	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'$2y$10$IL5Fv2uV.ltlOl7k61KAh.BzQnm4tCrgGaCBuPO/qlm36uoHDyItC',	'ADMIN',	'shrekova bazina 13',	'Praha',	'53803',	'2025-07-03 16:48:05',	NULL,	NULL,	'111222333'),
+(9,	'martin',	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'$2y$10$GWyEYwqs8lnAKXVZaQNLpuYPZXCFmFsTNPNe2YWkhogfgg5NNBLUK',	'ADMIN',	'shrekova bazina 13',	'Praha',	'53803',	'2025-07-03 16:48:05',	NULL,	NULL,	'111222333'),
 (10,	'testdb',	'Sima',	'Jegej',	'xmanmartinburda@seznam.cz',	'$2y$10$D8K7ICCAGIu6oJn8qihiWOpyJHj/gK4a4Xnj.hP/2UFTgLHTXXoD.',	'UZIVATEL',	NULL,	NULL,	NULL,	'2025-07-20 15:23:34',	NULL,	NULL,	NULL);
 
 DROP TABLE IF EXISTS `vendor_payment_methods`;
