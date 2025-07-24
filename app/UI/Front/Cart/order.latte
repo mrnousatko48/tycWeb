@@ -172,9 +172,6 @@
     box-shadow: 0 0 0 3px rgba(229, 62, 62, 0.2);
 }
 #delivery-point-field {
-    display: none;
-}
-#delivery-point-field.visible {
     display: block;
 }
 .form-field .btn {
@@ -332,21 +329,5 @@ function updateSelectbox(select, items) {
         select.appendChild(el);
     }
 }
-
-document.addEventListener('DOMContentLoaded', function() {
-    const vendorSelect = document.querySelector('select[name="vendor"]');
-    const deliveryPointField = document.getElementById('delivery-point-field');
-
-    function toggleDeliveryPoint() {
-        if (['1', '2'].includes(vendorSelect.value)) { // Zásilkovna or Balíkovna
-            deliveryPointField.classList.add('visible');
-        } else {
-            deliveryPointField.classList.remove('visible');
-        }
-    }
-
-    vendorSelect.addEventListener('change', toggleDeliveryPoint);
-    toggleDeliveryPoint();
-});
 </script>
 {/block}

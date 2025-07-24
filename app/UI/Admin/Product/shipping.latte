@@ -1,42 +1,41 @@
 {block content}
 <div class="container mt-4">
-    <h2 class="mb-4">Správa dopravců a možností dopravy</h2>
+    <h2 class="mb-4">Správa dopravy a plateb</h2>
 
-    {* Flash messages *}
-    <div n:snippet="flashes" class="mb-4">
-        {foreach $flashes as $flash}
-            <div class="alert alert-{$flash->type} alert-dismissible fade show" role="alert">
-                {$flash->message}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Zavřít"></button>
-            </div>
-        {/foreach}
-    </div>
-
-    <div class="row g-4 mb-5">
-        <div class="col-md-6">
-            <div class="card shadow-sm">
-                <div class="card-header fw-bold">Přidat dopravce</div>
+    <div class="row mb-5">
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-header">Přidat dopravce</div>
                 <div class="card-body" n:snippet="vendorForm">
                     {control vendorForm}
                 </div>
             </div>
         </div>
 
-        <div class="col-md-6">
-            <div class="card shadow-sm">
-                <div class="card-header fw-bold">Přidat možnost dopravy</div>
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-header">Způsob dopravy</div>
                 <div class="card-body" n:snippet="shippingOptionForm">
                     {control shippingOptionForm}
                 </div>
             </div>
         </div>
+
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-header">Přidat platební metodu</div>
+                <div class="card-body" n:snippet="paymentMethodForm">
+                    {control paymentMethodForm}
+                </div>
+            </div>
+        </div>
     </div>
 
-    <div class="card shadow-sm mb-5">
-        <div class="card-header fw-bold">Seznam dopravců</div>
-        <div class="card-body table-responsive" n:snippet="vendorsTable">
-            <table class="table table-striped table-hover align-middle">
-                <thead class="table-light">
+    <div class="card mb-5">
+        <div class="card-header">Dopravci</div>
+        <div class="card-body" n:snippet="vendorsTable">
+            <table class="table table-striped">
+                <thead>
                     <tr>
                         <th>Název</th>
                         <th>Akce</th>
@@ -47,8 +46,8 @@
                         <tr>
                             <td>{$name}</td>
                             <td>
-                                <a href="{link editVendor! $id}" class="btn btn-sm btn-primary ajax edit-vendor" data-bs-toggle="modal" data-bs-target="#editVendorModal">✏️ Upravit</a>
-                                <a href="{link deleteVendor! $id}" class="ajax btn btn-danger btn-sm" onclick="return confirm('Opravdu chcete smazat dopravce {$name}?')">🗑 Smazat</a>
+                                <a href="{link editVendor! $id}" class="btn btn-sm btn-primary ajax" data-bs-toggle="modal" data-bs-target="#editVendorModal">Upravit</a>
+                                <a href="{link deleteVendor! $id}" class="btn btn-sm btn-danger ajax" onclick="return confirm('Opravdu smazat dopravce {$name}?')">Smazat</a>
                             </td>
                         </tr>
                     {/foreach}
@@ -57,11 +56,11 @@
         </div>
     </div>
 
-    <div class="card shadow-sm">
-        <div class="card-header fw-bold">Seznam možností dopravy</div>
-        <div class="card-body table-responsive" n:snippet="shippingOptionsTable">
-            <table class="table table-striped table-hover align-middle">
-                <thead class="table-light">
+    <div class="card mb-5">
+        <div class="card-header">Možnosti dopravy</div>
+        <div class="card-body" n:snippet="shippingOptionsTable">
+            <table class="table table-striped">
+                <thead>
                     <tr>
                         <th>Dopravce</th>
                         <th>Název</th>
@@ -76,8 +75,8 @@
                             <td>{$option->name}</td>
                             <td>{$option->cost|number:2,',',' '} CZK</td>
                             <td>
-                                <a href="{link editShippingOption! $option->id}" class="btn btn-sm btn-primary ajax edit-shipping-option" data-bs-toggle="modal" data-bs-target="#editShippingOptionModal">✏️ Upravit</a>
-                                <a href="{link deleteShippingOption! $option->id}" class="ajax btn btn-danger btn-sm" onclick="return confirm('Opravdu chcete smazat možnost dopravy {$option->name}?')">🗑 Smazat</a>
+                                <a href="{link editShippingOption! $option->id}" class="btn btn-sm btn-primary ajax" data-bs-toggle="modal" data-bs-target="#editShippingOptionModal">Upravit</a>
+                                <a href="{link deleteShippingOption! $option->id}" class="btn btn-sm btn-danger ajax" onclick="return confirm('Opravdu smazat možnost dopravy {$option->name}?')">Smazat</a>
                             </td>
                         </tr>
                     {/foreach}
@@ -86,7 +85,46 @@
         </div>
     </div>
 
-    <!-- Modal for editing vendors -->
+    <div class="card">
+        <div class="card-header">Platební metody</div>
+        <div class="card-body" n:snippet="paymentMethodsTable">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Dopravce</th>
+                        <th>Kód</th>
+                        <th>Název</th>
+                        <th>Cena (CZK)</th>
+                        <th>Možnosti dopravy</th>
+                        <th>Akce</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {foreach $paymentMethods as $method}
+                        <tr>
+                            <td>{$vendors[$method->vendor_id]}</td>
+                            <td>{$method->code}</td>
+                            <td>{$method->name}</td>
+                            <td>{$method->price|number:2,',',' '} CZK</td>
+                            <td>
+                                {var $linkedOptions = $method->related('shipping_payment_methods')->fetchPairs('shipping_option_id', 'shipping_option_id')}
+                                {foreach $shippingOptions as $option}
+                                    {if isset($linkedOptions[$option->id])}
+                                        {$option->name}{sep}, {/sep}
+                                    {/if}
+                                {/foreach}
+                            </td>
+                            <td>
+                                <a href="{link editPaymentMethod! $method->id}" class="btn btn-sm btn-primary ajax" data-bs-toggle="modal" data-bs-target="#editPaymentMethodModal">Upravit</a>
+                                <a href="{link deletePaymentMethod! $method->id}" class="btn btn-sm btn-danger ajax" onclick="return confirm('Opravdu smazat platební metodu {$method->name}?')">Smazat</a>
+                            </td>
+                        </tr>
+                    {/foreach}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
     <div class="modal fade" id="editVendorModal" tabindex="-1" aria-labelledby="editVendorModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -101,7 +139,6 @@
         </div>
     </div>
 
-    <!-- Modal for editing shipping options -->
     <div class="modal fade" id="editShippingOptionModal" tabindex="-1" aria-labelledby="editShippingOptionModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
@@ -116,8 +153,18 @@
         </div>
     </div>
 
-    <div class="mt-4 text-center">
-        <a href="{link default}" class="btn btn-secondary">Zpět na produkty</a>
+    <div class="modal fade" id="editPaymentMethodModal" tabindex="-1" aria-labelledby="editPaymentMethodModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editPaymentMethodModalLabel">Upravit platební metodu</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zavřít"></button>
+                </div>
+                <div class="modal-body" n:snippet="paymentMethodEditForm">
+                    {control paymentMethodEditForm}
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -127,14 +174,10 @@
 
 <script n:syntax=off>
 document.addEventListener('DOMContentLoaded', () => {
-    // Initialize Select2 for shipping option form
-    $('#frm-shippingOptionForm-vendor_id').select2({
-        placeholder: 'Vyberte dopravce',
-        allowClear: true,
+    $('#frm-shippingOptionForm-vendor_id, #frm-paymentMethodForm-vendor_id, #frm-paymentMethodForm-shipping_option_ids').select2({
         width: '100%'
     });
 
-    // Handle form submissions and AJAX links
     document.body.addEventListener('click', async e => {
         let el = e.target.closest('button[type="submit"], a.ajax');
         if (!el) return;
@@ -145,7 +188,6 @@ document.addEventListener('DOMContentLoaded', () => {
             const form = el.closest('form');
             if (!form) return;
 
-            el.dataset.originalText = el.innerText;
             el.disabled = true;
             el.innerText = 'Ukládám...';
 
@@ -159,17 +201,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 for (let snip in json.snippets) {
                     document.getElementById(snip).innerHTML = json.snippets[snip];
                 }
-                if (form.closest('#editVendorModal') || form.closest('#editShippingOptionModal')) {
-                    bootstrap.Modal.getInstance(document.getElementById(form.closest('#editVendorModal') ? 'editVendorModal' : 'editShippingOptionModal')).hide();
+                if (form.closest('.modal')) {
+                    bootstrap.Modal.getInstance(form.closest('.modal')).hide();
                 }
             } catch (error) {
                 console.error('Chyba:', error);
             } finally {
                 el.disabled = false;
-                el.innerText = el.dataset.originalText || 'Uložit';
+                el.innerText = 'Uložit';
             }
-        } else if (el.tagName === 'A' && el.classList.contains('ajax')) {
-            if (el.classList.contains('btn-danger') && !confirm('Opravdu chcete tuto položku smazat?')) {
+        } else if (el.classList.contains('ajax')) {
+            if (el.classList.contains('btn-danger') && !confirm('Opravdu smazat?')) {
                 return;
             }
 
@@ -188,16 +230,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Initialize Select2 for all selects in both modals
-    $('#editVendorModal, #editShippingOptionModal').on('shown.bs.modal', function () {
+    $('.modal').on('shown.bs.modal', function () {
         $(this).find('select').select2({
             dropdownParent: $(this),
             width: '100%'
         });
     });
 
-    // Destroy Select2 when modals are hidden to prevent memory leaks
-    $('#editVendorModal, #editShippingOptionModal').on('hidden.bs.modal', function () {
+    $('.modal').on('hidden.bs.modal', function () {
         $(this).find('select').select2('destroy');
     });
 });

@@ -305,6 +305,13 @@ h2 {
         </nav>
     </div>
 </header>
+{if $flashes}
+    <div class="flash-messages mt-4">
+        {foreach $flashes as $flash}
+            <div class="p-4 rounded-lg text-white {$flash->type === 'success' ? 'bg-green-500' : 'bg-red-500'}">{$flash->message}</div>
+        {/foreach}
+    </div>
+{/if}
 <main class="flex-1 pt-0">
     {include content}
 </main>

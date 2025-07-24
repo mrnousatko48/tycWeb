@@ -127,12 +127,12 @@
         position: fixed;
         top: 50%;
         transform: translateY(-50%);
-        font-size: 5.5rem; /* Further increased font size for larger arrows */
+        font-size: 5.5rem;
         color: white;
         background: rgba(0, 0, 0, 0.5);
         border-radius: 0;
-        width: 110px; /* Further increased width */
-        height: 110px; /* Further increased height */
+        width: 110px;
+        height: 110px;
         display: flex;
         justify-content: center;
         align-items: center;
@@ -158,12 +158,12 @@
         position: absolute;
         top: 20px;
         right: 20px;
-        font-size: 3rem; /* Further increased font size for close button */
+        font-size: 3rem;
         color: white;
         background: rgba(0, 0, 0, 0.5);
         border-radius: 50%;
-        width: 60px; /* Further increased width */
-        height: 60px; /* Further increased height */
+        width: 60px;
+        height: 60px;
         display: flex;
         justify-content: center;
         align-items: center;
@@ -176,6 +176,20 @@
     .lightbox-close:hover {
         background: rgba(0, 0, 0, 0.8);
     }
+
+    .file-input {
+        background-color: var(--color-background);
+        color: var(--color-text);
+        border-color: var(--color-secondary);
+    }
+
+    .file-input:hover {
+        border-color: var(--color-accent);
+    }
+
+    .file-input:focus {
+        ring-color: var(--color-accent);
+    }
 </style>
 
 <div class="max-w-6xl mx-auto px-4 py-12 grid grid-cols-1 md:grid-cols-2 gap-12 items-start animate-fade-in-up carousel-container">
@@ -186,14 +200,14 @@
                     <!-- Images will be inserted here by JavaScript -->
                 </div>
             </div>
-                <button type="button"
-                    class="carousel-nav carousel-prev absolute top-1/2 -left-4 transform -translate-y-1/2 rounded-full bg-gray-800 bg-opacity-50 text-white p-2 hover:bg-opacity-75 focus:outline-none">
-                    ←
-                </button>
-                <button type="button"
-                    class="carousel-nav carousel-next absolute top-1/2 -right-4 transform -translate-y-1/2 rounded-full bg-gray-800 bg-opacity-50 text-white p-2 hover:bg-opacity-75 focus:outline-none">
-                    →
-                </button>
+            <button type="button"
+                class="carousel-nav carousel-prev absolute top-1/2 -left-4 transform -translate-y-1/2 rounded-full bg-gray-800 bg-opacity-50 text-white p-2 hover:bg-opacity-75 focus:outline-none">
+                ←
+            </button>
+            <button type="button"
+                class="carousel-nav carousel-next absolute top-1/2 -right-4 transform -translate-y-1/2 rounded-full bg-gray-800 bg-opacity-50 text-white p-2 hover:bg-opacity-75 focus:outline-none">
+                →
+            </button>
         </div>
         <div class="flex justify-center mt-4 space-x-2" id="carousel-dots">
             <!-- Dots will be inserted here by JavaScript -->
@@ -228,6 +242,13 @@
                 {input color type => 'hidden', id => 'frm-caseForm-color'}
 
                 <div id="features">
+                </div>
+
+                <div id="user-upload-container" style="display: none;">
+                    <h2 class="text-xl font-medium mt-4">Nahrát vlastní 3D soubor</h2>
+                    <div class="mt-2">
+                        {input user_file class => 'file-input px-4 py-3 rounded-xl shadow-sm hover:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)] transition duration-200 ease-out', accept => '.stl,.obj,.3mf,.ply,.fbx,.gltf,.glb'}
+                    </div>
                 </div>
 
                 <div>
@@ -297,11 +318,13 @@ function toggleSelection(button) {
     button.classList.add('ring-2', 'ring-[var(--color-accent)]', 'ring-offset-2');
     selectedFeatures[featureId] = {
         name: button.dataset.value,
-        price: parseFloat(button.dataset.price) || 0
+        price: parseFloat(button.dataset.price) || 0,
+        allow_user_upload: button.dataset.allowUserUpload === 'true'
     };
 
     updateFeaturesInput();
     updateTotalPrice();
+    updateUserUploadVisibility();
 }
 
 function updateFeaturesInput() {
@@ -310,6 +333,25 @@ function updateFeaturesInput() {
         features[featureId] = data.name;
     }
     document.getElementById('frm-caseForm-features').value = JSON.stringify(features);
+}
+
+function updateUserUploadVisibility() {
+    const userUploadContainer = document.getElementById('user-upload-container');
+    const userFileInput = document.getElementById('frm-caseForm-user_file');
+    let showUpload = false;
+
+    for (const data of Object.values(selectedFeatures)) {
+        if (data.allow_user_upload) {
+            showUpload = true;
+            break;
+        }
+    }
+
+    userUploadContainer.style.display = showUpload ? 'block' : 'none';
+    userFileInput.disabled = !showUpload;
+    if (!showUpload) {
+        userFileInput.value = '';
+    }
 }
 
 document.getElementById('frm-caseForm-model').addEventListener('change', function () {
@@ -354,6 +396,7 @@ document.getElementById('frm-caseForm-model').addEventListener('change', functio
         updateFeatureButtons([]);
         updateCarouselImages([]);
         updateTotalPrice();
+        updateUserUploadVisibility();
         document.getElementById('selected-device').textContent = 'Vyberte výrobce a model';
     }
 });
@@ -371,6 +414,7 @@ document.getElementById('frm-caseForm-manufacturer').addEventListener('change', 
     updateFeatureButtons([]);
     updateCarouselImages([]);
     updateTotalPrice();
+    updateUserUploadVisibility();
 
     document.getElementById('frm-caseForm-color').value = '';
     document.getElementById('frm-caseForm-features').value = '';
@@ -430,6 +474,7 @@ function updateFeatureButtons(features) {
             button.setAttribute('data-feature', featureId);
             button.setAttribute('data-value', option.name);
             button.setAttribute('data-price', option.price);
+            button.setAttribute('data-allow-user-upload', option.allow_user_upload);
             button.className = 'feature-button px-4 py-2 rounded-lg transition animate-fade-in-up';
             button.innerText = option.name;
             button.addEventListener('click', function () { toggleSelection(this); });
@@ -452,6 +497,8 @@ function updateFeatureButtons(features) {
         featureDiv.appendChild(buttonDiv);
         container.appendChild(featureDiv);
     }
+
+    updateUserUploadVisibility();
 }
 
 function updateTotalPrice() {
@@ -620,8 +667,8 @@ function goToSlide(index) {
 
 document.addEventListener('DOMContentLoaded', () => {
     updateCarouselImages([]);
+    updateUserUploadVisibility();
 
-    // Připojení posluchačů k tlačítkům pro šipky
     const prevButton = document.querySelector('.carousel-prev');
     const nextButton = document.querySelector('.carousel-next');
 
@@ -630,5 +677,69 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 setInterval(nextSlide, 5000);
+
+document.addEventListener('DOMContentLoaded', function() {
+    const fileInput = document.getElementById('frm-caseForm-user_file');
+    const modelSelect = document.getElementById('frm-caseForm-model');
+
+    if (!fileInput) {
+        console.error('File input element not found');
+        return;
+    }
+    if (!modelSelect) {
+        console.error('Model select element not found');
+        return;
+    }
+
+    fileInput.addEventListener('change', function() {
+        const file = this.files[0];
+        const modelId = modelSelect.value;
+
+        if (!file) {
+            alert('Please select a file to upload.');
+            return;
+        }
+        if (!modelId) {
+            alert('Please select a model before uploading a file.');
+            return;
+        }
+
+        const formData = new FormData();
+        formData.append('user_file', file);
+        formData.append('model', modelId);
+
+        fetch('/home/upload-file', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest'
+            }
+        })
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok: ' + response.statusText);
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                document.getElementById('frm-caseForm-user_upload_id').value = data.upload_id;
+                console.log('File uploaded successfully, ID:', data.upload_id);
+                alert('File uploaded successfully!');
+            } else {
+                console.error('Upload failed:', data.error);
+                alert('File upload failed: ' + data.error);
+            }
+        })
+        .catch(error => {
+            console.error('Error uploading file:', error);
+            alert('An error occurred while uploading the file: ' + error.message);
+        });
+    });
+});
+
+document.getElementById('frm-caseForm-submit').addEventListener('click', function() {
+    console.log('Submit clicked');
+});
 </script>
-{/block}
+{/block} 

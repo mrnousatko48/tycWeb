@@ -68,7 +68,6 @@ public function actionShippingOptions($vendor): void
         return;
     }
     $shippingOptions = $this->orderFacade->getShippingOptionsByVendor((int)$vendor);
-    \Tracy\Debugger::barDump($shippingOptions, "Shipping Options JSON for Vendor: $vendor"); // Debug output
     $this->sendJson($shippingOptions);
 }
 public function actionPaymentMethods($vendor): void
@@ -78,7 +77,6 @@ public function actionPaymentMethods($vendor): void
         return;
     }
     $paymentMethods = $this->orderFacade->getPaymentMethodsByVendor((int)$vendor);
-    \Tracy\Debugger::barDump($paymentMethods, 'Payment Methods JSON for Vendor: ' . $vendor);
     $this->sendJson($paymentMethods);
 }
 }

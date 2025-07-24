@@ -28,7 +28,7 @@ final class CartPresenter extends BaseFrontPresenter
         return $key;
     }
 
-    public function renderDefault(): void
+     public function renderDefault(): void
     {
         if ($this->getUser()->isLoggedIn()) {
             $userId = (int)$this->getUser()->getId();
@@ -63,6 +63,8 @@ final class CartPresenter extends BaseFrontPresenter
             }
 
             $caseArray['features'] = $cleanFeatures;
+            $upload = $case->user_upload_id ? $this->database->table('user_uploads')->get($case->user_upload_id) : null;
+            $caseArray['user_upload_filename'] = $upload ? $upload->original_filename : null;
             $decodedCases[] = (object) $caseArray;
 
             $quantity = $this->template->quantities[$case->id] ?? 1;
@@ -102,6 +104,8 @@ final class CartPresenter extends BaseFrontPresenter
             }
 
             $caseArray['features'] = $cleanFeatures;
+            $upload = $case->user_upload_id ? $this->database->table('user_uploads')->get($case->user_upload_id) : null;
+            $caseArray['user_upload_filename'] = $upload ? $upload->original_filename : null;
             $decodedCases[] = (object) $caseArray;
 
             $quantity = $quantities[$case->id] ?? 1;
@@ -147,6 +151,8 @@ final class CartPresenter extends BaseFrontPresenter
             }
 
             $caseArray['features'] = $cleanFeatures;
+            $upload = $case->user_upload_id ? $this->database->table('user_uploads')->get($case->user_upload_id) : null;
+            $caseArray['user_upload_filename'] = $upload ? $upload->original_filename : null;
             $decodedCases[] = (object) $caseArray;
 
             $quantity = $quantities[$case->id] ?? 1;
@@ -154,11 +160,9 @@ final class CartPresenter extends BaseFrontPresenter
         }
 
         $shippingInfo = $this->orderFacade->getShippingInfo((int)$session->shippingOption);
-        \Tracy\Debugger::barDump($shippingInfo, 'Shipping Info');
         $shippingCost = $shippingInfo ? (float)$shippingInfo['cost'] : 0.0;
         $shippingName = $shippingInfo ? $shippingInfo['name'] : 'Není vybráno';
         $paymentInfo = $this->orderFacade->getPaymentInfo((int)$session->paymentMethod);
-        \Tracy\Debugger::barDump($paymentInfo, 'Payment Info');
         $paymentCost = $paymentInfo ? (float)$paymentInfo['price'] : 0.0;
         $paymentName = $paymentInfo ? $paymentInfo['name'] : 'Není vybráno';
         $totalCartValue = $itemsSubtotal + $shippingCost + $paymentCost;
@@ -200,20 +204,17 @@ final class CartPresenter extends BaseFrontPresenter
 
         $form->onAnchor[] = function () use ($vendor, $shippingOption, $paymentMethod) {
             $vendorId = $vendor->getValue() ? (int)$vendor->getValue() : null;
-            \Tracy\Debugger::barDump($vendorId, 'Selected Vendor ID');
 
             // Populate shippingOption
             $shippingItems = $vendorId
                 ? $this->orderFacade->getShippingOptionsByVendor($vendorId)
                 : [];
-            \Tracy\Debugger::barDump($shippingItems, 'Shipping Options on Anchor');
             $shippingOption->setItems($shippingItems);
 
             // Populate paymentMethod
             $paymentItems = $vendorId
                 ? $this->orderFacade->getPaymentMethodsByVendor($vendorId)
                 : [];
-            \Tracy\Debugger::barDump($paymentItems, 'Payment Methods on Anchor');
             $paymentMethod->setItems($paymentItems);
         };
 

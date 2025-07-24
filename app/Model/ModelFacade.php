@@ -3,9 +3,11 @@ namespace App\Model;
 
 use Nette\Database\Explorer;
 use Nette\Database\Table\ActiveRow;
+use Nette\Database\Table\Selection;
 use Nette\Database\UniqueConstraintViolationException;
 use Nette\Http\FileUpload;
 use App\Utils\ImageUploader;
+use App\Utils\FileUploader;
 
 class ModelFacade
 {
@@ -104,10 +106,10 @@ class ModelFacade
             $model = $this->database->table('models')->insert($data);
 
             foreach ($colorIds as $colorId) {
-                $this->database->table('model_colors')->insert([
-                    'model_id' => $model->id,
-                    'color_id' => $colorId,
-                ]);
+            $this->database->table('model_colors')->insert([
+                'model_id' => $model->id,
+                'color_id' => $colorId,
+    ]);
             }
 
             foreach ($featureOptions as $featureId => $optionId) {
@@ -220,7 +222,8 @@ class ModelFacade
             $featureName = $featureData[$option->feature_id];
             $result[$featureName][] = [
                 'name' => $option->name,
-                'price' => (float)$option->price
+                'price' => (float)$option->price,
+                'allow_user_upload' => (bool)$option->allow_user_upload
             ];
         }
 
@@ -341,7 +344,7 @@ class ModelFacade
         return $this->database->table('feature_options')->order('feature_id, name');
     }
 
-    public function addFeatureOption(int $featureId, string $name, float $price = 0.00): ActiveRow
+    public function addFeatureOption(int $featureId, string $name, float $price = 0.00, bool $allowUserUpload = false): ActiveRow
     {
         $this->database->beginTransaction();
         try {
@@ -349,6 +352,7 @@ class ModelFacade
                 'feature_id' => $featureId,
                 'name' => trim($name),
                 'price' => $price,
+                'allow_user_upload' => $allowUserUpload,
             ]);
             $this->database->commit();
             return $option;
@@ -361,13 +365,14 @@ class ModelFacade
         }
     }
 
-    public function updateFeatureOption(int $id, string $name, float $price): void
+    public function updateFeatureOption(int $id, string $name, float $price, bool $allowUserUpload): void
     {
         $this->database->beginTransaction();
         try {
             $this->database->table('feature_options')->get($id)->update([
                 'name' => trim($name),
                 'price' => $price,
+                'allow_user_upload' => $allowUserUpload,
             ]);
             $this->database->commit();
         } catch (UniqueConstraintViolationException $e) {
@@ -389,6 +394,39 @@ class ModelFacade
         return $this->database->table('model_features')
             ->where('model_id', $modelId)
             ->fetchAll();
+    }
+
+    public function addUserUpload(int $modelId, FileUpload $file, string $originalFilename): ?ActiveRow
+    {
+        $uploadDir = 'uploads/user_uploads/' . $modelId;
+        $filePath = FileUploader::uploadFile($file, $uploadDir);
+        if ($filePath) {
+            return $this->database->table('user_uploads')->insert([
+                'model_id' => $modelId,
+                'file_path' => $filePath,
+                'original_filename' => $originalFilename,
+            ]);
+        }
+        return null;
+    }
+
+    public function getUserUploads(int $modelId): Selection
+    {
+        return $this->database->table('user_uploads')
+            ->where('model_id', $modelId)
+            ->order('created_at DESC');
+    }
+
+    public function deleteUserUpload(int $uploadId): void
+    {
+        $upload = $this->database->table('user_uploads')->get($uploadId);
+        if ($upload) {
+            $filePath = __DIR__ . '/../../' . $upload->file_path;
+            if (file_exists($filePath)) {
+                unlink($filePath);
+            }
+            $upload->delete();
+        }
     }
 
     // ---- IMAGES ----

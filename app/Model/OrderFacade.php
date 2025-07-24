@@ -35,20 +35,11 @@ final class OrderFacade
         $paymentMethod = $this->database->table('vendor_payment_methods')->get($paymentMethodId);
 
         if (!$shippingOption) {
-            \Tracy\Debugger::barDump($shippingOptionId, 'Invalid Shipping Option ID');
             throw new \InvalidArgumentException("Shipping option ID $shippingOptionId not found.");
         }
 
         $shippingCost = (float)$shippingOption->cost;
         $paymentCost = $paymentMethod ? (float)$paymentMethod->price : 0.0;
-
-        \Tracy\Debugger::barDump([
-            'shippingOptionId' => $shippingOptionId,
-            'shippingCost' => $shippingCost,
-            'paymentMethodId' => $paymentMethodId,
-            'paymentCost' => $paymentCost,
-        ], 'Additional Cost Calculation');
-
         return $shippingCost + $paymentCost;
     }
 
@@ -164,7 +155,7 @@ final class OrderFacade
     /**
      * Process cases to handle JSON features and include quantities
      */
-    private function processCases(iterable $orderCases, iterable $cases): array
+        private function processCases(iterable $orderCases, iterable $cases): array
     {
         $processedCases = [];
         $caseMap = [];
@@ -185,6 +176,7 @@ final class OrderFacade
                     $cleanKey = mb_convert_case($cleanKey, MB_CASE_TITLE, 'UTF-8');
                     $cleanFeatures[$cleanKey] = $value;
                 }
+                $upload = $case->user_upload_id ? $this->database->table('user_uploads')->get($case->user_upload_id) : null;
                 $processedCases[] = (object)[
                     'id' => $case->id,
                     'manufacturer' => $case->manufacturer,
@@ -196,6 +188,7 @@ final class OrderFacade
                     'user_id' => $case->user_id,
                     'created_at' => $case->created_at,
                     'quantity' => $orderCase->quantity,
+                    'user_upload_filename' => $upload ? $upload->original_filename : null,
                 ];
             }
         }
@@ -367,7 +360,6 @@ final class OrderFacade
         public function getShippingInfo(int $shippingOptionId): ?array
     {
         $shippingOption = $this->database->table('shipping_options')->get($shippingOptionId);
-        \Tracy\Debugger::barDump($shippingOption ? (array)$shippingOption : null, "Shipping Option Data for ID: $shippingOptionId");
         return $shippingOption ? ['cost' => (float)$shippingOption->cost, 'name' => $shippingOption->name] : null;
     }
 
@@ -422,7 +414,7 @@ final class OrderFacade
             ->order('created_at DESC');
     }
 
-    public function createCase(array $data, ?int $userId = null): ActiveRow
+        public function createCase(array $data, ?int $userId = null): ActiveRow
     {
         $coreData = [
             'user_id' => $userId,
@@ -431,12 +423,13 @@ final class OrderFacade
             'color' => $data['color'] ?? null,
             'total_price' => $data['total_price'] ?? 0.0,
             'state' => 'KOSIK',
-            'created_at' => new \DateTime()
+            'created_at' => new \DateTime(),
+            'user_upload_id' => $data['user_upload_id'] ?? null,
         ];
 
         $features = [];
         foreach ($data as $key => $value) {
-            if (!in_array($key, ['manufacturer', 'model', 'color', 'total_price'])) {
+            if (!in_array($key, ['manufacturer', 'model', 'color', 'total_price', 'user_upload_id'])) {
                 $features[$key] = $value;
             }
         }
@@ -485,7 +478,7 @@ final class OrderFacade
             ->delete();
     }
 
-    public function getOrderItems(int $orderId): array
+   public function getOrderItems(int $orderId): array
     {
         $orderCases = $this->database->table('order_case')
             ->where('order_id', $orderId)
@@ -505,7 +498,7 @@ final class OrderFacade
                     $cleanKey = mb_convert_case($cleanKey, MB_CASE_TITLE, 'UTF-8');
                     $cleanFeatures[$cleanKey] = $value;
                 }
-
+                $upload = $case->user_upload_id ? $this->database->table('user_uploads')->get($case->user_upload_id) : null;
                 $result[] = (object)[
                     'id' => $case->id,
                     'manufacturer' => $case->manufacturer,
@@ -514,6 +507,7 @@ final class OrderFacade
                     'total_price' => $case->total_price,
                     'features' => $cleanFeatures,
                     'quantity' => $orderCase->quantity,
+                    'user_upload_filename' => $upload ? $upload->original_filename : null,
                 ];
             }
         }
@@ -521,24 +515,20 @@ final class OrderFacade
         return $result;
     }
 
-    public function getVendors(): array
+        public function getVendorNameById(int $vendorId): string
     {
-        $vendors = $this->database->table('vendors')
-            ->order('name')
-            ->fetchAll();
-
-        $result = [];
-        foreach ($vendors as $vendor) {
-            $result[$vendor->id] = $vendor->name;
-        }
-
-        return $result;
+        $vendor = $this->database->table('vendors')->get($vendorId);
+        return $vendor ? $vendor->name : 'Unknown';
     }
 
-    public function getAllShippingOptions(): \Nette\Database\Table\Selection
+    public function getVendors(): array
     {
-        return $this->database->table('shipping_options')
-            ->order('vendor_id, name');
+        return $this->database->table('vendors')->fetchPairs('id', 'name');
+    }
+
+    public function getAllShippingOptions()
+    {
+        return $this->database->table('shipping_options');
     }
 
     public function getVendorById(int $vendorId): ?ActiveRow
@@ -611,7 +601,6 @@ final class OrderFacade
             $result[$option->id] = sprintf('%s (%s Kč)', $option->name, number_format($option->cost, 2, ',', ' '));
         }
 
-        \Tracy\Debugger::barDump($result, "Shipping Options for Vendor ID: $vendorId");
         return $result;
     }
 
@@ -655,11 +644,91 @@ final class OrderFacade
     {
         $shippingOption = $this->database->table('shipping_options')->get($shippingOptionId);
         if (!$shippingOption || !$shippingOption->vendor_id) {
-            \Tracy\Debugger::barDump($shippingOptionId, 'Invalid or Missing Shipping Option ID');
             return 'Není vybrán dopravce';
         }
 
         $vendor = $this->database->table('vendors')->get($shippingOption->vendor_id);
         return $vendor ? $vendor->name : 'Není vybrán dopravce';
     }
+
+    public function getAllPaymentMethods(): \Nette\Database\Table\Selection
+{
+    return $this->database->table('vendor_payment_methods')
+        ->order('vendor_id, name');
+}
+
+public function getPaymentMethodById(int $paymentMethodId): ?ActiveRow
+{
+    return $this->database->table('vendor_payment_methods')->get($paymentMethodId);
+}
+
+public function addPaymentMethod(int $vendorId, string $code, string $name, float $price, array $shippingOptionIds = []): void
+{
+    $this->database->beginTransaction();
+    try {
+        $paymentMethod = $this->database->table('vendor_payment_methods')->insert([
+            'vendor_id' => $vendorId,
+            'code' => $code,
+            'name' => $name,
+            'price' => $price,
+        ]);
+
+        foreach ($shippingOptionIds as $shippingOptionId) {
+            $this->database->table('shipping_payment_methods')->insert([
+                'shipping_option_id' => $shippingOptionId,
+                'payment_method_id' => $paymentMethod->id,
+            ]);
+        }
+        $this->database->commit();
+    } catch (\Exception $e) {
+        $this->database->rollBack();
+        throw $e;
+    }
+}
+
+public function updatePaymentMethod(int $paymentMethodId, int $vendorId, string $code, string $name, float $price, array $shippingOptionIds = []): void
+{
+    $this->database->beginTransaction();
+    try {
+        $this->database->table('vendor_payment_methods')
+            ->where('id', $paymentMethodId)
+            ->update([
+                'vendor_id' => $vendorId,
+                'code' => $code,
+                'name' => $name,
+                'price' => $price,
+            ]);
+
+        // Update shipping option links
+        $this->database->table('shipping_payment_methods')
+            ->where('payment_method_id', $paymentMethodId)
+            ->delete();
+
+        foreach ($shippingOptionIds as $shippingOptionId) {
+            $this->database->table('shipping_payment_methods')->insert([
+                'shipping_option_id' => $shippingOptionId,
+                'payment_method_id' => $paymentMethodId,
+            ]);
+        }
+        $this->database->commit();
+    } catch (\Exception $e) {
+        $this->database->rollBack();
+        throw $e;
+    }
+}
+
+public function deletePaymentMethod(int $paymentMethodId): void
+{
+    $this->database->table('vendor_payment_methods')
+        ->where('id', $paymentMethodId)
+        ->delete();
+}
+
+public function getShippingOptionsForPaymentMethod(int $paymentMethodId): array
+{
+    return $this->database->table('shipping_payment_methods')
+        ->where('payment_method_id', $paymentMethodId)
+        ->fetchPairs('shipping_option_id', 'shipping_option_id');
+}
+
 }

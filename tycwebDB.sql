@@ -1,3 +1,4 @@
+DROP TABLE IF EXISTS `banner`;
 CREATE TABLE `banner` (
   `id` int NOT NULL AUTO_INCREMENT,
   `content_type` enum('title','description','image','button_text','button_link') NOT NULL,
@@ -26,28 +27,38 @@ CREATE TABLE `cases` (
   `state` enum('KOSIK','OBJEDNANO','ZAPLACENO','ODESLANO','DORUCENO','VYZVEDNUTO') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `user_id` int unsigned DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `user_upload_id` int DEFAULT NULL,
   PRIMARY KEY (`id`),
   KEY `user_id` (`user_id`),
-  CONSTRAINT `cases_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE RESTRICT
+  KEY `cases_user_upload_fk` (`user_upload_id`),
+  CONSTRAINT `cases_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE RESTRICT,
+  CONSTRAINT `cases_user_upload_fk` FOREIGN KEY (`user_upload_id`) REFERENCES `user_uploads` (`id`) ON DELETE SET NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-INSERT INTO `cases` (`id`, `manufacturer`, `model`, `color`, `total_price`, `features`, `state`, `user_id`, `created_at`) VALUES
-(45,	'Apple',	'iPhone 13',	'Bílá',	634.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\"}\"}',	'OBJEDNANO',	10,	'2025-07-20 15:29:28'),
-(46,	'Apple',	'iPhone 13',	'Černá',	634.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\"}\"}',	'OBJEDNANO',	10,	'2025-07-20 15:49:28'),
-(47,	'Apple',	'iPhone 13',	'Bílá',	634.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\"}\"}',	'OBJEDNANO',	10,	'2025-07-20 16:01:57'),
-(48,	'Apple',	'iPhone 13',	'Bílá',	634.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\"}\"}',	'ZAPLACENO',	10,	'2025-07-20 16:07:59'),
-(49,	'Apple',	'iPhone 13',	'Bílá',	634.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\"}\"}',	'KOSIK',	NULL,	'2025-07-21 09:03:46'),
-(50,	'Apple',	'iPhone 13',	'Černá',	634.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\"}\"}',	'KOSIK',	NULL,	'2025-07-21 12:09:58'),
-(51,	'Apple',	'iPhone 13',	'Bílá',	634.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\"}\"}',	'KOSIK',	NULL,	'2025-07-21 13:21:34'),
-(52,	'Apple',	'iPhone 13',	'Bílá',	634.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\"}\"}',	'KOSIK',	NULL,	'2025-07-21 15:05:14'),
-(53,	'Apple',	'iPhone 13',	'Bílá',	634.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\"}\"}',	'OBJEDNANO',	9,	'2025-07-21 15:41:19'),
-(54,	'Apple',	'iPhone 13',	'Bílá',	634.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\"}\"}',	'OBJEDNANO',	9,	'2025-07-21 15:48:49'),
-(55,	'Apple',	'iPhone 13',	'Bílá',	634.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\"}\"}',	'OBJEDNANO',	9,	'2025-07-21 15:52:13'),
-(56,	'Apple',	'iPhone 13',	'Bílá',	634.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\"}\"}',	'OBJEDNANO',	9,	'2025-07-21 16:24:03'),
-(57,	'Apple',	'iPhone 13',	'Bílá',	634.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\"}\"}',	'OBJEDNANO',	9,	'2025-07-21 16:44:30'),
-(58,	'Apple',	'iPhone 13',	'Bílá',	589.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\"}\"}',	'OBJEDNANO',	9,	'2025-07-21 16:46:32'),
-(59,	'Apple',	'iPhone 13',	'Bílá',	574.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ne\\\"}\"}',	'KOSIK',	9,	'2025-07-21 16:47:27'),
-(60,	'Apple',	'iPhone 13',	'Bílá',	634.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\"}\"}',	'KOSIK',	9,	'2025-07-21 19:13:31');
+INSERT INTO `cases` (`id`, `manufacturer`, `model`, `color`, `total_price`, `features`, `state`, `user_id`, `created_at`, `user_upload_id`) VALUES
+(45,	'Apple',	'iPhone 13',	'Bílá',	634.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\"}\"}',	'OBJEDNANO',	10,	'2025-07-20 15:29:28',	NULL),
+(46,	'Apple',	'iPhone 13',	'Černá',	634.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\"}\"}',	'OBJEDNANO',	10,	'2025-07-20 15:49:28',	NULL),
+(47,	'Apple',	'iPhone 13',	'Bílá',	634.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\"}\"}',	'OBJEDNANO',	10,	'2025-07-20 16:01:57',	NULL),
+(48,	'Apple',	'iPhone 13',	'Bílá',	634.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\"}\"}',	'ZAPLACENO',	10,	'2025-07-20 16:07:59',	NULL),
+(49,	'Apple',	'iPhone 13',	'Bílá',	634.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\"}\"}',	'KOSIK',	NULL,	'2025-07-21 09:03:46',	NULL),
+(50,	'Apple',	'iPhone 13',	'Černá',	634.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\"}\"}',	'KOSIK',	NULL,	'2025-07-21 12:09:58',	NULL),
+(51,	'Apple',	'iPhone 13',	'Bílá',	634.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\"}\"}',	'KOSIK',	NULL,	'2025-07-21 13:21:34',	NULL),
+(52,	'Apple',	'iPhone 13',	'Bílá',	634.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\"}\"}',	'KOSIK',	NULL,	'2025-07-21 15:05:14',	NULL),
+(53,	'Apple',	'iPhone 13',	'Bílá',	634.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\"}\"}',	'OBJEDNANO',	9,	'2025-07-21 15:41:19',	NULL),
+(54,	'Apple',	'iPhone 13',	'Bílá',	634.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\"}\"}',	'OBJEDNANO',	9,	'2025-07-21 15:48:49',	NULL),
+(55,	'Apple',	'iPhone 13',	'Bílá',	634.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\"}\"}',	'OBJEDNANO',	9,	'2025-07-21 15:52:13',	NULL),
+(56,	'Apple',	'iPhone 13',	'Bílá',	634.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\"}\"}',	'OBJEDNANO',	9,	'2025-07-21 16:24:03',	NULL),
+(57,	'Apple',	'iPhone 13',	'Bílá',	634.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\"}\"}',	'OBJEDNANO',	9,	'2025-07-21 16:44:30',	NULL),
+(58,	'Apple',	'iPhone 13',	'Bílá',	589.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\"}\"}',	'OBJEDNANO',	9,	'2025-07-21 16:46:32',	NULL),
+(64,	'Apple',	'iPhone 13',	'Bílá',	559.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\"}\"}',	'KOSIK',	NULL,	'2025-07-22 08:38:52',	NULL),
+(65,	'Samsung',	'Galaxy S22',	'Černá',	500.00,	'{\"features\": \"{\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"vlastní_motiv\\\":\\\"Ne\\\"}\"}',	'KOSIK',	NULL,	'2025-07-22 09:08:14',	NULL),
+(67,	'Apple',	'iPhone 13',	'Černá',	589.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\"}\"}',	'KOSIK',	NULL,	'2025-07-23 15:11:08',	NULL),
+(69,	'Apple',	'iPhone 13',	'Bílá',	559.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\"}\"}',	'KOSIK',	NULL,	'2025-07-24 12:41:53',	NULL),
+(70,	'Apple',	'iPhone 13',	'Bílá',	634.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\"}\"}',	'KOSIK',	NULL,	'2025-07-24 16:28:15',	NULL),
+(71,	'Apple',	'iPhone 13',	'Bílá',	634.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\"}\"}',	'KOSIK',	NULL,	'2025-07-24 16:34:08',	NULL),
+(72,	'Apple',	'iPhone 13',	'Černá',	689.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\",\\\"vlastní_motiv\\\":\\\"Ano\\\"}\"}',	'OBJEDNANO',	9,	'2025-07-24 16:36:08',	NULL),
+(73,	'Apple',	'iPhone 13',	'Černá',	689.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\",\\\"vlastní_motiv\\\":\\\"Ano\\\"}\"}',	'OBJEDNANO',	9,	'2025-07-24 16:39:34',	NULL),
+(74,	'Apple',	'iPhone 13',	'Černá',	689.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\",\\\"vlastní_motiv\\\":\\\"Ano\\\"}\"}',	'OBJEDNANO',	9,	'2025-07-24 17:13:56',	NULL);
 
 DROP TABLE IF EXISTS `colors`;
 CREATE TABLE `colors` (
@@ -106,7 +117,6 @@ CREATE TABLE `default_images` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 INSERT INTO `default_images` (`id`, `image_path`, `created_at`) VALUES
-(5,	'/www/uploads/default/68790972e3f81_307-3079525-car-outline-car-outline-png.webp',	'2025-07-17 14:32:19'),
 (6,	'/www/uploads/default/68791276ce1ab_zidle.webp',	'2025-07-17 15:10:47'),
 (7,	'/www/uploads/default/6879127c01a36_holka-ridicak.webp',	'2025-07-17 15:10:55');
 
@@ -161,21 +171,22 @@ CREATE TABLE `feature_options` (
   `price` decimal(10,2) DEFAULT '0.00',
   `image_path` varchar(255) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `allow_user_upload` tinyint(1) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_feature_option` (`feature_id`,`name`),
   KEY `feature_id` (`feature_id`),
   CONSTRAINT `feature_options_ibfk_1` FOREIGN KEY (`feature_id`) REFERENCES `features` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-INSERT INTO `feature_options` (`id`, `feature_id`, `name`, `price`, `image_path`, `created_at`) VALUES
-(16,	16,	'Ano',	30.00,	'/uploads/features/camera_cover_yes.jpg',	'2025-07-09 19:46:47'),
-(18,	16,	'Ne',	0.00,	'/uploads/features/camera_cover_no.jpg',	'2025-07-09 19:46:50'),
-(24,	12,	'2 Sloty',	45.00,	'/uploads/features/card_holder_2_slots.jpg',	'2025-07-09 19:47:06'),
-(25,	12,	'Žádný',	0.00,	'/uploads/features/no_card_holder.jpg',	'2025-07-09 19:47:37'),
-(30,	18,	'Ano',	30.00,	'/uploads/features/charging_port_cover_yes.jpg',	'2025-07-09 20:05:52'),
-(31,	18,	'Ne',	0.00,	'/uploads/features/charging_port_cover_no.jpg',	'2025-07-09 20:05:58'),
-(38,	22,	'Ano',	85.00,	NULL,	'2025-07-15 09:44:06'),
-(39,	22,	'Ne',	0.00,	NULL,	'2025-07-15 09:44:11');
+INSERT INTO `feature_options` (`id`, `feature_id`, `name`, `price`, `image_path`, `created_at`, `allow_user_upload`) VALUES
+(16,	16,	'Ano',	30.00,	'/uploads/features/camera_cover_yes.jpg',	'2025-07-09 19:46:47',	0),
+(18,	16,	'Ne',	0.00,	'/uploads/features/camera_cover_no.jpg',	'2025-07-09 19:46:50',	0),
+(24,	12,	'2 Sloty',	45.00,	'/uploads/features/card_holder_2_slots.jpg',	'2025-07-09 19:47:06',	0),
+(25,	12,	'Žádný',	0.00,	'/uploads/features/no_card_holder.jpg',	'2025-07-09 19:47:37',	0),
+(30,	18,	'Ano',	30.00,	'/uploads/features/charging_port_cover_yes.jpg',	'2025-07-09 20:05:52',	0),
+(31,	18,	'Ne',	0.00,	'/uploads/features/charging_port_cover_no.jpg',	'2025-07-09 20:05:58',	0),
+(38,	22,	'Ano',	85.00,	NULL,	'2025-07-15 09:44:06',	1),
+(39,	22,	'Ne',	0.00,	NULL,	'2025-07-15 09:44:11',	0);
 
 DROP TABLE IF EXISTS `features`;
 CREATE TABLE `features` (
@@ -247,10 +258,7 @@ CREATE TABLE `manufacturers` (
 
 INSERT INTO `manufacturers` (`id`, `name`, `created_at`) VALUES
 (1,	'Apple',	'2025-07-03 16:52:35'),
-(2,	'Samsung',	'2025-07-03 16:52:35'),
-(3,	'Xiaomi',	'2025-07-03 16:52:35'),
-(4,	'Lenovo',	'2025-07-08 20:36:34'),
-(7,	'test',	'2025-07-09 13:11:16');
+(2,	'Samsung',	'2025-07-03 16:52:35');
 
 DROP TABLE IF EXISTS `model_colors`;
 CREATE TABLE `model_colors` (
@@ -267,8 +275,6 @@ INSERT INTO `model_colors` (`model_id`, `color_id`) VALUES
 (2,	1),
 (3,	1),
 (4,	1),
-(5,	1),
-(12,	1),
 (1,	2),
 (2,	2),
 (3,	2),
@@ -279,7 +285,6 @@ INSERT INTO `model_colors` (`model_id`, `color_id`) VALUES
 (4,	3),
 (1,	4),
 (2,	4),
-(5,	4),
 (1,	10);
 
 DROP TABLE IF EXISTS `model_features`;
@@ -299,10 +304,10 @@ INSERT INTO `model_features` (`model_id`, `feature_id`, `feature_option_id`) VAL
 (1,	16,	18),
 (3,	16,	18),
 (4,	16,	18),
-(12,	16,	18),
 (1,	12,	25),
 (4,	12,	25),
 (1,	18,	31),
+(1,	22,	39),
 (3,	22,	39);
 
 DROP TABLE IF EXISTS `model_images`;
@@ -335,9 +340,7 @@ INSERT INTO `models` (`id`, `manufacturer_id`, `name`, `created_at`, `price`) VA
 (1,	1,	'iPhone 13',	'2025-07-03 16:52:35',	529.99),
 (2,	1,	'iPhone 14',	'2025-07-03 16:52:35',	617.00),
 (3,	2,	'Galaxy S22',	'2025-07-03 16:52:35',	500.00),
-(4,	2,	'Galaxy S23',	'2025-07-03 16:52:35',	510.00),
-(5,	3,	'Mi 12',	'2025-07-03 16:52:35',	199.99),
-(12,	7,	'ssss',	'2025-07-17 11:30:00',	155.00);
+(4,	2,	'Galaxy S23',	'2025-07-03 16:52:35',	510.00);
 
 DROP TABLE IF EXISTS `order_case`;
 CREATE TABLE `order_case` (
@@ -351,10 +354,9 @@ CREATE TABLE `order_case` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 INSERT INTO `order_case` (`order_id`, `case_id`, `quantity`) VALUES
-(55,	56,	1),
-(56,	57,	1),
-(57,	57,	1),
-(58,	58,	1);
+(59,	73,	1),
+(59,	72,	1),
+(60,	74,	1);
 
 DROP TABLE IF EXISTS `orders`;
 CREATE TABLE `orders` (
@@ -377,18 +379,16 @@ CREATE TABLE `orders` (
   PRIMARY KEY (`id`),
   UNIQUE KEY `variable_symbol` (`variable_symbol`),
   KEY `user_id` (`user_id`),
-  KEY `orders_payment_fk` (`payment`),
   KEY `orders_shipping_fk` (`shipping`),
+  KEY `orders_payment_fk` (`payment`),
   CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL,
-  CONSTRAINT `orders_payment_fk` FOREIGN KEY (`payment`) REFERENCES `vendor_payment_methods` (`id`) ON DELETE RESTRICT,
+  CONSTRAINT `orders_payment_fk` FOREIGN KEY (`payment`) REFERENCES `vendor_payment_methods` (`id`) ON DELETE RESTRICT ON UPDATE CASCADE,
   CONSTRAINT `orders_shipping_fk` FOREIGN KEY (`shipping`) REFERENCES `shipping_options` (`id`) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO `orders` (`id`, `user_id`, `firstname`, `lastname`, `email`, `phone`, `address`, `city`, `psc`, `payment`, `shipping`, `delivery_point`, `additional_cost`, `state`, `created_at`, `variable_symbol`) VALUES
-(55,	9,	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'111222333',	'shrekova bazina 13',	'Praha',	'53803',	3,	3,	'sokolská 799 hermanuv mestec',	0.00,	'OBJEDNANO',	'2025-07-21 16:24:17',	'202507214464'),
-(56,	9,	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'111222333',	'shrekova bazina 13',	'Praha',	'53803',	1,	1,	'sokolská 799 hermanuv mestec',	0.00,	'OBJEDNANO',	'2025-07-21 16:44:48',	'202507219211'),
-(57,	9,	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'111222333',	'shrekova bazina 13',	'Praha',	'53803',	1,	1,	'sokolská 799 hermanuv mestec',	0.00,	'OBJEDNANO',	'2025-07-21 16:45:15',	'202507219047'),
-(58,	9,	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'111222333',	'shrekova bazina 13',	'Praha',	'53803',	1,	1,	'sokolská 799 hermanuv mestec',	89.00,	'OBJEDNANO',	'2025-07-21 16:46:54',	'202507216869');
+(59,	9,	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'111222333',	'shrekova bazina 13',	'Praha',	'53803',	7,	11,	'sokolská 799 hermanuv mestec',	91.00,	'OBJEDNANO',	'2025-07-24 16:39:56',	'202507247157'),
+(60,	9,	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'111222333',	'shrekova bazina 13',	'Praha',	'53803',	6,	11,	'sokolská 799 hermanuv mestec',	79.00,	'OBJEDNANO',	'2025-07-24 17:14:25',	'202507249841');
 
 DROP TABLE IF EXISTS `shipping_options`;
 CREATE TABLE `shipping_options` (
@@ -402,11 +402,47 @@ CREATE TABLE `shipping_options` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 INSERT INTO `shipping_options` (`id`, `vendor_id`, `name`, `cost`) VALUES
-(1,	1,	'Na výdejní místo',	89.00),
-(2,	1,	'Domů kurýrem',	100.00),
-(3,	2,	'Na poštu',	79.00),
-(4,	2,	'Balík do ruky',	120.00),
-(5,	2,	'do zahraničí',	10000.00);
+(9,	7,	'Na pobočku',	89.00),
+(10,	7,	'Na adresu',	110.00),
+(11,	6,	'Na pobočku',	79.00),
+(12,	6,	'Na adresu',	100.00);
+
+DROP TABLE IF EXISTS `shipping_payment_methods`;
+CREATE TABLE `shipping_payment_methods` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `shipping_option_id` int NOT NULL,
+  `payment_method_id` int NOT NULL,
+  PRIMARY KEY (`id`),
+  KEY `shipping_option_id` (`shipping_option_id`),
+  KEY `payment_method_id` (`payment_method_id`),
+  CONSTRAINT `shipping_payment_methods_ibfk_1` FOREIGN KEY (`shipping_option_id`) REFERENCES `shipping_options` (`id`) ON DELETE CASCADE,
+  CONSTRAINT `shipping_payment_methods_ibfk_2` FOREIGN KEY (`payment_method_id`) REFERENCES `vendor_payment_methods` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+INSERT INTO `shipping_payment_methods` (`id`, `shipping_option_id`, `payment_method_id`) VALUES
+(8,	9,	5),
+(9,	10,	5),
+(10,	11,	6),
+(11,	12,	6),
+(12,	9,	4),
+(13,	10,	4),
+(14,	11,	7),
+(15,	12,	7);
+
+DROP TABLE IF EXISTS `user_uploads`;
+CREATE TABLE `user_uploads` (
+  `id` int NOT NULL AUTO_INCREMENT,
+  `model_id` int NOT NULL,
+  `file_path` varchar(255) NOT NULL,
+  `original_filename` varchar(255) NOT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  PRIMARY KEY (`id`),
+  KEY `model_id` (`model_id`),
+  CONSTRAINT `user_uploads_ibfk_1` FOREIGN KEY (`model_id`) REFERENCES `models` (`id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+INSERT INTO `user_uploads` (`id`, `model_id`, `file_path`, `original_filename`, `created_at`) VALUES
+(1,	1,	'/www/uploads/user_uploads/1/688269a7873d3.gltf',	'Xi-Redmi-No-13-s-redukci.gltf',	'2025-07-24 17:13:11');
 
 DROP TABLE IF EXISTS `users`;
 CREATE TABLE `users` (
@@ -442,7 +478,7 @@ DROP TABLE IF EXISTS `vendor_payment_methods`;
 CREATE TABLE `vendor_payment_methods` (
   `id` int NOT NULL AUTO_INCREMENT,
   `vendor_id` int NOT NULL,
-  `payment_method` varchar(50) NOT NULL,
+  `code` varchar(50) NOT NULL,
   `name` varchar(255) NOT NULL,
   `price` decimal(10,2) NOT NULL DEFAULT '0.00',
   PRIMARY KEY (`id`),
@@ -450,11 +486,11 @@ CREATE TABLE `vendor_payment_methods` (
   CONSTRAINT `vendor_payment_methods_ibfk_1` FOREIGN KEY (`vendor_id`) REFERENCES `vendors` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-INSERT INTO `vendor_payment_methods` (`id`, `vendor_id`, `payment_method`, `name`, `price`) VALUES
-(1,	1,	'online',	'Pay Online',	0.00),
-(2,	1,	'pickup',	'Pay on Pickup',	50.00),
-(3,	2,	'online',	'Pay Online',	0.00),
-(4,	2,	'pickup',	'Pay on Pickup',	30.00);
+INSERT INTO `vendor_payment_methods` (`id`, `vendor_id`, `code`, `name`, `price`) VALUES
+(4,	7,	'prevod',	'převod',	0.00),
+(5,	7,	'dobirka',	'dobírka',	23.00),
+(6,	6,	'prevod',	'převod',	0.00),
+(7,	6,	'dobirka',	'dobírka',	12.00);
 
 DROP TABLE IF EXISTS `vendors`;
 CREATE TABLE `vendors` (
@@ -464,5 +500,5 @@ CREATE TABLE `vendors` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 INSERT INTO `vendors` (`id`, `name`) VALUES
-(1,	'Zásilkovna'),
-(2,	'Balíkovna');
+(6,	'Balíkovna'),
+(7,	'Zásilkovna');
