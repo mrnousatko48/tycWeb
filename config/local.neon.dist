@@ -1,0 +1,21 @@
+extensions:
+	recaptcha: Contributte\ReCaptcha\DI\ReCaptchaExtension
+
+parameters:
+
+database:
+    dsn: 'mysql:host=127.0.0.1;dbname=mydb'
+    user: usr
+    password: passwd
+
+mail:
+    smtp: true
+    host: smtp.seznam.cz
+    port: 465
+    username: "email@seznam.cz"
+    password: "passwd"
+    encryption: ssl
+
+recaptcha:
+	secretKey: 1234
+	siteKey: 1234
