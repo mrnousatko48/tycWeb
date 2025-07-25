@@ -104,7 +104,7 @@ protected function createComponentCaseForm(): Form
     return $form;
 }
 
-    public function processForm(Form $form): void
+   public function processForm(Form $form): void
 {
     $values = $form->getValues();
     error_log('Form values: ' . print_r($values, true));
@@ -115,7 +115,9 @@ protected function createComponentCaseForm(): Form
         $color = $values['color'];
         $totalPrice = (float)$values['total_price'];
         $features = json_decode($values['features'], true);
-        $userUploadId = isset($values['user_upload_id']) && $values['user_upload_id'] ? (int)$values['user_upload_id'] : null;
+        $userUploadId = isset($values['user_upload_id']) && $values['user_upload_id']
+            ? (int)$values['user_upload_id']
+            : null;
 
         if (!$manufacturerId || !$modelId || !$color) {
             throw new \Exception('Missing required fields: manufacturer, model, or color.');
@@ -147,11 +149,20 @@ protected function createComponentCaseForm(): Form
         $this->orderFacade->createCase($caseData, $userId);
 
         $this->flashMessage('Položka byla přidána do košíku.', 'success');
+        error_log('Redirecting after success.');
         $this->redirect('Cart:default');
+        return;
+
+    } catch (AbortException $e) {
+        // Let Nette handle redirects (e.g., from $this->redirect())
+        throw $e;
+
     } catch (\Exception $e) {
         error_log('Error in processForm: ' . $e->getMessage());
         $this->flashMessage('Chyba při přidávání do košíku: ' . $e->getMessage(), 'error');
+        error_log('Redirecting after error: ' . $e->getMessage());
         $this->redirect('Cart:default');
+        return;
     }
 }
 
