@@ -213,6 +213,11 @@
                                     {/foreach}
                                 </ul>
                             {/if}
+                            {if $case->user_upload_filename}
+                                <a href="{link downloadFile! $case->id}" class="action-button mt-2" style="background: #10b981;" target="_blank">
+                                    Stáhnout soubor: {$case->user_upload_filename}
+                                </a>
+                            {/if}
                         </li>
                     {/foreach}
                 </ul>

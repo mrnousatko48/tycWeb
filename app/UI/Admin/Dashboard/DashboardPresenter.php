@@ -149,4 +149,33 @@ public function renderEmails(): void
     return $form;
 }
 
+/**
+ * Handle file download for a case's user upload
+ */
+public function handleDownloadFile(int $caseId): void
+{
+    if (!$this->getUser()->isLoggedIn() || !$this->getUser()->isInRole('ADMIN')) {
+        $this->flashMessage('Nemáš oprávnění.', 'error');
+        $this->redirect('orders');
+    }
+
+    $uploadData = $this->orderFacade->getUserUploadFilePath($caseId);
+    if (!$uploadData) {
+        $this->flashMessage('Soubor nenalezen.', 'error');
+        $this->redirect('detail', $this->getParameter('id'));
+    }
+
+    $filePath = $_SERVER['DOCUMENT_ROOT'] . $uploadData['file_path'];
+    if (!file_exists($filePath)) {
+        $this->flashMessage('Soubor nenalezen na serveru.', 'error');
+        $this->redirect('detail', $this->getParameter('id'));
+    }
+
+    $response = new \Nette\Application\Responses\FileResponse(
+        $filePath,
+        $uploadData['original_filename'],
+        mime_content_type($filePath)
+    );
+    $this->sendResponse($response);
+}
 }

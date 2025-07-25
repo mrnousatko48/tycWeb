@@ -734,4 +734,28 @@ public function getUserUploadById(int $uploadId): ?ActiveRow
 {
     return $this->database->table('user_uploads')->get($uploadId);
 }
+
+public function getUserUploadFilePath(int $caseId): ?array
+{
+    $case = $this->database->table('cases')
+        ->where('id', $caseId)
+        ->fetch();
+
+    if (!$case || !$case->user_upload_id) {
+        return null;
+    }
+
+    $upload = $this->database->table('user_uploads')
+        ->where('id', $case->user_upload_id)
+        ->fetch();
+
+    if (!$upload) {
+        return null;
+    }
+
+    return [
+        'file_path' => $upload->file_path,
+        'original_filename' => $upload->original_filename,
+    ];
+}
 }
