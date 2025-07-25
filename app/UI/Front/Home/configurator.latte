@@ -254,6 +254,7 @@
                 <div>
                     {input features type => 'hidden', id => 'frm-caseForm-features'}
                     {input total_price type => 'hidden', id => 'frm-caseForm-total_price'}
+                    {input user_upload_id id => 'frm-caseForm-user_upload_id'}
                     {input submit class => 'submit-button w-full py-3 rounded-xl transform hover:scale-[1.02] transition duration-200 ease-out mt-6'}
                 </div>
             {/form}
@@ -680,33 +681,20 @@ setInterval(nextSlide, 5000);
 
 document.addEventListener('DOMContentLoaded', function() {
     const fileInput = document.getElementById('frm-caseForm-user_file');
-    const modelSelect = document.getElementById('frm-caseForm-model');
-
     if (!fileInput) {
         console.error('File input element not found');
-        return;
-    }
-    if (!modelSelect) {
-        console.error('Model select element not found');
         return;
     }
 
     fileInput.addEventListener('change', function() {
         const file = this.files[0];
-        const modelId = modelSelect.value;
-
         if (!file) {
             alert('Please select a file to upload.');
-            return;
-        }
-        if (!modelId) {
-            alert('Please select a model before uploading a file.');
             return;
         }
 
         const formData = new FormData();
         formData.append('user_file', file);
-        formData.append('model', modelId);
 
         fetch('/home/upload-file', {
             method: 'POST',
@@ -716,30 +704,44 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         })
         .then(response => {
-            if (!response.ok) {
-                throw new Error('Network response was not ok: ' + response.statusText);
-            }
-            return response.json();
+            console.log('Response status:', response.status);
+            return response.json().catch(err => {
+                console.error('Failed to parse JSON:', err);
+                throw new Error('Invalid JSON response');
+            });
         })
         .then(data => {
-            if (data.success) {
-                document.getElementById('frm-caseForm-user_upload_id').value = data.upload_id;
-                console.log('File uploaded successfully, ID:', data.upload_id);
-                alert('File uploaded successfully!');
+            console.log('Server response:', data);
+            if (data.success && data.upload_id) {
+                const hiddenField = document.getElementById('frm-caseForm-user_upload_id');
+                if (hiddenField) {
+                    hiddenField.value = data.upload_id;
+                    console.log('Set user_upload_id to:', data.upload_id);
+                    alert('File uploaded successfully!');
+                } else {
+                    console.error('Hidden field frm-caseForm-user_upload_id not found');
+                }
             } else {
-                console.error('Upload failed:', data.error);
-                alert('File upload failed: ' + data.error);
+                console.error('Upload failed:', data.error || 'No error message provided');
+                alert('Upload failed: ' + (data.error || 'Unknown error'));
             }
         })
         .catch(error => {
-            console.error('Error uploading file:', error);
-            alert('An error occurred while uploading the file: ' + error.message);
+            console.error('Upload error:', error);
+            alert('Upload failed: ' + error.message);
         });
     });
 });
 
-document.getElementById('frm-caseForm-submit').addEventListener('click', function() {
-    console.log('Submit clicked');
+document.addEventListener('DOMContentLoaded', function() {
+    const submitButton = document.getElementById('frm-caseForm-submit');
+    if (submitButton) {
+        submitButton.addEventListener('click', function() {
+            console.log('Submit clicked');
+        });
+    } else {
+        console.error('Submit button not found');
+    }
 });
 </script>
 {/block} 

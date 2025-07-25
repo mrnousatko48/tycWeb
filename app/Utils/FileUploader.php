@@ -5,23 +5,17 @@ use Nette\Http\FileUpload;
 
 class FileUploader
 {
-    /**
-     * Uploads a 3D file to the specified directory.
-     *
-     * @param FileUpload $file The uploaded file.
-     * @param string $uploadDir The target directory (e.g., 'uploads/user_uploads/1').
-     * @return string|null The path of the uploaded file, or null on failure.
-     * @throws \Exception If the file type is invalid.
-     */
     public static function uploadFile(FileUpload $file, string $uploadDir): ?string
     {
         if (!$file->isOk()) {
+            error_log('File upload failed: ' . $file->getError());
             return null;
         }
 
         $basePath = __DIR__ . '/../../www/' . ltrim($uploadDir, '/');
-        if (!is_dir($basePath)) {
-            mkdir($basePath, 0777, true);
+        if (!is_dir($basePath) && !mkdir($basePath, 0777, true)) {
+            error_log('Failed to create directory: ' . $basePath);
+            throw new \Exception('Failed to create upload directory.');
         }
 
         $allowedExtensions = ['stl', 'obj', '3mf', 'ply', 'fbx', 'gltf', 'glb'];
@@ -35,7 +29,17 @@ class FileUploader
         $filePath = $uploadDir . '/' . $filename;
         $fullPath = __DIR__ . '/../../www/' . ltrim($filePath, '/');
 
-        $file->move($fullPath);
-        return '/www/' . ltrim($filePath, '/');
+        try {
+            $file->move($fullPath);
+            if (!file_exists($fullPath)) {
+                error_log('File move failed: ' . $fullPath);
+                throw new \Exception('Failed to move file to destination.');
+            }
+            error_log('File moved successfully to: ' . $fullPath);
+            return '/www/' . ltrim($filePath, '/');
+        } catch (\Exception $e) {
+            error_log('Error moving file: ' . $e->getMessage());
+            throw $e;
+        }
     }
 }

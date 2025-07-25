@@ -396,16 +396,25 @@ class ModelFacade
             ->fetchAll();
     }
 
-    public function addUserUpload(int $modelId, FileUpload $file, string $originalFilename): ?ActiveRow
+    public function addUserUpload(FileUpload $file, string $originalFilename): ?ActiveRow
     {
-        $uploadDir = 'uploads/user_uploads/' . $modelId;
+        $uploadDir = 'uploads/user_uploads';
         $filePath = FileUploader::uploadFile($file, $uploadDir);
         if ($filePath) {
-            return $this->database->table('user_uploads')->insert([
-                'model_id' => $modelId,
-                'file_path' => $filePath,
-                'original_filename' => $originalFilename,
-            ]);
+            error_log("Attempting to insert into user_uploads: file_path=$filePath, original_filename=$originalFilename");
+            try {
+                $upload = $this->database->table('user_uploads')->insert([
+                    'file_path' => $filePath,
+                    'original_filename' => $originalFilename,
+                ]);
+                error_log("Insert succeeded, upload ID: " . $upload->id);
+                return $upload;
+            } catch (\Exception $e) {
+                error_log("Database insertion failed: " . $e->getMessage() . " | Stack trace: " . $e->getTraceAsString());
+                throw new \Exception("Failed to save upload to database: " . $e->getMessage());
+            }
+        } else {
+            error_log("File upload failed, filePath is empty");
         }
         return null;
     }

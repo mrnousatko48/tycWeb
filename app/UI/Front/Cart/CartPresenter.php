@@ -28,155 +28,155 @@ final class CartPresenter extends BaseFrontPresenter
         return $key;
     }
 
-     public function renderDefault(): void
-    {
-        if ($this->getUser()->isLoggedIn()) {
-            $userId = (int)$this->getUser()->getId();
-            $cases = $this->orderFacade->getCartCasesByUserId($userId);
-        } else {
-            $session = $this->getSession('order');
-            $quantities = $session->quantities ?? [];
-
-            if (empty($quantities)) {
-                $this->template->cases = [];
-                return;
-            }
-
-            $caseIds = array_keys($quantities);
-            $cases = $this->orderFacade->getCasesByIds($caseIds);
-            $this->template->quantities = $quantities;
-        }
-
-        $decodedCases = [];
-        $totalCartValue = 0;
-        foreach ($cases as $case) {
-            $caseArray = $case->toArray();
-            $features = $case->features ? json_decode($case->features, true) : [];
-            if (isset($features['features']) && is_string($features['features'])) {
-                $features = json_decode($features['features'], true) ?: $features;
-            }
-
-            $cleanFeatures = [];
-            foreach ($features as $key => $value) {
-                $cleanKey = $this->cleanFeatureKey($key);
-                $cleanFeatures[$cleanKey] = $value;
-            }
-
-            $caseArray['features'] = $cleanFeatures;
-            $upload = $case->user_upload_id ? $this->database->table('user_uploads')->get($case->user_upload_id) : null;
-            $caseArray['user_upload_filename'] = $upload ? $upload->original_filename : null;
-            $decodedCases[] = (object) $caseArray;
-
-            $quantity = $this->template->quantities[$case->id] ?? 1;
-            $totalCartValue += $case->total_price * $quantity;
-        }
-
-        $this->template->cases = $decodedCases;
-        $this->template->totalCartValue = $totalCartValue;
-    }
-
-    public function renderOrder(): void
-    {
+ public function renderDefault(): void
+{
+    if ($this->getUser()->isLoggedIn()) {
+        $userId = (int)$this->getUser()->getId();
+        $cases = $this->orderFacade->getCartCasesByUserId($userId);
+    } else {
         $session = $this->getSession('order');
         $quantities = $session->quantities ?? [];
 
         if (empty($quantities)) {
-            $this->flashMessage('Košík je prázdný.', 'warning');
-            $this->redirect('Cart:default');
+            $this->template->cases = [];
+            return;
         }
 
         $caseIds = array_keys($quantities);
         $cases = $this->orderFacade->getCasesByIds($caseIds);
-
-        $decodedCases = [];
-        $totalCartValue = 0;
-        foreach ($cases as $case) {
-            $caseArray = $case->toArray();
-            $features = $case->features ? json_decode($case->features, true) : [];
-            if (isset($features['features']) && is_string($features['features'])) {
-                $features = json_decode($features['features'], true) ?: $features;
-            }
-
-            $cleanFeatures = [];
-            foreach ($features as $key => $value) {
-                $cleanKey = $this->cleanFeatureKey($key);
-                $cleanFeatures[$cleanKey] = $value;
-            }
-
-            $caseArray['features'] = $cleanFeatures;
-            $upload = $case->user_upload_id ? $this->database->table('user_uploads')->get($case->user_upload_id) : null;
-            $caseArray['user_upload_filename'] = $upload ? $upload->original_filename : null;
-            $decodedCases[] = (object) $caseArray;
-
-            $quantity = $quantities[$case->id] ?? 1;
-            $totalCartValue += $case->total_price * $quantity;
-        }
-
-        $this->template->cases = $decodedCases;
         $this->template->quantities = $quantities;
-        $this->template->totalCartValue = $totalCartValue;
     }
 
-    public function renderInfo(): void
-    {
-        $session = $this->getSession('order');
-        $quantities = $session->quantities ?? [];
-
-        if (empty($quantities)) {
-            $this->flashMessage('Košík je prázdný.', 'warning');
-            $this->redirect('Cart:default');
+    $decodedCases = [];
+    $totalCartValue = 0;
+    foreach ($cases as $case) {
+        $caseArray = $case->toArray();
+        $features = $case->features ? json_decode($case->features, true) : [];
+        if (isset($features['features']) && is_string($features['features'])) {
+            $features = json_decode($features['features'], true) ?: $features;
         }
 
-        if (!isset($session->vendor) || !isset($session->shippingOption) || !isset($session->paymentMethod)) {
-            $this->flashMessage('Prosím, vyberte dopravce, způsob dopravy a platby.', 'warning');
-            $this->redirect('Cart:order');
+        $cleanFeatures = [];
+        foreach ($features as $key => $value) {
+            $cleanKey = $this->cleanFeatureKey($key);
+            $cleanFeatures[$cleanKey] = $value;
         }
 
-        $caseIds = array_keys($quantities);
-        $cases = $this->orderFacade->getCasesByIds($caseIds);
+        $caseArray['features'] = $cleanFeatures;
+        $upload = $case->user_upload_id ? $this->orderFacade->getUserUploadById($case->user_upload_id) : null;
+        $caseArray['user_upload_filename'] = $upload ? $upload->original_filename : null;
+        $decodedCases[] = (object) $caseArray;
 
-        $decodedCases = [];
-        $itemsSubtotal = 0;
-        foreach ($cases as $case) {
-            $caseArray = $case->toArray();
-            $features = $case->features ? json_decode($case->features, true) : [];
-            if (isset($features['features']) && is_string($features['features'])) {
-                $features = json_decode($features['features'], true) ?: $features;
-            }
-
-            $cleanFeatures = [];
-            foreach ($features as $key => $value) {
-                $cleanKey = $this->cleanFeatureKey($key);
-                $cleanFeatures[$cleanKey] = $value;
-            }
-
-            $caseArray['features'] = $cleanFeatures;
-            $upload = $case->user_upload_id ? $this->database->table('user_uploads')->get($case->user_upload_id) : null;
-            $caseArray['user_upload_filename'] = $upload ? $upload->original_filename : null;
-            $decodedCases[] = (object) $caseArray;
-
-            $quantity = $quantities[$case->id] ?? 1;
-            $itemsSubtotal += $case->total_price * $quantity;
-        }
-
-        $shippingInfo = $this->orderFacade->getShippingInfo((int)$session->shippingOption);
-        $shippingCost = $shippingInfo ? (float)$shippingInfo['cost'] : 0.0;
-        $shippingName = $shippingInfo ? $shippingInfo['name'] : 'Není vybráno';
-        $paymentInfo = $this->orderFacade->getPaymentInfo((int)$session->paymentMethod);
-        $paymentCost = $paymentInfo ? (float)$paymentInfo['price'] : 0.0;
-        $paymentName = $paymentInfo ? $paymentInfo['name'] : 'Není vybráno';
-        $totalCartValue = $itemsSubtotal + $shippingCost + $paymentCost;
-
-        $this->template->cases = $decodedCases;
-        $this->template->quantities = $quantities;
-        $this->template->itemsSubtotal = $itemsSubtotal;
-        $this->template->shippingCost = $shippingCost;
-        $this->template->paymentCost = $paymentCost;
-        $this->template->totalCartValue = $totalCartValue;
-        $this->template->shipping = $shippingName;
-        $this->template->payment = $paymentName;
-        $this->template->delivery_point = $session->delivery_point ?? 'Není zadáno';
+        $quantity = $this->template->quantities[$case->id] ?? 1;
+        $totalCartValue += $case->total_price * $quantity;
     }
+
+    $this->template->cases = $decodedCases;
+    $this->template->totalCartValue = $totalCartValue;
+}
+
+public function renderOrder(): void
+{
+    $session = $this->getSession('order');
+    $quantities = $session->quantities ?? [];
+
+    if (empty($quantities)) {
+        $this->flashMessage('Košík je prázdný.', 'warning');
+        $this->redirect('Cart:default');
+    }
+
+    $caseIds = array_keys($quantities);
+    $cases = $this->orderFacade->getCasesByIds($caseIds);
+
+    $decodedCases = [];
+    $totalCartValue = 0;
+    foreach ($cases as $case) {
+        $caseArray = $case->toArray();
+        $features = $case->features ? json_decode($case->features, true) : [];
+        if (isset($features['features']) && is_string($features['features'])) {
+            $features = json_decode($features['features'], true) ?: $features;
+        }
+
+        $cleanFeatures = [];
+        foreach ($features as $key => $value) {
+            $cleanKey = $this->cleanFeatureKey($key);
+            $cleanFeatures[$cleanKey] = $value;
+        }
+
+        $caseArray['features'] = $cleanFeatures;
+        $upload = $case->user_upload_id ? $this->orderFacade->getUserUploadById($case->user_upload_id) : null;
+        $caseArray['user_upload_filename'] = $upload ? $upload->original_filename : null;
+        $decodedCases[] = (object) $caseArray;
+
+        $quantity = $quantities[$case->id] ?? 1;
+        $totalCartValue += $case->total_price * $quantity;
+    }
+
+    $this->template->cases = $decodedCases;
+    $this->template->quantities = $quantities;
+    $this->template->totalCartValue = $totalCartValue;
+}
+
+public function renderInfo(): void
+{
+    $session = $this->getSession('order');
+    $quantities = $session->quantities ?? [];
+
+    if (empty($quantities)) {
+        $this->flashMessage('Košík je prázdný.', 'warning');
+        $this->redirect('Cart:default');
+    }
+
+    if (!isset($session->vendor) || !isset($session->shippingOption) || !isset($session->paymentMethod)) {
+        $this->flashMessage('Prosím, vyberte dopravce, způsob dopravy a platby.', 'warning');
+        $this->redirect('Cart:order');
+    }
+
+    $caseIds = array_keys($quantities);
+    $cases = $this->orderFacade->getCasesByIds($caseIds);
+
+    $decodedCases = [];
+    $itemsSubtotal = 0;
+    foreach ($cases as $case) {
+        $caseArray = $case->toArray();
+        $features = $case->features ? json_decode($case->features, true) : [];
+        if (isset($features['features']) && is_string($features['features'])) {
+            $features = json_decode($features['features'], true) ?: $features;
+        }
+
+        $cleanFeatures = [];
+        foreach ($features as $key => $value) {
+            $cleanKey = $this->cleanFeatureKey($key);
+            $cleanFeatures[$cleanKey] = $value;
+        }
+
+        $caseArray['features'] = $cleanFeatures;
+        $upload = $case->user_upload_id ? $this->orderFacade->getUserUploadById($case->user_upload_id) : null;
+        $caseArray['user_upload_filename'] = $upload ? $upload->original_filename : null;
+        $decodedCases[] = (object) $caseArray;
+
+        $quantity = $quantities[$case->id] ?? 1;
+        $itemsSubtotal += $case->total_price * $quantity;
+    }
+
+    $shippingInfo = $this->orderFacade->getShippingInfo((int)$session->shippingOption);
+    $shippingCost = $shippingInfo ? (float)$shippingInfo['cost'] : 0.0;
+    $shippingName = $shippingInfo ? $shippingInfo['name'] : 'Není vybráno';
+    $paymentInfo = $this->orderFacade->getPaymentInfo((int)$session->paymentMethod);
+    $paymentCost = $paymentInfo ? (float)$paymentInfo['price'] : 0.0;
+    $paymentName = $paymentInfo ? $paymentInfo['name'] : 'Není vybráno';
+    $totalCartValue = $itemsSubtotal + $shippingCost + $paymentCost;
+
+    $this->template->cases = $decodedCases;
+    $this->template->quantities = $quantities;
+    $this->template->itemsSubtotal = $itemsSubtotal;
+    $this->template->shippingCost = $shippingCost;
+    $this->template->paymentCost = $paymentCost;
+    $this->template->totalCartValue = $totalCartValue;
+    $this->template->shipping = $shippingName;
+    $this->template->payment = $paymentName;
+    $this->template->delivery_point = $session->delivery_point ?? 'Není zadáno';
+}
 
     protected function createComponentOrderForm(): Form
     {

@@ -6,6 +6,8 @@ namespace App\UI\Front\Home;
 use Nette\Application\UI\Form;
 use App\UI\Front\BaseFrontPresenter;
 use App\Model\ModelFacade;
+use Nette\Application\AbortException;
+
 
 final class HomePresenter extends BaseFrontPresenter
 {
@@ -85,7 +87,9 @@ protected function createComponentCaseForm(): Form
     // Add a hidden field to store the uploaded file ID
     $form->addHidden('user_upload_id')->setDefaultValue(null);
 
-    $form->addSubmit('submit', 'Přidat do košíku');
+    $form->addSubmit('submit', 'Přidat do košíku')
+     ->setHtmlAttribute('id', 'frm-caseForm-submit');
+
 
     $form->onAnchor[] = function () use ($model, $manufacturer) {
         $model->setItems(
@@ -103,13 +107,15 @@ protected function createComponentCaseForm(): Form
     public function processForm(Form $form): void
 {
     $values = $form->getValues();
+    error_log('Form values: ' . print_r($values, true));
+
     try {
         $manufacturerId = (int)$values['manufacturer'];
         $modelId = (int)$values['model'];
         $color = $values['color'];
         $totalPrice = (float)$values['total_price'];
         $features = json_decode($values['features'], true);
-        $userUploadId = $values['user_upload_id'] ? (int)$values['user_upload_id'] : null;
+        $userUploadId = isset($values['user_upload_id']) && $values['user_upload_id'] ? (int)$values['user_upload_id'] : null;
 
         if (!$manufacturerId || !$modelId || !$color) {
             throw new \Exception('Missing required fields: manufacturer, model, or color.');
@@ -132,11 +138,10 @@ protected function createComponentCaseForm(): Form
             'color' => $color,
             'total_price' => $totalPrice,
             'features' => $values['features'],
+            'user_upload_id' => $userUploadId,
         ];
 
-        if ($userUploadId) {
-            $caseData['user_upload_id'] = $userUploadId;
-        }
+        error_log('Creating case with user_upload_id: ' . ($userUploadId ?? 'NULL'));
 
         $userId = $this->getUser()->isLoggedIn() ? $this->getUser()->getId() : null;
         $this->orderFacade->createCase($caseData, $userId);
@@ -155,40 +160,39 @@ protected function createComponentCaseForm(): Form
         $this->template->gallery = $this->pageFacade->getGalleryImages();
     }
 
-    public function actionUploadFile(): void
+public function actionUploadFile(): void
 {
     if (!$this->isAjax()) {
         $this->error('This endpoint accepts only AJAX requests.', 400);
     }
 
-    $request = $this->getHttpRequest();
-    $file = $request->getFile('user_file');
-
-    if (!$file || !$file->isOk()) {
-        $this->sendJson([
-            'success' => false,
-            'error' => $file ? 'File upload failed: ' . $file->getError() : 'No file uploaded.',
-        ]);
-    }
-
     try {
-        // Assuming modelId is not strictly required for upload; adjust as needed
-        $modelId = $request->getPost('model') ? (int)$request->getPost('model') : null;
-        $upload = $this->modelFacade->addUserUpload($modelId, $file, $file->getSanitizedName());
-        
-        if ($upload) {
-            $this->sendJson([
-                'success' => true,
-                'upload_id' => $upload->id,
-            ]);
-        } else {
-            throw new \Exception('Failed to process file upload.');
+        $file = $this->getHttpRequest()->getFile('user_file');
+        if (!$file || !$file->isOk()) {
+            throw new \RuntimeException('File upload failed: ' . ($file ? $file->getError() : 'No file uploaded.'));
         }
-    } catch (\Exception $e) {
+
+        $upload = $this->modelFacade->addUserUpload($file, $file->getSanitizedName());
+        if (!$upload || !isset($upload->id)) {
+            throw new \RuntimeException('Failed to process file upload: missing ID');
+        }
+
+        // success → JSON + terminate
+        $this->sendJson(['success' => true, 'upload_id' => $upload->id]);
+        $this->terminate();
+
+    } catch (AbortException $e) {
+        // re‑throw Nette’s own “abort” so we don’t mistake it for an error
+        throw $e;
+
+    } catch (\Throwable $e) {
+        // *only* real upload errors land here
+        error_log("upload error: " . $e->getMessage());
         $this->sendJson([
             'success' => false,
-            'error' => 'Upload error: ' . $e->getMessage(),
+            'error'   => $e->getMessage(),
         ]);
+        $this->terminate();
     }
-}
+    }
 }

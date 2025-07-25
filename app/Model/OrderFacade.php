@@ -451,7 +451,6 @@ final class OrderFacade
             $quantities = $orderSection->quantities ?? [];
             $quantities[$case->id] = ($quantities[$case->id] ?? 0) + 1;
             $orderSection->quantities = $quantities;
-            $this->session->setExpiration('30 minutes');
             error_log('Guest cart updated: ' . print_r($quantities, true));
         }
 
@@ -731,4 +730,8 @@ public function getShippingOptionsForPaymentMethod(int $paymentMethodId): array
         ->fetchPairs('shipping_option_id', 'shipping_option_id');
 }
 
+public function getUserUploadById(int $uploadId): ?ActiveRow
+{
+    return $this->database->table('user_uploads')->get($uploadId);
+}
 }
