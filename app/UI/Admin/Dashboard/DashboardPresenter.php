@@ -47,12 +47,12 @@ final class DashboardPresenter extends Nette\Application\UI\Presenter
         $this->template->orderData = $orderData;
     }
 
-    public function renderOrders(): void
-    {
-        $status = $this->getParameter('status');
-        $this->template->orders = $this->orderFacade->getOrdersWithDetails($status);
-        $this->template->currentStatus = $status;
-    }
+public function renderOrders(string $status = null): void
+{
+    $this->template->orders = $this->orderFacade->getOrdersWithDetails($status);
+    $this->template->currentStatus = $status;
+}
+
 
 public function renderEmails(): void
 {

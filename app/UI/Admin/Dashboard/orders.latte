@@ -159,7 +159,7 @@
         <h1>Seznam objednávek</h1>
         <div class="filter-container">
             <label for="statusFilter" class="filter-label">Filtrovat podle stavu:</label>
-            <select id="statusFilter" onchange="window.location.href='?status=' + this.value" class="filter-select">
+            <select id="statusFilter" class="filter-select" onchange="window.location.href = '?status=' + this.value">
                 <option value="" {if !$currentStatus}selected{/if}>Všechny</option>
                 <option value="KOSIK" {if $currentStatus === 'KOSIK'}selected{/if}>Košík</option>
                 <option value="OBJEDNANO" {if $currentStatus === 'OBJEDNANO'}selected{/if}>Objednáno</option>
