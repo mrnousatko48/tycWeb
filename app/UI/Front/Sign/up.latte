@@ -213,37 +213,38 @@
             <div class="form-columns">
                 <div>
                     <div class="form-group">
-                        <label n:name="username">Uživatelské jméno:</label>
+                        <label n:name="username">*Uživatelské jméno:</label>
                         {input username}
                         {if $form[username]->hasErrors()}<div class="error">{$form[username]->getError()}</div>{/if}
                     </div>
                     <div class="form-group">
-                        <label n:name="firstname">Křestní jméno:</label>
+                        <label n:name="firstname">*Křestní jméno:</label>
                         {input firstname}
                         {if $form[firstname]->hasErrors()}<div class="error">{$form[firstname]->getError()}</div>{/if}
                     </div>
                     <div class="form-group">
-                        <label n:name="lastname">Příjmení:</label>
+                        <label n:name="lastname">*Příjmení:</label>
                         {input lastname}
                         {if $form[lastname]->hasErrors()}<div class="error">{$form[lastname]->getError()}</div>{/if}
                     </div>
                 </div>
                 <div>
                     <div class="form-group">
-                        <label n:name="email">Email:</label>
+                        <label n:name="email">*Email:</label>
                         {input email}
                         {if $form[email]->hasErrors()}<div class="error">{$form[email]->getError()}</div>{/if}
                     </div>
                     <div class="form-group">
-                        <label n:name="password">Heslo:</label>
+                        <label n:name="password">*Heslo:</label>
                         {input password}
                         {if $form[password]->hasErrors()}<div class="error">{$form[password]->getError()}</div>{/if}
                     </div>
                     <div class="form-group">
-                        <label n:name="confirmPassword">Potvrzení hesla:</label>
+                        <label n:name="confirmPassword">*Potvrzení hesla:</label>
                         {input confirmPassword}
                         {if $form[confirmPassword]->hasErrors()}<div class="error">{$form[confirmPassword]->getError()}</div>{/if}
                     </div>
+                    <div n:name="recaptcha"></div>
                 </div>
             </div>
             <div class="form-group">
@@ -257,4 +258,5 @@
         </div>
     </div>
 </div>
+<script src='https://www.google.com/recaptcha/api.js'></script>
 {/block}

@@ -28,6 +28,7 @@ return array(
     'Mpdf\\' => array($vendorDir . '/mpdf/mpdf/src'),
     'Latte\\' => array($vendorDir . '/latte/latte/src'),
     'DeepCopy\\' => array($vendorDir . '/myclabs/deep-copy/src/DeepCopy'),
+    'Contributte\\ReCaptcha\\' => array($vendorDir . '/contributte/recaptcha/src'),
     'Contributte\\Application\\' => array($vendorDir . '/contributte/application/src'),
     'App\\' => array($baseDir . '/app'),
 );

@@ -1,3 +1,6 @@
+extensions:
+	recaptcha: Contributte\ReCaptcha\DI\ReCaptchaExtension
+
 parameters:
 
 database:
@@ -12,3 +15,7 @@ mail:
     username: "opnx3d@seznam.cz"
     password: "SecretHeslo123"
     encryption: ssl
+
+recaptcha:
+	secretKey: 6LcfHI8rAAAAABWZVRCKeyuzWrvbEMKGebm0lc1o
+	siteKey: 6LcfHI8rAAAAAEEh3EHh9i9c0MgLj4E2CGOgIVWK

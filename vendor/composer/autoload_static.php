@@ -71,6 +71,7 @@ class ComposerStaticInit8124be0df26b082507d0f18b298719a8
         ),
         'C' => 
         array (
+            'Contributte\\ReCaptcha\\' => 22,
             'Contributte\\Application\\' => 24,
         ),
         'A' => 
@@ -167,6 +168,10 @@ class ComposerStaticInit8124be0df26b082507d0f18b298719a8
         'DeepCopy\\' => 
         array (
             0 => __DIR__ . '/..' . '/myclabs/deep-copy/src/DeepCopy',
+        ),
+        'Contributte\\ReCaptcha\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/contributte/recaptcha/src',
         ),
         'Contributte\\Application\\' => 
         array (

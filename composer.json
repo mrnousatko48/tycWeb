@@ -21,7 +21,8 @@
 		"latte/latte": "^3.0",
 		"tracy/tracy": "^2.10",
 		"ublaboo/datagrid": "^6.10",
-		"mpdf/mpdf": "^8.2"
+		"mpdf/mpdf": "^8.2",
+		"contributte/recaptcha": "^4.0"
 	},
 	"require-dev": {
 		"nette/tester": "^2.5",
