@@ -245,9 +245,10 @@
                 </div>
 
                 <div id="user-upload-container" style="display: none;">
-                    <h2 class="text-xl font-medium mt-4">Nahrát vlastní 3D soubor</h2>
+                    <h2 class="text-xl font-medium mt-4">Nahrát vlastní obrázek</h2>
+                    <p class="text-sm text-gray-400 mt-2">Nahrajte obrázek ve formátu PNG nebo JPG. Maximální velikost souboru je 5 MB.</p>
                     <div class="mt-2">
-                        {input user_file class => 'file-input px-4 py-3 rounded-xl shadow-sm hover:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)] transition duration-200 ease-out', accept => '.stl,.obj,.3mf,.ply,.fbx,.gltf,.glb'}
+                        {input user_file class => 'file-input px-4 py-3 rounded-xl shadow-sm hover:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)] transition duration-200 ease-out', accept => '.png,.jpg,.jpeg'}
                     </div>
                 </div>
 
@@ -273,6 +274,7 @@ let selectedFeatures = {};
 let currentImages = [];
 let currentSlide = 0;
 let totalSlides = currentImages.length || 1;
+let fileUploadSuccess = false; // Track file upload status
 
 document.querySelectorAll('select[data-depends]').forEach((childSelect) => {
     let parentSelect = childSelect.form[childSelect.dataset.depends];
@@ -352,6 +354,8 @@ function updateUserUploadVisibility() {
     userFileInput.disabled = !showUpload;
     if (!showUpload) {
         userFileInput.value = '';
+        document.getElementById('frm-caseForm-user_upload_id').value = '';
+        fileUploadSuccess = false;
     }
 }
 
@@ -689,7 +693,9 @@ document.addEventListener('DOMContentLoaded', function() {
     fileInput.addEventListener('change', function() {
         const file = this.files[0];
         if (!file) {
-            alert('Please select a file to upload.');
+            alert('Prosím vyberte soubor k nahrání.');
+            fileUploadSuccess = false;
+            document.getElementById('frm-caseForm-user_upload_id').value = '';
             return;
         }
 
@@ -717,18 +723,23 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (hiddenField) {
                     hiddenField.value = data.upload_id;
                     console.log('Set user_upload_id to:', data.upload_id);
-                    alert('File uploaded successfully!');
+                    fileUploadSuccess = true;
+                    alert('Soubor byl úspěšně nahrán!');
                 } else {
                     console.error('Hidden field frm-caseForm-user_upload_id not found');
                 }
             } else {
                 console.error('Upload failed:', data.error || 'No error message provided');
-                alert('Upload failed: ' + (data.error || 'Unknown error'));
+                alert('Nahrání selhalo: ' + (data.error || 'Neznámá chyba'));
+                fileUploadSuccess = false;
+                document.getElementById('frm-caseForm-user_upload_id').value = '';
             }
         })
         .catch(error => {
             console.error('Upload error:', error);
-            alert('Upload failed: ' + error.message);
+            alert('Nahrání selhalo: ' + error.message);
+            fileUploadSuccess = false;
+            document.getElementById('frm-caseForm-user_upload_id').value = '';
         });
     });
 });
@@ -736,8 +747,13 @@ document.addEventListener('DOMContentLoaded', function() {
 document.addEventListener('DOMContentLoaded', function() {
     const submitButton = document.getElementById('frm-caseForm-submit');
     if (submitButton) {
-        submitButton.addEventListener('click', function() {
+        submitButton.addEventListener('click', function(event) {
             console.log('Submit clicked');
+            const requiresUpload = Object.values(selectedFeatures).some(feature => feature.allow_user_upload);
+            if (requiresUpload && !fileUploadSuccess) {
+                event.preventDefault();
+                alert('Prosím nahrajte platný obrázek (PNG/JPG, max. 5 MB) před přidáním do košíku.');
+            }
         });
     } else {
         console.error('Submit button not found');

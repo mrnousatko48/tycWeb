@@ -18,8 +18,14 @@ class FileUploader
             throw new \Exception('Failed to create upload directory.');
         }
 
-        $allowedExtensions = ['stl', 'obj', '3mf', 'ply', 'fbx', 'gltf', 'glb'];
+
+        $allowedExtensions = ['png', 'jpg', 'jpeg'];
         $ext = strtolower(pathinfo($file->getSanitizedName(), PATHINFO_EXTENSION));
+
+        $maxFileSize = 5 * 1024 * 1024; // 5MB in bytes
+        if ($file->getSize() > $maxFileSize) {
+            throw new \Exception('Soubor nesmí přesahovat velikost 5MB.');
+        }
 
         if (!in_array($ext, $allowedExtensions)) {
             throw new \Exception('Invalid file type. Allowed types: ' . implode(', ', $allowedExtensions));
