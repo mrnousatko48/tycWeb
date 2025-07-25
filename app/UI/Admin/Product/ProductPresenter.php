@@ -426,131 +426,137 @@ final class ProductPresenter extends Nette\Application\UI\Presenter
         }
     }
 
-    public function createComponentFeatureOptionForm(): Form
-    {
-        $form = new Form;
+public function createComponentFeatureOptionForm(): Form
+{
+    $form = new Form;
 
-        $form->addSelect('feature_id', 'Funkce:', 
-            $this->modelFacade->getFeatures()->fetchPairs('id', 'name'))
-            ->setPrompt('Vyberte funkci')
-            ->setRequired('Prosím, vyberte funkci.');
+    $form->addSelect('feature_id', 'Funkce:', 
+        $this->modelFacade->getFeatures()->fetchPairs('id', 'name'))
+        ->setPrompt('Vyberte funkci')
+        ->setRequired('Prosím, vyberte funkci.');
 
-        $form->addText('name', 'Název varianty:')
-            ->setRequired('Prosím, zadejte název varianty.');
+    $form->addText('name', 'Název varianty:')
+        ->setRequired('Prosím, zadejte název varianty.');
 
-        $form->addText('price', 'Cena (CZK):')
-            ->setRequired('Prosím, zadejte cenu.')
-            ->addRule($form::FLOAT, 'Cena musí být platné číslo.')
-            ->setDefaultValue('0.00');
+    $form->addText('price', 'Cena (CZK):')
+        ->setRequired('Prosím, zadejte cenu.')
+        ->addRule($form::FLOAT, 'Cena musí být platné číslo.')
+        ->setDefaultValue('0.00');
 
-        $form->addSubmit('save', 'Přidat variantu');
+    $form->addCheckbox('allow_user_upload', 'Nahrát Soubor')
+        ->setDefaultValue(false);
 
-        $form->onSuccess[] = [$this, 'featureOptionFormSucceeded'];
-        return $form;
-    }
+    $form->addSubmit('save', 'Přidat variantu');
 
-    public function featureOptionFormSucceeded(Form $form, array $values): void
-    {
-        try {
-            $existingOption = $this->modelFacade->getAllFeatureOptions()
-                ->where('feature_id', $values['feature_id'])
-                ->where('name', $values['name'])
-                ->fetch();
-            
-            if ($existingOption) {
-                $this->flashMessage("Možnost '{$values['name']}' již pro tuto vlastnost existuje.", 'error');
-            } else {
-                $this->modelFacade->addFeatureOption($values['feature_id'], $values['name'], (float)$values['price']);
-                $this->flashMessage('Možnost byla úspěšně přidána!', 'success');
-            }
-        } catch (\Exception $e) {
-            $this->flashMessage($e->getMessage(), 'error');
-        }
+    $form->onSuccess[] = [$this, 'featureOptionFormSucceeded'];
+    return $form;
+}
 
-        if ($this->isAjax()) {
-            $this->template->featureOptions = $this->modelFacade->getAllFeatureOptions();
-            $this->redrawControl('featureOptionsTable');
-            $this->redrawControl('featureOptionForm-feature_id');
-            $this->redrawControl('flashes');
+public function featureOptionFormSucceeded(Form $form, array $values): void
+{
+    try {
+        $existingOption = $this->modelFacade->getAllFeatureOptions()
+            ->where('feature_id', $values['feature_id'])
+            ->where('name', $values['name'])
+            ->fetch();
+        
+        if ($existingOption) {
+            $this->flashMessage("Možnost '{$values['name']}' již pro tuto vlastnost existuje.", 'error');
         } else {
-            $this->redirect('features');
+            $this->modelFacade->addFeatureOption(
+                $values['feature_id'],
+                $values['name'],
+                (float)$values['price'],
+                (bool)$values['allow_user_upload']
+            );
+            $this->flashMessage('Možnost byla úspěšně přidána!', 'success');
         }
+    } catch (\Exception $e) {
+        $this->flashMessage($e->getMessage(), 'error');
     }
 
-    public function createComponentFeatureOptionEditForm(): Form
-    {
-        $form = new Form;
+    if ($this->isAjax()) {
+        $this->template->featureOptions = $this->modelFacade->getAllFeatureOptions();
+        $this->redrawControl('featureOptionsTable');
+        $this->redrawControl('featureOptionForm-feature_id');
+        $this->redrawControl('flashes');
+    } else {
+        $this->redirect('features');
+    }
+}
 
-        $form->addHidden('id');
+public function createComponentFeatureOptionEditForm(): Form
+{
+    $form = new Form;
 
-        $form->addSelect('feature_id', 'Funkce:', 
-            $this->modelFacade->getFeatures()->fetchPairs('id', 'name'))
-            ->setPrompt('Vyberte funkci')
-            ->setRequired('Prosím, vyberte funkci.');
+    $form->addHidden('id');
 
-        $form->addText('name', 'Název varianty:')
-            ->setRequired('Prosím, zadejte název varianty.');
+    $form->addSelect('feature_id', 'Funkce:', 
+        $this->modelFacade->getFeatures()->fetchPairs('id', 'name'))
+        ->setPrompt('Vyberte funkci')
+        ->setRequired('Prosím, vyberte funkci.');
 
-        $form->addText('price', 'Cena (CZK):')
-            ->setRequired('Prosím, zadejte cenu.')
-            ->addRule($form::FLOAT, 'Cena musí být platné číslo.')
-            ->setDefaultValue('0.00');
+    $form->addText('name', 'Název varianty:')
+        ->setRequired('Prosím, zadejte název varianty.');
 
-        $form->addSubmit('save', 'Upravit variantu');
+    $form->addText('price', 'Cena (CZK):')
+        ->setRequired('Prosím, zadejte cenu.')
+        ->addRule($form::FLOAT, 'Cena musí být platné číslo.')
+        ->setDefaultValue('0.00');
 
-        $form->onSuccess[] = [$this, 'featureOptionEditFormSucceeded'];
-        return $form;
+    $form->addCheckbox('allow_user_upload', 'Nahrát Soubor')
+        ->setDefaultValue(false);
+
+    $form->addSubmit('save', 'Upravit variantu');
+
+    $form->onSuccess[] = [$this, 'featureOptionEditFormSucceeded'];
+    return $form;
+}
+
+public function featureOptionEditFormSucceeded(Form $form, array $values): void
+{
+    try {
+        $this->modelFacade->updateFeatureOption(
+            (int)$values['id'],
+            $values['name'],
+            (float)$values['price'],
+            (bool)$values['allow_user_upload']
+        );
+        $this->flashMessage('Varianta byla úspěšně upravena!', 'success');
+    } catch (\Exception $e) {
+        $this->flashMessage($e->getMessage(), 'error');
     }
 
-    public function featureOptionEditFormSucceeded(Form $form, array $values): void
-    {
-        try {
-            $option = $this->modelFacade->getAllFeatureOptions()->get((int)$values['id']);
-            $this->modelFacade->updateFeatureOption((int)$values['id'], $values['name'], (float)$values['price'], (bool)$option->allow_user_upload);
-            $this->flashMessage('Varianta byla úspěšně upravena!', 'success');
-        } catch (\Exception $e) {
-            $this->flashMessage($e->getMessage(), 'error');
-        }
+    if ($this->isAjax()) {
+        $this->template->featureOptions = $this->modelFacade->getAllFeatureOptions();
+        $this->redrawControl('featureOptionsTable');
+        $this->redrawControl('featureOptionForm-feature_id');
+        $this->redrawControl('flashes');
+    } else {
+        $this->redirect('features');
+    }
+}
 
-        if ($this->isAjax()) {
-            $this->template->featureOptions = $this->modelFacade->getAllFeatureOptions();
-            $this->redrawControl('featureOptionsTable');
-            $this->redrawControl('featureOptionForm-feature_id');
-            $this->redrawControl('flashes');
-        } else {
-            $this->redirect('features');
-        }
+public function handleEditFeatureOption(int $optionId): void
+{
+    $option = $this->modelFacade->getAllFeatureOptions()->get($optionId);
+    if (!$option) {
+        $this->flashMessage('Možnost neexistuje.', 'error');
+        $this->redirect('features');
     }
 
+    $this['featureOptionEditForm']->setDefaults([
+        'id' => $option->id,
+        'feature_id' => $option->feature_id,
+        'name' => $option->name,
+        'price' => $option->price,
+        'allow_user_upload' => (bool)$option->allow_user_upload,
+    ]);
 
-    public function handleFilterModels(int $manufacturerId): void
-    {
-        if ($this->isAjax()) {
-            $this->template->models = $this->modelFacade->getModels($manufacturerId);
-            $this->template->selectedManufacturerId = $manufacturerId;
-            $this->redrawControl('modelsTable');
-        }
+    if ($this->isAjax()) {
+        $this->redrawControl('featureOptionEditForm');
     }
-
-        public function handleEditFeatureOption(int $optionId): void
-    {
-        $option = $this->modelFacade->getAllFeatureOptions()->get($optionId);
-        if (!$option) {
-            $this->flashMessage('Možnost neexistuje.', 'error');
-            $this->redirect('features');
-        }
-
-        $this['featureOptionEditForm']->setDefaults([
-            'id' => $option->id,
-            'feature_id' => $option->feature_id,
-            'name' => $option->name,
-            'price' => $option->price,
-        ]);
-
-        if ($this->isAjax()) {
-            $this->redrawControl('featureOptionEditForm');
-        }
-    }
+}
 
     public function handleDeleteColor(int $colorId): void
     {
