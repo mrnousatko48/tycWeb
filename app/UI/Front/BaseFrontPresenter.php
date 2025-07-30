@@ -6,27 +6,37 @@ namespace App\UI\Front;
 use Nette\Application\UI\Presenter;
 use App\Model\PageFacade;
 use App\Model\OrderFacade;
-use App\Model\userFacade;
-
+use App\Model\UserFacade;
+use App\Utils\ArrayTranslator;
+use Nette\Localization\Translator;
 
 abstract class BaseFrontPresenter extends Presenter
 {
     protected OrderFacade $orderFacade;
     protected PageFacade $pageFacade;
     protected UserFacade $userFacade;
- 
+    protected Translator $translator;
 
     public function injectDependencies(OrderFacade $orderFacade, PageFacade $pageFacade, UserFacade $userFacade): void
     {
         $this->orderFacade = $orderFacade;
         $this->pageFacade = $pageFacade;
         $this->userFacade = $userFacade;
-        
     }
 
     protected function startup(): void
     {
         parent::startup();
+
+        // Set up translator with language from URL or system preference, default to 'cs'
+        $lang = $this->getParameter('lang');
+        if (!$lang) {
+            $acceptLanguage = $this->getHttpRequest()->getHeader('Accept-Language') ?: 'cs';
+            $lang = strpos($acceptLanguage, 'cs') !== false ? 'cs' : (strpos($acceptLanguage, 'en') !== false ? 'en' : 'cs');
+        }
+        $this->translator = new ArrayTranslator($lang);
+        $this->template->setTranslator($this->translator);
+        $this->template->lang = $lang;
 
         // Dark theme logic
         $savedTheme = $this->getHttpRequest()->getCookie('theme');
@@ -66,5 +76,13 @@ abstract class BaseFrontPresenter extends Presenter
         $newTheme = $currentTheme === 'light' ? 'dark' : 'light';
         $this->getHttpResponse()->setCookie('theme', $newTheme, '30 days');
         $this->redirect('this');
+    }
+
+    protected function beforeRender(): void
+    {
+        parent::beforeRender();
+        $this->template->addFilter('translate', function ($value) {
+            return $this->translator->translate($value);
+        });
     }
 }

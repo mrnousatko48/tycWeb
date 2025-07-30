@@ -1,14 +1,17 @@
 <!DOCTYPE html>
-<html lang="cs">
+<html lang="{$lang}">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="{_'meta.description'}">
     <title>{block title}{/block}</title>
     <link rel="icon" href="/www/favicon.ico" type="image/x-icon">
+    <link rel="alternate" hreflang="cs" href="{link //Home:default, 'lang' => 'cs'}" />
+    <link rel="alternate" hreflang="en" href="{link //Home:default, 'lang' => 'en'}" />
+    <link rel="alternate" hreflang="x-default" href="{link //Home:default, 'lang' => 'cs'}" />
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
-
     <style>
 :root {
     /* Light mode */
@@ -230,28 +233,28 @@ h2 {
 }
     </style>
 </head>
-<body class="flex flex-col min-h-screen" data-theme="dark">
+<body class="flex flex-col min-h-screen" data-theme="{if $darkMode}dark{else}light{/if}">
 <header class="site-header">
     <div class="container mx-auto px-4 flex justify-between items-center">
         <a href="{$basePath}/" class="hover:text-[var(--color-accent)] transition">
-            <img src="{$basePath}{$logos['dark']}" alt="OPNX3D Logo" class="logo-dark h-10 w-auto">
-            <img src="{$basePath}{$logos['light']}" alt="OPNX3D Logo" class="logo-light h-10 w-auto">
+            <img src="{$basePath}{$logos['dark']}" alt="{_'logo.alt'}" class="logo-dark h-10 w-auto">
+            <img src="{$basePath}{$logos['light']}" alt="{_'logo.alt'}" class="logo-light h-10 w-auto">
         </a>
         <nav class="flex items-center space-x-6 text-sm font-medium relative">
             <button id="hamburger-toggle" class="hamburger-menu">
                 <i class="fas fa-bars"></i>
             </button>
             <div class="nav-menu hidden sm:flex sm:space-x-6">
-                <a n:href="Home:default" class="hover:text-[var(--color-accent)] transition">Domů</a>
-                <a n:href="Home:gallery" class="hover:text-[var(--color-accent)] transition">Galerie</a>
-                <a href="{$basePath}{link Home:default}#contact" class="hover:text-[var(--color-accent)] transition">Kontakty</a>
-                <a n:href="Home:configurator" class="hover:text-[var(--color-accent)] transition">Navrhnout kryt</a>
+                <a n:href="Home:default" class="hover:text-[var(--color-accent)] transition">{_'nav.home'}</a>
+                <a n:href="Home:gallery" class="hover:text-[var(--color-accent)] transition">{_'nav.gallery'}</a>
+                <a href="{$basePath}{link Home:default}#contact" class="hover:text-[var(--color-accent)] transition">{_'nav.contact'}</a>
+                <a n:href="Home:configurator" class="hover:text-[var(--color-accent)] transition">{_'nav.design'}</a>
             </div>
 
             {if $user->isLoggedIn()}
                 <div class="relative">
                     <button id="dropdownButton" class="flex items-center gap-2 rounded-full focus:outline-none focus:ring-2 focus:ring-[var(--color-accent)]">
-                        <img src="/www/uploads/user/default.jpg" alt="avatar" class="rounded-full w-8 h-8">
+                        <img src="/www/uploads/user/default.jpg" alt="{_'nav.avatar.alt'}" class="rounded-full w-8 h-8">
                         <span class="text-sm text-[var(--color-text)] font-semibold">{$user->identity->username}</span>
                         <svg class="w-4 h-4 fill-current text-[var(--color-text)]" viewBox="0 0 20 20"><path d="M5.5 7l4.5 4 4.5-4H5.5z"/></svg>
                     </button>
@@ -259,31 +262,28 @@ h2 {
                         {if $user->isInRole('ADMIN')}
                             <a n:href=":Admin:Dashboard:default" class="flex items-center gap-3 px-4 py-2 text-sm text-[var(--color-text)] hover:bg-[var(--color-secondary)] transition">
                                 <i class="fas fa-tools text-[var(--color-accent)] w-4 text-center"></i>
-                                Administrace
+                                {_'nav.admin'}
                             </a>
                         {/if}
-
                         <a n:href="Profile:default" class="flex items-center gap-3 px-4 py-2 text-sm text-[var(--color-text)] hover:bg-[var(--color-secondary)] transition">
                             <i class="fas fa-user-circle text-[var(--color-accent)] w-4 text-center"></i>
-                            Účet
+                            {_'nav.profile'}
                         </a>
-
                         <a n:href="Profile:orders" class="flex items-center gap-3 px-4 py-2 text-sm text-[var(--color-text)] hover:bg-[var(--color-secondary)] transition">
                             <i class="fas fa-box text-[var(--color-accent)] w-4 text-center"></i>
-                            Objednávky
+                            {_'nav.orders'}
                         </a>
-
                         <a n:href="Sign:out" class="flex items-center gap-3 px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-50 hover:text-red-700 transition">
                             <i class="fas fa-sign-out-alt w-4 text-center"></i>
-                            Odhlásit se
+                            {_'nav.logout'}
                         </a>
                     </div>
                 </div>
             {else}
-                <a n:href="Sign:in" class="hover:text-[var(--color-accent)] transition">Přihlášení</a>
+                <a n:href="Sign:in" class="hover:text-[var(--color-accent)] transition">{_'nav.login'}</a>
             {/if}
 
-            <a n:href="Cart:default" class="hover:text-[var(--color-accent)] transition relative flex items-center" aria-label="Cart">
+            <a n:href="Cart:default" class="hover:text-[var(--color-accent)] transition relative flex items-center" aria-label="{_'nav.cart'}">
                 <i class="fas fa-shopping-cart text-xl"></i>
                 <span n:if="$cartCount > 0" class="absolute -top-2 -right-3 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                     {$cartCount}
@@ -291,10 +291,14 @@ h2 {
             </a>
 
             <div class="flex justify-center flex-grow">
-                <button id="theme-toggle" aria-label="Toggle dark mode" class="btn btn-accent shadow-md hover:shadow-lg flex items-center justify-center w-10 h-10 p-0 rounded-full">
+                <button id="theme-toggle" aria-label="{_'nav.theme_toggle'}" class="btn btn-accent shadow-md hover:shadow-lg flex items-center justify-center w-10 h-10 p-0 rounded-full">
                     <i class="theme-icon fas fa-sun sun-icon"></i>
                     <i class="theme-icon fas fa-moon moon-icon"></i>
                 </button>
+            </div>
+            <div class="language-switcher">
+                <a n:href="this, lang => 'cs'">{_'nav.lang.cs'}</a> |
+                <a n:href="this, lang => 'en'">{_'nav.lang.en'}</a>
             </div>
         </nav>
     </div>
@@ -313,13 +317,13 @@ h2 {
     <div class="container mx-auto px-4">
         <div class="flex flex-col md:flex-row items-center justify-between mb-6">
             <p class="text-sm mb-4 md:mb-0 text-center md:text-left">
-                © {date('Y')} OPNX3D. Všechna práva vyhrazena.
+                ©{date('Y')}{_'footer.copyright'}
             </p>
             <div class="flex items-center space-x-6">
                 <a href="mailto:opnx3d@gmail.com" target="_blank" class="text-sm hover:text-[var(--color-accent)] transition">
                     opnx3d@gmail.com
                 </a>
-                <a href="https://www.instagram.com/opnx3d" target="_blank" aria-label="Instagram">
+                <a href="https://www.instagram.com/opnx3d" target="_blank" aria-label="{_'footer.instagram'}">
                     <svg class="w-5 h-5 fill-current" viewBox="0 0 24 24">
                         <path d="M7 2C4.2 2 2 4.2 2 7v10c0 2.8 2.2 5 5 5h10c2.8 0 5-2.2 5-5V7c0-2.8-2.2-5-5-5H7zm10 2c1.7 0 3 1.3 3 3v10c0 1.7-1.3 3-3 3H7c-1.7 0-3-1.3-3-3V7c0-1.7 1.3-3 3-3h10zM12 7.5A4.5 4.5 0 1016.5 12 4.5 4.5 0 0012 7.5zm0 7.2A2.7 2.7 0 1114.7 12 2.7 2.7 0 0112 14.7zM17.8 6.2a1 1 0 11-1-1 1 1 0 011 1z"/>
                     </svg>
@@ -327,12 +331,12 @@ h2 {
             </div>
         </div>
         <div class="border-t border-[var(--color-secondary)] pt-4">
-            <h3 class="text-lg font-semibold mb-3 text-center">Podmínky a ustanovení</h3>
+            <h3 class="text-lg font-semibold mb-3 text-center">{_'footer.terms'}</h3>
             <div class="flex flex-col sm:flex-row justify-center gap-4 sm:gap-6 text-sm">
-                <a n:href="Home:legal, 'obchodni-podminky'" class="hover:text-[var(--color-accent)] transition">Obchodní podmínky</a>
-                <a n:href="Home:legal, 'ochrana-osobnich-udaju'" class="hover:text-[var(--color-accent)] transition">Ochrana osobních údajů</a>
-                <a n:href="Home:legal, 'reklamacni-rad'" class="hover:text-[var(--color-accent)] transition">Reklamační řád</a>
-                <a n:href="Home:legal, 'odstoupeni-od-smlouvy'" class="hover:text-[var(--color-accent)] transition">Odstoupení od smlouvy</a>
+                <a n:href="Home:legal, 'obchodni-podminky'" class="hover:text-[var(--color-accent)] transition">{_'footer.terms_conditions'}</a>
+                <a n:href="Home:legal, 'ochrana-osobnich-udaju'" class="hover:text-[var(--color-accent)] transition">{_'footer.privacy'}</a>
+                <a n:href="Home:legal, 'reklamacni-rad'" class="hover:text-[var(--color-accent)] transition">{_'footer.complaints'}</a>
+                <a n:href="Home:legal, 'odstoupeni-od-smlouvy'" class="hover:text-[var(--color-accent)] transition">{_'footer.withdrawal'}</a>
             </div>
         </div>
     </div>

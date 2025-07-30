@@ -1,13 +1,9 @@
-# Service registrations. See https://doc.nette.org/dependency-injection/services
-
 services:
-	- App\Core\RouterFactory::createRouter
-	- App\MailSender\MailSender
-
-
+    - App\Core\RouterFactory::createRouter
+    - App\MailSender\MailSender
 
 search:
-	-	in: %appDir%
-		classes:
-			- *Factory
-			- *Facade
+    - in: %appDir%
+      classes:
+          - *Factory
+          - *Facade

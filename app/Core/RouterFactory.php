@@ -1,5 +1,4 @@
 <?php
-
 declare(strict_types=1);
 
 namespace App\Core;
@@ -12,14 +11,18 @@ final class RouterFactory
     {
         $router = new RouteList;
 
-        // Admin modul
+        // Admin modul (unchanged)
         $adminRouter = new RouteList('Admin');
         $adminRouter->addRoute('admin/<presenter>/<action>[/<id>]', 'Dashboard:default');
         $router->add($adminRouter);
 
-        // Front modul
+        // Front modul with language prefix
         $frontRouter = new RouteList('Front');
-        $frontRouter->addRoute('<presenter>/<action>[/<id>]', 'Home:default');
+        $frontRouter->addRoute('<lang cs|en>/<presenter>/<action>[/<id>]', [
+            'presenter' => 'Home',
+            'action' => 'default',
+            'lang' => 'cs', // Default to Czech
+        ]);
         $router->add($frontRouter);
 
         return $router;

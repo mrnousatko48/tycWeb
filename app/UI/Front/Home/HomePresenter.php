@@ -20,6 +20,7 @@ final class HomePresenter extends BaseFrontPresenter
 
     public function renderDefault(): void
     {
+        $this->pageFacade->setLang($this->template->lang); // Use lang from BaseFrontPresenter        
         $this->template->banner = $this->pageFacade->getSectionContent('banner');
         $this->template->durability = $this->pageFacade->getSectionContent('durability');
         $this->template->customizations = $this->pageFacade->getCustomizations();
@@ -54,6 +55,7 @@ protected function createComponentCaseForm(): Form
 {
     $form = new Form;
     $form->setHtmlAttribute('enctype', 'multipart/form-data');
+    $form->setTranslator($this->translator); // Enable translation for the form
 
     $manufacturers = $this->modelFacade->getManufacturers();
     $manufacturerItems = [];
@@ -61,13 +63,13 @@ protected function createComponentCaseForm(): Form
         $manufacturerItems[$manufacturer->id] = $manufacturer->name;
     }
 
-    $manufacturer = $form->addSelect('manufacturer', 'Manufacturer:', $manufacturerItems)
-        ->setPrompt('Vyberte výrobce')
+    $manufacturer = $form->addSelect('manufacturer', 'form.manufacturer', $manufacturerItems)
+        ->setPrompt('form.select_manufacturer')
         ->setHtmlAttribute('data-url', $this->link('Endpoint:manufacturers'))
         ->setRequired('Prosím vyberte výrobce.');
 
-    $model = $form->addSelect('model', 'Model:')
-        ->setPrompt('Vyberte model')
+    $model = $form->addSelect('model', 'form.model')
+        ->setPrompt('form.select_model')
         ->setHtmlAttribute('data-depends', $manufacturer->getHtmlName())
         ->setHtmlAttribute('data-url', $this->link('Endpoint:models', ['manufacturerId' => '#']))
         ->setHtmlAttribute('data-colors-url', $this->link('Endpoint:modelColors', ['modelId' => '#']))
@@ -80,16 +82,13 @@ protected function createComponentCaseForm(): Form
     $form->addHidden('features')->setDefaultValue('{}');
     $form->addHidden('total_price')->setDefaultValue('0.00');
     
-    // Add file upload field (still present for compatibility)
     $form->addUpload('user_file', 'Upload your 3D file:')
-        ->setRequired(false); // No validation rules here; we'll handle it via AJAX
+        ->setRequired(false);
 
-    // Add a hidden field to store the uploaded file ID
     $form->addHidden('user_upload_id')->setDefaultValue(null);
 
-    $form->addSubmit('submit', 'Přidat do košíku')
-     ->setHtmlAttribute('id', 'frm-caseForm-submit');
-
+    $form->addSubmit('submit', 'form.submit')
+        ->setHtmlAttribute('id', 'frm-caseForm-submit');
 
     $form->onAnchor[] = function () use ($model, $manufacturer) {
         $model->setItems(

@@ -1,30 +1,75 @@
-<?php declare(strict_types = 1);
+<?php
+declare(strict_types=1);
 
-namespace Contributte\Application\UI;
+namespace App\UI\Front;
 
 use Nette\Application\UI\Presenter;
+use App\Model\PageFacade;
+use App\Model\OrderFacade;
+use App\Model\UserFacade;
+use App\Utils\ArrayTranslator;
+use Nette\Localization\ITranslator;
 
-abstract class BasePresenter extends Presenter
+abstract class BaseFrontPresenter extends Presenter
 {
+    protected OrderFacade $orderFacade;
+    protected PageFacade $pageFacade;
+    protected UserFacade $userFacade;
+    protected ITranslator $translator;
 
-	/**
-	 * Gets module name
-	 */
-	public function getModuleName(): string
-	{
-		$parts = explode(':', (string) $this->getName());
+    public function injectDependencies(OrderFacade $orderFacade, PageFacade $pageFacade, UserFacade $userFacade): void
+    {
+        $this->orderFacade = $orderFacade;
+        $this->pageFacade = $pageFacade;
+        $this->userFacade = $userFacade;
+    }
 
-		return current($parts);
-	}
+    protected function startup(): void
+    {
+        parent::startup();
 
-	/**
-	 * Is current module active?
-	 *
-	 * @param string $module Module name
-	 */
-	public function isModuleCurrent(string $module): bool
-	{
-		return strpos($this->getAction(true), $module) !== false;
-	}
+        // Set up translator with language from URL, default to 'cs'
+        $lang = $this->getParameter('lang', 'cs');
+        $this->translator = new ArrayTranslator($lang);
+        $this->template->setTranslator($this->translator);
 
+        // Dark theme logic
+        $savedTheme = $this->getHttpRequest()->getCookie('theme');
+        if ($savedTheme === 'dark') {
+            $this->template->darkMode = true;
+        } elseif ($savedTheme === 'light') {
+            $this->template->darkMode = false;
+        } else {
+            $this->template->darkMode = $this->isDarkModePreferred();
+        }
+
+        // Calculate cartCount for all front presenters
+        if ($this->getUser()->isLoggedIn()) {
+            $userId = (int) $this->getUser()->getId();
+            $cartItems = $this->orderFacade->getCartCasesByUserId($userId);
+            $cartCount = count($cartItems);
+        } else {
+            $session = $this->getSession('order');
+            $quantities = $session->quantities ?? [];
+            $cartCount = array_sum($quantities);
+        }
+
+        $this->template->cartCount = $cartCount;
+
+        // Fetch logo paths for light and dark themes
+        $this->template->logos = $this->pageFacade->getLogos();
+    }
+
+    protected function isDarkModePreferred(): bool
+    {
+        return $this->getHttpRequest()->isAjax() ? false : (bool)preg_match('/dark/', $this->getHttpRequest()->getHeader('Sec-CH-Prefers-Color-Scheme') ?: '');
+    }
+
+    public function handleToggleTheme(): void
+    {
+        $currentTheme = $this->getHttpRequest()->getCookie('theme') ?: ($this->isDarkModePreferred() ? 'dark' : 'light');
+        $newTheme = $currentTheme === 'light' ? 'dark' : 'light';
+        $this->getHttpResponse()->setCookie('theme', $newTheme, '30 days');
+        $this->redirect('this');
+    }
 }

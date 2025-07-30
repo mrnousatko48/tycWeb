@@ -1,7 +1,7 @@
 <?php
 namespace App\Model;
 
-use Nette\Database\Context;
+use Nette\Database\Explorer; 
 use Nette\Http\FileUpload;
 use App\Utils\ImageUploader;
 
@@ -10,12 +10,28 @@ use App\Utils\ImageUploader;
  */
 class PageFacade
 {
-    private Context $database;
+    private Explorer $database; 
+    private string $lang;
 
-    public function __construct(Context $database)
+    public function __construct(Explorer $database, string $lang = 'cs')
     {
         $this->database = $database;
+        $this->lang = $lang;
     }
+
+    public function setLang(string $lang): void
+    {
+        $this->lang = $lang;
+    }
+
+    public function getSectionContent(string $sectionName): array
+{
+    $contentColumn = $this->lang === 'en' ? 'content_text_en' : 'content_text';
+    return $this->database->table($sectionName)
+        ->select("id, content_type, COALESCE($contentColumn, content_text) AS content_text, image_path, ordering")
+        ->order('ordering')
+        ->fetchAll();
+}
 
     public function getLogos(): array
     {
@@ -37,7 +53,7 @@ class PageFacade
     {
         if ($image instanceof FileUpload && $image->isOk()) {
             $currentLogo = $this->database->table('logos')->where('theme', $theme)->fetch();
-            $imagePath = ImageUploader::uploadImage($image, 'uploads/logo', $currentLogo ? $currentLogo->image_path : null);
+            $imagePath = ImageUploader::uploadImage($image, 'Uploads/logo', $currentLogo ? $currentLogo->image_path : null);
             $data = ['image_path' => $imagePath];
 
             $existing = $this->database->table('logos')->where('theme', $theme)->fetch();
@@ -49,16 +65,6 @@ class PageFacade
         }
     }
     
-    /**
-     * Fetch all content for a given section, ordered by ordering.
-     */
-    public function getSectionContent(string $sectionName): array
-    {
-        return $this->database->table($sectionName)
-            ->order('ordering')
-            ->fetchAll();
-    }
-
     /**
      * Update or insert content for a specific section and content type.
      */
@@ -109,7 +115,6 @@ class PageFacade
      */
     public function updateBannerSection(array $values): void
     {
-        // Handle image upload
         if (!empty($values['image']) && $values['image'] instanceof FileUpload && $values['image']->isOk()) {
             $currentImage = $this->getBannerSection()->image ?? null;
             $imagePath = ImageUploader::uploadImage($values['image'], 'uploads/home', $currentImage);
@@ -117,7 +122,6 @@ class PageFacade
                 $this->updateSectionContent('banner', 'image', null, $imagePath);
             }
         }
-        // Update other fields
         $fields = ['title', 'description', 'button_text', 'button_link'];
         foreach ($fields as $field) {
             if (isset($values[$field])) {
@@ -152,7 +156,7 @@ class PageFacade
         $image = $values['image'] ?? null;
         if ($image instanceof FileUpload && $image->isOk()) {
             $currentImage = $this->getDurabilitySection()->image ?? null;
-            $imagePath = ImageUploader::uploadImage($image, 'uploads/home', $currentImage);
+            $imagePath = ImageUploader::uploadImage($image, 'Uploads/home', $currentImage);
             $this->updateSectionContent('durability', 'image', null, $imagePath);
         }
         $fields = ['title', 'description1', 'description2'];
@@ -168,7 +172,10 @@ class PageFacade
      */
     public function getCustomizations(): array
     {
+        $titleColumn = $this->lang === 'en' ? 'title_en' : 'title';
+        $descColumn = $this->lang === 'en' ? 'description_en' : 'description';
         return $this->database->table('customization')
+            ->select("id, COALESCE($titleColumn, title) AS title, COALESCE($descColumn, description) AS description, image_path, ordering")
             ->order('ordering')
             ->fetchAll();
     }
@@ -181,7 +188,7 @@ class PageFacade
         if (!$image->isOk()) {
             throw new \Exception('Musíte nahrát platný obrázek.');
         }
-        $imagePath = ImageUploader::uploadImage($image, 'uploads/home', null);
+        $imagePath = ImageUploader::uploadImage($image, 'Uploads/home', null);
 
         $maxOrdering = $this->database->table('customization')
             ->select('MAX(ordering) AS max_ordering')
@@ -215,7 +222,9 @@ class PageFacade
      */
     public function getGalleryImages(): array
     {
+        $altTextColumn = $this->lang === 'en' ? 'alt_text_en' : 'alt_text';
         return $this->database->table('gallery')
+            ->select("id, image, COALESCE($altTextColumn, alt_text) AS alt_text, ordering")
             ->order('ordering ASC')
             ->fetchAll();
     }
@@ -229,7 +238,7 @@ class PageFacade
         if (!$image instanceof FileUpload || !$image->isOk()) {
             throw new \Exception('Valid image file is required.');
         }
-        $imagePath = ImageUploader::uploadImage($image, 'uploads/gallery', null);
+        $imagePath = ImageUploader::uploadImage($image, 'Uploads/gallery', null);
         $altText = $values['alt_text'] ?? null;
         $ordering = (int)($values['ordering'] ?? 0);
 
@@ -275,7 +284,11 @@ class PageFacade
      */
     public function getContactInfo(): ?object
     {
-        return $this->database->table('contact_info')->fetch();
+        $nameColumn = $this->lang === 'en' ? 'name_en' : 'name';
+        $addressColumn = $this->lang === 'en' ? 'address_en' : 'address';
+        return $this->database->table('contact_info')
+            ->select("id, COALESCE($nameColumn, name) AS name, COALESCE($addressColumn, address) AS address, ico, phone, email, map_embed")
+            ->fetch();
     }
 
     /**
