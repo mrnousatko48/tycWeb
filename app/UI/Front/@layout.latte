@@ -236,7 +236,7 @@ h2 {
 <body class="flex flex-col min-h-screen" data-theme="{if $darkMode}dark{else}light{/if}">
 <header class="site-header">
     <div class="container mx-auto px-4 flex justify-between items-center">
-        <a href="{$basePath}/" class="hover:text-[var(--color-accent)] transition">
+        <a n:href="Home:default, lang => $lang" class="hover:text-[var(--color-accent)] transition">
             <img src="{$basePath}{$logos['dark']}" alt="{_'logo.alt'}" class="logo-dark h-10 w-auto">
             <img src="{$basePath}{$logos['light']}" alt="{_'logo.alt'}" class="logo-light h-10 w-auto">
         </a>
@@ -245,10 +245,10 @@ h2 {
                 <i class="fas fa-bars"></i>
             </button>
             <div class="nav-menu hidden sm:flex sm:space-x-6">
-                <a n:href="Home:default" class="hover:text-[var(--color-accent)] transition">{_'nav.home'}</a>
-                <a n:href="Home:gallery" class="hover:text-[var(--color-accent)] transition">{_'nav.gallery'}</a>
-                <a href="{$basePath}{link Home:default}#contact" class="hover:text-[var(--color-accent)] transition">{_'nav.contact'}</a>
-                <a n:href="Home:configurator" class="hover:text-[var(--color-accent)] transition">{_'nav.design'}</a>
+                <a n:href="Home:default, lang => $lang" class="hover:text-[var(--color-accent)] transition">{_'nav.home'}</a>
+                <a n:href="Home:gallery, lang => $lang" class="hover:text-[var(--color-accent)] transition">{_'nav.gallery'}</a>
+                <a href="{link Home:default, lang => $lang}#contact" class="hover:text-[var(--color-accent)] transition">{_'nav.contact'}</a>
+                <a n:href="Home:configurator, lang => $lang" class="hover:text-[var(--color-accent)] transition">{_'nav.design'}</a>
             </div>
 
             {if $user->isLoggedIn()}
@@ -260,30 +260,30 @@ h2 {
                     </button>
                     <div id="dropdownMenu" class="hidden absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-[var(--color-background)] ring-1 ring-black ring-opacity-5 z-50">
                         {if $user->isInRole('ADMIN')}
-                            <a n:href=":Admin:Dashboard:default" class="flex items-center gap-3 px-4 py-2 text-sm text-[var(--color-text)] hover:bg-[var(--color-secondary)] transition">
+                            <a n:href=":Admin:Dashboard:default, lang => $lang" class="flex items-center gap-3 px-4 py-2 text-sm text-[var(--color-text)] hover:bg-[var(--color-secondary)] transition">
                                 <i class="fas fa-tools text-[var(--color-accent)] w-4 text-center"></i>
                                 {_'nav.admin'}
                             </a>
                         {/if}
-                        <a n:href="Profile:default" class="flex items-center gap-3 px-4 py-2 text-sm text-[var(--color-text)] hover:bg-[var(--color-secondary)] transition">
+                        <a n:href="Profile:default, lang => $lang" class="flex items-center gap-3 px-4 py-2 text-sm text-[var(--color-text)] hover:bg-[var(--color-secondary)] transition">
                             <i class="fas fa-user-circle text-[var(--color-accent)] w-4 text-center"></i>
                             {_'nav.profile'}
                         </a>
-                        <a n:href="Profile:orders" class="flex items-center gap-3 px-4 py-2 text-sm text-[var(--color-text)] hover:bg-[var(--color-secondary)] transition">
+                        <a n:href="Profile:orders, lang => $lang" class="flex items-center gap-3 px-4 py-2 text-sm text-[var(--color-text)] hover:bg-[var(--color-secondary)] transition">
                             <i class="fas fa-box text-[var(--color-accent)] w-4 text-center"></i>
                             {_'nav.orders'}
                         </a>
-                        <a n:href="Sign:out" class="flex items-center gap-3 px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-50 hover:text-red-700 transition">
+                        <a n:href="Sign:out, lang => $lang" class="flex items-center gap-3 px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-50 hover:text-red-700 transition">
                             <i class="fas fa-sign-out-alt w-4 text-center"></i>
                             {_'nav.logout'}
                         </a>
                     </div>
                 </div>
             {else}
-                <a n:href="Sign:in" class="hover:text-[var(--color-accent)] transition">{_'nav.login'}</a>
+                <a n:href="Sign:in, lang => $lang" class="hover:text-[var(--color-accent)] transition">{_'nav.login'}</a>
             {/if}
 
-            <a n:href="Cart:default" class="hover:text-[var(--color-accent)] transition relative flex items-center" aria-label="{_'nav.cart'}">
+            <a n:href="Cart:default, lang => $lang" class="hover:text-[var(--color-accent)] transition relative flex items-center" aria-label="{_'nav.cart'}">
                 <i class="fas fa-shopping-cart text-xl"></i>
                 <span n:if="$cartCount > 0" class="absolute -top-2 -right-3 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
                     {$cartCount}
@@ -291,7 +291,7 @@ h2 {
             </a>
 
             <div class="flex justify-center flex-grow">
-                <button id="theme-toggle" aria-label="{_'nav.theme_toggle'}" class="btn btn-accent shadow-md hover:shadow-lg flex items-center justify-center w-10 h-10 p-0 rounded-full">
+                <button n:href="handleToggleTheme" id="theme-toggle" aria-label="{_'nav.theme_toggle'}" class="btn btn-accent shadow-md hover:shadow-lg flex items-center justify-center w-10 h-10 p-0 rounded-full">
                     <i class="theme-icon fas fa-sun sun-icon"></i>
                     <i class="theme-icon fas fa-moon moon-icon"></i>
                 </button>
@@ -306,7 +306,7 @@ h2 {
 {if $flashes}
     <div class="flash-messages mt-4">
         {foreach $flashes as $flash}
-            <div class="p-4 rounded-lg text-white {$flash->type === 'success' ? 'bg-green-500' : 'bg-red-500'}">{$flash->message}</div>
+            <div class="p-4 rounded-lg text-white {$flash->type === 'success' ? 'bg-green-500' : 'bg-red-500'}">{_'flash.' . $flash->type . '.' . $flash->message}</div>
         {/foreach}
     </div>
 {/if}
@@ -333,10 +333,10 @@ h2 {
         <div class="border-t border-[var(--color-secondary)] pt-4">
             <h3 class="text-lg font-semibold mb-3 text-center">{_'footer.terms'}</h3>
             <div class="flex flex-col sm:flex-row justify-center gap-4 sm:gap-6 text-sm">
-                <a n:href="Home:legal, 'obchodni-podminky'" class="hover:text-[var(--color-accent)] transition">{_'footer.terms_conditions'}</a>
-                <a n:href="Home:legal, 'ochrana-osobnich-udaju'" class="hover:text-[var(--color-accent)] transition">{_'footer.privacy'}</a>
-                <a n:href="Home:legal, 'reklamacni-rad'" class="hover:text-[var(--color-accent)] transition">{_'footer.complaints'}</a>
-                <a n:href="Home:legal, 'odstoupeni-od-smlouvy'" class="hover:text-[var(--color-accent)] transition">{_'footer.withdrawal'}</a>
+                <a n:href="Home:legal, 'obchodni-podminky', lang => $lang" class="hover:text-[var(--color-accent)] transition">{_'footer.terms_conditions'}</a>
+                <a n:href="Home:legal, 'ochrana-osobnich-udaju', lang => $lang" class="hover:text-[var(--color-accent)] transition">{_'footer.privacy'}</a>
+                <a n:href="Home:legal, 'reklamacni-rad', lang => $lang" class="hover:text-[var(--color-accent)] transition">{_'footer.complaints'}</a>
+                <a n:href="Home:legal, 'odstoupeni-od-smlouvy', lang => $lang" class="hover:text-[var(--color-accent)] transition">{_'footer.withdrawal'}</a>
             </div>
         </div>
     </div>

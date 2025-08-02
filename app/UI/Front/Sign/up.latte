@@ -200,51 +200,50 @@
     }
 }
 </style>
-
 <div class="form-section">
     <div class="form-container">
-        <h1 class="text-center">Registrace</h1>
+        <h1 class="text-center">{_'sign.up.title'}</h1>
 
         {foreach $flashes as $flash}
-            <div class="flash {$flash->type}">{$flash->message}</div>
+            <div class="flash {$flash->type}">{_'flash.' . $flash->type . '.' . $flash->message}</div>
         {/foreach}
 
         {form signUpForm}
             <div class="form-columns">
                 <div>
                     <div class="form-group">
-                        <label n:name="username">*Uživatelské jméno:</label>
+                        <label n:name="username">*{_'form.username'}</label>
                         {input username}
-                        {if $form[username]->hasErrors()}<div class="error">{$form[username]->getError()}</div>{/if}
+                        {if $form[username]->hasErrors()}<div class="error">{_'sign.up.' . $form[username]->getError()}</div>{/if}
                     </div>
                     <div class="form-group">
-                        <label n:name="firstname">*Křestní jméno:</label>
+                        <label n:name="firstname">*{_'form.firstname'}</label>
                         {input firstname}
-                        {if $form[firstname]->hasErrors()}<div class="error">{$form[firstname]->getError()}</div>{/if}
+                        {if $form[firstname]->hasErrors()}<div class="error">{_'form.firstname.' . $form[firstname]->getError()}</div>{/if}
                     </div>
                     <div class="form-group">
-                        <label n:name="lastname">*Příjmení:</label>
+                        <label n:name="lastname">*{_'form.lastname'}</label>
                         {input lastname}
-                        {if $form[lastname]->hasErrors()}<div class="error">{$form[lastname]->getError()}</div>{/if}
+                        {if $form[lastname]->hasErrors()}<div class="error">{_'form.lastname.' . $form[lastname]->getError()}</div>{/if}
                     </div>
                 </div>
                 <div>
                     <div class="form-group">
-                        <label n:name="email">*Email:</label>
+                        <label n:name="email">*{_'form.email'}</label>
                         {input email}
-                        {if $form[email]->hasErrors()}<div class="error">{$form[email]->getError()}</div>{/if}
+                        {if $form[email]->hasErrors()}<div class="error">{_'sign.up.' . $form[email]->getError()}</div>{/if}
                     </div>
                     <div class="form-group">
-                        <label n:name="password">*Heslo:</label>
+                        <label n:name="password">*{_'form.password'}</label>
                         {input password}
-                        {if $form[password]->hasErrors()}<div class="error">{$form[password]->getError()}</div>{/if}
+                        {if $form[password]->hasErrors()}<div class="error">{_'form.password.' . $form[password]->getError()}</div>{/if}
                     </div>
                     <div class="form-group">
-                        <label n:name="confirmPassword">*Potvrzení hesla:</label>
+                        <label n:name="confirmPassword">*{_'form.confirm_password'}</label>
                         {input confirmPassword}
-                        {if $form[confirmPassword]->hasErrors()}<div class="error">{$form[confirmPassword]->getError()}</div>{/if}
+                        {if $form[confirmPassword]->hasErrors()}<div class="error">{_'form.confirm_password.' . $form[confirmPassword]->getError()}</div>{/if}
                     </div>
-                    <div n:name="recaptcha"></div>
+                    <div n:name="recaptcha">{_'form.recaptcha'}</div>
                 </div>
             </div>
             <div class="form-group">
@@ -253,8 +252,8 @@
         {/form}
 
         <div class="text-center">
-            <p class="fst-italic">*povinné údaje</p>
-            <a n:href="Sign:in" class="btn btn-outline-success">Už máte účet? Přihlaste se.</a>
+            <p class="fst-italic">{_'form.required_fields'}</p>
+            <a n:href="Sign:in, lang => $lang" class="btn btn-outline-success">{_'sign.up.have_account'}</a>
         </div>
     </div>
 </div>

@@ -1,19 +1,21 @@
+DROP TABLE IF EXISTS `banner`;
 CREATE TABLE `banner` (
   `id` int NOT NULL AUTO_INCREMENT,
   `content_type` enum('title','description','image','button_text','button_link') NOT NULL,
   `content_text` text,
+  `content_text_en` text,
   `image_path` varchar(255) DEFAULT NULL,
   `ordering` int DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `content_type_ordering` (`content_type`,`ordering`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-INSERT INTO `banner` (`id`, `content_type`, `content_text`, `image_path`, `ordering`) VALUES
-(1,	'title',	'Odolné 3D tisknuté kryty',	NULL,	1),
-(2,	'description',	'Vytvořte si pevný a stylový kryt s pokročilou 3D tiskovou technologií a vlastním designem.',	NULL,	2),
-(3,	'image',	NULL,	'/www/uploads/home/6873e208e7adb_Obrazek-WhatsApp-2025-07-12-v-07.06.31-ae69212d.webp',	3),
-(4,	'button_text',	'Navrhnout kryt',	NULL,	4),
-(5,	'button_link',	'configurator',	NULL,	5);
+INSERT INTO `banner` (`id`, `content_type`, `content_text`, `content_text_en`, `image_path`, `ordering`) VALUES
+(1,	'title',	'Odolné 3D tisknuté kryty',	'Durable 3D Printed Cases',	NULL,	1),
+(2,	'description',	'Vytvořte si pevný a stylový kryt s pokročilou 3D tiskovou technologií a vlastním designem.',	'Create a sturdy and stylish case with advanced 3D printing technology and your own design.',	NULL,	2),
+(3,	'image',	NULL,	NULL,	'/www/uploads/home/6873e208e7adb_Obrazek-WhatsApp-2025-07-12-v-07.06.31-ae69212d.webp',	3),
+(4,	'button_text',	'Navrhnout kryt',	'Design Your Case',	NULL,	4),
+(5,	'button_link',	'configurator',	NULL,	NULL,	5);
 
 DROP TABLE IF EXISTS `cases`;
 CREATE TABLE `cases` (
@@ -34,12 +36,24 @@ CREATE TABLE `cases` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO `cases` (`id`, `manufacturer`, `model`, `color`, `total_price`, `features`, `state`, `user_id`, `created_at`, `user_upload_id`) VALUES
-(94,	'Apple',	'iPhone 13',	'Černá',	719.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\",\\\"vlastní_motiv\\\":\\\"Ano\\\"}\"}',	'KOSIK',	9,	'2025-07-25 09:57:07',	NULL),
-(95,	'Apple',	'iPhone 13',	'Bílá',	719.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\",\\\"vlastní_motiv\\\":\\\"Ano\\\"}\"}',	'KOSIK',	9,	'2025-07-25 11:04:10',	NULL),
-(96,	'Apple',	'iPhone 13',	'Bílá',	719.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\",\\\"vlastní_motiv\\\":\\\"Ano\\\"}\"}',	'KOSIK',	9,	'2025-07-25 11:08:31',	NULL),
-(97,	'Apple',	'iPhone 13',	'Černá',	719.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\",\\\"vlastní_motiv\\\":\\\"Ano\\\"}\"}',	'KOSIK',	9,	'2025-07-25 11:11:35',	12),
 (98,	'Apple',	'iPhone 13',	'Bílá',	719.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\",\\\"vlastní_motiv\\\":\\\"Ano\\\"}\"}',	'KOSIK',	NULL,	'2025-07-25 12:10:41',	13),
-(99,	'Apple',	'iPhone 13',	'Bílá',	719.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\",\\\"vlastní_motiv\\\":\\\"Ano\\\"}\"}',	'KOSIK',	NULL,	'2025-07-25 12:13:54',	14);
+(99,	'Apple',	'iPhone 13',	'Bílá',	719.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\",\\\"vlastní_motiv\\\":\\\"Ano\\\"}\"}',	'KOSIK',	NULL,	'2025-07-25 12:13:54',	14),
+(100,	'Apple',	'iPhone 13',	'Bílá',	559.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\",\\\"vlastní_motiv\\\":\\\"Ne\\\"}\"}',	'KOSIK',	NULL,	'2025-07-25 12:16:58',	NULL),
+(101,	'Apple',	'iPhone 13',	'Modrá',	559.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\",\\\"vlastní_motiv\\\":\\\"Ne\\\"}\"}',	'KOSIK',	NULL,	'2025-07-25 12:19:15',	NULL),
+(102,	'Apple',	'iPhone 13',	'Bílá',	644.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ne\\\",\\\"vlastní_motiv\\\":\\\"Ano\\\"}\"}',	'KOSIK',	NULL,	'2025-07-25 12:27:57',	15),
+(103,	'Apple',	'iPhone 13',	'Bílá',	589.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\",\\\"vlastní_motiv\\\":\\\"Ne\\\"}\"}',	'KOSIK',	NULL,	'2025-07-25 12:29:44',	NULL),
+(104,	'Apple',	'iPhone 13',	'Bílá',	529.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ne\\\",\\\"vlastní_motiv\\\":\\\"Ne\\\"}\"}',	'KOSIK',	NULL,	'2025-07-25 12:44:19',	NULL),
+(105,	'Apple',	'iPhone 13',	'Modrá',	529.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ne\\\",\\\"vlastní_motiv\\\":\\\"Ne\\\"}\"}',	'KOSIK',	NULL,	'2025-07-25 13:32:29',	NULL),
+(106,	'Apple',	'iPhone 13',	'Černá',	529.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ne\\\",\\\"vlastní_motiv\\\":\\\"Ne\\\"}\"}',	'KOSIK',	NULL,	'2025-07-25 13:35:23',	NULL),
+(107,	'Apple',	'iPhone 13',	'Černá',	529.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ne\\\",\\\"vlastní_motiv\\\":\\\"Ne\\\"}\"}',	'KOSIK',	NULL,	'2025-07-25 13:38:22',	NULL),
+(108,	'Apple',	'iPhone 13',	'Černá',	529.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ne\\\",\\\"vlastní_motiv\\\":\\\"Ne\\\"}\"}',	'KOSIK',	NULL,	'2025-07-25 13:39:35',	NULL),
+(109,	'Samsung',	'Galaxy S22',	'Modrá',	500.00,	'{\"features\": \"{\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"vlastní_motiv\\\":\\\"Ne\\\"}\"}',	'KOSIK',	NULL,	'2025-07-25 13:43:28',	NULL),
+(110,	'Apple',	'iPhone 13',	'Černá',	574.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ne\\\",\\\"vlastní_motiv\\\":\\\"Ne\\\"}\"}',	'KOSIK',	NULL,	'2025-07-25 13:44:36',	NULL),
+(111,	'Apple',	'iPhone 13',	'Modrá',	529.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ne\\\",\\\"vlastní_motiv\\\":\\\"Ne\\\"}\"}',	'KOSIK',	NULL,	'2025-07-25 13:48:09',	NULL),
+(113,	'Apple',	'iPhone 13',	'Bílá',	614.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ne\\\",\\\"vlastní_motiv\\\":\\\"Ano\\\"}\"}',	'OBJEDNANO',	9,	'2025-07-25 14:30:22',	17),
+(114,	'Apple',	'iPhone 13',	'Červená',	719.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\",\\\"vlastní_motiv\\\":\\\"Ano\\\"}\"}',	'OBJEDNANO',	9,	'2025-07-25 14:30:37',	18),
+(115,	'Apple',	'iPhone 13',	'Bílá',	614.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ne\\\",\\\"vlastní_motiv\\\":\\\"Ano\\\"}\"}',	'KOSIK',	NULL,	'2025-07-25 20:36:00',	NULL),
+(116,	'Apple',	'iPhone 13',	'Bílá',	614.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ne\\\",\\\"vlastní_motiv\\\":\\\"Ano\\\"}\"}',	'KOSIK',	NULL,	'2025-07-25 21:00:46',	23);
 
 DROP TABLE IF EXISTS `colors`;
 CREATE TABLE `colors` (
@@ -64,7 +78,9 @@ DROP TABLE IF EXISTS `contact_info`;
 CREATE TABLE `contact_info` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
+  `name_en` varchar(255) DEFAULT NULL,
   `address` varchar(255) NOT NULL,
+  `address_en` varchar(255) DEFAULT NULL,
   `ico` varchar(50) NOT NULL,
   `phone` varchar(20) NOT NULL,
   `email` varchar(255) NOT NULL,
@@ -72,21 +88,23 @@ CREATE TABLE `contact_info` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-INSERT INTO `contact_info` (`id`, `name`, `address`, `ico`, `phone`, `email`, `map_embed`) VALUES
-(1,	'Karel Dvořák.',	'shrekova bazina 13',	'12345678',	'123 456 789',	'email@email.cz',	'<iframe src=\"https://www.google.com/maps/embed?pb=...\" width=\"100%\" height=\"300\" style=\"border:0; border-radius:8px;\" allowfullscreen=\"\" loading=\"lazy\"></iframe>');
+INSERT INTO `contact_info` (`id`, `name`, `name_en`, `address`, `address_en`, `ico`, `phone`, `email`, `map_embed`) VALUES
+(1,	'Karel Dvořák.',	'Karel Dvořák',	'shrekova bazina 13',	'Shrekova Bazina 13',	'12345678',	'123 456 789',	'email@email.cz',	'<iframe src=\"https://www.google.com/maps/embed?pb=...\" width=\"100%\" height=\"300\" style=\"border:0; border-radius:8px;\" allowfullscreen=\"\" loading=\"lazy\"></iframe>');
 
 DROP TABLE IF EXISTS `customization`;
 CREATE TABLE `customization` (
   `id` int NOT NULL AUTO_INCREMENT,
   `title` varchar(255) NOT NULL,
+  `title_en` text,
   `description` text NOT NULL,
+  `description_en` text,
   `image_path` varchar(255) NOT NULL,
   `ordering` int DEFAULT '0',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-INSERT INTO `customization` (`id`, `title`, `description`, `image_path`, `ordering`) VALUES
-(8,	'test',	'dassda',	'/www/uploads/home/6873e436bbb5b_r6bwd7wd.webp',	1);
+INSERT INTO `customization` (`id`, `title`, `title_en`, `description`, `description_en`, `image_path`, `ordering`) VALUES
+(8,	'test',	'Test',	'dassda',	'Test description',	'/www/uploads/home/6873e436bbb5b_r6bwd7wd.webp',	1);
 
 DROP TABLE IF EXISTS `default_images`;
 CREATE TABLE `default_images` (
@@ -106,17 +124,18 @@ CREATE TABLE `durability` (
   `id` int NOT NULL AUTO_INCREMENT,
   `content_type` enum('title','description1','description2','image') NOT NULL,
   `content_text` text,
+  `content_text_en` text,
   `image_path` varchar(255) DEFAULT NULL,
   `ordering` int DEFAULT '0',
   PRIMARY KEY (`id`),
   UNIQUE KEY `content_type_ordering` (`content_type`,`ordering`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-INSERT INTO `durability` (`id`, `content_type`, `content_text`, `image_path`, `ordering`) VALUES
-(1,	'title',	'Odolnost navržená pro život',	NULL,	1),
-(2,	'description1',	'Naše kryty zvládnou pád, prach i dobrodružství díky precizní 3D tiskové technologii',	NULL,	2),
-(3,	'description2',	'Vyrobeny z odolných, ekologických materiálů s perfektním přizpůsobením pro váš telefon.',	NULL,	3),
-(4,	'image',	NULL,	'/www/uploads/home/6873e220ce872_Yellow-Black-Simple-Creative-Agency-Logo.webp',	4);
+INSERT INTO `durability` (`id`, `content_type`, `content_text`, `content_text_en`, `image_path`, `ordering`) VALUES
+(1,	'title',	'Odolnost navržená pro život',	'Durability Designed for Life',	NULL,	1),
+(2,	'description1',	'Naše kryty zvládnou pád, prach i dobrodružství díky precizní 3D tiskové technologii',	'Our cases withstand drops, dust, and adventures thanks to precise 3D printing technology.',	NULL,	2),
+(3,	'description2',	'Vyrobeny z odolných, ekologických materiálů s perfektním přizpůsobením pro váš telefon.',	'Made from durable, eco-friendly materials with perfect fit for your phone.',	NULL,	3),
+(4,	'image',	NULL,	NULL,	'/www/uploads/home/6873e220ce872_Yellow-Black-Simple-Creative-Agency-Logo.webp',	4);
 
 DROP TABLE IF EXISTS `email_templates`;
 CREATE TABLE `email_templates` (
@@ -189,15 +208,16 @@ CREATE TABLE `gallery` (
   `id` int NOT NULL AUTO_INCREMENT,
   `image` varchar(255) NOT NULL,
   `alt_text` varchar(255) DEFAULT NULL,
+  `alt_text_en` text,
   `ordering` int NOT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-INSERT INTO `gallery` (`id`, `image`, `alt_text`, `ordering`) VALUES
-(15,	'/www/uploads/gallery/687945b800dec_holka-ridicak.webp',	'Autoškola Prima',	4),
-(16,	'/www/uploads/gallery/687945c42eeae_zidle.webp',	'adsads',	3),
-(17,	'/www/uploads/gallery/687945cd88555_kluk-s-autem.webp',	'asdasdfg',	2),
-(18,	'/www/uploads/gallery/687945d87ac49_ucebna.webp',	'gfsdf',	1);
+INSERT INTO `gallery` (`id`, `image`, `alt_text`, `alt_text_en`, `ordering`) VALUES
+(15,	'/www/uploads/gallery/687945b800dec_holka-ridicak.webp',	'Autoškola Prima',	NULL,	4),
+(16,	'/www/uploads/gallery/687945c42eeae_zidle.webp',	'adsads',	NULL,	3),
+(17,	'/www/uploads/gallery/687945cd88555_kluk-s-autem.webp',	'asdasdfg',	NULL,	2),
+(18,	'/www/uploads/gallery/687945d87ac49_ucebna.webp',	'gfsdf',	NULL,	1);
 
 DROP TABLE IF EXISTS `legal_pages`;
 CREATE TABLE `legal_pages` (
@@ -334,6 +354,15 @@ CREATE TABLE `order_case` (
   CONSTRAINT `order_case_ibfk_4` FOREIGN KEY (`case_id`) REFERENCES `cases` (`id`) ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
+INSERT INTO `order_case` (`order_id`, `case_id`, `quantity`) VALUES
+(63,	106,	1),
+(63,	107,	1),
+(63,	108,	1),
+(63,	109,	1),
+(63,	110,	1),
+(63,	111,	1),
+(64,	114,	1),
+(64,	113,	1);
 
 DROP TABLE IF EXISTS `orders`;
 CREATE TABLE `orders` (
@@ -364,10 +393,12 @@ CREATE TABLE `orders` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 INSERT INTO `orders` (`id`, `user_id`, `firstname`, `lastname`, `email`, `phone`, `address`, `city`, `psc`, `payment`, `shipping`, `delivery_point`, `additional_cost`, `state`, `created_at`, `variable_symbol`) VALUES
-(59,	9,	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'111222333',	'shrekova bazina 13',	'Praha',	'53803',	7,	11,	'sokolská 799 hermanuv mestec',	91.00,	'OBJEDNANO',	'2025-07-24 16:39:56',	'202507247157'),
+(59,	9,	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'111222333',	'shrekova bazina 13',	'Praha',	'53803',	7,	11,	'sokolská 799 hermanuv mestec',	91.00,	'ZAPLACENO',	'2025-07-24 16:39:56',	'202507247157'),
 (60,	9,	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'111222333',	'shrekova bazina 13',	'Praha',	'53803',	6,	11,	'sokolská 799 hermanuv mestec',	79.00,	'OBJEDNANO',	'2025-07-24 17:14:25',	'202507249841'),
 (61,	NULL,	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'666777888',	'shrekova bazina 13',	'Praha',	'53803',	6,	11,	'sokolská 799 hermanuv mestec',	79.00,	'OBJEDNANO',	'2025-07-24 20:28:15',	'202507245394'),
-(62,	9,	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'111222333',	'shrekova bazina 13',	'Praha',	'53803',	6,	11,	'sokolská 799 hermanuv mestec',	79.00,	'OBJEDNANO',	'2025-07-24 20:30:13',	'202507241828');
+(62,	9,	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'111222333',	'shrekova bazina 13',	'Praha',	'53803',	6,	11,	'sokolská 799 hermanuv mestec',	79.00,	'OBJEDNANO',	'2025-07-24 20:30:13',	'202507241828'),
+(63,	NULL,	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'666777888',	'shrekova bazina 13',	'Praha',	'53803',	6,	11,	'sokolská 799 hermanuv mestec',	79.00,	'OBJEDNANO',	'2025-07-25 13:50:33',	'202507256077'),
+(64,	9,	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'111222333',	'shrekova bazina 13',	'Praha',	'53803',	6,	11,	'sokolská 799 hermanuv mestec',	79.00,	'OBJEDNANO',	'2025-07-25 14:30:50',	'202507259712');
 
 DROP TABLE IF EXISTS `shipping_options`;
 CREATE TABLE `shipping_options` (
@@ -431,7 +462,16 @@ INSERT INTO `user_uploads` (`id`, `file_path`, `original_filename`, `created_at`
 (11,	'/www/uploads/user_uploads/688365d71887f.gltf',	'Xi-Redmi-No-13-bez-redukce.gltf',	'2025-07-25 11:09:11'),
 (12,	'/www/uploads/user_uploads/6883665e7711a.gltf',	'Xi-Redmi-No-13-bez-redukce.gltf',	'2025-07-25 11:11:26'),
 (13,	'/www/uploads/user_uploads/6883743a9660f.gltf',	'Xi-Redmi-No-13-bez-redukce.gltf',	'2025-07-25 12:10:34'),
-(14,	'/www/uploads/user_uploads/688374fd3f9ab.gltf',	'Xi-Redmi-No-13-bez-redukce.gltf',	'2025-07-25 12:13:49');
+(14,	'/www/uploads/user_uploads/688374fd3f9ab.gltf',	'Xi-Redmi-No-13-bez-redukce.gltf',	'2025-07-25 12:13:49'),
+(15,	'/www/uploads/user_uploads/6883784b3a668.gltf',	'Xi-Redmi-No-13-bez-redukce.gltf',	'2025-07-25 12:27:55'),
+(16,	'/www/uploads/user_uploads/688394d9ee36b.gltf',	'Xi-Redmi-No-13-bez-redukce.gltf',	'2025-07-25 14:29:45'),
+(17,	'/www/uploads/user_uploads/688394fd07e02.gltf',	'Xi-Redmi-No-13-bez-redukce.gltf',	'2025-07-25 14:30:21'),
+(18,	'/www/uploads/user_uploads/6883950b7bd07.gltf',	'Xi-Redmi-No-13-s-redukci.gltf',	'2025-07-25 14:30:35'),
+(19,	'/www/uploads/user_uploads/6883eaef0f04d.png',	'Yellow-Black-Simple-Creative-Agency-Logo.png',	'2025-07-25 20:37:03'),
+(20,	'/www/uploads/user_uploads/6883ecaaeb186.jpeg',	'holka-ridicak.jpeg',	'2025-07-25 20:44:26'),
+(21,	'/www/uploads/user_uploads/6883ee713351b.png',	'logoLight.png',	'2025-07-25 20:52:01'),
+(22,	'/www/uploads/user_uploads/6883f0661cc19.jpeg',	'ridicak.jpeg',	'2025-07-25 21:00:22'),
+(23,	'/www/uploads/user_uploads/6883f07aed0ac.jpeg',	'Obrazek-WhatsApp-2025-07-12-v-07.06.31-ae69212d.jpeg',	'2025-07-25 21:00:42');
 
 DROP TABLE IF EXISTS `users`;
 CREATE TABLE `users` (

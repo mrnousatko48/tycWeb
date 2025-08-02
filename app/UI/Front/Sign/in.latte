@@ -154,22 +154,22 @@
 
 <div class="form-section">
     <div class="form-container">
-        <h1 class="text-center">Přihlášení</h1>
+        <h1 class="text-center">{_'sign.in.title'}</h1>
 
         {foreach $flashes as $flash}
-            <div class="flash {$flash->type}">{$flash->message}</div>
+            <div class="flash {$flash->type}">{_'flash.' . $flash->type . '.' . $flash->message}</div>
         {/foreach}
 
         {form signInForm}
             <div class="form-group">
-                <label n:name="username">Uživatelské jméno:</label>
+                <label n:name="username">{_'form.username'}</label>
                 {input username}
-                {if $form[username]->hasErrors()}<div class="error">{$form[username]->getError()}</div>{/if}
+                {if $form[username]->hasErrors()}<div class="error">{_'form.username.' . $form[username]->getError()}</div>{/if}
             </div>
             <div class="form-group">
-                <label n:name="password">Heslo:</label>
+                <label n:name="password">{_'form.password'}</label>
                 {input password}
-                {if $form[password]->hasErrors()}<div class="error">{$form[password]->getError()}</div>{/if}
+                {if $form[password]->hasErrors()}<div class="error">{_'form.password.' . $form[password]->getError()}</div>{/if}
             </div>
             <div class="form-group">
                 {input send}
@@ -177,8 +177,8 @@
         {/form}
 
         <div class="text-center">
-            <a n:href="Sign:up" class="btn btn-outline-success">Nemáte účet? Zaregistrujte se</a>
-            <a n:href="Sign:forgotPassword" class="btn btn-outline-success">Zapomněli jste heslo?</a>
+            <a n:href="Sign:up, lang => $lang" class="btn btn-outline-success">{_'sign.in.no_account'}</a>
+            <a n:href="Sign:forgotPassword, lang => $lang" class="btn btn-outline-success">{_'sign.in.forgot_password'}</a>
         </div>
     </div>
 </div>

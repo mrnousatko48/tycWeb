@@ -25,122 +25,125 @@ final class SignPresenter extends BaseFrontPresenter
     protected function createComponentSignInForm(): Form
     {
         $form = $this->formFactory->create();
+        $form->setTranslator($this->translator); // Enable translation for form
 
-        $form->addText('username', 'Uživatelské jméno:')
-            ->setRequired('Zadejte své uživatelské jméno');
+        $form->addText('username', 'form.username')
+            ->setRequired('form.username.required');
 
-        $form->addPassword('password', 'Heslo:')
-            ->setRequired('Zadejte své heslo');
+        $form->addPassword('password', 'form.password')
+            ->setRequired('form.password.required');
 
-        $form->addSubmit('send', 'Přihlásit se');
+        $form->addSubmit('send', 'form.signin.submit');
 
         $form->onSuccess[] = function (Form $form, \stdClass $data): void {
             try {
                 $this->getUser()->login($data->username, $data->password);
                 $this->restoreRequest($this->backlink);
-                $this->flashMessage('Přihlášení bylo úspěšné.', 'success');
+                $this->flashMessage('sign.in.success', 'success');
                 $this->redirect('Home:default');
             } catch (Nette\Security\AuthenticationException) {
-                $this->flashMessage('Neplatné přihlašovací údaje.', 'danger');
+                $this->flashMessage('sign.in.invalid_credentials', 'danger');
             }
         };
 
         return $form;
     }
 
-protected function createComponentSignUpForm(): Form
-{
-    $form = $this->formFactory->create();
+    protected function createComponentSignUpForm(): Form
+    {
+        $form = $this->formFactory->create();
+        $form->setTranslator($this->translator); // Enable translation for form
 
-    $form->addText('username', 'Uživatelské jméno:')
-        ->setRequired('Zadejte uživatelské jméno');
+        $form->addText('username', 'form.username')
+            ->setRequired('form.username.required');
 
-    $form->addText('firstname', 'Křestní jméno:');
-    
-    $form->addText('lastname', 'Příjmení:');
+        $form->addText('firstname', 'form.firstname');
+        
+        $form->addText('lastname', 'form.lastname');
 
-    $form->addEmail('email', 'Email:')
-        ->setRequired('Zadejte e-mailovou adresu');
+        $form->addEmail('email', 'form.email')
+            ->setRequired('form.email.required');
 
-    $form->addPassword('password', 'Heslo:')
-        ->setRequired('Zadejte heslo')
-        ->addRule($form::MinLength, 'Heslo musí mít alespoň %d znaků.', $this->userFacade::PasswordMinLength);
+        $form->addPassword('password', 'form.password')
+            ->setRequired('form.password.required')
+            ->addRule($form::MinLength, 'form.password.min_length', $this->userFacade::PasswordMinLength);
 
-    $form->addPassword('confirmPassword', 'Potvrzení hesla:')
-        ->setRequired('Zadejte heslo znovu')
-        ->addRule($form::EQUAL, 'Hesla se neshodují', $form['password']);
+        $form->addPassword('confirmPassword', 'form.confirm_password')
+            ->setRequired('form.confirm_password.required')
+            ->addRule($form::EQUAL, 'form.passwords_not_matching', $form['password']);
 
-    $form->addReCaptcha('recaptcha', 'Captcha', true, 'Are you a bot?');
+        $form->addReCaptcha('recaptcha', 'form.recaptcha', true, 'form.recaptcha.error');
 
-    $form->addSubmit('send', 'Registrovat');
+        $form->addSubmit('send', 'form.signup.submit');
 
-    $form->onSuccess[] = function (Form $form, \stdClass $data): void {
-        try {
-            $this->userFacade->add(
-                username: $data->username,
-                firstname: $data->firstname,
-                lastname: $data->lastname,
-                email: $data->email,
-                password: $data->password,
-                role: 'UZIVATEL'
-            );
+        $form->onSuccess[] = function (Form $form, \stdClass $data): void {
+            try {
+                $this->userFacade->add(
+                    username: $data->username,
+                    firstname: $data->firstname,
+                    lastname: $data->lastname,
+                    email: $data->email,
+                    password: $data->password,
+                    role: 'UZIVATEL'
+                );
 
-            $this->mailSender->sendRegistrationEmail($data->email, $data->username);
-            $this->mailSender->sendNewUserEmail($data->email, $data->username);
+                $this->mailSender->sendRegistrationEmail($data->email, $data->username);
+                $this->mailSender->sendNewUserEmail($data->email, $data->username);
 
-            $this->flashMessage('Registrace byla úspěšná. Nyní se můžete přihlásit.', 'success');
-            $this->redirect('Sign:in');
+                $this->flashMessage('sign.up.success', 'success');
+                $this->redirect('Sign:in');
 
-        } catch (DuplicateNameException $e) {
-            $message = $e->getMessage();
+            } catch (DuplicateNameException $e) {
+                $message = $e->getMessage();
 
-            /** @var \Nette\Forms\Controls\BaseControl $email */
-            $email = $form['email'];
-            /** @var \Nette\Forms\Controls\BaseControl $username */
-            $username = $form['username'];
+                /** @var \Nette\Forms\Controls\BaseControl $email */
+                $email = $form['email'];
+                /** @var \Nette\Forms\Controls\BaseControl $username */
+                $username = $form['username'];
 
-            if (str_contains($message, 'Uživatelské jméno')) {
-                $username->addError('Uživatelské jméno již existuje.');
-            } elseif (str_contains($message, 'Email')) {
-                $email->addError('Email již existuje.');
-            } else {
-                $form->addError('Registrace se nezdařila. Zkuste to prosím znovu.');
+                if (str_contains($message, 'Uživatelské jméno')) {
+                    $username->addError('sign.up.username_exists');
+                } elseif (str_contains($message, 'Email')) {
+                    $email->addError('sign.up.email_exists');
+                } else {
+                    $form->addError('sign.up.failed');
+                }
+
+            } catch (\Exception $e) {
+                if ($e instanceof \Nette\Application\AbortException) {
+                    throw $e;
+                }
+
+                $this->flashMessage('sign.up.failed', 'danger');
             }
+        };
 
-        } catch (\Exception $e) {
-            if ($e instanceof \Nette\Application\AbortException) {
-                throw $e;
-            }
-
-            $this->flashMessage('Registrace se nepodařila. Zkuste to prosím znovu.', 'danger');
-        }
-    };
-
-    return $form;
-}
-
+        return $form;
+    }
 
     public function actionOut(): void
     {
         $this->getUser()->logout();
         $this->getHttpResponse()->deleteCookie(session_name());
-        $this->flashMessage('Byli jste odhlášeni.', 'success');
+        $this->flashMessage('sign.out.success', 'success');
         $this->redirect('Home:default');
     }
 
     protected function createComponentForgotPasswordForm(): Form
     {
         $form = $this->formFactory->create();
+        $form->setTranslator($this->translator); // Enable translation for form
         $form->elementPrototype->class[] = 'custom-form';
-        $form->addEmail('email', 'Váš email:')
-            ->setRequired('Zadejte váš email');
 
-        $form->addSubmit('send', 'Odeslat resetovací kód');
+        $form->addEmail('email', 'form.email')
+            ->setRequired('form.email.required');
+
+        $form->addSubmit('send', 'form.forgot_password.submit');
 
         $form->onSuccess[] = function (Form $form, \stdClass $data): void {
             $user = $this->userFacade->findByEmail($data->email);
             if (!$user) {
-                $this->flashMessage('Tento email nebyl nalezen', 'danger');
+                $this->flashMessage('forgot_password.email_not_found', 'danger');
                 return;
             }
 
@@ -148,7 +151,7 @@ protected function createComponentSignUpForm(): Form
             $this->userFacade->saveResetCode($user->id, $resetCode);
             $this->mailSender->sendPasswordResetEmail($data->email, $resetCode);
 
-            $this->flashMessage('Na váš email byl odeslán resetovací kód', 'success');
+            $this->flashMessage('forgot_password.code_sent', 'success');
             $this->redirect('Sign:resetPassword');
         };
 
@@ -158,35 +161,36 @@ protected function createComponentSignUpForm(): Form
     protected function createComponentResetPasswordForm(): Form
     {
         $form = $this->formFactory->create();
+        $form->setTranslator($this->translator); // Enable translation for form
         $form->elementPrototype->class[] = 'custom-form';
 
-        $form->addText('resetCode', 'Resetovací kód:')
-            ->setRequired('Zadejte resetovací kód')
-            ->addRule(Form::MAX_LENGTH, 'Resetovací kód může mít maximálně %d znaků', 6);
+        $form->addText('resetCode', 'form.reset_code')
+            ->setRequired('form.reset_code.required')
+            ->addRule(Form::MAX_LENGTH, 'form.reset_code.max_length', 6);
 
-        $form->addPassword('newPassword', 'Nové heslo:')
-            ->setRequired('Zadejte nové heslo')
-            ->addRule(Form::MIN_LENGTH, 'Heslo musí mít alespoň 6 znaků', 6);
+        $form->addPassword('newPassword', 'form.new_password')
+            ->setRequired('form.new_password.required')
+            ->addRule(Form::MIN_LENGTH, 'form.new_password.min_length', 6);
 
-        $form->addPassword('confirmPassword', 'Potvrďte nové heslo:')
-            ->setRequired('Potvrďte nové heslo');
+        $form->addPassword('confirmPassword', 'form.confirm_password')
+            ->setRequired('form.confirm_password.required');
 
-        $form->addSubmit('send', 'Obnovit heslo');
+        $form->addSubmit('send', 'form.reset_password.submit');
 
         $form->onSuccess[] = function (Form $form, \stdClass $data): void {
             $user = $this->userFacade->findByResetCode($data->resetCode);
             if (!$user) {
-                $form->addError('Neplatný resetovací kód');
+                $form->addError('reset_password.invalid_code');
                 return;
             }
 
             if ($data->newPassword !== $data->confirmPassword) {
-                $form->addError('Hesla se neshodují');
+                $form->addError('form.passwords_not_matching');
                 return;
             }
 
             $this->userFacade->updatePassword($user->id, $data->newPassword);
-            $this->flashMessage('Heslo bylo úspěšně změněno', 'success');
+            $this->flashMessage('reset_password.success', 'success');
             $this->redirect('Sign:in');
         };
 

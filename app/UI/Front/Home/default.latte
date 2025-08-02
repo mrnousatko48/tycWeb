@@ -119,93 +119,93 @@
 }
 </style>
 <section class="banner-section relative">
-        <div class="absolute inset-0 bg-black bg-opacity-50"></div>
-        <div class="banner-content relative z-10 max-w-5xl mx-auto">
-            <h1 class="text-4xl md:text-5xl font-extrabold mb-4">{foreach $banner as $item}{if $item->content_type == 'title'}{$item->content_text}{/if}{/foreach}</h1>
-            <p class="text-lg md:text-xl mb-6 max-w-2xl mx-auto">{foreach $banner as $item}{if $item->content_type == 'description'}{$item->content_text}{/if}{/foreach}</p>
-            {var $link = ''}
-            {var $text = ''}
-            {foreach $banner as $item}
-                {if $item->content_type == 'button_link'}{var $link = $item->content_text}{/if}
-                {if $item->content_type == 'button_text'}{var $text = $item->content_text}{/if} {* Removed |translate *}
-            {/foreach}
-            <a n:href="$link" class="btn btn-primary shadow-md hover:shadow-lg">{$text}</a>
-        </div>
-    </section>
+    <div class="absolute inset-0 bg-black bg-opacity-50"></div>
+    <div class="banner-content relative z-10 max-w-5xl mx-auto">
+        <h1 class="text-4xl md:text-5xl font-extrabold mb-4">{foreach $banner as $item}{if $item->content_type == 'title'}{$item->content_text}{/if}{/foreach}</h1>
+        <p class="text-lg md:text-xl mb-6 max-w-2xl mx-auto">{foreach $banner as $item}{if $item->content_type == 'description'}{$item->content_text}{/if}{/foreach}</p>
+        {var $link = ''}
+        {var $text = ''}
+        {foreach $banner as $item}
+            {if $item->content_type == 'button_link'}{var $link = $item->content_text}{/if}
+            {if $item->content_type == 'button_text'}{var $text = $item->content_text}{/if}
+        {/foreach}
+        <a n:href="$link, lang => $lang" class="btn btn-primary shadow-md hover:shadow-lg">{$text}</a>
+    </div>
+</section>
 
-    <section class="py-12">
-        <div class="container mx-auto px-4">
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
-                <div>
-                    <h2 class="text-3xl font-semibold mb-3">{foreach $durability as $item}{if $item->content_type == 'title'}{$item->content_text}{/if}{/foreach}</h2>
-                    {foreach $durability as $item}
-                        {if strpos($item->content_type, 'description') === 0}
-                            <p class="text-lg mb-3">{$item->content_text}</p>
-                        {/if}
-                    {/foreach}
-                </div>
-                <div>
-                    <img src="{foreach $durability as $item}{if $item->content_type == 'image'}{$item->image_path}{/if}{/foreach}" alt="{_'durability.image_alt'}" class="section-img shadow-lg">
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <section class="py-12">
-        <div class="container mx-auto px-4">
-            <h2 class="text-3xl font-semibold text-center border-b border-[var(--color-accent)] pb-3 mb-6">{_'customize.header'}</h2>
-            <div class="gallery-grid">
-                {foreach $customizations as $customization}
-                    <div class="gallery-item p-2 rounded-xl shadow-md hover:shadow-lg transition text-center">
-                        <img src="{$customization->image_path}" alt="{$customization->title}" class="section-img mb-3">
-                        <h3 class="text-xl font-semibold mb-2">{$customization->title}</h3>
-                        <p>{$customization->description}</p>
-                    </div>
-                {/foreach}
-            </div>
-            <div class="text-center mt-8">
-                <a n:href="configurator" class="btn btn-accent shadow-md hover:shadow-lg">{_'customize.button'}</a>
-            </div>
-        </div>
-    </section>
-
-    <section class="py-12">
-        <div class="container mx-auto px-4">
-            <h2 class="text-3xl font-semibold text-center border-b border-[var(--color-accent)] pb-3 mb-6">{_'gallery.header'}</h2>
-            <div class="gallery-grid">
-                {var $imageCount = count($gallery)}
-                {var $displayLimit = 5}
-                {foreach $gallery as $image}
-                    {if $iterator->counter <= $displayLimit}
-                        <div class="gallery-item">
-                            <img src="{$image->image}" alt="{$image->alt_text}">
-                        </div>
+<section class="py-12">
+    <div class="container mx-auto px-4">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+            <div>
+                <h2 class="text-3xl font-semibold mb-3">{foreach $durability as $item}{if $item->content_type == 'title'}{$item->content_text}{/if}{/foreach}</h2>
+                {foreach $durability as $item}
+                    {if strpos($item->content_type, 'description') === 0}
+                        <p class="text-lg mb-3">{$item->content_text}</p>
                     {/if}
                 {/foreach}
             </div>
-            {if $imageCount > $displayLimit}
-                <div class="see-more-btn">
-                    <a n:href="Home:gallery" class="btn btn-accent shadow-md hover:shadow-lg">{_'gallery.button'}</a>
-                </div>
-            {/if}
-        </section>
+            <div>
+                <img src="{foreach $durability as $item}{if $item->content_type == 'image'}{$item->image_path}{/if}{/foreach}" alt="{_'durability.image_alt'}" class="section-img shadow-lg">
+            </div>
+        </div>
+    </div>
+</section>
 
-        <section id="contact" class="contact">
-            <div class="container mx-auto px-4">
-                <h2 class="text-center">{_'contact.header'}</h2>
-                <p class="text-center text-gray-600 mb-8">{_'contact.description'}</p>
-                <div class="flex flex-col md:flex-row md:space-x-8">
-                    <div class="contact-info mb-8 md:mb-0 flex-1">
-                        <p><i class="fas fa-user"></i> <strong>{$contact->name}</strong></p>
-                        <p><i class="fas fa-map-marker-alt"></i> <a href="#">{_'contact.address'}: {$contact->address}</a></p>
-                        <p><i class="fas fa-id-card"></i> <a href="#">{_'contact.ico'}: {$contact->ico}</a></p>
-                        <p><i class="fas fa-phone"></i> <a href="tel:{$contact->phone|replace: ' ', ''}">{_'contact.phone'}: {$contact->phone}</a></p>
-                        <p><i class="fas fa-envelope"></i> <a href="mailto:{$contact->email}">{_'contact.email'}: {$contact->email}</a></p>
+<section class="py-12">
+    <div class="container mx-auto px-4">
+        <h2 class="text-3xl font-semibold text-center border-b border-[var(--color-accent)] pb-3 mb-6">{_'customize.header'}</h2>
+        <div class="gallery-grid">
+            {foreach $customizations as $customization}
+                <div class="gallery-item p-2 rounded-xl shadow-md hover:shadow-lg transition text-center">
+                    <img src="{$customization->image_path}" alt="{$customization->title}" class="section-img mb-3">
+                    <h3 class="text-xl font-semibold mb-2">{$customization->title}</h3>
+                    <p>{$customization->description}</p>
+                </div>
+            {/foreach}
+        </div>
+        <div class="text-center mt-8">
+            <a n:href="Home:configurator, lang => $lang" class="btn btn-accent shadow-md hover:shadow-lg">{_'customize.button'}</a>
+        </div>
+    </div>
+</section>
+
+<section class="py-12">
+    <div class="container mx-auto px-4">
+        <h2 class="text-3xl font-semibold text-center border-b border-[var(--color-accent)] pb-3 mb-6">{_'gallery.header'}</h2>
+        <div class="gallery-grid">
+            {var $imageCount = count($gallery)}
+            {var $displayLimit = 4}
+            {foreach $gallery as $image}
+                {if $iterator->counter <= $displayLimit}
+                    <div class="gallery-item">
+                        <img src="{$image->image}" alt="{$image->alt_text ?: $image->alt_text_en}">
                     </div>
-                    <div class="md:w-1/2">
-                        {$contact->map_embed|noescape}
-                    </div>
+                {/if}
+            {/foreach}
+        </div>
+        {if $imageCount > $displayLimit}
+            <div class="see-more-btn">
+                <a n:href="Home:gallery, lang => $lang" class="btn btn-accent shadow-md hover:shadow-lg">{_'gallery.button'}</a>
+            </div>
+        {/if}
+    </section>
+
+    <section id="contact" class="contact">
+        <div class="container mx-auto px-4">
+            <h2 class="text-center">{_'contact.header'}</h2>
+            <p class="text-center text-gray-600 mb-8">{_'contact.description'}</p>
+            <div class="flex flex-col md:flex-row md:space-x-8">
+                <div class="contact-info mb-8 md:mb-0 flex-1">
+                    <p><i class="fas fa-user"></i> <strong>{$contact->name}</strong></p>
+                    <p><i class="fas fa-map-marker-alt"></i> <a href="#">{_'contact.address'}: {$contact->address}</a></p>
+                    <p><i class="fas fa-id-card"></i> <a href="#">{_'contact.ico'}: {$contact->ico}</a></p>
+                    <p><i class="fas fa-phone"></i> <a href="tel:{$contact->phone|replace: ' ', ''}">{_'contact.phone'}: {$contact->phone}</a></p>
+                    <p><i class="fas fa-envelope"></i> <a href="mailto:{$contact->email}">{_'contact.email'}: {$contact->email}</a></p>
+                </div>
+                <div class="md:w-1/2">
+                    {$contact->map_embed|noescape}
                 </div>
             </div>
-        </section>
+        </div>
+    </section>
 {/block}
