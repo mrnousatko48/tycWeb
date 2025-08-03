@@ -8,7 +8,6 @@ use App\UI\Front\BaseFrontPresenter;
 use App\Model\ModelFacade;
 use Nette\Application\AbortException;
 
-
 final class HomePresenter extends BaseFrontPresenter
 {
     private ModelFacade $modelFacade;
@@ -20,7 +19,7 @@ final class HomePresenter extends BaseFrontPresenter
 
     public function renderDefault(): void
     {
-        $this->pageFacade->setLang($this->template->lang); // Use lang from BaseFrontPresenter        
+        $this->pageFacade->setLang($this->template->lang);        
         $this->template->banner = $this->pageFacade->getSectionContent('banner');
         $this->template->durability = $this->pageFacade->getSectionContent('durability');
         $this->template->customizations = $this->pageFacade->getCustomizations();
@@ -28,10 +27,16 @@ final class HomePresenter extends BaseFrontPresenter
         $this->template->contact = $this->pageFacade->getContactInfo();
     }
 
-    public function renderConfigurator(): void
-    {
-        $this->template->manufacturers = $this->modelFacade->getManufacturers();
-    }
+public function renderConfigurator(): void
+{
+    $this->template->manufacturers = $this->modelFacade->getManufacturers();
+    $this->template->colorsUrl = $this->link('Endpoint:modelColors') . '?modelId=#';
+    $this->template->featuresUrl = $this->link('Endpoint:modelFeatures') . '?modelId=#';
+    $this->template->priceUrl = $this->link('Endpoint:modelPrice') . '?modelId=#';
+    $this->template->imagesUrl = $this->link('Endpoint:modelImages') . '?modelId=#';
+    $this->template->uploadUrl = $this->link('uploadFile');
+    $this->template->defaultImagesUrl = $this->link('Endpoint:modelImages');
+}
 
     public function renderLegal(string $section): void
     {
@@ -51,158 +56,154 @@ final class HomePresenter extends BaseFrontPresenter
         $this->template->page = $page;
     }
 
-protected function createComponentCaseForm(): Form
-{
-    $form = new Form;
-    $form->setHtmlAttribute('enctype', 'multipart/form-data');
-    $form->setTranslator($this->translator); // Enable translation for the form
+    protected function createComponentCaseForm(): Form
+    {
+        $form = new Form;
+        $form->setHtmlAttribute('enctype', 'multipart/form-data');
+        $form->setTranslator($this->translator);
 
-    $manufacturers = $this->modelFacade->getManufacturers();
-    $manufacturerItems = [];
-    foreach ($manufacturers as $manufacturer) {
-        $manufacturerItems[$manufacturer->id] = $manufacturer->name;
+        $manufacturers = $this->modelFacade->getManufacturers();
+        $manufacturerItems = [];
+        foreach ($manufacturers as $manufacturer) {
+            $manufacturerItems[$manufacturer->id] = $manufacturer->name;
+        }
+
+        $manufacturer = $form->addSelect('manufacturer', 'form.manufacturer', $manufacturerItems)
+            ->setPrompt('form.select_manufacturer')
+            ->setHtmlAttribute('data-url', $this->link('Endpoint:manufacturers'))
+            ->setRequired('Prosím vyberte výrobce.');
+
+        $model = $form->addSelect('model', 'form.model')
+            ->setPrompt('form.select_model')
+            ->setHtmlAttribute('data-depends', $manufacturer->getHtmlName())
+            ->setHtmlAttribute('data-url', $this->link('Endpoint:models', ['manufacturerId' => '#']))
+            ->setHtmlAttribute('data-colors-url', $this->link('Endpoint:modelColors', ['modelId' => '#']))
+            ->setHtmlAttribute('data-features-url', $this->link('Endpoint:modelFeatures', ['modelId' => '#']))
+            ->setHtmlAttribute('data-price-url', $this->link('Endpoint:modelPrice', ['modelId' => '#']))
+            ->setHtmlAttribute('data-images-url', $this->link('Endpoint:modelImages', ['modelId' => '#']))
+            ->setRequired('Prosím vyberte model.');
+
+        $form->addHidden('color')->setRequired('Prosím vyberte barvu.');
+        $form->addHidden('features')->setDefaultValue('{}');
+        $form->addHidden('total_price')->setDefaultValue('0.00');
+        
+        $form->addUpload('user_file', 'Upload your 3D file:')
+            ->setRequired(false);
+
+        $form->addHidden('user_upload_id')->setDefaultValue(null);
+
+        $form->addSubmit('submit', 'form.submit')
+            ->setHtmlAttribute('id', 'frm-caseForm-submit');
+
+        $form->onAnchor[] = function () use ($model, $manufacturer) {
+            $model->setItems(
+                $manufacturer->getValue()
+                    ? $this->modelFacade->getModelsByManufacturer((int)$manufacturer->getValue())
+                    : []
+            );
+        };
+
+        $form->onSuccess[] = [$this, 'processForm'];
+
+        return $form;
     }
 
-    $manufacturer = $form->addSelect('manufacturer', 'form.manufacturer', $manufacturerItems)
-        ->setPrompt('form.select_manufacturer')
-        ->setHtmlAttribute('data-url', $this->link('Endpoint:manufacturers'))
-        ->setRequired('Prosím vyberte výrobce.');
+    public function processForm(Form $form): void
+    {
+        $values = $form->getValues();
+        error_log('Form values: ' . print_r($values, true));
 
-    $model = $form->addSelect('model', 'form.model')
-        ->setPrompt('form.select_model')
-        ->setHtmlAttribute('data-depends', $manufacturer->getHtmlName())
-        ->setHtmlAttribute('data-url', $this->link('Endpoint:models', ['manufacturerId' => '#']))
-        ->setHtmlAttribute('data-colors-url', $this->link('Endpoint:modelColors', ['modelId' => '#']))
-        ->setHtmlAttribute('data-features-url', $this->link('Endpoint:modelFeatures', ['modelId' => '#']))
-        ->setHtmlAttribute('data-price-url', $this->link('Endpoint:modelPrice', ['modelId' => '#']))
-        ->setHtmlAttribute('data-images-url', $this->link('Endpoint:modelImages', ['modelId' => '#']))
-        ->setRequired('Prosím vyberte model.');
+        try {
+            $manufacturerId = (int)$values['manufacturer'];
+            $modelId = (int)$values['model'];
+            $color = $values['color'];
+            $totalPrice = (float)$values['total_price'];
+            $features = json_decode($values['features'], true);
+            $userUploadId = isset($values['user_upload_id']) && $values['user_upload_id']
+                ? (int)$values['user_upload_id']
+                : null;
 
-    $form->addHidden('color')->setRequired('Prosím vyberte barvu.');
-    $form->addHidden('features')->setDefaultValue('{}');
-    $form->addHidden('total_price')->setDefaultValue('0.00');
-    
-    $form->addUpload('user_file', 'Upload your 3D file:')
-        ->setRequired(false);
+            if (!$manufacturerId || !$modelId || !$color) {
+                throw new \Exception('Missing required fields: manufacturer, model, or color.');
+            }
 
-    $form->addHidden('user_upload_id')->setDefaultValue(null);
+            if (!is_array($features)) {
+                throw new \Exception('Invalid features format.');
+            }
 
-    $form->addSubmit('submit', 'form.submit')
-        ->setHtmlAttribute('id', 'frm-caseForm-submit');
+            $manufacturerName = $this->modelFacade->getManufacturerNameById($manufacturerId);
+            $modelName = $this->modelFacade->getModelNameById($modelId);
 
-    $form->onAnchor[] = function () use ($model, $manufacturer) {
-        $model->setItems(
-            $manufacturer->getValue()
-                ? $this->modelFacade->getModelsByManufacturer((int)$manufacturer->getValue())
-                : []
-        );
-    };
+            if (!$manufacturerName || !$modelName) {
+                throw new \Exception('Invalid manufacturer or model selected.');
+            }
 
-    $form->onSuccess[] = [$this, 'processForm'];
+            $caseData = [
+                'manufacturer' => $manufacturerName,
+                'model' => $modelName,
+                'color' => $color,
+                'total_price' => $totalPrice,
+                'features' => $values['features'],
+                'user_upload_id' => $userUploadId,
+            ];
 
-    return $form;
-}
+            error_log('Creating case with user_upload_id: ' . ($userUploadId ?? 'NULL'));
 
-   public function processForm(Form $form): void
-{
-    $values = $form->getValues();
-    error_log('Form values: ' . print_r($values, true));
+            $userId = $this->getUser()->isLoggedIn() ? $this->getUser()->getId() : null;
+            $this->orderFacade->createCase($caseData, $userId);
 
-    try {
-        $manufacturerId = (int)$values['manufacturer'];
-        $modelId = (int)$values['model'];
-        $color = $values['color'];
-        $totalPrice = (float)$values['total_price'];
-        $features = json_decode($values['features'], true);
-        $userUploadId = isset($values['user_upload_id']) && $values['user_upload_id']
-            ? (int)$values['user_upload_id']
-            : null;
+            $this->flashMessage('Položka byla přidána do košíku.', 'success');
+            error_log('Redirecting after success.');
+            $this->redirect('Cart:default');
+            return;
 
-        if (!$manufacturerId || !$modelId || !$color) {
-            throw new \Exception('Missing required fields: manufacturer, model, or color.');
+        } catch (AbortException $e) {
+            throw $e;
+
+        } catch (\Exception $e) {
+            error_log('Error in processForm: ' . $e->getMessage());
+            $this->flashMessage('Chyba při přidávání do košíku: ' . $e->getMessage(), 'error');
+            error_log('Redirecting after error: ' . $e->getMessage());
+            $this->redirect('Cart:default');
+            return;
         }
-
-        if (!is_array($features)) {
-            throw new \Exception('Invalid features format.');
-        }
-
-        $manufacturerName = $this->modelFacade->getManufacturerNameById($manufacturerId);
-        $modelName = $this->modelFacade->getModelNameById($modelId);
-
-        if (!$manufacturerName || !$modelName) {
-            throw new \Exception('Invalid manufacturer or model selected.');
-        }
-
-        $caseData = [
-            'manufacturer' => $manufacturerName,
-            'model' => $modelName,
-            'color' => $color,
-            'total_price' => $totalPrice,
-            'features' => $values['features'],
-            'user_upload_id' => $userUploadId,
-        ];
-
-        error_log('Creating case with user_upload_id: ' . ($userUploadId ?? 'NULL'));
-
-        $userId = $this->getUser()->isLoggedIn() ? $this->getUser()->getId() : null;
-        $this->orderFacade->createCase($caseData, $userId);
-
-        $this->flashMessage('Položka byla přidána do košíku.', 'success');
-        error_log('Redirecting after success.');
-        $this->redirect('Cart:default');
-        return;
-
-    } catch (AbortException $e) {
-        // Let Nette handle redirects (e.g., from $this->redirect())
-        throw $e;
-
-    } catch (\Exception $e) {
-        error_log('Error in processForm: ' . $e->getMessage());
-        $this->flashMessage('Chyba při přidávání do košíku: ' . $e->getMessage(), 'error');
-        error_log('Redirecting after error: ' . $e->getMessage());
-        $this->redirect('Cart:default');
-        return;
     }
-}
 
     public function renderGallery(): void
     {
         $this->template->gallery = $this->pageFacade->getGalleryImages();
     }
 
-public function actionUploadFile(): void
-{
-    if (!$this->isAjax()) {
-        $this->error('This endpoint accepts only AJAX requests.', 400);
-    }
-
-    try {
-        $file = $this->getHttpRequest()->getFile('user_file');
-        if (!$file || !$file->isOk()) {
-            throw new \RuntimeException('File upload failed: ' . ($file ? $file->getError() : 'No file uploaded.'));
+    public function actionUploadFile(): void
+    {
+        if (!$this->isAjax()) {
+            $this->error('This endpoint accepts only AJAX requests.', 400);
         }
 
-        $upload = $this->modelFacade->addUserUpload($file, $file->getSanitizedName());
-        if (!$upload || !isset($upload->id)) {
-            throw new \RuntimeException('Failed to process file upload: missing ID');
+        try {
+            $file = $this->getHttpRequest()->getFile('user_file');
+            if (!$file || !$file->isOk()) {
+                throw new \RuntimeException('File upload failed: ' . ($file ? $file->getError() : 'No file uploaded.'));
+            }
+
+            $upload = $this->modelFacade->addUserUpload($file, $file->getSanitizedName());
+            if (!$upload || !isset($upload->id)) {
+                throw new \RuntimeException('Failed to process file upload: missing ID');
+            }
+
+            $this->sendJson(['success' => true, 'upload_id' => $upload->id]);
+            $this->terminate();
+
+        } catch (AbortException $e) {
+            throw $e;
+
+        } catch (\Throwable $e) {
+            error_log("upload error: " . $e->getMessage());
+            $this->sendJson([
+                'success' => false,
+                'error'   => $e->getMessage(),
+            ]);
+            $this->terminate();
         }
-
-        // success → JSON + terminate
-        $this->sendJson(['success' => true, 'upload_id' => $upload->id]);
-        $this->terminate();
-
-    } catch (AbortException $e) {
-        // re‑throw Nette’s own “abort” so we don’t mistake it for an error
-        throw $e;
-
-    } catch (\Throwable $e) {
-        // *only* real upload errors land here
-        error_log("upload error: " . $e->getMessage());
-        $this->sendJson([
-            'success' => false,
-            'error'   => $e->getMessage(),
-        ]);
-        $this->terminate();
-    }
     }
 }
