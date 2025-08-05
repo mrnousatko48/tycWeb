@@ -247,6 +247,11 @@
     .popup-close:hover {
         background: rgba(0, 0, 0, 0.4);
     }
+
+    .ring-2 { outline: 2px solid; outline-offset: 2px; }
+    .ring-red-500 { outline-color: #ef4444; }
+    .p-1 { padding: 0.25rem; }
+    .text-red-500 { color: #ef4444; }
 </style>
 <div class="max-w-6xl mx-auto px-4 py-12 grid grid-cols-1 md:grid-cols-2 gap-12 items-start animate-fade-in-up carousel-container">
     <div class="w-full">
@@ -273,6 +278,7 @@
     <div class="w-full animate-fade-in-up">
         <div class="space-y-8">
             <h1 class="text-3xl font-semibold">{_'configurator.title'}</h1>
+            <div id="configurator-message" class="text-red-500 text-sm hidden"></div>
             <p class="text-lg text-gray-400">{_'configurator.description'}</p>
 
             <div class="text-xl font-medium">
@@ -336,7 +342,12 @@
     const translations = {
         upload_required: '{_'configurator.upload_required'}',
         upload_success: '{_'configurator.upload_success'}',
-        select_device: '{_'configurator.select_device'}'
+        select_device: '{_'configurator.select_device'}',
+        select_manufacturer: '{_'form.manufacturer'}',
+        select_model: '{_'form.model'}',
+        select_color: '{_'configurator.color'}',
+        select_features: '{_'configurator.features'}',
+        select_upload: '{_'configurator.upload_image'}'
     };
 </script>
 
@@ -344,23 +355,13 @@
 let basePrice = 0;
 let featurePrices = {};
 let selectedFeatures = {};
+let availableFeatures = {};
 let currentImages = [];
 let currentSlide = 0;
 let totalSlides = currentImages.length || 1;
 let fileUploadSuccess = false;
 
-function showCustomPopup(message) {
-    const popup = document.getElementById('custom-popup');
-    const popupMessage = document.getElementById('popup-message');
-    popupMessage.textContent = message;
-    popup.classList.add('active');
-}
-
-function hideCustomPopup() {
-    const popup = document.getElementById('custom-popup');
-    popup.classList.remove('active');
-}
-
+// Initialize popup event listeners
 document.addEventListener('DOMContentLoaded', function() {
     const popup = document.getElementById('custom-popup');
     const closeButton = document.querySelector('.popup-close');
@@ -375,6 +376,87 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 });
+
+// Function to check if all required selections are made
+function checkSelections(showMessage = false) {
+    const manufacturerSelected = document.getElementById('frm-caseForm-manufacturer').value !== '';
+    const modelSelected = document.getElementById('frm-caseForm-model').value !== '';
+    const colorSelected = document.getElementById('frm-caseForm-color').value !== '';
+    const requiresUpload = Object.values(selectedFeatures).some(feature => feature.allow_user_upload);
+    const uploadConditionMet = !requiresUpload || (requiresUpload && fileUploadSuccess);
+    const totalFeatures = Object.keys(availableFeatures).length;
+    const selectedFeaturesCount = Object.keys(selectedFeatures).length;
+    const allFeaturesSelected = totalFeatures > 0 && selectedFeaturesCount === totalFeatures;
+
+    const allSelected = manufacturerSelected && modelSelected && colorSelected && allFeaturesSelected && uploadConditionMet;
+
+    // Update highlights and show popup only if showMessage is true
+    if (showMessage) {
+        // Clear highlights
+        document.getElementById('color-buttons').classList.remove('ring-2', 'ring-red-500', 'p-1');
+        document.querySelectorAll('#features h2').forEach(h2 => h2.classList.remove('text-red-500'));
+        document.getElementById('user-upload-container').classList.remove('ring-2', 'ring-red-500', 'p-1');
+
+        // If manufacturer or model is missing, show only that message without checking other fields
+        if (!manufacturerSelected || !modelSelected) {
+            showCustomPopup('Prosím vyberte výrobce a model.');
+            return allSelected;
+        }
+
+        // Check other fields only if manufacturer and model are selected
+        const missingFields = [];
+        const missingFeatureGroups = [];
+
+        // Check for missing fields and highlight relevant sections
+        if (!colorSelected) {
+            missingFields.push(translations.select_color);
+            document.getElementById('color-buttons').classList.add('ring-2', 'ring-red-500', 'p-1');
+        }
+        if (!allFeaturesSelected && totalFeatures > 0) {
+            // Identify specific missing feature groups
+            for (const featureName of Object.keys(availableFeatures)) {
+                const featureId = featureName.replace(/\s+/g, '_').toLowerCase();
+                if (!selectedFeatures[featureId]) {
+                    missingFeatureGroups.push(featureName);
+                    // Highlight the specific feature group header
+                    const featureHeader = Array.from(document.querySelectorAll('#features h2')).find(h2 => h2.textContent === featureName);
+                    if (featureHeader) {
+                        featureHeader.classList.add('text-red-500');
+                    }
+                }
+            }
+            missingFields.push(...missingFeatureGroups);
+        }
+        if (requiresUpload && !fileUploadSuccess) {
+            missingFields.push(translations.select_upload);
+            document.getElementById('user-upload-container').classList.add('ring-2', 'ring-red-500', 'p-1');
+        }
+
+        // Show popup with specific missing fields
+        if (missingFields.length > 0) {
+            showCustomPopup(`Prosím vyberte: ${missingFields.join(', ')}`);
+        }
+    } else {
+        // Clear highlights during normal interaction
+        document.getElementById('color-buttons').classList.remove('ring-2', 'ring-red-500', 'p-1');
+        document.querySelectorAll('#features h2').forEach(h2 => h2.classList.remove('text-red-500'));
+        document.getElementById('user-upload-container').classList.remove('ring-2', 'ring-red-500', 'p-1');
+    }
+
+    return allSelected;
+}
+
+function showCustomPopup(message) {
+    const popup = document.getElementById('custom-popup');
+    const popupMessage = document.getElementById('popup-message');
+    popupMessage.textContent = message;
+    popup.classList.add('active');
+}
+
+function hideCustomPopup() {
+    const popup = document.getElementById('custom-popup');
+    popup.classList.remove('active');
+}
 
 document.querySelectorAll('select[data-depends]').forEach((childSelect) => {
     let parentSelect = childSelect.form[childSelect.dataset.depends];
@@ -408,6 +490,7 @@ function updateSelectbox(select, items) {
         select.appendChild(el);
     }
     select.disabled = Object.keys(items).length === 0;
+    checkSelections();
 }
 
 function toggleSelection(button) {
@@ -428,6 +511,7 @@ function toggleSelection(button) {
     updateFeaturesInput();
     updateTotalPrice();
     updateUserUploadVisibility();
+    checkSelections();
 }
 
 function updateFeaturesInput() {
@@ -458,7 +542,30 @@ function updateUserUploadVisibility() {
         fileUploadSuccess = false;
         hideCustomPopup();
     }
+    checkSelections();
 }
+
+document.getElementById('frm-caseForm-manufacturer').addEventListener('change', function () {
+    const modelSelect = document.getElementById('frm-caseForm-model');
+    modelSelect.value = '';
+    modelSelect.disabled = false;
+
+    basePrice = 0;
+    selectedFeatures = {};
+    featurePrices = {};
+    availableFeatures = {};
+
+    updateColorButtons([]);
+    updateFeatureButtons([]);
+    updateCarouselImages([]);
+    updateTotalPrice();
+    updateUserUploadVisibility();
+    document.getElementById('frm-caseForm-color').value = '';
+    document.getElementById('frm-caseForm-features').value = '';
+    document.getElementById('frm-caseForm-total_price').value = '';
+    document.getElementById('selected-device').textContent = translations.select_device;
+    checkSelections();
+});
 
 document.getElementById('frm-caseForm-model').addEventListener('change', function () {
     let modelId = this.value;
@@ -496,48 +603,33 @@ document.getElementById('frm-caseForm-model').addEventListener('change', functio
                     return response.json();
                 })
                 .then(images => updateCarouselImages(images))
-        ]).catch(error => console.error('Error fetching data:', error));
-
-        const manufacturerSelect = document.getElementById('frm-caseForm-manufacturer');
-        const modelSelect = this;
-        const selectedDevice = document.getElementById('selected-device');
-        if (manufacturerSelect.value && modelId) {
-            selectedDevice.textContent = `${manufacturerSelect.options[manufacturerSelect.selectedIndex].text} ${modelSelect.options[modelSelect.selectedIndex].text}`;
-        } else {
-            selectedDevice.textContent = translations.select_device;
-        }
+        ]).then(() => {
+            const manufacturerSelect = document.getElementById('frm-caseForm-manufacturer');
+            const modelSelect = this;
+            const selectedDevice = document.getElementById('selected-device');
+            if (manufacturerSelect.value && modelId) {
+                selectedDevice.textContent = `${manufacturerSelect.options[manufacturerSelect.selectedIndex].text} ${modelSelect.options[modelSelect.selectedIndex].text}`;
+            } else {
+                selectedDevice.textContent = translations.select_device;
+            }
+            checkSelections();
+        }).catch(error => console.error('Error fetching data:', error));
     } else {
         basePrice = 0;
         featurePrices = {};
         selectedFeatures = {};
+        availableFeatures = {};
         updateColorButtons([]);
         updateFeatureButtons([]);
         updateCarouselImages([]);
         updateTotalPrice();
         updateUserUploadVisibility();
+        document.getElementById('frm-caseForm-color').value = '';
+        document.getElementById('frm-caseForm-features').value = '';
+        document.getElementById('frm-caseForm-total_price').value = '';
         document.getElementById('selected-device').textContent = translations.select_device;
+        checkSelections();
     }
-});
-
-document.getElementById('frm-caseForm-manufacturer').addEventListener('change', function () {
-    const modelSelect = document.getElementById('frm-caseForm-model');
-    modelSelect.value = '';
-    modelSelect.disabled = false;
-
-    basePrice = 0;
-    selectedFeatures = {};
-    featurePrices = {};
-
-    updateColorButtons([]);
-    updateFeatureButtons([]);
-    updateCarouselImages([]);
-    updateTotalPrice();
-    updateUserUploadVisibility();
-
-    document.getElementById('frm-caseForm-color').value = '';
-    document.getElementById('frm-caseForm-features').value = '';
-    document.getElementById('frm-caseForm-total_price').value = '';
-    document.getElementById('selected-device').textContent = translations.select_device;
 });
 
 function updateColorButtons(colors) {
@@ -555,16 +647,19 @@ function updateColorButtons(colors) {
             });
             this.classList.add('ring-2', 'ring-[var(--color-accent)]', 'ring-offset-2');
             document.getElementById('frm-caseForm-color').value = this.dataset.color;
+            checkSelections();
         });
         container.appendChild(button);
     });
     if (colors.length > 0) {
         container.firstChild.classList.add('ring-2', 'ring-[var(--color-accent)]', 'ring-offset-2');
         document.getElementById('frm-caseForm-color').value = colors[0].name;
+        checkSelections();
     }
 }
 
 function updateFeatureButtons(features) {
+    availableFeatures = features;
     const container = document.getElementById('features');
     container.innerHTML = '';
     featurePrices = {};
@@ -617,12 +712,13 @@ function updateFeatureButtons(features) {
     }
 
     updateUserUploadVisibility();
+    checkSelections();
 }
 
 function updateTotalPrice() {
     let total = basePrice;
     let breakdown = basePrice > 0 ? [`Základní cena: ${basePrice.toFixed(2)} Kč`] : [];
-    
+
     for (const [feature, data] of Object.entries(selectedFeatures)) {
         if (data.price > 0) {
             total += data.price;
@@ -807,6 +903,7 @@ document.addEventListener('DOMContentLoaded', function() {
             showCustomPopup('Prosím vyberte soubor k nahrání.');
             fileUploadSuccess = false;
             document.getElementById('frm-caseForm-user_upload_id').value = '';
+            checkSelections();
             return;
         }
 
@@ -834,28 +931,29 @@ document.addEventListener('DOMContentLoaded', function() {
                 fileUploadSuccess = false;
                 document.getElementById('frm-caseForm-user_upload_id').value = '';
             }
+            checkSelections();
         })
         .catch(error => {
             console.error('Upload error:', error);
             showCustomPopup('Nahrání selhalo: ' + error.message);
             fileUploadSuccess = false;
             document.getElementById('frm-caseForm-user_upload_id').value = '';
+            checkSelections();
         });
     });
 });
 
 document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('frm-caseForm');
     const submitButton = document.getElementById('frm-caseForm-submit');
-    if (submitButton) {
+    if (form && submitButton) {
         submitButton.addEventListener('click', function(event) {
-            const requiresUpload = Object.values(selectedFeatures).some(feature => feature.allow_user_upload);
-            if (requiresUpload && !fileUploadSuccess) {
-                event.preventDefault();
-                showCustomPopup(translations.upload_required);
+            if (!checkSelections(true)) {
+                event.preventDefault(); // Prevent form submission
             }
         });
     } else {
-        console.error('Submit button not found');
+        console.error('Form or submit button not found');
     }
 });
 </script>
