@@ -30,12 +30,13 @@ final class HomePresenter extends BaseFrontPresenter
 public function renderConfigurator(): void
 {
     $this->template->manufacturers = $this->modelFacade->getManufacturers();
-    $this->template->colorsUrl = $this->link('Endpoint:modelColors') . '?modelId=#';
-    $this->template->featuresUrl = $this->link('Endpoint:modelFeatures') . '?modelId=#';
-    $this->template->priceUrl = $this->link('Endpoint:modelPrice') . '?modelId=#';
-    $this->template->imagesUrl = $this->link('Endpoint:modelImages') . '?modelId=#';
+    $lang = $this->getParameter('lang', 'en'); // Get the current language from the URL
+    $this->template->colorsUrl = $this->link('Endpoint:modelColors', ['lang' => $lang]) . '?modelId=#';
+    $this->template->featuresUrl = $this->link('Endpoint:modelFeatures', ['lang' => $lang]) . '?modelId=#';
+    $this->template->priceUrl = $this->link('Endpoint:modelPrice', ['lang' => $lang]) . '?modelId=#';
+    $this->template->imagesUrl = $this->link('Endpoint:modelImages', ['lang' => $lang]) . '?modelId=#';
     $this->template->uploadUrl = $this->link('uploadFile');
-    $this->template->defaultImagesUrl = $this->link('Endpoint:modelImages');
+    $this->template->defaultImagesUrl = $this->link('Endpoint:modelImages', ['lang' => $lang]);
 }
 
     public function renderLegal(string $section): void

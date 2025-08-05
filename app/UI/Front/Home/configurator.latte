@@ -248,7 +248,6 @@
         background: rgba(0, 0, 0, 0.4);
     }
 </style>
-
 <div class="max-w-6xl mx-auto px-4 py-12 grid grid-cols-1 md:grid-cols-2 gap-12 items-start animate-fade-in-up carousel-container">
     <div class="w-full">
         <div class="relative carousel-wrapper">
@@ -273,18 +272,18 @@
 
     <div class="w-full animate-fade-in-up">
         <div class="space-y-8">
-            <h1 class="text-3xl font-semibold">Kryt na telefon</h1>
-            <p class="text-lg text-gray-400">Vyberte si svůj styl a přizpůsobte si kryt podle svých potřeb.</p>
+            <h1 class="text-3xl font-semibold">{_'configurator.title'}</h1>
+            <p class="text-lg text-gray-400">{_'configurator.description'}</p>
 
             <div class="text-xl font-medium">
-                Celková cena: <span id="total-price">0 Kč</span>
+                {_'configurator.total_price'} <span id="total-price">0 Kč</span>
                 <div id="price-breakdown" class="text-sm text-gray-400 mt-1"></div>
             </div>
-            <p class="text-sm text-gray-400">Kompatibilní s: <span id="selected-device">Vyberte výrobce a model</span></p>
+            <p class="text-sm text-gray-400">{_'configurator.compatible_with'} <span id="selected-device">{_'configurator.select_device'}</span></p>
 
             {form caseForm}
                 <div>
-                    <h2 class="text-xl font-medium">Model telefonu</h2>
+                    <h2 class="text-xl font-medium">{_'form.manufacturer'}</h2>
                     <div class="mt-2 flex flex-wrap gap-3">
                         {input manufacturer class => 'form-select px-4 py-3 rounded-xl shadow-sm hover:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)] transform hover:scale-[1.02] focus:scale-[1.02] transition duration-200 ease-out'}
                         {input model class => 'form-select px-4 py-3 rounded-xl shadow-sm hover:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)] transform hover:scale-[1.02] focus:scale-[1.02] transition duration-200 ease-out', data-colors-url => $colorsUrl, data-features-url => $featuresUrl, data-price-url => $priceUrl, data-images-url => $imagesUrl}
@@ -292,7 +291,7 @@
                 </div>
 
                 <div>
-                    <h2 class="text-xl font-medium mt-4">Barva</h2>
+                    <h2 class="text-xl font-medium mt-4">{_'configurator.color'}</h2>
                     <div id="color-buttons" class="mt-2 flex space-x-3">
                     </div>
                 </div>
@@ -302,8 +301,8 @@
                 </div>
 
                 <div id="user-upload-container" style="display: none;">
-                    <h2 class="text-xl font-medium mt-4">Nahrát vlastní obrázek</h2>
-                    <p class="text-sm text-gray-400 mt-2">Nahrajte obrázek ve formátu PNG nebo JPG. Maximální velikost souboru je 5 MB.</p>
+                    <h2 class="text-xl font-medium mt-4">{_'configurator.upload_image'}</h2>
+                    <p class="text-sm text-gray-400 mt-2">{_'configurator.upload_description'}</p>
                     <div class="mt-2">
                         {input user_file class => 'file-input px-4 py-3 rounded-xl shadow-sm hover:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)] transition duration-200 ease-out', accept => '.png,.jpg,.jpeg'}
                     </div>
@@ -334,6 +333,11 @@
 <script>
     const uploadUrl = {$uploadUrl};
     const defaultImagesUrl = {$defaultImagesUrl};
+    const translations = {
+        upload_required: '{_'configurator.upload_required'}',
+        upload_success: '{_'configurator.upload_success'}',
+        select_device: '{_'configurator.select_device'}'
+    };
 </script>
 
 <script n:syntax=off>
@@ -500,7 +504,7 @@ document.getElementById('frm-caseForm-model').addEventListener('change', functio
         if (manufacturerSelect.value && modelId) {
             selectedDevice.textContent = `${manufacturerSelect.options[manufacturerSelect.selectedIndex].text} ${modelSelect.options[modelSelect.selectedIndex].text}`;
         } else {
-            selectedDevice.textContent = 'Vyberte výrobce a model';
+            selectedDevice.textContent = translations.select_device;
         }
     } else {
         basePrice = 0;
@@ -511,7 +515,7 @@ document.getElementById('frm-caseForm-model').addEventListener('change', functio
         updateCarouselImages([]);
         updateTotalPrice();
         updateUserUploadVisibility();
-        document.getElementById('selected-device').textContent = 'Vyberte výrobce a model';
+        document.getElementById('selected-device').textContent = translations.select_device;
     }
 });
 
@@ -533,7 +537,7 @@ document.getElementById('frm-caseForm-manufacturer').addEventListener('change', 
     document.getElementById('frm-caseForm-color').value = '';
     document.getElementById('frm-caseForm-features').value = '';
     document.getElementById('frm-caseForm-total_price').value = '';
-    document.getElementById('selected-device').textContent = 'Vyberte výrobce a model';
+    document.getElementById('selected-device').textContent = translations.select_device;
 });
 
 function updateColorButtons(colors) {
@@ -824,7 +828,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (data.success && data.upload_id) {
                 document.getElementById('frm-caseForm-user_upload_id').value = data.upload_id;
                 fileUploadSuccess = true;
-                showCustomPopup('Soubor byl úspěšně nahrán!');
+                showCustomPopup(translations.upload_success);
             } else {
                 showCustomPopup('Nahrání selhalo: ' + (data.error || 'Neznámá chyba'));
                 fileUploadSuccess = false;
@@ -847,7 +851,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const requiresUpload = Object.values(selectedFeatures).some(feature => feature.allow_user_upload);
             if (requiresUpload && !fileUploadSuccess) {
                 event.preventDefault();
-                showCustomPopup('Prosím nahrajte platný obrázek (PNG/JPG, max. 5 MB) před přidáním do košíku.');
+                showCustomPopup(translations.upload_required);
             }
         });
     } else {

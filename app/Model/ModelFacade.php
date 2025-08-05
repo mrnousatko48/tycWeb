@@ -173,7 +173,7 @@ class ModelFacade
         $this->database->table('models')->get($id)?->delete();
     }
 
-    public function getColorsByModel(int $modelId): array
+    public function getColorsByModel(int $modelId, string $lang): array
     {
         $modelColors = $this->database->table('model_colors')
             ->where('model_id', $modelId)
@@ -184,6 +184,7 @@ class ModelFacade
         }
 
         $colors = $this->database->table('colors')
+            ->select('id, name_' . $lang . ' AS name, hex_code')
             ->where('id', array_keys($modelColors))
             ->fetchAll();
 
@@ -198,7 +199,7 @@ class ModelFacade
         return $result;
     }
 
-    public function getFeaturesByModel(int $modelId): array
+    public function getFeaturesByModel(int $modelId, string $lang): array
     {
         $features = $this->database->table('model_features')
             ->where('model_id', $modelId)
@@ -209,17 +210,19 @@ class ModelFacade
         }
 
         $featureData = $this->database->table('features')
+            ->select('id, name_' . $lang . ' AS name')
             ->where('id', array_keys($features))
             ->fetchPairs('id', 'name');
 
         $options = $this->database->table('feature_options')
+            ->select('id, feature_id, name_' . $lang . ' AS name, price, image_path, allow_user_upload')
             ->where('feature_id', array_keys($features))
             ->order('feature_id')
             ->fetchAll();
 
         $result = [];
         foreach ($options as $option) {
-            $featureName = $featureData[$option->feature_id];
+            $featureName = $featureData[$option->feature_id] ?? 'Unknown Feature';
             $result[$featureName][] = [
                 'name' => $option->name,
                 'price' => (float)$option->price,
