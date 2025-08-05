@@ -7,8 +7,27 @@
     @tailwind components;
     @tailwind utilities;
 
+    :root {
+        --color-primary: #2563eb; /* Vibrant blue for primary actions */
+        --color-text: #1f2937; /* Dark gray for text */
+        --color-secondary: #6b7280; /* Neutral gray for secondary elements */
+        --color-button-bg: #f3f4f6; /* Light gray for button backgrounds */
+        --color-button-text: #1f2937; /* Dark text for buttons */
+        --color-error: #ef4444; /* Red for errors/highlights */
+    }
+
+    [data-theme="dark"] {
+        --color-text: #e5e7eb; /* Light gray for text */
+        --color-secondary: #9ca3af; /* Lighter gray for secondary elements */
+        --color-button-bg: #374151; /* Darker gray for button backgrounds */
+        --color-button-text: #e5e7eb; /* Light text for buttons */
+    }
+
     body {
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background-color: var(--color-background);
+        color: var(--color-text);
+        line-height: 1.6;
     }
 
     .selected {
@@ -19,7 +38,7 @@
         @keyframes fade-in-up {
             from {
                 opacity: 0;
-                transform: translateY(20px);
+                transform: translateY(10px);
             }
             to {
                 opacity: 1;
@@ -28,61 +47,96 @@
         }
 
         .animate-fade-in-up {
-            animation: fade-in-up 0.6s ease-out both;
+            animation: fade-in-up 0.5s ease-out both;
         }
     }
 
     .carousel-nav {
         background-color: var(--color-primary);
-        color: var(--button-text);
+        color: #ffffff;
+        padding: 0.75rem;
+        border-radius: 50%;
+        transition: background-color 0.3s ease, transform 0.2s ease;
     }
 
     .carousel-nav:hover {
-        background-color: var(--color-accent);
+        background-color: #1e40af; /* Darker blue on hover */
+        transform: scale(1.1);
     }
 
     .carousel-dot {
         background-color: var(--color-secondary);
+        width: 0.75rem;
+        height: 0.75rem;
+        transition: background-color 0.3s ease;
     }
 
     .carousel-dot.active {
         background-color: var(--color-primary);
+        transform: scale(1.2);
     }
 
     .form-select {
-        background-color: var(--color-background);
-        color: var(--color-text);
-        border-color: var(--color-secondary);
+        background-color: var(--color-button-bg);
+        color: var(--color-button-text);
+        border: 1px solid var(--color-secondary);
+        border-radius: 0.5rem;
+        padding: 0.75rem 1rem;
+        transition: border-color 0.3s ease, transform 0.2s ease;
     }
 
     .form-select:hover {
         border-color: var(--color-accent);
+        transform: translateY(-1px);
     }
 
     .form-select:focus {
-        ring-color: var(--color-accent);
+        outline: none;
+        border-color: var(--color-accent);
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
     }
 
     .feature-button {
-        background-color: var(--color-secondary);
-        color: var(--color-text);
+        background-color: var(--color-button-bg);
+        color: var(--color-button-text);
+        border: 1px solid var(--color-secondary);
+        border-radius: 0.5rem;
+        padding: 0.5rem 1rem;
+        transition: background-color 0.3s ease, border-color 0.3s ease, transform 0.2s ease;
     }
 
     .feature-button:hover {
         background-color: var(--color-accent);
+        color: #ffffff;
+        border-color: var(--color-accent);
+        transform: translateY(-1px);
     }
 
     .submit-button {
         background-color: var(--color-primary);
-        color: var(--button-text);
+        color: #ffffff;
+        border-radius: 0.5rem;
+        padding: 0.75rem;
+        transition: background-color 0.3s ease, transform 0.2s ease;
     }
 
     .submit-button:hover {
-        background-color: var(--color-accent);
+        background-color: #1e40af;
+        transform: translateY(-1px);
+    }
+
+    .color-button {
+        border: 2px solid var(--color-secondary);
+        transition: border-color 0.3s ease, transform 0.2s ease;
+    }
+
+    .color-button:hover {
+        border-color: var(--color-accent);
+        transform: scale(1.1);
     }
 
     [data-theme="dark"] .text-gray-400 {
-        color: var(--color-text);
+        color: var(--color-secondary);
     }
 
     [data-theme="dark"] .text-gray-500 {
@@ -95,7 +149,7 @@
 
     .carousel-wrapper {
         width: 100%;
-        max-width: 500px;
+        max-width: 600px; /* Slightly wider for modern look */
         margin: 0 auto;
     }
 
@@ -107,7 +161,7 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(0, 0, 0, 0.8);
+        background: rgba(0, 0, 0, 0.85);
         justify-content: center;
         align-items: center;
     }
@@ -115,8 +169,9 @@
     .lightbox img {
         max-width: 90%;
         max-height: 80%;
-        border: 5px solid white;
-        border-radius: 5px;
+        border: 3px solid #ffffff;
+        border-radius: 0.5rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
     }
 
     .lightbox.active {
@@ -127,50 +182,47 @@
         position: fixed;
         top: 50%;
         transform: translateY(-50%);
-        font-size: 5.5rem;
-        color: white;
-        background: rgba(0, 0, 0, 0.5);
-        border-radius: 0;
-        width: 110px;
-        height: 110px;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        cursor: pointer;
-        user-select: none;
-        transition: background 0.3s;
-        z-index: 1001;
-    }
-
-    .lightbox-nav:hover {
-        background: rgba(0, 0, 0, 0.8);
-    }
-
-    .lightbox-prev {
-        left: 0;
-    }
-
-    .lightbox-next {
-        right: 0;
-    }
-
-    .lightbox-close {
-        position: absolute;
-        top: 20px;
-        right: 20px;
-        font-size: 3rem;
-        color: white;
-        background: rgba(0, 0, 0, 0.5);
-        border-radius: 50%;
+        font-size: 2.5rem;
+        color: #ffffff;
+        background: rgba(0, 0, 0, 0.6);
+        border-radius: 0.5rem;
         width: 60px;
         height: 60px;
         display: flex;
         justify-content: center;
         align-items: center;
         cursor: pointer;
-        user-select: none;
-        transition: background 0.3s;
-        z-index: 1001;
+        transition: background 0.3s ease, transform 0.2s ease;
+    }
+
+    .lightbox-nav:hover {
+        background: rgba(0, 0, 0, 0.8);
+        transform: translateY(-50%) scale(1.1);
+    }
+
+    .lightbox-prev {
+        left: 1rem;
+    }
+
+    .lightbox-next {
+        right: 1rem;
+    }
+
+    .lightbox-close {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        font-size: 2rem;
+        color: #ffffff;
+        background: rgba(0, 0, 0, 0.6);
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        cursor: pointer;
+        transition: background 0.3s ease;
     }
 
     .lightbox-close:hover {
@@ -178,17 +230,23 @@
     }
 
     .file-input {
-        background-color: var(--color-background);
-        color: var(--color-text);
-        border-color: var(--color-secondary);
+        background-color: var(--color-button-bg);
+        color: var(--color-button-text);
+        border: 1px solid var(--color-secondary);
+        border-radius: 0.5rem;
+        padding: 0.75rem;
+        transition: border-color 0.3s ease, transform 0.2s ease;
     }
 
     .file-input:hover {
         border-color: var(--color-accent);
+        transform: translateY(-1px);
     }
 
     .file-input:focus {
-        ring-color: var(--color-accent);
+        outline: none;
+        border-color: var(--color-accent);
+        box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2);
     }
 
     .custom-popup {
@@ -199,7 +257,7 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background: rgba(0, 0, 0, 0.8);
+        background: rgba(0, 0, 0, 0.85);
         justify-content: center;
         align-items: center;
     }
@@ -209,39 +267,36 @@
     }
 
     .popup-content {
-        background-color: #FFFFFF;
-        padding: 2rem;
-        border-radius: 1rem;
-        max-width: 400px;
-        text-align: center;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
-        position: relative;
-        border: 1px solid var(--color-secondary);
-    }
-
-    [data-theme="dark"] .popup-content {
         background-color: var(--color-background);
+        padding: 1.5rem;
+        border-radius: 0.75rem;
+        max-width: 450px;
+        text-align: center;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        border: 1px solid var(--color-secondary);
     }
 
     .popup-message {
         color: var(--color-text);
+        font-size: 1.1rem;
+        font-weight: 500;
     }
 
     .popup-close {
         position: absolute;
-        top: 0.5rem;
-        right: 0.5rem;
-        font-size: 1.5rem;
+        top: 0.75rem;
+        right: 0.75rem;
+        font-size: 1.25rem;
         color: var(--color-text);
         background: rgba(0, 0, 0, 0.2);
         border-radius: 50%;
-        width: 2rem;
-        height: 2rem;
+        width: 1.75rem;
+        height: 1.75rem;
         display: flex;
         justify-content: center;
         align-items: center;
         cursor: pointer;
-        transition: background 0.3s;
+        transition: background 0.3s ease;
     }
 
     .popup-close:hover {
@@ -249,24 +304,24 @@
     }
 
     .ring-2 { outline: 2px solid; outline-offset: 2px; }
-    .ring-red-500 { outline-color: #ef4444; }
+    .ring-red-500 { outline-color: var(--color-error); }
     .p-1 { padding: 0.25rem; }
-    .text-red-500 { color: #ef4444; }
+    .text-red-500 { color: var(--color-error); }
 </style>
-<div class="max-w-6xl mx-auto px-4 py-12 grid grid-cols-1 md:grid-cols-2 gap-12 items-start animate-fade-in-up carousel-container">
+<div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 grid grid-cols-1 md:grid-cols-2 gap-8 items-start animate-fade-in-up carousel-container">
     <div class="w-full">
         <div class="relative carousel-wrapper">
-            <div class="overflow-hidden rounded-2xl shadow-lg h-[500px]">
+            <div class="overflow-hidden rounded-xl shadow-lg h-[500px]">
                 <div class="flex h-full transition-transform duration-700 ease-in-out" id="carousel-track">
                     <!-- Images will be inserted here by JavaScript -->
                 </div>
             </div>
             <button type="button"
-                class="carousel-nav carousel-prev absolute top-1/2 -left-4 transform -translate-y-1/2 rounded-full bg-gray-800 bg-opacity-50 text-white p-2 hover:bg-opacity-75 focus:outline-none">
+                class="carousel-nav carousel-prev absolute top-1/2 -left-4 transform -translate-y-1/2">
                 ←
             </button>
             <button type="button"
-                class="carousel-nav carousel-next absolute top-1/2 -right-4 transform -translate-y-1/2 rounded-full bg-gray-800 bg-opacity-50 text-white p-2 hover:bg-opacity-75 focus:outline-none">
+                class="carousel-nav carousel-next absolute top-1/2 -right-4 transform -translate-y-1/2">
                 →
             </button>
         </div>
@@ -276,29 +331,29 @@
     </div>
 
     <div class="w-full animate-fade-in-up">
-        <div class="space-y-8">
-            <h1 class="text-3xl font-semibold">{_'configurator.title'}</h1>
+        <div class="space-y-6">
+            <h1 class="text-2xl sm:text-3xl font-bold">{_'configurator.title'}</h1>
             <div id="configurator-message" class="text-red-500 text-sm hidden"></div>
-            <p class="text-lg text-gray-400">{_'configurator.description'}</p>
+            <p class="text-base sm:text-lg text-[var(--color-secondary)]">{_'configurator.description'}</p>
 
-            <div class="text-xl font-medium">
-                {_'configurator.total_price'} <span id="total-price">0 Kč</span>
-                <div id="price-breakdown" class="text-sm text-gray-400 mt-1"></div>
+            <div class="text-xl font-semibold">
+                {_'configurator.total_price'} <span id="total-price" class="text-[var(--color-primary)]">0 Kč</span>
+                <div id="price-breakdown" class="text-sm text-[var(--color-secondary)] mt-2"></div>
             </div>
-            <p class="text-sm text-gray-400">{_'configurator.compatible_with'} <span id="selected-device">{_'configurator.select_device'}</span></p>
+            <p class="text-sm text-[var(--color-secondary)]">{_'configurator.compatible_with'} <span id="selected-device">{_'configurator.select_device'}</span></p>
 
             {form caseForm}
                 <div>
-                    <h2 class="text-xl font-medium">{_'form.manufacturer'}</h2>
-                    <div class="mt-2 flex flex-wrap gap-3">
-                        {input manufacturer class => 'form-select px-4 py-3 rounded-xl shadow-sm hover:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)] transform hover:scale-[1.02] focus:scale-[1.02] transition duration-200 ease-out'}
-                        {input model class => 'form-select px-4 py-3 rounded-xl shadow-sm hover:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)] transform hover:scale-[1.02] focus:scale-[1.02] transition duration-200 ease-out', data-colors-url => $colorsUrl, data-features-url => $featuresUrl, data-price-url => $priceUrl, data-images-url => $imagesUrl}
+                    <h2 class="text-lg font-semibold">{_'form.manufacturer'}</h2>
+                    <div class="mt-2 flex flex-col sm:flex-row sm:gap-4">
+                        {input manufacturer class => 'form-select w-full sm:w-1/2'}
+                        {input model class => 'form-select w-full sm:w-1/2', data-colors-url => $colorsUrl, data-features-url => $featuresUrl, data-price-url => $priceUrl, data-images-url => $imagesUrl}
                     </div>
                 </div>
 
                 <div>
-                    <h2 class="text-xl font-medium mt-4">{_'configurator.color'}</h2>
-                    <div id="color-buttons" class="mt-2 flex space-x-3">
+                    <h2 class="text-lg font-semibold mt-6">{_'configurator.color'}</h2>
+                    <div id="color-buttons" class="mt-3 flex flex-wrap gap-3">
                     </div>
                 </div>
                 {input color type => 'hidden', id => 'frm-caseForm-color'}
@@ -307,10 +362,10 @@
                 </div>
 
                 <div id="user-upload-container" style="display: none;">
-                    <h2 class="text-xl font-medium mt-4">{_'configurator.upload_image'}</h2>
-                    <p class="text-sm text-gray-400 mt-2">{_'configurator.upload_description'}</p>
-                    <div class="mt-2">
-                        {input user_file class => 'file-input px-4 py-3 rounded-xl shadow-sm hover:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)] transition duration-200 ease-out', accept => '.png,.jpg,.jpeg'}
+                    <h2 class="text-lg font-semibold mt-6">{_'configurator.upload_image'}</h2>
+                    <p class="text-sm text-[var(--color-secondary)] mt-2">{_'configurator.upload_description'}</p>
+                    <div class="mt-3">
+                        {input user_file class => 'file-input w-full', accept => '.png,.jpg,.jpeg'}
                     </div>
                 </div>
 
@@ -318,7 +373,7 @@
                     {input features type => 'hidden', id => 'frm-caseForm-features'}
                     {input total_price type => 'hidden', id => 'frm-caseForm-total_price'}
                     {input user_upload_id id => 'frm-caseForm-user_upload_id'}
-                    {input submit class => 'submit-button w-full py-3 rounded-xl transform hover:scale-[1.02] transition duration-200 ease-out mt-6'}
+                    {input submit class => 'submit-button w-full mt-6'}
                 </div>
             {/form}
         </div>
@@ -639,7 +694,7 @@ function updateColorButtons(colors) {
         const button = document.createElement('button');
         button.setAttribute('type', 'button');
         button.setAttribute('data-color', color.name);
-        button.className = `w-10 h-10 rounded-full bg-[${color.hex_code}] hover:ring-2 hover:ring-offset-2 hover:ring-[var(--color-accent)] transition animate-fade-in-up`;
+        button.className = `color-button w-10 h-10 rounded-full bg-[${color.hex_code}]`;
         button.title = color.name;
         button.addEventListener('click', function () {
             document.querySelectorAll('#color-buttons button').forEach(btn => {
@@ -668,15 +723,15 @@ function updateFeatureButtons(features) {
     for (const [featureName, options] of Object.entries(features)) {
         const featureId = featureName.replace(/\s+/g, '_').toLowerCase();
         const featureDiv = document.createElement('div');
-        featureDiv.className = 'mt-4 animate-fade-in-up';
+        featureDiv.className = 'mt-6 animate-fade-in-up';
 
         const h2 = document.createElement('h2');
-        h2.className = 'text-xl font-medium';
+        h2.className = 'text-lg font-semibold';
         h2.innerText = featureName;
         featureDiv.appendChild(h2);
 
         const buttonDiv = document.createElement('div');
-        buttonDiv.className = 'mt-2 flex flex-wrap gap-3';
+        buttonDiv.className = 'mt-3 flex flex-wrap gap-3';
 
         options.forEach(option => {
             const optionDiv = document.createElement('div');
@@ -688,7 +743,7 @@ function updateFeatureButtons(features) {
             button.setAttribute('data-value', option.name);
             button.setAttribute('data-price', option.price);
             button.setAttribute('data-allow-user-upload', option.allow_user_upload);
-            button.className = 'feature-button px-4 py-2 rounded-lg transition animate-fade-in-up';
+            button.className = 'feature-button';
             button.innerText = option.name;
             button.addEventListener('click', function () { toggleSelection(this); });
 
@@ -696,7 +751,7 @@ function updateFeatureButtons(features) {
 
             if (option.price > 0) {
                 const priceSpan = document.createElement('span');
-                priceSpan.className = 'text-sm text-white-500 mt-1 animate-fade-in-up';
+                priceSpan.className = 'text-sm text-[var(--color-secondary)] mt-1 animate-fade-in-up';
                 priceSpan.innerText = `+${option.price.toFixed(2)} Kč`;
                 optionDiv.appendChild(priceSpan);
             }
@@ -750,7 +805,7 @@ function updateCarouselImages(images) {
             })
             .catch(err => {
                 console.error('Failed to load default images:', err);
-                track.innerHTML = '<p class="text-center text-gray-500">No images available</p>';
+                track.innerHTML = '<p class="text-center text-[var(--color-secondary)]">No images available</p>';
             });
     } else {
         renderImages(currentImages);
@@ -761,7 +816,7 @@ function renderImages(images) {
     const track = document.getElementById('carousel-track');
     const dotsContainer = document.getElementById('carousel-dots');
     if (images.length === 0) {
-        track.innerHTML = '<p class="text-center text-gray-500">No images available</p>';
+        track.innerHTML = '<p class="text-center text-[var(--color-secondary)]">No images available</p>';
         return;
     }
     track.innerHTML = '';
@@ -770,7 +825,7 @@ function renderImages(images) {
     images.forEach((image, index) => {
         const img = document.createElement('img');
         img.src = image.image_path;
-        img.className = 'w-full flex-shrink-0 object-cover h-full cursor-pointer';
+        img.className = 'w-full flex-shrink-0 object-cover h-full cursor-pointer rounded-xl';
         img.alt = image.alt_text || `Product Image ${index + 1}`;
         img.setAttribute('data-lightbox', 'gallery');
         img.setAttribute('data-alt', image.alt_text || `Product Image ${index + 1}`);
@@ -784,7 +839,7 @@ function renderImages(images) {
         const dot = document.createElement('button');
         dot.setAttribute('type', 'button');
         dot.setAttribute('onclick', `goToSlide(${index})`);
-        dot.className = `carousel-dot w-3 h-3 rounded-full ${index === 0 ? 'active' : ''}`;
+        dot.className = `carousel-dot ${index === 0 ? 'active' : ''}`;
         dotsContainer.appendChild(dot);
     });
 
