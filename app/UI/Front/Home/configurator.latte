@@ -1,4 +1,4 @@
-{block title}OPNX3D | Konfigurátor{/block}
+{block title}OPNX3D | {_'configurator.title'}{/block}
 {block content}
 
 <script src="https://cdn.tailwindcss.com"></script>
@@ -337,7 +337,7 @@
             <p class="text-base sm:text-lg text-[var(--color-secondary)]">{_'configurator.description'}</p>
 
             <div class="text-xl font-semibold">
-                {_'configurator.total_price'} <span id="total-price" class="text-[var(--color-primary)]">0 Kč</span>
+                {_'configurator.total_price'} <span id="total-price" class="text-[var(--color-primary)]">0 <span id="currency"></span></span>
                 <div id="price-breakdown" class="text-sm text-[var(--color-secondary)] mt-2"></div>
             </div>
             <p class="text-sm text-[var(--color-secondary)]">{_'configurator.compatible_with'} <span id="selected-device">{_'configurator.select_device'}</span></p>
@@ -395,14 +395,25 @@
     const uploadUrl = {$uploadUrl};
     const defaultImagesUrl = {$defaultImagesUrl};
     const translations = {
-        upload_required: '{_'configurator.upload_required'}',
-        upload_success: '{_'configurator.upload_success'}',
-        select_device: '{_'configurator.select_device'}',
-        select_manufacturer: '{_'form.manufacturer'}',
-        select_model: '{_'form.model'}',
-        select_color: '{_'configurator.color'}',
-        select_features: '{_'configurator.features'}',
-        select_upload: '{_'configurator.upload_image'}'
+        upload_required: '{_'configurator.upload_required' | noescape}',
+        upload_success: '{_'configurator.upload_success' | noescape}',
+        select_device: '{_'configurator.select_device' | noescape}',
+        select_manufacturer: '{_'form.manufacturer' | noescape}',
+        select_model: '{_'form.model' | noescape}',
+        select_color: '{_'configurator.color' | noescape}',
+        select_features: '{_'configurator.features' | noescape}',
+        select_upload: '{_'configurator.upload_image' | noescape}',
+        missing_manufacturer_model: '{_'configurator.missing_manufacturer_model' | noescape}',
+        missing_fields: '{_'configurator.missing_fields' | noescape}',
+        select_file: '{_'configurator.select_file' | noescape}',
+        upload_failed: '{_'configurator.upload_failed' | noescape}',
+        upload_failed_unknown: '{_'configurator.upload_failed_unknown' | noescape}',
+        base_price: '{_'configurator.base_price' | noescape}',
+        select_model_for_price: '{_'configurator.select_model_for_price' | noescape}',
+        no_images_available: '{_'configurator.no_images_available' | noescape}',
+        product_image: '{_'configurator.product_image' | noescape}',
+        select_option: '{if $lang == "cs"}Vyberte{else}Select{/if}',
+        currency: '{_'configurator.currency' | noescape}'
     };
 </script>
 
@@ -416,7 +427,7 @@ let currentSlide = 0;
 let totalSlides = currentImages.length || 1;
 let fileUploadSuccess = false;
 
-// Initialize popup event listeners
+// Initialize popup event listeners and currency
 document.addEventListener('DOMContentLoaded', function() {
     const popup = document.getElementById('custom-popup');
     const closeButton = document.querySelector('.popup-close');
@@ -430,6 +441,10 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
+    // Set currency symbol
+    document.getElementById('currency').textContent = translations.currency;
+    // Debug translations
+    console.log('Translations:', translations);
 });
 
 // Function to check if all required selections are made
@@ -454,7 +469,7 @@ function checkSelections(showMessage = false) {
 
         // If manufacturer or model is missing, show only that message without checking other fields
         if (!manufacturerSelected || !modelSelected) {
-            showCustomPopup('Prosím vyberte výrobce a model.');
+            showCustomPopup(translations.missing_manufacturer_model);
             return allSelected;
         }
 
@@ -489,7 +504,7 @@ function checkSelections(showMessage = false) {
 
         // Show popup with specific missing fields
         if (missingFields.length > 0) {
-            showCustomPopup(`Prosím vyberte: ${missingFields.join(', ')}`);
+            showCustomPopup(`${translations.missing_fields}: ${missingFields.join(', ')}`);
         }
     } else {
         // Clear highlights during normal interaction
@@ -519,24 +534,33 @@ document.querySelectorAll('select[data-depends]').forEach((childSelect) => {
     let items = JSON.parse(childSelect.dataset.items || 'null');
 
     parentSelect.addEventListener('change', () => {
+        console.log('Manufacturer changed:', parentSelect.value);
         if (items) {
             updateSelectbox(childSelect, items[parentSelect.value]);
         }
         if (url) {
             fetch(url.replace(encodeURIComponent('#'), encodeURIComponent(parentSelect.value)))
                 .then((response) => response.json())
-                .then((data) => updateSelectbox(childSelect, data));
+                .then((data) => {
+                    console.log('Model data:', data);
+                    updateSelectbox(childSelect, data);
+                })
+                .catch(error => console.error('Error fetching models:', error));
         }
     });
 });
 
 function updateSelectbox(select, items) {
+    console.log('Updating selectbox:', select.id, items);
     select.innerHTML = '';
     let defaultOption = document.createElement('option');
     defaultOption.setAttribute('value', '');
     defaultOption.setAttribute('disabled', 'disabled');
     defaultOption.setAttribute('selected', 'selected');
-    defaultOption.innerText = select.dataset.prompt || 'Vyberte';
+    // Use translations.select_option + translations.select_model for model dropdown, else translations.select_option
+    defaultOption.innerText = select.id === 'frm-caseForm-model' 
+        ? `${translations.select_option} ${translations.select_model.toLowerCase()}`
+        : (select.dataset.prompt || translations.select_option);
     select.appendChild(defaultOption);
     for (let id in items) {
         let el = document.createElement('option');
@@ -624,6 +648,7 @@ document.getElementById('frm-caseForm-manufacturer').addEventListener('change', 
 
 document.getElementById('frm-caseForm-model').addEventListener('change', function () {
     let modelId = this.value;
+    console.log('Model selected:', modelId);
     if (modelId) {
         let colorsUrl = this.dataset.colorsUrl.replace('#', encodeURIComponent(modelId));
         let featuresUrl = this.dataset.featuresUrl.replace('#', encodeURIComponent(modelId));
@@ -636,19 +661,26 @@ document.getElementById('frm-caseForm-model').addEventListener('change', functio
                     if (!response.ok) throw new Error('Failed to load colors');
                     return response.json();
                 })
-                .then(colors => updateColorButtons(colors)),
+                .then(colors => {
+                    console.log('Colors:', colors);
+                    updateColorButtons(colors);
+                }),
             fetch(featuresUrl)
                 .then(response => {
                     if (!response.ok) throw new Error('Failed to load features');
                     return response.json();
                 })
-                .then(features => updateFeatureButtons(features)),
+                .then(features => {
+                    console.log('Features:', features);
+                    updateFeatureButtons(features);
+                }),
             fetch(priceUrl)
                 .then(response => {
                     if (!response.ok) throw new Error('Failed to load price');
                     return response.json();
                 })
                 .then(data => {
+                    console.log('Price:', data);
                     basePrice = data.price || 0;
                     updateTotalPrice();
                 }),
@@ -657,7 +689,10 @@ document.getElementById('frm-caseForm-model').addEventListener('change', functio
                     if (!response.ok) throw new Error('Failed to load images');
                     return response.json();
                 })
-                .then(images => updateCarouselImages(images))
+                .then(images => {
+                    console.log('Images:', images);
+                    updateCarouselImages(images);
+                })
         ]).then(() => {
             const manufacturerSelect = document.getElementById('frm-caseForm-manufacturer');
             const modelSelect = this;
@@ -752,7 +787,7 @@ function updateFeatureButtons(features) {
             if (option.price > 0) {
                 const priceSpan = document.createElement('span');
                 priceSpan.className = 'text-sm text-[var(--color-secondary)] mt-1 animate-fade-in-up';
-                priceSpan.innerText = `+${option.price.toFixed(2)} Kč`;
+                priceSpan.innerText = `+${option.price.toFixed(2)} ${translations.currency}`;
                 optionDiv.appendChild(priceSpan);
             }
 
@@ -772,18 +807,18 @@ function updateFeatureButtons(features) {
 
 function updateTotalPrice() {
     let total = basePrice;
-    let breakdown = basePrice > 0 ? [`Základní cena: ${basePrice.toFixed(2)} Kč`] : [];
+    let breakdown = basePrice > 0 ? [`${translations.base_price}: ${basePrice.toFixed(2)} ${translations.currency}`] : [];
 
     for (const [feature, data] of Object.entries(selectedFeatures)) {
         if (data.price > 0) {
             total += data.price;
-            breakdown.push(`${data.name}: +${data.price.toFixed(2)} Kč`);
+            breakdown.push(`${data.name}: +${data.price.toFixed(2)} ${translations.currency}`);
         }
     }
 
-    document.getElementById('total-price').textContent = total.toFixed(2) + ' Kč';
+    document.getElementById('total-price').textContent = `${total.toFixed(2)} ${translations.currency}`;
     document.getElementById('frm-caseForm-total_price').value = total.toFixed(2);
-    document.getElementById('price-breakdown').innerHTML = breakdown.length > 0 ? breakdown.join('<br>') : 'Vyberte model pro zobrazení ceny';
+    document.getElementById('price-breakdown').innerHTML = breakdown.length > 0 ? breakdown.join('<br>') : translations.select_model_for_price;
 }
 
 function updateCarouselImages(images) {
@@ -805,7 +840,7 @@ function updateCarouselImages(images) {
             })
             .catch(err => {
                 console.error('Failed to load default images:', err);
-                track.innerHTML = '<p class="text-center text-[var(--color-secondary)]">No images available</p>';
+                track.innerHTML = `<p class="text-center text-[var(--color-secondary)]">${translations.no_images_available}</p>`;
             });
     } else {
         renderImages(currentImages);
@@ -816,7 +851,7 @@ function renderImages(images) {
     const track = document.getElementById('carousel-track');
     const dotsContainer = document.getElementById('carousel-dots');
     if (images.length === 0) {
-        track.innerHTML = '<p class="text-center text-[var(--color-secondary)]">No images available</p>';
+        track.innerHTML = `<p class="text-center text-[var(--color-secondary)]">${translations.no_images_available}</p>`;
         return;
     }
     track.innerHTML = '';
@@ -826,9 +861,9 @@ function renderImages(images) {
         const img = document.createElement('img');
         img.src = image.image_path;
         img.className = 'w-full flex-shrink-0 object-cover h-full cursor-pointer rounded-xl';
-        img.alt = image.alt_text || `Product Image ${index + 1}`;
+        img.alt = image.alt_text || `${translations.product_image} ${index + 1}`;
         img.setAttribute('data-lightbox', 'gallery');
-        img.setAttribute('data-alt', image.alt_text || `Product Image ${index + 1}`);
+        img.setAttribute('data-alt', image.alt_text || `${translations.product_image} ${index + 1}`);
 
         img.addEventListener('click', () => {
             showImage(index);
@@ -955,7 +990,7 @@ document.addEventListener('DOMContentLoaded', function() {
     fileInput.addEventListener('change', function() {
         const file = this.files[0];
         if (!file) {
-            showCustomPopup('Prosím vyberte soubor k nahrání.');
+            showCustomPopup(translations.select_file);
             fileUploadSuccess = false;
             document.getElementById('frm-caseForm-user_upload_id').value = '';
             checkSelections();
@@ -982,7 +1017,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 fileUploadSuccess = true;
                 showCustomPopup(translations.upload_success);
             } else {
-                showCustomPopup('Nahrání selhalo: ' + (data.error || 'Neznámá chyba'));
+                showCustomPopup(`${translations.upload_failed}: ${data.error || translations.upload_failed_unknown}`);
                 fileUploadSuccess = false;
                 document.getElementById('frm-caseForm-user_upload_id').value = '';
             }
@@ -990,7 +1025,7 @@ document.addEventListener('DOMContentLoaded', function() {
         })
         .catch(error => {
             console.error('Upload error:', error);
-            showCustomPopup('Nahrání selhalo: ' + error.message);
+            showCustomPopup(`${translations.upload_failed}: ${error.message}`);
             fileUploadSuccess = false;
             document.getElementById('frm-caseForm-user_upload_id').value = '';
             checkSelections();
