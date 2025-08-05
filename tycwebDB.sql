@@ -53,26 +53,38 @@ INSERT INTO `cases` (`id`, `manufacturer`, `model`, `color`, `total_price`, `fea
 (113,	'Apple',	'iPhone 13',	'Bílá',	614.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ne\\\",\\\"vlastní_motiv\\\":\\\"Ano\\\"}\"}',	'OBJEDNANO',	9,	'2025-07-25 14:30:22',	17),
 (114,	'Apple',	'iPhone 13',	'Červená',	719.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\",\\\"vlastní_motiv\\\":\\\"Ano\\\"}\"}',	'OBJEDNANO',	9,	'2025-07-25 14:30:37',	18),
 (115,	'Apple',	'iPhone 13',	'Bílá',	614.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ne\\\",\\\"vlastní_motiv\\\":\\\"Ano\\\"}\"}',	'KOSIK',	NULL,	'2025-07-25 20:36:00',	NULL),
-(116,	'Apple',	'iPhone 13',	'Bílá',	614.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ne\\\",\\\"vlastní_motiv\\\":\\\"Ano\\\"}\"}',	'KOSIK',	NULL,	'2025-07-25 21:00:46',	23);
+(116,	'Apple',	'iPhone 13',	'Bílá',	614.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ne\\\",\\\"vlastní_motiv\\\":\\\"Ano\\\"}\"}',	'KOSIK',	NULL,	'2025-07-25 21:00:46',	23),
+(117,	'Apple',	'iPhone 13',	'Černá',	604.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\",\\\"vlastní_motiv\\\":\\\"Ne\\\"}\"}',	'KOSIK',	9,	'2025-08-03 21:35:39',	NULL),
+(118,	'Samsung',	'Galaxy S22',	'Black',	500.00,	'{\"features\": \"{\\\"front_camera_cover\\\":\\\"No\\\"}\"}',	'KOSIK',	NULL,	'2025-08-05 13:24:40',	NULL),
+(119,	'Samsung',	'Galaxy S22',	'Bílá',	500.00,	'{\"features\": \"{\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"vlastní_motiv\\\":\\\"Ne\\\"}\"}',	'KOSIK',	NULL,	'2025-08-05 14:21:36',	NULL),
+(120,	'Samsung',	'Galaxy S22',	'Black',	500.00,	'{\"features\": \"{\\\"front_camera_cover\\\":\\\"No\\\",\\\"custom_design\\\":\\\"No\\\"}\"}',	'KOSIK',	NULL,	'2025-08-05 15:58:45',	NULL),
+(121,	'Samsung',	'Galaxy S22',	'Black',	500.00,	'{\"features\": \"{\\\"front_camera_cover\\\":\\\"No\\\",\\\"custom_design\\\":\\\"No\\\"}\"}',	'KOSIK',	NULL,	'2025-08-05 15:58:46',	NULL),
+(122,	'Samsung',	'Galaxy S22',	'Black',	500.00,	'{\"features\": \"{\\\"front_camera_cover\\\":\\\"No\\\",\\\"custom_design\\\":\\\"No\\\"}\"}',	'KOSIK',	NULL,	'2025-08-05 15:58:46',	NULL),
+(123,	'Samsung',	'Galaxy S22',	'Black',	500.00,	'{\"features\": \"{\\\"front_camera_cover\\\":\\\"No\\\",\\\"custom_design\\\":\\\"No\\\"}\"}',	'KOSIK',	NULL,	'2025-08-05 15:58:46',	NULL),
+(124,	'Samsung',	'Galaxy S22',	'Black',	500.00,	'{\"features\": \"{\\\"front_camera_cover\\\":\\\"No\\\",\\\"custom_design\\\":\\\"No\\\"}\"}',	'KOSIK',	NULL,	'2025-08-05 15:58:46',	NULL),
+(125,	'Apple',	'iPhone 13',	'White',	559.99,	'{\"features\": \"{\\\"card_holder\\\":\\\"None\\\",\\\"front_camera_cover\\\":\\\"Yes\\\",\\\"charging_port_cover\\\":\\\"No\\\",\\\"custom_design\\\":\\\"No\\\"}\"}',	'KOSIK',	NULL,	'2025-08-05 17:07:11',	NULL),
+(126,	'Apple',	'iPhone 13',	'Černá',	634.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\",\\\"vlastní_motiv\\\":\\\"Ne\\\"}\"}',	'KOSIK',	NULL,	'2025-08-05 21:37:38',	NULL);
 
 DROP TABLE IF EXISTS `colors`;
 CREATE TABLE `colors` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(50) NOT NULL,
+  `name_cs` varchar(50) NOT NULL,
+  `name_en` varchar(50) NOT NULL,
   `hex_code` varchar(7) DEFAULT NULL COMMENT 'Optional hex color code (e.g., #FF0000 for red)',
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-INSERT INTO `colors` (`id`, `name`, `hex_code`, `created_at`) VALUES
-(1,	'Černá',	'#000000',	'2025-07-09 14:37:00'),
-(2,	'Bílá',	'#FFFFFF',	'2025-07-09 14:37:00'),
-(3,	'Modrá',	'#0000FF',	'2025-07-09 14:37:00'),
-(4,	'Červená',	'#FF0000',	'2025-07-09 14:37:00'),
-(5,	'Zelená',	'#00FF00',	'2025-07-09 14:37:00'),
-(6,	'oranžová',	'#FFAC1C',	'2025-07-09 12:39:45'),
-(10,	'fialova',	'#bd00ff',	'2025-07-10 15:01:31');
+INSERT INTO `colors` (`id`, `name`, `name_cs`, `name_en`, `hex_code`, `created_at`) VALUES
+(1,	'black',	'Černá',	'Black',	'#000000',	'2025-07-09 14:37:00'),
+(2,	'white',	'Bílá',	'White',	'#FFFFFF',	'2025-07-09 14:37:00'),
+(3,	'blue',	'Modrá',	'Blue',	'#0000FF',	'2025-07-09 14:37:00'),
+(4,	'red',	'Červená',	'Red',	'#FF0000',	'2025-07-09 14:37:00'),
+(5,	'green',	'Zelená',	'Green',	'#00FF00',	'2025-07-09 14:37:00'),
+(6,	'orange',	'oranžová',	'Orange',	'#FFAC1C',	'2025-07-09 12:39:45'),
+(10,	'purple',	'fialova',	'Purple',	'#bd00ff',	'2025-07-10 15:01:31');
 
 DROP TABLE IF EXISTS `contact_info`;
 CREATE TABLE `contact_info` (
@@ -168,7 +180,10 @@ CREATE TABLE `feature_options` (
   `id` int NOT NULL AUTO_INCREMENT,
   `feature_id` int NOT NULL,
   `name` varchar(50) NOT NULL,
+  `name_cs` varchar(50) NOT NULL,
+  `name_en` varchar(50) NOT NULL,
   `price` decimal(10,2) DEFAULT '0.00',
+  `price_eur` decimal(10,2) NOT NULL DEFAULT '0.00' COMMENT 'Price of the feature option in EUR',
   `image_path` varchar(255) DEFAULT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `allow_user_upload` tinyint(1) NOT NULL DEFAULT '0',
@@ -178,30 +193,32 @@ CREATE TABLE `feature_options` (
   CONSTRAINT `feature_options_ibfk_1` FOREIGN KEY (`feature_id`) REFERENCES `features` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-INSERT INTO `feature_options` (`id`, `feature_id`, `name`, `price`, `image_path`, `created_at`, `allow_user_upload`) VALUES
-(16,	16,	'Ano',	30.00,	'/uploads/features/camera_cover_yes.jpg',	'2025-07-09 19:46:47',	0),
-(18,	16,	'Ne',	0.00,	'/uploads/features/camera_cover_no.jpg',	'2025-07-09 19:46:50',	0),
-(24,	12,	'2 Sloty',	45.00,	'/uploads/features/card_holder_2_slots.jpg',	'2025-07-09 19:47:06',	0),
-(25,	12,	'Žádný',	0.00,	'/uploads/features/no_card_holder.jpg',	'2025-07-09 19:47:37',	0),
-(30,	18,	'Ano',	30.00,	'/uploads/features/charging_port_cover_yes.jpg',	'2025-07-09 20:05:52',	0),
-(31,	18,	'Ne',	0.00,	'/uploads/features/charging_port_cover_no.jpg',	'2025-07-09 20:05:58',	0),
-(38,	22,	'Ano',	85.00,	NULL,	'2025-07-15 09:44:06',	1),
-(39,	22,	'Ne',	0.00,	NULL,	'2025-07-15 09:44:11',	0);
+INSERT INTO `feature_options` (`id`, `feature_id`, `name`, `name_cs`, `name_en`, `price`, `price_eur`, `image_path`, `created_at`, `allow_user_upload`) VALUES
+(16,	16,	'Ano',	'Ano',	'Yes',	30.00,	1.20,	'/uploads/features/camera_cover_yes.jpg',	'2025-07-09 19:46:47',	0),
+(18,	16,	'Ne',	'Ne',	'No',	0.00,	0.00,	'/uploads/features/camera_cover_no.jpg',	'2025-07-09 19:46:50',	0),
+(24,	12,	'2 Sloty',	'2 Sloty',	'2 Slots',	45.00,	1.80,	'/uploads/features/card_holder_2_slots.jpg',	'2025-07-09 19:47:06',	0),
+(25,	12,	'Žádný',	'Žádný',	'None',	0.00,	0.00,	'/uploads/features/no_card_holder.jpg',	'2025-07-09 19:47:37',	0),
+(30,	18,	'Ano',	'Ano',	'Yes',	30.00,	1.20,	'/uploads/features/charging_port_cover_yes.jpg',	'2025-07-09 20:05:52',	0),
+(31,	18,	'Ne',	'Ne',	'No',	0.00,	0.00,	'/uploads/features/charging_port_cover_no.jpg',	'2025-07-09 20:05:58',	0),
+(38,	22,	'Ano',	'Ano',	'Yes',	85.00,	3.40,	NULL,	'2025-07-15 09:44:06',	1),
+(39,	22,	'Ne',	'Ne',	'No',	0.00,	0.00,	NULL,	'2025-07-15 09:44:11',	0);
 
 DROP TABLE IF EXISTS `features`;
 CREATE TABLE `features` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(50) NOT NULL,
+  `name_cs` varchar(50) NOT NULL,
+  `name_en` varchar(50) NOT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   UNIQUE KEY `name` (`name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-INSERT INTO `features` (`id`, `name`, `created_at`) VALUES
-(12,	'Držák karet',	'2025-07-09 19:45:56'),
-(16,	'Clona přední kamery',	'2025-07-09 19:46:07'),
-(18,	'Krytka nabíjecího portu',	'2025-07-09 19:46:27'),
-(22,	'Vlastní motiv',	'2025-07-15 09:43:43');
+INSERT INTO `features` (`id`, `name`, `name_cs`, `name_en`, `created_at`) VALUES
+(12,	'Držák karet',	'Držák karet',	'Card Holder',	'2025-07-09 19:45:56'),
+(16,	'Clona přední kamery',	'Clona přední kamery',	'Front Camera Cover',	'2025-07-09 19:46:07'),
+(18,	'Krytka nabíjecího portu',	'Krytka nabíjecího portu',	'Charging Port Cover',	'2025-07-09 19:46:27'),
+(22,	'Vlastní motiv',	'Vlastní motiv',	'Custom Design',	'2025-07-15 09:43:43');
 
 DROP TABLE IF EXISTS `gallery`;
 CREATE TABLE `gallery` (
@@ -332,16 +349,17 @@ CREATE TABLE `models` (
   `name` varchar(100) NOT NULL,
   `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `price` decimal(10,2) NOT NULL DEFAULT '0.00' COMMENT 'Base price of the model',
+  `price_eur` decimal(10,2) NOT NULL DEFAULT '0.00' COMMENT 'Base price of the model in EUR',
   PRIMARY KEY (`id`),
   KEY `manufacturer_id` (`manufacturer_id`),
   CONSTRAINT `models_ibfk_1` FOREIGN KEY (`manufacturer_id`) REFERENCES `manufacturers` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-INSERT INTO `models` (`id`, `manufacturer_id`, `name`, `created_at`, `price`) VALUES
-(1,	1,	'iPhone 13',	'2025-07-03 16:52:35',	529.99),
-(2,	1,	'iPhone 14',	'2025-07-03 16:52:35',	617.00),
-(3,	2,	'Galaxy S22',	'2025-07-03 16:52:35',	500.00),
-(4,	2,	'Galaxy S23',	'2025-07-03 16:52:35',	510.00);
+INSERT INTO `models` (`id`, `manufacturer_id`, `name`, `created_at`, `price`, `price_eur`) VALUES
+(1,	1,	'iPhone 13',	'2025-07-03 16:52:35',	529.99,	21.20),
+(2,	1,	'iPhone 14',	'2025-07-03 16:52:35',	617.00,	24.68),
+(3,	2,	'Galaxy S22',	'2025-07-03 16:52:35',	500.00,	20.00),
+(4,	2,	'Galaxy S23',	'2025-07-03 16:52:35',	510.00,	20.40);
 
 DROP TABLE IF EXISTS `order_case`;
 CREATE TABLE `order_case` (

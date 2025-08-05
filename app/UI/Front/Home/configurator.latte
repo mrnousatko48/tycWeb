@@ -413,7 +413,8 @@
         no_images_available: '{_'configurator.no_images_available' | noescape}',
         product_image: '{_'configurator.product_image' | noescape}',
         select_option: '{if $lang == "cs"}Vyberte{else}Select{/if}',
-        currency: '{_'configurator.currency' | noescape}'
+        currency_symbol: '{if $lang == "cs"}Kč{else}€{/if}',
+        lang: {$lang}
     };
 </script>
 
@@ -442,7 +443,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     // Set currency symbol
-    document.getElementById('currency').textContent = translations.currency;
+    document.getElementById('currency').textContent = translations.currency_symbol;
     // Debug translations
     console.log('Translations:', translations);
 });
@@ -584,6 +585,7 @@ function toggleSelection(button) {
     selectedFeatures[featureId] = {
         name: button.dataset.value,
         price: parseFloat(button.dataset.price) || 0,
+        price_eur: parseFloat(button.dataset.priceEur) || 0,
         allow_user_upload: button.dataset.allowUserUpload === 'true'
     };
 
@@ -681,7 +683,7 @@ document.getElementById('frm-caseForm-model').addEventListener('change', functio
                 })
                 .then(data => {
                     console.log('Price:', data);
-                    basePrice = data.price || 0;
+                    basePrice = translations.lang === 'cs' ? (data.price || 0) : (data.price_eur || 0);
                     updateTotalPrice();
                 }),
             fetch(imagesUrl)
@@ -777,6 +779,7 @@ function updateFeatureButtons(features) {
             button.setAttribute('data-feature', featureId);
             button.setAttribute('data-value', option.name);
             button.setAttribute('data-price', option.price);
+            button.setAttribute('data-price-eur', option.price_eur);
             button.setAttribute('data-allow-user-upload', option.allow_user_upload);
             button.className = 'feature-button';
             button.innerText = option.name;
@@ -784,17 +787,18 @@ function updateFeatureButtons(features) {
 
             optionDiv.appendChild(button);
 
-            if (option.price > 0) {
+            const priceToShow = translations.lang === 'cs' ? option.price : option.price_eur;
+            if (priceToShow > 0) {
                 const priceSpan = document.createElement('span');
                 priceSpan.className = 'text-sm text-[var(--color-secondary)] mt-1 animate-fade-in-up';
-                priceSpan.innerText = `+${option.price.toFixed(2)} ${translations.currency}`;
+                priceSpan.innerText = `+${priceToShow.toFixed(2)} ${translations.currency_symbol}`;
                 optionDiv.appendChild(priceSpan);
             }
 
             buttonDiv.appendChild(optionDiv);
 
             featurePrices[featureId] = featurePrices[featureId] || {};
-            featurePrices[featureId][option.name] = option.price;
+            featurePrices[featureId][option.name] = translations.lang === 'cs' ? option.price : option.price_eur;
         });
 
         featureDiv.appendChild(buttonDiv);
@@ -807,16 +811,17 @@ function updateFeatureButtons(features) {
 
 function updateTotalPrice() {
     let total = basePrice;
-    let breakdown = basePrice > 0 ? [`${translations.base_price}: ${basePrice.toFixed(2)} ${translations.currency}`] : [];
+    let breakdown = basePrice > 0 ? [`${translations.base_price}: ${basePrice.toFixed(2)} ${translations.currency_symbol}`] : [];
 
     for (const [feature, data] of Object.entries(selectedFeatures)) {
-        if (data.price > 0) {
-            total += data.price;
-            breakdown.push(`${data.name}: +${data.price.toFixed(2)} ${translations.currency}`);
+        const priceToUse = translations.lang === 'cs' ? data.price : data.price_eur;
+        if (priceToUse > 0) {
+            total += priceToUse;
+            breakdown.push(`${data.name}: +${priceToUse.toFixed(2)} ${translations.currency_symbol}`);
         }
     }
 
-    document.getElementById('total-price').textContent = `${total.toFixed(2)} ${translations.currency}`;
+    document.getElementById('total-price').textContent = `${total.toFixed(2)} ${translations.currency_symbol}`;
     document.getElementById('frm-caseForm-total_price').value = total.toFixed(2);
     document.getElementById('price-breakdown').innerHTML = breakdown.length > 0 ? breakdown.join('<br>') : translations.select_model_for_price;
 }

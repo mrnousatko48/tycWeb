@@ -199,7 +199,7 @@ class ModelFacade
         return $result;
     }
 
-    public function getFeaturesByModel(int $modelId, string $lang): array
+public function getFeaturesByModel(int $modelId, string $lang): array
     {
         $features = $this->database->table('model_features')
             ->where('model_id', $modelId)
@@ -215,7 +215,7 @@ class ModelFacade
             ->fetchPairs('id', 'name');
 
         $options = $this->database->table('feature_options')
-            ->select('id, feature_id, name_' . $lang . ' AS name, price, image_path, allow_user_upload')
+            ->select('id, feature_id, name_' . $lang . ' AS name, price, price_eur, image_path, allow_user_upload')
             ->where('feature_id', array_keys($features))
             ->order('feature_id')
             ->fetchAll();
@@ -226,6 +226,7 @@ class ModelFacade
             $result[$featureName][] = [
                 'name' => $option->name,
                 'price' => (float)$option->price,
+                'price_eur' => (float)$option->price_eur,
                 'allow_user_upload' => (bool)$option->allow_user_upload
             ];
         }

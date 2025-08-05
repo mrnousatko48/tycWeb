@@ -38,10 +38,13 @@ class EndpointPresenter extends Nette\Application\UI\Presenter
             $this->terminate();
         }
 
-    public function actionModelPrice($modelId): void
+public function actionModelPrice($modelId): void
     {
         $model = $this->modelFacade->getModelById((int)$modelId);
-        $this->sendJson(['price' => $model ? (float)$model->price : 0.00]);
+        $this->sendJson([
+            'price' => $model ? (float)$model->price : 0.00,
+            'price_eur' => $model ? (float)$model->price_eur : 0.00
+        ]);
         $this->terminate();
     }
 
