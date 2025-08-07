@@ -93,6 +93,8 @@ public function renderConfigurator(): void
 
         $form->addHidden('user_upload_id')->setDefaultValue(null);
 
+        $form->addHidden('lang')->setDefaultValue($this->getParameter('lang', 'en'));
+
         $form->addSubmit('submit', 'form.submit')
             ->setHtmlAttribute('id', 'frm-caseForm-submit');
 
@@ -109,66 +111,66 @@ public function renderConfigurator(): void
         return $form;
     }
 
-    public function processForm(Form $form): void
-    {
-        $values = $form->getValues();
-        error_log('Form values: ' . print_r($values, true));
+public function processForm(Form $form): void
+{
+    $values = $form->getValues();
+    error_log('Form values: ' . print_r($values, true));
 
-        try {
-            $manufacturerId = (int)$values['manufacturer'];
-            $modelId = (int)$values['model'];
-            $color = $values['color'];
-            $totalPrice = (float)$values['total_price'];
-            $features = json_decode($values['features'], true);
-            $userUploadId = isset($values['user_upload_id']) && $values['user_upload_id']
-                ? (int)$values['user_upload_id']
-                : null;
+    try {
+        $manufacturerId = (int)$values['manufacturer'];
+        $modelId = (int)$values['model'];
+        $color = $values['color'];
+        $totalPrice = (float)$values['total_price'];
+        $features = json_decode($values['features'], true);
+        $userUploadId = isset($values['user_upload_id']) && $values['user_upload_id']
+            ? (int)$values['user_upload_id']
+            : null;
+        $lang = $values['lang'] ?? 'en'; // Use lang from form, default to 'en'
 
-            if (!$manufacturerId || !$modelId || !$color) {
-                throw new \Exception('Missing required fields: manufacturer, model, or color.');
-            }
-
-            if (!is_array($features)) {
-                throw new \Exception('Invalid features format.');
-            }
-
-            $manufacturerName = $this->modelFacade->getManufacturerNameById($manufacturerId);
-            $modelName = $this->modelFacade->getModelNameById($modelId);
-
-            if (!$manufacturerName || !$modelName) {
-                throw new \Exception('Invalid manufacturer or model selected.');
-            }
-
-            $caseData = [
-                'manufacturer' => $manufacturerName,
-                'model' => $modelName,
-                'color' => $color,
-                'total_price' => $totalPrice,
-                'features' => $values['features'],
-                'user_upload_id' => $userUploadId,
-            ];
-
-            error_log('Creating case with user_upload_id: ' . ($userUploadId ?? 'NULL'));
-
-            $userId = $this->getUser()->isLoggedIn() ? $this->getUser()->getId() : null;
-            $this->orderFacade->createCase($caseData, $userId);
-
-            $this->flashMessage('Položka byla přidána do košíku.', 'success');
-            error_log('Redirecting after success.');
-            $this->redirect('Cart:default');
-            return;
-
-        } catch (AbortException $e) {
-            throw $e;
-
-        } catch (\Exception $e) {
-            error_log('Error in processForm: ' . $e->getMessage());
-            $this->flashMessage('Chyba při přidávání do košíku: ' . $e->getMessage(), 'error');
-            error_log('Redirecting after error: ' . $e->getMessage());
-            $this->redirect('Cart:default');
-            return;
+        if (!$manufacturerId || !$modelId || !$color) {
+            throw new \Exception('Missing required fields: manufacturer, model, or color.');
         }
+
+        if (!is_array($features)) {
+            throw new \Exception('Invalid features format.');
+        }
+
+        $manufacturerName = $this->modelFacade->getManufacturerNameById($manufacturerId);
+        $modelName = $this->modelFacade->getModelNameById($modelId);
+
+        if (!$manufacturerName || !$modelName) {
+            throw new \Exception('Invalid manufacturer or model selected.');
+        }
+
+        $caseData = [
+            'manufacturer' => $manufacturerName,
+            'model' => $modelName,
+            'color' => $color,
+            'total_price' => $totalPrice,
+            'features' => $values['features'],
+            'user_upload_id' => $userUploadId,
+        ];
+
+        error_log('Creating case with user_upload_id: ' . ($userUploadId ?? 'NULL'));
+
+        $userId = $this->getUser()->isLoggedIn() ? $this->getUser()->getId() : null;
+        $this->orderFacade->createCase($caseData, $userId);
+
+        $this->flashMessage('Položka byla přidána do košíku.', 'success');
+        error_log('Redirecting after success.');
+        $this->redirect('Cart:default', ['lang' => $lang]);
+        return;
+
+    } catch (AbortException $e) {
+        throw $e;
+
+    } catch (\Exception $e) {
+        $this->flashMessage('Chyba při přidávání do košíku: ' . $e->getMessage(), 'error');
+        error_log('Redirecting after error: ' . $e->getMessage());
+        $this->redirect('Cart:default', ['lang' => $values['lang'] ?? 'en']); // Use lang from form
+        return;
     }
+}
 
     public function renderGallery(): void
     {
