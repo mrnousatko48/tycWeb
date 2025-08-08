@@ -1,4 +1,4 @@
-{block title}OPNX3D | Košík{/block}
+{block title}OPNX3D | {_'cart.title'}{/block}
 {block content}
 <style>
 /* Define variables with dark mode support */
@@ -108,113 +108,99 @@
     background-color: var(--color-accent);
 }
 </style>
-
-<div class="progress-bar bg-[var(--color-background)] p-4 mb-8 rounded-lg shadow">
-    <div class="flex justify-between items-center">
-        <div class="step {if $presenter->action === 'default'}active{else}completed{/if}">
-            <span class="step-number">1</span> Košík
-        </div>
-        <div class="step {if $presenter->action === 'order'}active{elseif $presenter->action === 'info'}completed{else}inactive{/if}">
-            <span class="step-number">2</span> Doprava a platba
-        </div>
-        <div class="step {if $presenter->action === 'info'}active{else}inactive{/if}">
-            <span class="step-number">3</span> Osobní údaje
-        </div>
-    </div>
-</div>
-
 {if empty($cases)}
     <div class="container mx-auto max-w-4xl px-9">
-        <h2 class="text-2xl font-bold text-[var(--color-text)] mb-6 text-center">Shrnutí košíku</h2>
+        <h2 class="text-2xl font-bold text-[var(--color-text)] mb-6 text-center">{_'cart.summary'}</h2>
         <div class="text-center py-16 px-6 bg-[var(--color-background)] rounded-2xl shadow-2xl">
-            <p class="text-2xl font-medium text-[var(--color-text)] mb-6">Nemáte žádné kryty v košíku.</p>
-            <a n:href="Home:configurator" class="inline-block btn px-6 py-3 rounded-xl text-lg font-semibold transition hover:scale-105" style="background-color: var(--color-primary); color: var(--button-text);">Navrhnout kryt</a>
+            <p class="text-2xl font-medium text-[var(--color-text)] mb-6">{_'cart.empty'}</p>
+            <a n:href="Home:configurator, lang => $lang" class="inline-block btn px-6 py-3 rounded-xl text-lg font-semibold transition hover:scale-105" style="background-color: var(--color-primary); color: var(--button-text);">{_'cart.design_case'}</a>
         </div>
     </div>
 {else}
-<div class="container mx-auto max-w-4xl px-9">
-    <h2 class="text-2xl font-bold text-[var(--color-text)] mb-6 text-center">Shrnutí košíku</h2>
-    <form action="{$presenter->link('CreateOrder')}" method="post" class="bg-[var(--color-background)] p-8 rounded-3xl shadow-2xl overflow-x-auto">
-    <div class="space-y-6">
-        {foreach $cases as $case}
-            <div class="bg-[var(--color-background-secondary)] text-[var(--color-text)] shadow transition hover:shadow-lg duration-300 rounded-2xl p-6" data-case-id="{$case->id}" data-price="{$case->total_price}">
-                <div class="grid grid-cols-1 md:grid-cols-6 gap-4">
-                    <div>
-                        <h3 class="text-lg font-semibold mb-1">Výrobce</h3>
-                        <p class="text-base leading-relaxed">{$case->manufacturer}</p>
+    <div class="container mx-auto max-w-4xl px-9">
+        <h2 class="text-2xl font-bold text-[var(--color-text)] mb-6 text-center">{_'cart.summary'}</h2>
+        <form action="{link CreateOrder, lang => $lang}" method="post" class="bg-[var(--color-background)] p-8 rounded-3xl shadow-2xl overflow-x-auto">
+            <input type="hidden" name="lang" value="{$lang|escape}">
+            <div class="space-y-6">
+                {foreach $cases as $case}
+                    <div class="bg-[var(--color-background-secondary)] text-[var(--color-text)] shadow transition hover:shadow-lg duration-300 rounded-2xl p-6" data-case-id="{$case->id}" data-price="{$case->total_price}">
+                        <div class="grid grid-cols-1 md:grid-cols-6 gap-4">
+                            <div>
+                                <h3 class="text-lg font-semibold mb-1">{_'cart.manufacturer'}</h3>
+                                <p class="text-base leading-relaxed">{$case->manufacturer}</p>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold mb-1">{_'cart.model'}</h3>
+                                <p class="text-base leading-relaxed">{$case->model}</p>
+                            </div>
+                            <div>
+                                <h3 class="text-lg font-semibold mb-1">{_'cart.color'}</h3>
+                                <p class="text-base leading-relaxed">{$case->color}</p>
+                            </div>
+                            <div class="md:col-span-2">
+                                <h3 class="text-lg font-semibold mb-2">{_'cart.features'}</h3>
+                                {if $case->features}
+                                    <ul class="features-list grid grid-cols-2 gap-2 mb-0">
+                                        {foreach $case->features as $label => $value}
+                                            <li class="feature-item px-3 py-2 rounded border border-transparent transition-colors duration-300">
+                                                <span class="feature-label font-semibold text-[var(--color-text-secondary)]">{$label}:</span>
+                                                <span class="feature-value text-[var(--color-text)]"> {$value}</span>
+                                            </li>
+                                        {/foreach}
+                                    </ul>
+                                {else}
+                                    <p class="text-[var(--color-text-secondary)]">{_'cart.no_features'}</p>
+                                {/if}
+                            </div>
+                            <div class="flex flex-col space-y-2">
+                                <h3 class="text-lg font-semibold mb-1">{_'cart.quantity'}</h3>
+                                <input type="number" name="quantities[{$case->id}][amount]" value="{$quantities[$case->id] ?? 1}" min="1"
+                                    class="w-20 text-center border border-[var(--color-secondary)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)] bg-[var(--color-secondary)] focus:outline-none transition quantity-input">
+                                <a class="inline-flex items-center justify-center text-sm font-semibold text-white rounded-lg px-4 py-2 transition transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-400"
+                                   style="background-color: #ef4444;"
+                                   href="{link removeCase! $case->id}"
+                                   onclick="return confirm('{_'cart.remove_confirm'}')">
+                                    <i class="fas fa-trash mr-2"></i> {_'cart.remove'}
+                                </a>
+                            </div>
+                        </div>
                     </div>
-                    <div>
-                        <h3 class="text-lg font-semibold mb-1">Model</h3>
-                        <p class="text-base leading-relaxed">{$case->model}</p>
+                {/foreach}
+                <div class="flex justify-end mt-10">
+                    <div class="mr-4 text-lg font-semibold text-[var(--color-text)]">
+                        {_'cart.total_price'} <span class="text-[var(--color-accent)] total-value">{number_format($totalCartValue, 2, ',', ' ')} Kč</span>
                     </div>
-                    <div>
-                        <h3 class="text-lg font-semibold mb-1">Barva</h3>
-                        <p class="text-base leading-relaxed">{$case->color}</p>
-                    </div>
-                    <div class="md:col-span-2">
-                        <h3 class="text-lg font-semibold mb-2">Funkce</h3>
-                        {if $case->features}
-                            <ul class="features-list grid grid-cols-2 gap-2 mb-0">
-                                {foreach $case->features as $label => $value}
-                                    <li class="feature-item px-3 py-2 rounded border border-transparent transition-colors duration-300">
-                                        <span class="feature-label font-semibold text-[var(--color-text-secondary)]">{$label}:</span>
-                                        <span class="feature-value text-[var(--color-text)]"> {$value}</span>
-                                    </li>
-                                {/foreach}
-                            </ul>
-                        {else}
-                            <p class="text-[var(--color-text-secondary)]">Žádné funkce</p>
-                        {/if}
-                    </div>
-                    <div class="flex flex-col space-y-2">
-                        <h3 class="text-lg font-semibold mb-1">Množství</h3>
-                        <input type="number" name="quantities[{$case->id}][amount]" value="{$quantities[$case->id] ?? 1}" min="1"
-                            class="w-20 text-center border border-[var(--color-secondary)] rounded-lg focus:ring-2 focus:ring-[var(--color-accent)] bg-[var(--color-secondary)] focus:outline-none transition quantity-input">
-                        <a class="inline-flex items-center justify-center text-sm font-semibold text-white rounded-lg px-4 py-2 transition transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-red-400"
-                           style="background-color: #ef4444;"
-                           href="{link removeCase! $case->id}"
-                           onclick="return confirm('Opravdu chcete odstranit tento kryt z košíku?')">
-                            <i class="fas fa-trash mr-2"></i> Odstranit
-                        </a>
-                    </div>
+                    <button type="submit" class="btn px-8 py-4 rounded-2xl text-lg font-bold transition transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-[var(--color-accent)]"
+                        style="background-color: var(--color-primary); color: var(--button-text);">
+                        {_'cart.proceed_to_checkout'}
+                    </button>
                 </div>
             </div>
-        {/foreach}
-        <div class="flex justify-end mt-10">
-            <div class="mr-4 text-lg font-semibold text-[var(--color-text)]">
-                Celková cena: <span class="text-[var(--color-accent)] total-value">{number_format($totalCartValue, 2, ',', ' ')} Kč</span>
-            </div>
-            <button type="submit" class="btn px-8 py-4 rounded-2xl text-lg font-bold transition transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-[var(--color-accent)]"
-                style="background-color: var(--color-primary); color: var(--button-text);">
-                Pokračovat k objednávce
-            </button>
-        </div>
-    </div>
-</form>
+        </form>
 
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const quantityInputs = document.querySelectorAll('.quantity-input');
-        const totalValueElement = document.querySelector('.total-value');
+        <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const quantityInputs = document.querySelectorAll('.quantity-input');
+                const totalValueElement = document.querySelector('.total-value');
 
-        function updateTotal() {
-            let total = 0;
-            quantityInputs.forEach(input => {
-                const card = input.closest('[data-case-id]');
-                const price = parseFloat(card.getAttribute('data-price'));
-                const quantity = parseInt(input.value) || 1;
-                total += price * quantity;
+                function updateTotal() {
+                    let total = 0;
+                    quantityInputs.forEach(input => {
+                        const card = input.closest('[data-case-id]');
+                        const price = parseFloat(card.getAttribute('data-price'));
+                        const quantity = parseInt(input.value) || 1;
+                        total += price * quantity;
+                    });
+                    totalValueElement.textContent = total.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' Kč';
+                }
+
+                quantityInputs.forEach(input => {
+                    input.addEventListener('input', updateTotal);
+                });
+
+                updateTotal();
             });
-            totalValueElement.textContent = total.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' Kč';
-        }
-
-        quantityInputs.forEach(input => {
-            input.addEventListener('input', updateTotal);
-        });
-
-        // Initial calculation
-        updateTotal();
-    });
-</script>
+        </script>
+    </div>
 {/if}
 {/block}

@@ -1,4 +1,4 @@
-{block title}OPNX3D | Osobní údaje{/block}
+{block title}OPNX3D | {_'cart.personal_details_page'}{/block}
 {block content}
 <style>
 /* Progress Bar */
@@ -249,59 +249,59 @@
 <div class="progress-bar bg-[var(--color-background)] p-4 mb-8 rounded-lg shadow">
     <div class="flex justify-between items-center">
         <div class="step completed">
-            <span class="step-number">1</span> Košík
+            <span class="step-number">1</span> {_'nav.cart'}
         </div>
         <div class="step completed">
-            <span class="step-number">2</span> Doprava a platba
+            <span class="step-number">2</span> {_'cart.shipping_payment'}
         </div>
         <div class="step active">
-            <span class="step-number">3</span> Osobní údaje
+            <span class="step-number">3</span> {_'cart.personal_details_page'}
         </div>
     </div>
 </div>
 
 <div class="bg-[var(--color-background)] p-6 rounded-2xl shadow-lg form-container">
    <div class="form-section">
-        <a href="{link Cart:order}" class="text-[var(--color-primary)] hover:underline mb-3 inline-block text-sm">
-            Zpět na dopravu a platbu
+        <a n:href="Cart:order, lang => $lang" class="text-[var(--color-primary)] hover:underline mb-3 inline-block text-sm">
+            {_'cart.back_to_shipping_payment'}
         </a>
-        <h2 class="text-xl font-bold text-[var(--color-text)] mb-4">Osobní údaje</h2>
+        <h2 class="text-xl font-bold text-[var(--color-text)] mb-4">{_'cart.personal_details_page'}</h2>
 
         <form n:name="sendOrderForm" class="space-y-3">
-
+            <input type="hidden" name="lang" value="{$lang|escape}">
             <div class="form-field">
                 <input type="text" n:name="firstname" id="firstname-field" placeholder=" ">
-                <label for="firstname-field">Jméno</label>
+                <label for="firstname-field">{_'cart.firstname'}</label>
             </div>
 
             <div class="form-field">
                 <input type="text" n:name="lastname" id="lastname-field" placeholder=" ">
-                <label for="lastname-field">Příjmení</label>
+                <label for="lastname-field">{_'cart.lastname'}</label>
             </div>
 
             <div class="form-field">
                 <input type="email" n:name="email" id="email-field" placeholder=" ">
-                <label for="email-field">E-mail</label>
+                <label for="email-field">{_'cart.email'}</label>
             </div>
 
             <div class="form-field">
                 <input type="text" n:name="phone" id="phone-field" placeholder=" ">
-                <label for="phone-field">Telefon</label>
+                <label for="phone-field">{_'cart.phone'}</label>
             </div>
 
             <div class="form-field">
                 <input type="text" n:name="address" id="address-field" placeholder=" ">
-                <label for="address-field">Adresa</label>
+                <label for="address-field">{_'cart.address'}</label>
             </div>
 
             <div class="form-field">
                 <input type="text" n:name="city" id="city-field" placeholder=" ">
-                <label for="city-field">Město</label>
+                <label for="city-field">{_'cart.city'}</label>
             </div>
 
             <div class="form-field">
                 <input type="text" n:name="psc" id="psc-field" placeholder=" ">
-                <label for="psc-field">PSČ</label>
+                <label for="psc-field">{_'cart.psc'}</label>
             </div>
 
             <div class="form-field">
@@ -312,31 +312,31 @@
     </div>
 
     <div class="summary-section">
-        <h3>Shrnutí objednávky</h3>
+        <h3>{_'cart.order_summary'}</h3>
         <div class="space-y-3">
             {foreach $cases as $case}
                 <div class="bg-[var(--color-secondary)] text-[var(--color-text)] shadow rounded-xl p-3">
                     <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
                         <div>
-                            <h3 class="text-base font-semibold">Výrobce</h3>
+                            <h3 class="text-base font-semibold">{_'cart.manufacturer'}</h3>
                             <p class="text-sm">{$case->manufacturer}</p>
                         </div>
                         <div>
-                            <h3 class="text-base font-semibold">Model</h3>
+                            <h3 class="text-base font-semibold">{_'cart.model'}</h3>
                             <p class="text-sm">{$case->model}</p>
                         </div>
                         <div>
-                            <h3 class="text-base font-semibold">Barva</h3>
+                            <h3 class="text-base font-semibold">{_'cart.color'}</h3>
                             <p class="text-sm">{$case->color}</p>
                         </div>
                         <div>
-                            <h3 class="text-base font-semibold">Množství</h3>
+                            <h3 class="text-base font-semibold">{_'cart.quantity'}</h3>
                             <p class="text-sm">{$quantities[$case->id] ?? 1}</p>
                         </div>
                     </div>
                     {if !empty($case->features)}
                         <div class="features-list">
-                            <h3 class="text-base font-semibold mt-2">Funkce</h3>
+                            <h3 class="text-base font-semibold mt-2">{_'cart.features'}</h3>
                             <ul>
                                 {foreach $case->features as $key => $value}
                                     <li>{$key}: {$value}</li>
@@ -349,27 +349,27 @@
             <div class="order-summary text-right text-base font-semibold text-[var(--color-text)]">
                 <div class="cost-breakdown">
                     <div class="cost-item">
-                        <span>Mezisoučet zboží:</span>
+                        <span>{_'cart.items_subtotal'}:</span>
                         <span>{number_format($itemsSubtotal, 2, ',', ' ')} Kč</span>
                     </div>
                     <div class="cost-item">
-                        <span>Doprava ({$shipping}):</span>
+                        <span>{_'cart.shipping_cost'} ({$shipping}):</span>
                         <span>{number_format($shippingCost, 2, ',', ' ')} Kč</span>
                     </div>
                     {if $paymentCost > 0}
                         <div class="cost-item">
-                            <span>Poplatek za dobírku:</span>
+                            <span>{_'cart.payment_fee'}:</span>
                             <span>{number_format($paymentCost, 2, ',', ' ')} Kč</span>
                         </div>
                     {/if}
                     {if $delivery_point !== 'Není zadáno'}
                         <div class="cost-item">
-                            <span>Místo doručení:</span>
+                            <span>{_'cart.delivery_point_label'}:</span>
                             <span>{$delivery_point}</span>
                         </div>
                     {/if}
                     <div class="cost-item total">
-                        <span>Celková cena:</span>
+                        <span>{_'cart.total_cost'}:</span>
                         <span class="text-[var(--color-primary)]">{number_format($totalCartValue, 2, ',', ' ')} Kč</span>
                     </div>
                 </div>
@@ -377,7 +377,5 @@
         </div>
     </div>
 </div>
-
-
 
 {/block}
