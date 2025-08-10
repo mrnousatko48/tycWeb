@@ -19,12 +19,12 @@ class MailSender
     ) {
     }
 
-    public function createRegistrationEmail(string $email, string $username): Message
+    public function createRegistrationEmail(string $email, string $username, string $lang = 'cs'): Message
     {
         $latte = new Engine();
-        $template = $this->emailFacade->getTemplateByName('registration');
+        $template = $this->emailFacade->getTemplateByName('registration', $lang);
         if (!$template) {
-            throw new \Exception('Šablona registration nebyla nalezena v databázi.');
+            throw new \Exception("Template registration for language $lang was not found.");
         }
 
         $params = [
@@ -45,12 +45,12 @@ class MailSender
         return $mail;
     }
 
-    public function createNewUserEmail(string $email, string $username): Message
+    public function createNewUserEmail(string $email, string $username, string $lang = 'cs'): Message
     {
         $latte = new Engine();
-        $template = $this->emailFacade->getTemplateByName('new_user');
+        $template = $this->emailFacade->getTemplateByName('new_user', $lang);
         if (!$template) {
-            throw new \Exception('Šablona new_user nebyla nalezena v databázi.');
+            throw new \Exception("Template new_user for language $lang was not found.");
         }
 
         $params = [
@@ -71,37 +71,39 @@ class MailSender
         return $mail;
     }
 
-    public function sendRegistrationEmail(string $email, string $username): void
+    public function sendRegistrationEmail(string $email, string $username, string $lang = 'cs'): void
     {
-        $mail = $this->createRegistrationEmail($email, $username);
+        $mail = $this->createRegistrationEmail($email, $username, $lang);
         $this->mailer->send($mail);
     }
 
-    public function sendNewUserEmail(string $email, string $username): void
+    public function sendNewUserEmail(string $email, string $username, string $lang = 'cs'): void
     {
-        $mail = $this->createNewUserEmail($email, $username);
+        $mail = $this->createNewUserEmail($email, $username, $lang);
         $this->mailer->send($mail);
     }
 
-    public function sendInvoiceEmail(string $recipientEmail, string $recipientName, \Nette\Database\Table\ActiveRow $order, array $orderItems): void
+    public function sendInvoiceEmail(string $recipientEmail, string $recipientName, \Nette\Database\Table\ActiveRow $order, array $orderItems, string $lang = 'cs'): void
     {
         $latte = new Engine();
-        $template = $this->emailFacade->getTemplateByName('invoice');
+        $template = $this->emailFacade->getTemplateByName('invoice', $lang);
         if (!$template) {
-            error_log('Template "invoice" not found in database.');
-            throw new \Exception('Šablona invoice nebyla nalezena v databázi.');
+            error_log("Template 'invoice' for language $lang not found in database.");
+            throw new \Exception("Template invoice for language $lang was not found.");
         }
 
         $itemsSubtotal = 0;
         foreach ($orderItems as $item) {
-            $itemsSubtotal += $item->total_price * $item->quantity;
+            $price = $lang === 'en' ? (float)$item->total_price_eur : (float)$item->total_price;
+            $itemsSubtotal += $price * $item->quantity;
         }
 
-        $shippingInfo = $this->orderFacade->getShippingInfo($order->shipping);
-        $shippingCost = $shippingInfo ? $shippingInfo['cost'] : 0.0;
+        $shippingInfo = $this->orderFacade->getShippingInfo($order->shipping, $lang);
+        $shippingCost = $shippingInfo ? (float)$shippingInfo['cost'] : 0.0;
         $vendorName = $this->orderFacade->getVendorNameByShippingOptionId($order->shipping);
 
-        $paymentCost = $order->payment === 'DOBIRKA' ? 40.0 : 0.0;
+        $paymentInfo = $this->orderFacade->getPaymentInfo($order->payment, $lang);
+        $paymentCost = $paymentInfo ? (float)$paymentInfo['price'] : 0.0;
         $total = $itemsSubtotal + $shippingCost + $paymentCost;
 
         $params = [
@@ -120,17 +122,17 @@ class MailSender
             $htmlInvoice = $latte->renderToString($template['body'], $params);
         } catch (\Exception $e) {
             error_log('Error rendering invoice template: ' . $e->getMessage());
-            throw new \Exception('Chyba při renderování šablony invoice: ' . $e->getMessage());
+            throw new \Exception("Error rendering invoice template for language $lang: " . $e->getMessage());
         }
 
         $mpdf = new Mpdf();
         $mpdf->WriteHTML($htmlInvoice);
         $pdfContent = $mpdf->Output('', \Mpdf\Output\Destination::STRING_RETURN);
 
-        $emailTemplate = $this->emailFacade->getTemplateByName('invoice_email');
+        $emailTemplate = $this->emailFacade->getTemplateByName('invoice_email', $lang);
         if (!$emailTemplate) {
-            error_log('Template "invoice_email" not found in database.');
-            throw new \Exception('Šablona invoice_email nebyla nalezena v databázi.');
+            error_log("Template 'invoice_email' for language $lang not found in database.");
+            throw new \Exception("Template invoice_email for language $lang was not found.");
         }
 
         $emailParams = [
@@ -143,7 +145,7 @@ class MailSender
             $htmlBody = $latte->renderToString($emailTemplate['body'], $emailParams);
         } catch (\Exception $e) {
             error_log('Error rendering invoice_email template: ' . $e->getMessage());
-            throw new \Exception('Chyba při renderování šablony invoice_email: ' . $e->getMessage());
+            throw new \Exception("Error rendering invoice_email template for language $lang: " . $e->getMessage());
         }
 
         $mail = new Message;
@@ -151,17 +153,17 @@ class MailSender
             ->addTo($recipientEmail)
             ->setSubject($subject)
             ->setHtmlBody($htmlBody)
-            ->addAttachment("faktura-{$order->id}.pdf", $pdfContent, 'application/pdf');
+            ->addAttachment("invoice-{$order->id}.pdf", $pdfContent, 'application/pdf');
 
         $this->mailer->send($mail);
     }
 
-    public function sendPasswordResetEmail(string $email, string $resetCode): void
+    public function sendPasswordResetEmail(string $email, string $resetCode, string $lang = 'cs'): void
     {
         $latte = new Engine();
-        $template = $this->emailFacade->getTemplateByName('password_reset');
+        $template = $this->emailFacade->getTemplateByName('password_reset', $lang);
         if (!$template) {
-            throw new \Exception('Šablona password_reset nebyla nalezena v databázi.');
+            throw new \Exception("Template password_reset for language $lang was not found.");
         }
 
         $params = [
@@ -182,12 +184,12 @@ class MailSender
         $this->mailer->send($mail);
     }
 
-    public function sendPaymentConfirmationEmail(string $recipientEmail, string $recipientName, \Nette\Database\Table\ActiveRow $order): void
+    public function sendPaymentConfirmationEmail(string $recipientEmail, string $recipientName, \Nette\Database\Table\ActiveRow $order, string $lang = 'cs'): void
     {
         $latte = new Engine();
-        $template = $this->emailFacade->getTemplateByName('payment_confirmation');
+        $template = $this->emailFacade->getTemplateByName('payment_confirmation', $lang);
         if (!$template) {
-            throw new \Exception('Šablona payment_confirmation nebyla nalezena v databázi.');
+            throw new \Exception("Template payment_confirmation for language $lang was not found.");
         }
 
         $params = [
@@ -209,12 +211,12 @@ class MailSender
         $this->mailer->send($mail);
     }
 
-    public function sendShippedEmail(string $recipientEmail, string $recipientName, \Nette\Database\Table\ActiveRow $order): void
+    public function sendShippedEmail(string $recipientEmail, string $recipientName, \Nette\Database\Table\ActiveRow $order, string $lang = 'cs'): void
     {
         $latte = new Engine();
-        $template = $this->emailFacade->getTemplateByName('shipped');
+        $template = $this->emailFacade->getTemplateByName('shipped', $lang);
         if (!$template) {
-            throw new \Exception('Šablona shipped nebyla nalezena v databázi.');
+            throw new \Exception("Template shipped for language $lang was not found.");
         }
 
         $params = [
@@ -235,18 +237,18 @@ class MailSender
         $this->mailer->send($mail);
     }
 
-    public function sendReadyForPickupEmail(string $recipientEmail, string $recipientName, \Nette\Database\Table\ActiveRow $order): void
+    public function sendReadyForPickupEmail(string $recipientEmail, string $recipientName, \Nette\Database\Table\ActiveRow $order, string $lang = 'cs'): void
     {
         $latte = new Engine();
-        $template = $this->emailFacade->getTemplateByName('ready_for_pickup');
+        $template = $this->emailFacade->getTemplateByName('ready_for_pickup', $lang);
         if (!$template) {
-            throw new \Exception('Šablona ready_for_pickup nebyla nalezena v databázi.');
+            throw new \Exception("Template ready_for_pickup for language $lang was not found.");
         }
 
         $params = [
             'recipient' => $recipientName,
             'orderId' => $order->id,
-            'deliveryPoint' => $order->delivery_point ?? 'Není uvedeno dodací místo',
+            'deliveryPoint' => $order->delivery_point ?? ($lang === 'en' ? 'Not specified' : 'Není uvedeno'),
         ];
 
         $latte->setLoader(new \Latte\Loaders\StringLoader());
@@ -262,12 +264,12 @@ class MailSender
         $this->mailer->send($mail);
     }
 
-    public function sendPickedUpEmail(string $recipientEmail, string $recipientName, \Nette\Database\Table\ActiveRow $order): void
+    public function sendPickedUpEmail(string $recipientEmail, string $recipientName, \Nette\Database\Table\ActiveRow $order, string $lang = 'cs'): void
     {
         $latte = new Engine();
-        $template = $this->emailFacade->getTemplateByName('picked_up');
+        $template = $this->emailFacade->getTemplateByName('picked_up', $lang);
         if (!$template) {
-            throw new \Exception('Šablona picked_up nebyla nalezena v databázi.');
+            throw new \Exception("Template picked_up for language $lang was not found.");
         }
 
         $params = [
@@ -288,25 +290,27 @@ class MailSender
         $this->mailer->send($mail);
     }
 
-    public function sendNewOrderEmail(string $recipientName, \Nette\Database\Table\ActiveRow $order, array $orderItems): void
+    public function sendNewOrderEmail(string $recipientName, \Nette\Database\Table\ActiveRow $order, array $orderItems, string $lang = 'cs'): void
     {
         $latte = new Engine();
-        $template = $this->emailFacade->getTemplateByName('new_order');
+        $template = $this->emailFacade->getTemplateByName('new_order', $lang);
         if (!$template) {
-            error_log('Template "new_order" not found in database.');
-            throw new \Exception('Šablona new_order nebyla nalezena v databázi.');
+            error_log("Template 'new_order' for language $lang not found in database.");
+            throw new \Exception("Template new_order for language $lang was not found.");
         }
 
         $itemsSubtotal = 0;
         foreach ($orderItems as $item) {
-            $itemsSubtotal += $item->total_price * $item->quantity;
+            $price = $lang === 'en' ? (float)$item->total_price_eur : (float)$item->total_price;
+            $itemsSubtotal += $price * $item->quantity;
         }
 
-        $shippingInfo = $this->orderFacade->getShippingInfo($order->shipping);
-        $shippingCost = $shippingInfo ? $shippingInfo['cost'] : 0.0;
+        $shippingInfo = $this->orderFacade->getShippingInfo($order->shipping, $lang);
+        $shippingCost = $shippingInfo ? (float)$shippingInfo['cost'] : 0.0;
         $vendorName = $this->orderFacade->getVendorNameByShippingOptionId($order->shipping);
 
-        $paymentCost = $order->payment === 'DOBIRKA' ? 40.0 : 0.0;
+        $paymentInfo = $this->orderFacade->getPaymentInfo($order->payment, $lang);
+        $paymentCost = $paymentInfo ? (float)$paymentInfo['price'] : 0.0;
         $total = $itemsSubtotal + $shippingCost + $paymentCost;
 
         $params = [
@@ -326,7 +330,7 @@ class MailSender
             $html = $latte->renderToString($template['body'], $params);
         } catch (\Exception $e) {
             error_log('Error rendering new_order template: ' . $e->getMessage());
-            throw new \Exception('Chyba při renderování šablony new_order: ' . $e->getMessage());
+            throw new \Exception("Error rendering new_order template for language $lang: " . $e->getMessage());
         }
 
         $mail = new Message;

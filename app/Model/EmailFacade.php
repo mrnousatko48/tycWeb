@@ -14,12 +14,18 @@ class EmailFacade
         $this->database = $database;
     }
 
-    public function getTemplateByName(string $name): array
+    public function getTemplateByName(string $name, string $lang = 'cs'): array
     {
-        $template = $this->database->table('email_templates')->where('name', $name)->fetch();
+        $template = $this->database->table('email_templates')
+            ->where('name', $name)
+            ->where('lang', $lang)
+            ->fetch();
+
         if (!$template) {
-            throw new \Exception("Šablona $name nebyla nalezena.");
+            error_log("Template '$name' for language '$lang' not found in database.");
+            throw new \Exception("Template $name for language $lang was not found.");
         }
+
         $data = $template->toArray();
         $data['pdf_paths'] = json_decode($data['pdf_paths'] ?? '[]', true);
         return $data;
@@ -49,6 +55,7 @@ class EmailFacade
                 'body' => $values['body'],
                 'recipient_email' => $values['recipient_email'],
                 'admin_phone' => $values['admin_phone'],
+                'lang' => $values['lang'] ?? 'cs',
                 'updated_at' => new \DateTime(),
             ]);
     }

@@ -6,18 +6,15 @@ namespace App\UI\Front\Cart;
 use App\UI\Front\BaseFrontPresenter;
 use Nette\Application\UI\Form;
 use App\MailSender\MailSender;
-use App\Model\EmailFacade;
 
 final class CartPresenter extends BaseFrontPresenter
 {
     private MailSender $mailSender;
-    private EmailFacade $emailFacade;
 
-    public function __construct(MailSender $mailSender, EmailFacade $emailFacade)
+    public function __construct(MailSender $mailSender)
     {
         parent::__construct();
         $this->mailSender = $mailSender;
-        $this->emailFacade = $emailFacade;
     }
 
     private function cleanFeatureKey(string $key): string
@@ -28,7 +25,7 @@ final class CartPresenter extends BaseFrontPresenter
         return $key;
     }
 
-public function renderDefault(): void
+    public function renderDefault(): void
     {
         $session = $this->getSession('order');
         $lang = $this->getParameter('lang') ?? $session->lang ?? 'cs';
@@ -84,169 +81,169 @@ public function renderDefault(): void
         $this->template->lang = $lang;
     }
 
-public function renderOrder(): void
-{
-    $session = $this->getSession('order');
-    $lang = $this->getHttpRequest()->getQuery('lang') ?? $session->lang ?? 'cs';
-    $session->lang = $lang; // Update session language
-    $quantities = $session->quantities ?? [];
+    public function renderOrder(): void
+    {
+        $session = $this->getSession('order');
+        $lang = $this->getHttpRequest()->getQuery('lang') ?? $session->lang ?? 'cs';
+        $session->lang = $lang; // Update session language
+        $quantities = $session->quantities ?? [];
 
-    if (empty($quantities)) {
-        $this->flashMessage('Košík je prázdný.', 'warning');
-        $this->redirect('Cart:default', ['lang' => $lang]);
-    }
-
-    $caseIds = array_keys($quantities);
-    $cases = $this->orderFacade->getCasesByIds($caseIds);
-
-    $decodedCases = [];
-    $totalCartValue = 0;
-    foreach ($cases as $case) {
-        $caseArray = $case->toArray();
-        $features = $case->features ? json_decode($case->features, true) : [];
-        if (isset($features['features']) && is_string($features['features'])) {
-            $features = json_decode($features['features'], true) ?: $features;
+        if (empty($quantities)) {
+            $this->flashMessage($lang === 'en' ? 'Cart is empty.' : 'Košík je prázdný.', 'warning');
+            $this->redirect('Cart:default', ['lang' => $lang]);
         }
 
-        $cleanFeatures = [];
-        foreach ($features as $key => $value) {
-            $cleanKey = $this->cleanFeatureKey($key);
-            $cleanFeatures[$cleanKey] = $value;
+        $caseIds = array_keys($quantities);
+        $cases = $this->orderFacade->getCasesByIds($caseIds);
+
+        $decodedCases = [];
+        $totalCartValue = 0;
+        foreach ($cases as $case) {
+            $caseArray = $case->toArray();
+            $features = $case->features ? json_decode($case->features, true) : [];
+            if (isset($features['features']) && is_string($features['features'])) {
+                $features = json_decode($features['features'], true) ?: $features;
+            }
+
+            $cleanFeatures = [];
+            foreach ($features as $key => $value) {
+                $cleanKey = $this->cleanFeatureKey($key);
+                $cleanFeatures[$cleanKey] = $value;
+            }
+
+            $caseArray['features'] = $cleanFeatures;
+            $upload = $case->user_upload_id ? $this->orderFacade->getUserUploadById($case->user_upload_id) : null;
+            $caseArray['user_upload_filename'] = $upload ? $upload->original_filename : null;
+            $decodedCases[] = (object) $caseArray;
+
+            $quantity = $quantities[$case->id] ?? 1;
+            $price = $lang === 'en' ? (float)$case->total_price_eur : (float)$case->total_price;
+            $totalCartValue += $price * $quantity;
         }
 
-        $caseArray['features'] = $cleanFeatures;
-        $upload = $case->user_upload_id ? $this->orderFacade->getUserUploadById($case->user_upload_id) : null;
-        $caseArray['user_upload_filename'] = $upload ? $upload->original_filename : null;
-        $decodedCases[] = (object) $caseArray;
-
-        $quantity = $quantities[$case->id] ?? 1;
-        $price = $lang === 'en' ? (float)$case->total_price_eur : (float)$case->total_price;
-        $totalCartValue += $price * $quantity;
+        $this->template->cases = $decodedCases;
+        $this->template->quantities = $quantities;
+        $this->template->totalCartValue = $totalCartValue;
+        $this->template->currency = $lang === 'en' ? '€' : 'Kč';
+        $this->template->lang = $lang;
     }
 
-    $this->template->cases = $decodedCases;
-    $this->template->quantities = $quantities;
-    $this->template->totalCartValue = $totalCartValue;
-    $this->template->currency = $lang === 'en' ? '€' : 'Kč';
-    $this->template->lang = $lang;
-}
+    public function renderInfo(): void
+    {
+        $session = $this->getSession('order');
+        $lang = $this->getParameter('lang') ?? $session->lang ?? 'cs';
+        $quantities = $session->quantities ?? [];
 
-public function renderInfo(): void
-{
-    $session = $this->getSession('order');
-    $lang = $this->getParameter('lang') ?? $session->lang ?? 'cs';
-    $quantities = $session->quantities ?? [];
-
-    if (empty($quantities)) {
-        $this->flashMessage('Košík je prázdný.', 'warning');
-        $this->redirect('Cart:default', ['lang' => $lang]);
-    }
-
-    if (!isset($session->vendor) || !isset($session->shippingOption) || !isset($session->paymentMethod)) {
-        $this->flashMessage('Prosím, vyberte dopravce, způsob dopravy a platby.', 'warning');
-        $this->redirect('Cart:order', ['lang' => $lang]);
-    }
-
-    $caseIds = array_keys($quantities);
-    $cases = $this->orderFacade->getCasesByIds($caseIds);
-
-    $decodedCases = [];
-    $itemsSubtotal = 0;
-    foreach ($cases as $case) {
-        $caseArray = $case->toArray();
-        $features = $case->features ? json_decode($case->features, true) : [];
-        if (isset($features['features']) && is_string($features['features'])) {
-            $features = json_decode($features['features'], true) ?: $features;
+        if (empty($quantities)) {
+            $this->flashMessage($lang === 'en' ? 'Cart is empty.' : 'Košík je prázdný.', 'warning');
+            $this->redirect('Cart:default', ['lang' => $lang]);
         }
 
-        $cleanFeatures = [];
-        foreach ($features as $key => $value) {
-            $cleanKey = $this->cleanFeatureKey($key);
-            $cleanFeatures[$cleanKey] = $value;
+        if (!isset($session->vendor) || !isset($session->shippingOption) || !isset($session->paymentMethod)) {
+            $this->flashMessage($lang === 'en' ? 'Please select a vendor, shipping method, and payment method.' : 'Prosím, vyberte dopravce, způsob dopravy a platby.', 'warning');
+            $this->redirect('Cart:order', ['lang' => $lang]);
         }
 
-        $caseArray['features'] = $cleanFeatures;
-        $upload = $case->user_upload_id ? $this->orderFacade->getUserUploadById($case->user_upload_id) : null;
-        $caseArray['user_upload_filename'] = $upload ? $upload->original_filename : null;
-        $decodedCases[] = (object) $caseArray;
+        $caseIds = array_keys($quantities);
+        $cases = $this->orderFacade->getCasesByIds($caseIds);
 
-        $quantity = $quantities[$case->id] ?? 1;
-        $price = $lang === 'en' ? (float)$case->total_price_eur : (float)$case->total_price;
-        $itemsSubtotal += $price * $quantity;
+        $decodedCases = [];
+        $itemsSubtotal = 0;
+        foreach ($cases as $case) {
+            $caseArray = $case->toArray();
+            $features = $case->features ? json_decode($case->features, true) : [];
+            if (isset($features['features']) && is_string($features['features'])) {
+                $features = json_decode($features['features'], true) ?: $features;
+            }
+
+            $cleanFeatures = [];
+            foreach ($features as $key => $value) {
+                $cleanKey = $this->cleanFeatureKey($key);
+                $cleanFeatures[$cleanKey] = $value;
+            }
+
+            $caseArray['features'] = $cleanFeatures;
+            $upload = $case->user_upload_id ? $this->orderFacade->getUserUploadById($case->user_upload_id) : null;
+            $caseArray['user_upload_filename'] = $upload ? $upload->original_filename : null;
+            $decodedCases[] = (object) $caseArray;
+
+            $quantity = $quantities[$case->id] ?? 1;
+            $price = $lang === 'en' ? (float)$case->total_price_eur : (float)$case->total_price;
+            $itemsSubtotal += $price * $quantity;
+        }
+
+        $shippingInfo = $this->orderFacade->getShippingInfo((int)$session->shippingOption, $lang);
+        $shippingCost = $shippingInfo ? (float)$shippingInfo['cost'] : 0.0;
+        $shippingName = $shippingInfo ? $shippingInfo['name'] : ($lang === 'en' ? 'Not selected' : 'Není vybráno');
+        $paymentInfo = $this->orderFacade->getPaymentInfo((int)$session->paymentMethod, $lang);
+        $paymentCost = $paymentInfo ? (float)$paymentInfo['price'] : 0.0;
+        $paymentName = $paymentInfo ? $paymentInfo['name'] : ($lang === 'en' ? 'Not selected' : 'Není vybráno');
+        $totalCartValue = $itemsSubtotal + $shippingCost + $paymentCost;
+
+        $this->template->cases = $decodedCases;
+        $this->template->quantities = $quantities;
+        $this->template->itemsSubtotal = $itemsSubtotal;
+        $this->template->shippingCost = $shippingCost;
+        $this->template->paymentCost = $paymentCost;
+        $this->template->totalCartValue = $totalCartValue;
+        $this->template->shipping = $shippingName;
+        $this->template->payment = $paymentName;
+        $this->template->delivery_point = $session->delivery_point ?? ($lang === 'en' ? 'Not specified' : 'Není zadáno');
+        $this->template->currency = $lang === 'en' ? '€' : 'Kč';
+        $this->template->lang = $lang;
     }
 
-    $shippingInfo = $this->orderFacade->getShippingInfo((int)$session->shippingOption, $lang);
-    $shippingCost = $shippingInfo ? (float)$shippingInfo['cost'] : 0.0;
-    $shippingName = $shippingInfo ? $shippingInfo['name'] : 'Není vybráno';
-    $paymentInfo = $this->orderFacade->getPaymentInfo((int)$session->paymentMethod, $lang);
-    $paymentCost = $paymentInfo ? (float)$paymentInfo['price'] : 0.0;
-    $paymentName = $paymentInfo ? $paymentInfo['name'] : 'Není vybráno';
-    $totalCartValue = $itemsSubtotal + $shippingCost + $paymentCost;
+    protected function createComponentOrderForm(): Form
+    {
+        $form = new Form;
+        $form->setTranslator($this->translator);
 
-    $this->template->cases = $decodedCases;
-    $this->template->quantities = $quantities;
-    $this->template->itemsSubtotal = $itemsSubtotal;
-    $this->template->shippingCost = $shippingCost;
-    $this->template->paymentCost = $paymentCost;
-    $this->template->totalCartValue = $totalCartValue;
-    $this->template->shipping = $shippingName;
-    $this->template->payment = $paymentName;
-    $this->template->delivery_point = $session->delivery_point ?? 'Není zadáno';
-    $this->template->currency = $lang === 'en' ? '€' : 'Kč';
-    $this->template->lang = $lang;
-}
+        $lang = $this->getHttpRequest()->getQuery('lang') ?? $this->getSession('order')->lang ?? 'cs';
+        $vendor = $form->addSelect('vendor', 'cart.vendor', $this->orderFacade->getVendors($lang))
+            ->setPrompt($lang === 'en' ? '---- Select Vendor ----' : '---- Vyberte dopravce ----')
+            ->setRequired($lang === 'en' ? 'Please select a vendor.' : 'Zvolte dopravce.');
 
-   protected function createComponentOrderForm(): Form
-{
-    $form = new Form;
-    $form->setTranslator($this->translator);
+        $shippingOption = $form->addSelect('shippingOption', 'cart.shipping_option')
+            ->setHtmlAttribute('data-depends', $vendor->getHtmlName())
+            ->setHtmlAttribute('data-url', $this->link('Endpoint:shippingOptions', ['vendor' => '#', 'lang' => $lang]))
+            ->setRequired($lang === 'en' ? 'Please select a shipping method.' : 'Zvolte způsob dopravy.');
 
-    $lang = $this->getHttpRequest()->getQuery('lang') ?? $this->getSession('order')->lang ?? 'cs';
-    $vendor = $form->addSelect('vendor', 'cart.vendor', $this->orderFacade->getVendors($lang))
-        ->setPrompt('----')
-        ->setRequired('Zvolte dopravce');
+        $paymentMethod = $form->addSelect('paymentMethod', 'cart.payment_method')
+            ->setHtmlAttribute('data-depends', $vendor->getHtmlName())
+            ->setHtmlAttribute('data-url', $this->link('Endpoint:paymentMethods', ['vendor' => '#', 'lang' => $lang]))
+            ->setPrompt($lang === 'en' ? '---- Select Payment Method ----' : '---- Vyberte způsob platby ----')
+            ->setRequired($lang === 'en' ? 'Please select a payment method.' : 'Zvolte způsob platby.');
 
-    $shippingOption = $form->addSelect('shippingOption', 'cart.shipping_option')
-        ->setHtmlAttribute('data-depends', $vendor->getHtmlName())
-        ->setHtmlAttribute('data-url', $this->link('Endpoint:shippingOptions', ['vendor' => '#', 'lang' => $lang]))
-        ->setRequired('Zvolte způsob dopravy');
+        $deliveryPoint = $form->addText('delivery_point', 'cart.delivery_point')
+            ->setHtmlAttribute('id', 'delivery-point-input')
+            ->setHtmlAttribute('placeholder', $lang === 'en' ? 'Enter Z-Box or branch name, or address' : 'Zadejte název Z-Boxu nebo pobočky, nebo adresa')
+            ->setRequired($lang === 'en' ? 'Delivery point is required.' : 'Místo doručení je povinné.');
 
-    $paymentMethod = $form->addSelect('paymentMethod', 'cart.payment_method')
-        ->setHtmlAttribute('data-depends', $vendor->getHtmlName())
-        ->setHtmlAttribute('data-url', $this->link('Endpoint:paymentMethods', ['vendor' => '#', 'lang' => $lang]))
-        ->setPrompt('----')
-        ->setRequired('Zvolte způsob platby');
+        $form->addHidden('lang', $lang);
 
-    $deliveryPoint = $form->addText('delivery_point', 'cart.delivery_point')
-        ->setHtmlAttribute('id', 'delivery-point-input')
-        ->setHtmlAttribute('placeholder', 'Zadejte název Z-Boxu nebo pobočky, nebo adresa')
-        ->setRequired();
+        $form->onAnchor[] = function () use ($vendor, $shippingOption, $paymentMethod, $lang) {
+            $vendorId = $vendor->getValue() ? (int)$vendor->getValue() : null;
 
-    $form->addHidden('lang', $lang);
+            // Populate shippingOption
+            $shippingItems = $vendorId
+                ? $this->orderFacade->getShippingOptionsByVendor($vendorId, $lang)
+                : [];
+            $shippingOption->setItems($shippingItems);
 
-    $form->onAnchor[] = function () use ($vendor, $shippingOption, $paymentMethod, $lang) {
-        $vendorId = $vendor->getValue() ? (int)$vendor->getValue() : null;
+            // Populate paymentMethod
+            $paymentItems = $vendorId
+                ? $this->orderFacade->getPaymentMethodsByVendor($vendorId, $lang)
+                : [];
+            $paymentMethod->setItems($paymentItems);
+        };
 
-        // Populate shippingOption
-        $shippingItems = $vendorId
-            ? $this->orderFacade->getShippingOptionsByVendor($vendorId, $lang)
-            : [];
-        $shippingOption->setItems($shippingItems);
+        $form->addSubmit('submit', $lang === 'en' ? 'Proceed to Personal Details' : 'Pokračovat k osobním údajům')
+            ->setHtmlAttribute('class', 'btn px-8 py-4 rounded-2xl text-lg font-bold transition transform hover:scale-105')
+            ->setHtmlAttribute('style', 'background-color: var(--color-primary); color: var(--button-text);');
 
-        // Populate paymentMethod
-        $paymentItems = $vendorId
-            ? $this->orderFacade->getPaymentMethodsByVendor($vendorId, $lang)
-            : [];
-        $paymentMethod->setItems($paymentItems);
-    };
-
-    $form->addSubmit('submit', 'cart.submit_to_personal_details')
-        ->setHtmlAttribute('class', 'btn px-8 py-4 rounded-2xl text-lg font-bold transition transform hover:scale-105')
-        ->setHtmlAttribute('style', 'background-color: var(--color-primary); color: var(--button-text);');
-
-    $form->onSuccess[] = [$this, 'orderFormSucceeded'];
-    return $form;
-}
+        $form->onSuccess[] = [$this, 'orderFormSucceeded'];
+        return $form;
+    }
 
     public function orderFormSucceeded(Form $form, \stdClass $values): void
     {
@@ -254,25 +251,25 @@ public function renderInfo(): void
         $quantities = $session->quantities ?? [];
 
         if (empty($quantities)) {
-            $this->flashMessage('Košík je prázdný.', 'warning');
-            $this->redirect('Cart:default');
+            $this->flashMessage($values->lang === 'en' ? 'Cart is empty.' : 'Košík je prázdný.', 'warning');
+            $this->redirect('Cart:default', ['lang' => $values->lang]);
             return;
         }
 
         // Validate vendor and shipping option
         if (!$this->orderFacade->isValidVendor($values->vendor)) {
-            $this->flashMessage('Neplatný dopravce.', 'danger');
-            $this->redirect('this');
+            $this->flashMessage($values->lang === 'en' ? 'Invalid vendor.' : 'Neplatný dopravce.', 'danger');
+            $this->redirect('this', ['lang' => $values->lang]);
             return;
         }
         if (!$this->orderFacade->isValidShippingOption($values->shippingOption)) {
-            $this->flashMessage('Neplatný způsob dopravy.', 'danger');
-            $this->redirect('this');
+            $this->flashMessage($values->lang === 'en' ? 'Invalid shipping method.' : 'Neplatný způsob dopravy.', 'danger');
+            $this->redirect('this', ['lang' => $values->lang]);
             return;
         }
         if (!$this->orderFacade->isValidPaymentMethod($values->paymentMethod)) {
-            $this->flashMessage('Neplatný způsob platby.', 'danger');
-            $this->redirect('this');
+            $this->flashMessage($values->lang === 'en' ? 'Invalid payment method.' : 'Neplatný způsob platby.', 'danger');
+            $this->redirect('this', ['lang' => $values->lang]);
             return;
         }
 
@@ -282,97 +279,100 @@ public function renderInfo(): void
         $session->lang = $values->lang ?? $session->lang ?? 'cs';
         $session->delivery_point = $values->delivery_point ?: null;
 
-        $additionalCost = $this->orderFacade->calculateAdditionalCost($values->shippingOption, $values->paymentMethod);
+        $additionalCost = $this->orderFacade->calculateAdditionalCost($values->shippingOption, $values->paymentMethod, $values->lang);
         $session->additionalCost = $additionalCost;
         $this->redirect('Cart:info', ['lang' => $session->lang]);
     }
 
     protected function createComponentSendOrderForm(): Form
-{
-    $form = new Form;
-    $form->setTranslator($this->translator); // Set the translator for form labels and messages
+    {
+        $form = new Form;
+        $form->setTranslator($this->translator); // Set the translator for form labels and messages
 
-    $user = $this->getUser()->isLoggedIn() ? $this->getUser()->getIdentity() : null;
-    if ($user) {
-        $userData = $this->userFacade->getUserById($user->getId());
-    } else {
-        $userData = null;
+        $lang = $this->getSession('order')->lang ?? 'cs';
+        $user = $this->getUser()->isLoggedIn() ? $this->getUser()->getIdentity() : null;
+        if ($user) {
+            $userData = $this->userFacade->getUserById($user->getId());
+        } else {
+            $userData = null;
+        }
+
+        $form->addText('firstname', 'cart.firstname')
+            ->setRequired($lang === 'en' ? 'First name is required.' : 'Jméno je povinné.')
+            ->setHtmlAttribute('id', 'firstname-field')
+            ->setDefaultValue($userData ? $userData->firstname : '');
+
+        $form->addText('lastname', 'cart.lastname')
+            ->setRequired($lang === 'en' ? 'Last name is required.' : 'Příjmení je povinné.')
+            ->setHtmlAttribute('id', 'lastname-field')
+            ->setDefaultValue($userData ? $userData->lastname : '');
+
+        $form->addEmail('email', 'cart.email')
+            ->setRequired($lang === 'en' ? 'Email is required.' : 'Email je povinný.')
+            ->setHtmlAttribute('id', 'email-field')
+            ->setHtmlAttribute('placeholder', $lang === 'en' ? 'Enter your email' : 'Zadejte váš email')
+            ->setDefaultValue($userData ? $userData->email : '');
+
+        $form->addText('phone', 'cart.phone')
+            ->setRequired($lang === 'en' ? 'Phone number is required.' : 'Telefonní číslo je povinné.')
+            ->setHtmlAttribute('id', 'phone-field')
+            ->setHtmlAttribute('placeholder', $lang === 'en' ? 'Enter your phone number' : 'Zadejte vaše telefonní číslo')
+            ->setDefaultValue($userData && isset($userData->phone) ? $userData->phone : '');
+
+        $form->addText('address', 'cart.address')
+            ->setRequired($lang === 'en' ? 'Address is required.' : 'Adresa je povinná.')
+            ->setHtmlAttribute('id', 'address-field')
+            ->setHtmlAttribute('placeholder', $lang === 'en' ? 'Enter your address' : 'Zadejte vaši adresu')
+            ->setDefaultValue($userData && isset($userData->address) ? $userData->address : '');
+
+        $form->addText('city', 'cart.city')
+            ->setRequired($lang === 'en' ? 'City is required.' : 'Město je povinné.')
+            ->setHtmlAttribute('id', 'city-field')
+            ->setHtmlAttribute('placeholder', $lang === 'en' ? 'Enter your city' : 'Zadejte vaše město')
+            ->setDefaultValue($userData && isset($userData->city) ? $userData->city : '');
+
+        $form->addText('psc', 'cart.psc')
+            ->setRequired($lang === 'en' ? 'Postal code is required.' : 'PSČ je povinné.')
+            ->setHtmlAttribute('id', 'psc-field')
+            ->setHtmlAttribute('placeholder', $lang === 'en' ? 'Enter your postal code' : 'Zadejte vaše PSČ')
+            ->setDefaultValue($userData && isset($userData->psc) ? $userData->psc : '');
+
+        $form->addHidden('order_token', bin2hex(random_bytes(16)));
+        $form->addHidden('lang', $lang);
+
+        $form->addProtection($lang === 'en' ? 'The form has expired. Please try again.' : 'Formulář vypršel. Zkuste to znovu.');
+
+        $form->addSubmit('submit', $lang === 'en' ? 'Submit Order' : 'Odeslat objednávku')
+            ->setHtmlAttribute('class', 'btn px-6 py-3 rounded-xl text-base font-semibold transition transform hover:scale-105')
+            ->setHtmlAttribute('style', 'background-color: var(--color-primary); color: var(--button-text);');
+
+        $form->onSuccess[] = [$this, 'sendOrderFormSucceeded'];
+        return $form;
     }
-
-    $form->addText('firstname', 'cart.firstname')
-        ->setRequired('cart.firstname_required')
-        ->setHtmlAttribute('id', 'firstname-field')
-        ->setDefaultValue($userData ? $userData->firstname : '');
-
-    $form->addText('lastname', 'cart.lastname')
-        ->setRequired('cart.lastname_required')
-        ->setHtmlAttribute('id', 'lastname-field')
-        ->setDefaultValue($userData ? $userData->lastname : '');
-
-    $form->addEmail('email', 'cart.email')
-        ->setRequired('cart.email_required')
-        ->setHtmlAttribute('id', 'email-field')
-        ->setHtmlAttribute('placeholder', 'cart.email_placeholder')
-        ->setDefaultValue($userData ? $userData->email : '');
-
-    $form->addText('phone', 'cart.phone')
-        ->setRequired('cart.phone_required')
-        ->setHtmlAttribute('id', 'phone-field')
-        ->setHtmlAttribute('placeholder', 'cart.phone_placeholder')
-        ->setDefaultValue($userData && isset($userData->phone) ? $userData->phone : '');
-
-    $form->addText('address', 'cart.address')
-        ->setRequired('cart.address_required')
-        ->setHtmlAttribute('id', 'address-field')
-        ->setHtmlAttribute('placeholder', 'cart.address_placeholder')
-        ->setDefaultValue($userData && isset($userData->address) ? $userData->address : '');
-
-    $form->addText('city', 'cart.city')
-        ->setRequired('cart.city_required')
-        ->setHtmlAttribute('id', 'city-field')
-        ->setHtmlAttribute('placeholder', 'cart.city_placeholder')
-        ->setDefaultValue($userData && isset($userData->city) ? $userData->city : '');
-
-    $form->addText('psc', 'cart.psc')
-        ->setRequired('cart.psc_required')
-        ->setHtmlAttribute('id', 'psc-field')
-        ->setHtmlAttribute('placeholder', 'cart.psc_placeholder')
-        ->setDefaultValue($userData && isset($userData->psc) ? $userData->psc : '');
-
-    $form->addHidden('order_token', bin2hex(random_bytes(16)));
-
-    $form->addProtection('cart.form_expired');
-
-    $form->addSubmit('submit', 'cart.submit_order')
-        ->setHtmlAttribute('class', 'btn px-6 py-3 rounded-xl text-base font-semibold transition transform hover:scale-105')
-        ->setHtmlAttribute('style', 'background-color: var(--color-primary); color: var(--button-text);');
-
-    $form->onSuccess[] = [$this, 'sendOrderFormSucceeded'];
-    return $form;
-}
 
     public function sendOrderFormSucceeded(Form $form, \stdClass $values): void
     {
         $session = $this->getSession('order');
         $quantities = $session->quantities ?? [];
+        $lang = $values->lang ?? $session->lang ?? 'cs';
 
         if (empty($quantities)) {
-            $this->flashMessage('Nelze dokončit prázdnou objednávku.', 'danger');
-            $this->redirect('Cart:default');
+            $this->flashMessage($lang === 'en' ? 'Cannot complete an empty order.' : 'Nelze dokončit prázdnou objednávku.', 'danger');
+            $this->redirect('Cart:default', ['lang' => $lang]);
             return;
         }
 
         if (!isset($session->vendor) || !isset($session->shippingOption) || !isset($session->paymentMethod)) {
-            $this->flashMessage('Prosím, vyberte dopravce, způsob dopravy a platby.', 'warning');
-            $this->redirect('Cart:order');
+            $this->flashMessage($lang === 'en' ? 'Please select a vendor, shipping method, and payment method.' : 'Prosím, vyberte dopravce, způsob dopravy a platby.', 'warning');
+            $this->redirect('Cart:order', ['lang' => $lang]);
             return;
         }
 
         $orderToken = $values->order_token;
         $sessionToken = $session->order_token ?? null;
         if ($sessionToken && $sessionToken === $orderToken) {
-            $this->flashMessage('Objednávka již byla zpracována.', 'warning');
-            $this->redirect('Home:default');
+            $this->flashMessage($lang === 'en' ? 'Order has already been processed.' : 'Objednávka již byla zpracována.', 'warning');
+            $this->redirect('Home:default', ['lang' => $lang]);
             return;
         }
         $session->order_token = $orderToken;
@@ -413,19 +413,19 @@ public function renderInfo(): void
 
             $items = $this->orderFacade->getOrderItems($order->id);
             $recipientName = $values->firstname . ' ' . $values->lastname;
-            $this->mailSender->sendInvoiceEmail($values->email, $recipientName, $order, $items);
-            $this->mailSender->sendNewOrderEmail($recipientName, $order, $items);
+            $this->mailSender->sendInvoiceEmail($values->email, $recipientName, $order, $items, $lang);
+            $this->mailSender->sendNewOrderEmail($recipientName, $order, $items, $lang);
 
-            unset($session->quantities, $session->vendor, $session->shippingOption, $session->paymentMethod, $session->additionalCost, $session->delivery_point, $session->order_token);
-            $this->flashMessage('Objednávka byla úspěšně dokončena a faktura odeslána.', 'success');
-            $this->redirect('Home:default');
+            unset($session->quantities, $session->vendor, $session->shippingOption, $session->paymentMethod, $session->additionalCost, $session->delivery_point, $session->order_token, $session->lang);
+            $this->flashMessage($lang === 'en' ? 'Order successfully completed and invoice sent.' : 'Objednávka byla úspěšně dokončena a faktura odeslána.', 'success');
+            $this->redirect('Home:default', ['lang' => $lang]);
         } catch (\InvalidArgumentException $e) {
             $this->flashMessage($e->getMessage(), 'danger');
-            $this->redirect('Cart:default');
+            $this->redirect('Cart:default', ['lang' => $lang]);
         }
     }
 
-   public function actionCreateOrder(): void
+    public function actionCreateOrder(): void
     {
         $lang = $this->getParameter('lang') ?? $this->getHttpRequest()->getPost('lang') ?? 'cs';
         $quantities = $this->getHttpRequest()->getPost('quantities') ?? [];
@@ -439,7 +439,7 @@ public function renderInfo(): void
         }
 
         if (empty($selected)) {
-            $this->flashMessage('Košík je prázdný nebo nebylo zadáno žádné množství.', 'warning');
+            $this->flashMessage($lang === 'en' ? 'Cart is empty or no quantities specified.' : 'Košík je prázdný nebo nebylo zadáno žádné množství.', 'warning');
             $this->redirect('Cart:default', ['lang' => $lang]);
         }
 
@@ -457,7 +457,7 @@ public function renderInfo(): void
     public function handleUpdateQuantity(int $caseId, int $quantity): void
     {
         if ($quantity < 1) {
-            $this->flashMessage('Množství musí být alespoň 1.', 'warning');
+            $this->flashMessage($this->getSession('order')->lang === 'en' ? 'Quantity must be at least 1.' : 'Množství musí být alespoň 1.', 'warning');
             $this->redirect('this');
         }
 
@@ -497,8 +497,9 @@ public function renderInfo(): void
         $session = $this->getSession();
         $this->orderFacade->removeCaseFromCart($session, $caseId);
 
-        $this->flashMessage("Kryt byl odebrán z košíku.", 'info');
-        $this->redirect('this');
+        $lang = $this->getSession('order')->lang ?? 'cs';
+        $this->flashMessage($lang === 'en' ? 'Case removed from cart.' : 'Kryt byl odebrán z košíku.', 'info');
+        $this->redirect('this', ['lang' => $lang]);
     }
 
     public function handleAddCase($caseData): void
@@ -512,7 +513,8 @@ public function renderInfo(): void
             $session->quantities = $quantities;
         }
 
-        $this->flashMessage('Kryt byl přidán do košíku.', 'success');
-        $this->redirect('this');
+        $lang = $this->getSession('order')->lang ?? 'cs';
+        $this->flashMessage($lang === 'en' ? 'Case added to cart.' : 'Kryt byl přidán do košíku.', 'success');
+        $this->redirect('this', ['lang' => $lang]);
     }
 }

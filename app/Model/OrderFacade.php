@@ -46,7 +46,7 @@ final class OrderFacade
     /**
      * Fetch orders with details, optionally filtered by status
      */
-   public function getOrdersWithDetails(?string $status = null): array
+    public function getOrdersWithDetails(?string $status = null): array
     {
         $query = $this->database->table('orders')
             ->order('created_at DESC');
@@ -155,7 +155,7 @@ final class OrderFacade
     /**
      * Process cases to handle JSON features and include quantities
      */
-        private function processCases(iterable $orderCases, iterable $cases): array
+    private function processCases(iterable $orderCases, iterable $cases): array
     {
         $processedCases = [];
         $caseMap = [];
@@ -182,7 +182,8 @@ final class OrderFacade
                     'manufacturer' => $case->manufacturer,
                     'model' => $case->model,
                     'color' => $case->color,
-                    'total_price' => $case->total_price,
+                    'total_price' => (float)$case->total_price,
+                    'total_price_eur' => (float)$case->total_price_eur,
                     'features' => $cleanFeatures,
                     'state' => $case->state,
                     'user_id' => $case->user_id,
@@ -418,7 +419,7 @@ final class OrderFacade
             ->order('created_at DESC');
     }
 
-       public function createCase(array $data, ?int $userId = null): ActiveRow
+    public function createCase(array $data, ?int $userId = null): ActiveRow
     {
         $coreData = [
             'user_id' => $userId,
@@ -482,7 +483,7 @@ final class OrderFacade
             ->delete();
     }
 
-   public function getOrderItems(int $orderId): array
+    public function getOrderItems(int $orderId): array
     {
         $orderCases = $this->database->table('order_case')
             ->where('order_id', $orderId)
@@ -508,7 +509,8 @@ final class OrderFacade
                     'manufacturer' => $case->manufacturer,
                     'model' => $case->model,
                     'color' => $case->color,
-                    'total_price' => $case->total_price,
+                    'total_price' => (float)$case->total_price,
+                    'total_price_eur' => (float)$case->total_price_eur,
                     'features' => $cleanFeatures,
                     'quantity' => $orderCase->quantity,
                     'user_upload_filename' => $upload ? $upload->original_filename : null,
@@ -519,7 +521,7 @@ final class OrderFacade
         return $result;
     }
 
-        public function getVendorNameById(int $vendorId): string
+    public function getVendorNameById(int $vendorId): string
     {
         $vendor = $this->database->table('vendors')->get($vendorId);
         return $vendor ? $vendor->name : 'Unknown';
@@ -666,111 +668,111 @@ final class OrderFacade
     }
 
     public function getAllPaymentMethods(): \Nette\Database\Table\Selection
-{
-    return $this->database->table('vendor_payment_methods')
-        ->order('vendor_id, name');
-}
-
-public function getPaymentMethodById(int $paymentMethodId): ?ActiveRow
-{
-    return $this->database->table('vendor_payment_methods')->get($paymentMethodId);
-}
-
-public function addPaymentMethod(int $vendorId, string $code, string $name, float $price, array $shippingOptionIds = []): void
-{
-    $this->database->beginTransaction();
-    try {
-        $paymentMethod = $this->database->table('vendor_payment_methods')->insert([
-            'vendor_id' => $vendorId,
-            'code' => $code,
-            'name' => $name,
-            'price' => $price,
-        ]);
-
-        foreach ($shippingOptionIds as $shippingOptionId) {
-            $this->database->table('shipping_payment_methods')->insert([
-                'shipping_option_id' => $shippingOptionId,
-                'payment_method_id' => $paymentMethod->id,
-            ]);
-        }
-        $this->database->commit();
-    } catch (\Exception $e) {
-        $this->database->rollBack();
-        throw $e;
+    {
+        return $this->database->table('vendor_payment_methods')
+            ->order('vendor_id, name');
     }
-}
 
-public function updatePaymentMethod(int $paymentMethodId, int $vendorId, string $code, string $name, float $price, array $shippingOptionIds = []): void
-{
-    $this->database->beginTransaction();
-    try {
-        $this->database->table('vendor_payment_methods')
-            ->where('id', $paymentMethodId)
-            ->update([
+    public function getPaymentMethodById(int $paymentMethodId): ?ActiveRow
+    {
+        return $this->database->table('vendor_payment_methods')->get($paymentMethodId);
+    }
+
+    public function addPaymentMethod(int $vendorId, string $code, string $name, float $price, array $shippingOptionIds = []): void
+    {
+        $this->database->beginTransaction();
+        try {
+            $paymentMethod = $this->database->table('vendor_payment_methods')->insert([
                 'vendor_id' => $vendorId,
                 'code' => $code,
                 'name' => $name,
                 'price' => $price,
             ]);
 
-        // Update shipping option links
-        $this->database->table('shipping_payment_methods')
-            ->where('payment_method_id', $paymentMethodId)
-            ->delete();
-
-        foreach ($shippingOptionIds as $shippingOptionId) {
-            $this->database->table('shipping_payment_methods')->insert([
-                'shipping_option_id' => $shippingOptionId,
-                'payment_method_id' => $paymentMethodId,
-            ]);
+            foreach ($shippingOptionIds as $shippingOptionId) {
+                $this->database->table('shipping_payment_methods')->insert([
+                    'shipping_option_id' => $shippingOptionId,
+                    'payment_method_id' => $paymentMethod->id,
+                ]);
+            }
+            $this->database->commit();
+        } catch (\Exception $e) {
+            $this->database->rollBack();
+            throw $e;
         }
-        $this->database->commit();
-    } catch (\Exception $e) {
-        $this->database->rollBack();
-        throw $e;
-    }
-}
-
-public function deletePaymentMethod(int $paymentMethodId): void
-{
-    $this->database->table('vendor_payment_methods')
-        ->where('id', $paymentMethodId)
-        ->delete();
-}
-
-public function getShippingOptionsForPaymentMethod(int $paymentMethodId): array
-{
-    return $this->database->table('shipping_payment_methods')
-        ->where('payment_method_id', $paymentMethodId)
-        ->fetchPairs('shipping_option_id', 'shipping_option_id');
-}
-
-public function getUserUploadById(int $uploadId): ?ActiveRow
-{
-    return $this->database->table('user_uploads')->get($uploadId);
-}
-
-public function getUserUploadFilePath(int $caseId): ?array
-{
-    $case = $this->database->table('cases')
-        ->where('id', $caseId)
-        ->fetch();
-
-    if (!$case || !$case->user_upload_id) {
-        return null;
     }
 
-    $upload = $this->database->table('user_uploads')
-        ->where('id', $case->user_upload_id)
-        ->fetch();
+    public function updatePaymentMethod(int $paymentMethodId, int $vendorId, string $code, string $name, float $price, array $shippingOptionIds = []): void
+    {
+        $this->database->beginTransaction();
+        try {
+            $this->database->table('vendor_payment_methods')
+                ->where('id', $paymentMethodId)
+                ->update([
+                    'vendor_id' => $vendorId,
+                    'code' => $code,
+                    'name' => $name,
+                    'price' => $price,
+                ]);
 
-    if (!$upload) {
-        return null;
+            // Update shipping option links
+            $this->database->table('shipping_payment_methods')
+                ->where('payment_method_id', $paymentMethodId)
+                ->delete();
+
+            foreach ($shippingOptionIds as $shippingOptionId) {
+                $this->database->table('shipping_payment_methods')->insert([
+                    'shipping_option_id' => $shippingOptionId,
+                    'payment_method_id' => $paymentMethodId,
+                ]);
+            }
+            $this->database->commit();
+        } catch (\Exception $e) {
+            $this->database->rollBack();
+            throw $e;
+        }
     }
 
-    return [
-        'file_path' => $upload->file_path,
-        'original_filename' => $upload->original_filename,
-    ];
-}
+    public function deletePaymentMethod(int $paymentMethodId): void
+    {
+        $this->database->table('vendor_payment_methods')
+            ->where('id', $paymentMethodId)
+            ->delete();
+    }
+
+    public function getShippingOptionsForPaymentMethod(int $paymentMethodId): array
+    {
+        return $this->database->table('shipping_payment_methods')
+            ->where('payment_method_id', $paymentMethodId)
+            ->fetchPairs('shipping_option_id', 'shipping_option_id');
+    }
+
+    public function getUserUploadById(int $uploadId): ?ActiveRow
+    {
+        return $this->database->table('user_uploads')->get($uploadId);
+    }
+
+    public function getUserUploadFilePath(int $caseId): ?array
+    {
+        $case = $this->database->table('cases')
+            ->where('id', $caseId)
+            ->fetch();
+
+        if (!$case || !$case->user_upload_id) {
+            return null;
+        }
+
+        $upload = $this->database->table('user_uploads')
+            ->where('id', $case->user_upload_id)
+            ->fetch();
+
+        if (!$upload) {
+            return null;
+        }
+
+        return [
+            'file_path' => $upload->file_path,
+            'original_filename' => $upload->original_filename,
+        ];
+    }
 }
