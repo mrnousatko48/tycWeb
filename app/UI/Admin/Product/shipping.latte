@@ -49,7 +49,7 @@
                             <td>
                                 {var $langs = $vendor->supported_lang ? explode(',', $vendor->supported_lang) : []}
                                 {foreach $langs as $lang}
-                                    {if $lang == 'cs'}Čeština{elseif $lang == 'en'}English{/if}{sep}, {/sep}
+                                    {if $lang == 'cs'}Čeština{elseif $lang == 'en'}Angličtina{/if}{sep}, {/sep}
                                 {/foreach}
                             </td>
                             <td>
@@ -63,7 +63,120 @@
         </div>
     </div>
 
-    <!-- Rest of the template remains unchanged -->
+    <div class="card mb-5">
+        <div class="card-header">Možnosti dopravy</div>
+        <div class="card-body" n:snippet="shippingOptionsTable">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Dopravce</th>
+                        <th>Název</th>
+                        <th>Cena (CZK)</th>
+                        <th>Cena (EUR)</th>
+                        <th>Akce</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {foreach $shippingOptions as $option}
+                        <tr>
+                            <td>{isset($vendors[$option->vendor_id]) ? $vendors[$option->vendor_id] : 'Unknown Vendor'}</td>
+                            <td>{$option->name}</td>
+                            <td>{$option->cost|number:2,',',' '} CZK</td>
+                            <td>{$option->cost_eur|number:2,',',' '} EUR</td>
+                            <td>
+                                <a href="{link editShippingOption! $option->id}" class="btn btn-sm btn-primary ajax" data-bs-toggle="modal" data-bs-target="#editShippingOptionModal">Upravit</a>
+                                <a href="{link deleteShippingOption! $option->id}" class="btn btn-sm btn-danger ajax" onclick="return confirm('Opravdu smazat možnost dopravy {$option->name}?')">Smazat</a>
+                            </td>
+                        </tr>
+                    {/foreach}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="card-header">Platební metody</div>
+        <div class="card-body" n:snippet="paymentMethodsTable">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Dopravce</th>
+                        <th>Kód</th>
+                        <th>Název</th>
+                        <th>Cena (CZK)</th>
+                        <th>Cena (EUR)</th>
+                        <th>Možnosti dopravy</th>
+                        <th>Akce</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {foreach $paymentMethods as $method}
+                        <tr>
+                            <td>{isset($vendors[$method->vendor_id]) ? $vendors[$method->vendor_id] : 'Unknown Vendor'}</td>
+                            <td>{$method->code}</td>
+                            <td>{$method->name}</td>
+                            <td>{$method->price|number:2,',',' '} CZK</td>
+                            <td>{$method->price_eur|number:2,',',' '} EUR</td>
+                            <td>
+                                {var $linkedOptions = $method->related('shipping_payment_methods')->fetchPairs('shipping_option_id', 'shipping_option_id')}
+                                {foreach $shippingOptions as $option}
+                                    {if isset($linkedOptions[$option->id])}
+                                        {$option->name}{sep}, {/sep}
+                                    {/if}
+                                {/foreach}
+                            </td>
+                            <td>
+                                <a href="{link editPaymentMethod! $method->id}" class="btn btn-sm btn-primary ajax" data-bs-toggle="modal" data-bs-target="#editPaymentMethodModal">Upravit</a>
+                                <a href="{link deletePaymentMethod! $method->id}" class="btn btn-sm btn-danger ajax" onclick="return confirm('Opravdu smazat platební metodu {$method->name}?')">Smazat</a>
+                            </td>
+                        </tr>
+                    {/foreach}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="modal fade" id="editVendorModal" tabindex="-1" aria-labelledby="editVendorModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editVendorModalLabel">Upravit dopravce</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zavřít"></button>
+                </div>
+                <div class="modal-body" n:snippet="vendorEditForm">
+                    {control vendorEditForm}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="editShippingOptionModal" tabindex="-1" aria-labelledby="editShippingOptionModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editShippingOptionModalLabel">Upravit možnost dopravy</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zavřít"></button>
+                </div>
+                <div class="modal-body" n:snippet="shippingOptionEditForm">
+                    {control shippingOptionEditForm}
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="editPaymentMethodModal" tabindex="-1" aria-labelledby="editPaymentMethodModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editPaymentMethodModalLabel">Upravit platební metodu</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zavřít"></button>
+                </div>
+                <div class="modal-body" n:snippet="paymentMethodEditForm">
+                    {control paymentMethodEditForm}
+                </div>
+            </div>
+        </div>
+    </div>
 </div>
 
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -72,7 +185,7 @@
 
 <script n:syntax=off>
 document.addEventListener('DOMContentLoaded', () => {
-    $('#frm-shippingOptionForm-vendor_id, #frm-paymentMethodForm-vendor_id, #frm-paymentMethodForm-shipping_option_ids, #frm-vendorForm-supported_lang, #frm-vendorEditForm-supported_lang').select2({
+    $('#frm-shippingOptionForm-vendor_id, #frm-shippingOptionEditForm-vendor_id, #frm-paymentMethodForm-vendor_id, #frm-paymentMethodForm-shipping_option_ids, #frm-paymentMethodEditForm-vendor_id, #frm-paymentMethodEditForm-shipping_option_ids, #frm-vendorForm-supported_lang, #frm-vendorEditForm-supported_lang').select2({
         width: '100%'
     });
 
@@ -106,7 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 console.error('Chyba:', error);
             } finally {
                 el.disabled = false;
-                el.innerText = 'Uložit';
+                el.innerText = el.dataset.originalText || 'Uložit';
             }
         } else if (el.classList.contains('ajax')) {
             if (el.classList.contains('btn-danger') && !confirm('Opravdu smazat?')) {

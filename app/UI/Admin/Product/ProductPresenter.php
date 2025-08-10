@@ -67,7 +67,11 @@ final class ProductPresenter extends Nette\Application\UI\Presenter
 
     public function renderShipping(): void
     {
-        $this->template->vendors = $this->orderFacade->getVendors();
+        $vendors = $this->orderFacade->getVendors('');
+        $this->template->vendors = array_combine(
+            array_column($vendors, 'id'),
+            $vendors
+        );
         $this->template->shippingOptions = $this->orderFacade->getAllShippingOptions();
         $this->template->paymentMethods = $this->orderFacade->getAllPaymentMethods();
         $this->template->isAjax = $this->isAjax();
@@ -777,7 +781,7 @@ public function handleEditFeatureOption(int $optionId): void
             ->setRequired('Prosím, zadejte název dopravce.');
         $form->addMultiSelect('supported_lang', 'Podporované jazyky:', [
             'cs' => 'Čeština',
-            'en' => 'English',
+            'en' => 'Angličtina',
         ])
             ->setRequired('Prosím, vyberte alespoň jeden jazyk.')
             ->setHtmlAttribute('multiple');
@@ -812,7 +816,7 @@ public function handleEditFeatureOption(int $optionId): void
             ->setRequired('Prosím, zadejte název dopravce.');
         $form->addMultiSelect('supported_lang', 'Podporované jazyky:', [
             'cs' => 'Čeština',
-            'en' => 'English',
+            'en' => 'Angličtina',
         ])
             ->setRequired('Prosím, vyberte alespoň jeden jazyk.')
             ->setHtmlAttribute('multiple');
@@ -891,6 +895,10 @@ public function handleEditVendor(int $vendorId): void
             ->setRequired('Prosím, zadejte cenu.')
             ->addRule($form::FLOAT, 'Cena musí být platné číslo.')
             ->setDefaultValue('0.00');
+        $form->addText('cost_eur', 'Cena (EUR):')
+            ->setRequired('Prosím, zadejte cenu v EUR.')
+            ->addRule($form::FLOAT, 'Cena musí být platné číslo.')
+            ->setDefaultValue('0.00');
         $form->addSubmit('save', 'Způsob dopravy');
         $form->onSuccess[] = [$this, 'shippingOptionFormSucceeded'];
         return $form;
@@ -899,7 +907,12 @@ public function handleEditVendor(int $vendorId): void
     public function shippingOptionFormSucceeded(Form $form, array $values): void
     {
         try {
-            $this->orderFacade->addShippingOption($values['vendor_id'], $values['name'], (float)$values['cost']);
+            $this->orderFacade->addShippingOption(
+                $values['vendor_id'],
+                $values['name'],
+                (float)$values['cost'],
+                (float)$values['cost_eur']
+            );
             $this->flashMessage('Možnost dopravy byla úspěšně přidána!', 'success');
         } catch (\Exception $e) {
             $this->flashMessage($e->getMessage(), 'error');
@@ -929,28 +942,38 @@ public function handleEditVendor(int $vendorId): void
             ->setRequired('Prosím, zadejte cenu.')
             ->addRule($form::FLOAT, 'Cena musí být platné číslo.')
             ->setDefaultValue('0.00');
+        $form->addText('cost_eur', 'Cena (EUR):')
+            ->setRequired('Prosím, zadejte cenu v EUR.')
+            ->addRule($form::FLOAT, 'Cena musí být platné číslo.')
+            ->setDefaultValue('0.00');
         $form->addSubmit('save', 'Upravit možnost dopravy');
         $form->onSuccess[] = [$this, 'shippingOptionEditFormSucceeded'];
         return $form;
     }
 
-    public function shippingOptionEditFormSucceeded(Form $form, array $values): void
-    {
-        try {
-            $this->orderFacade->updateShippingOption((int)$values['id'], $values['vendor_id'], $values['name'], (float)$values['cost']);
-            $this->flashMessage('Možnost dopravy byla úspěšně upravena!', 'success');
-        } catch (\Exception $e) {
-            $this->flashMessage($e->getMessage(), 'error');
-        }
-
-        if ($this->isAjax()) {
-            $this->template->shippingOptions = $this->orderFacade->getAllShippingOptions();
-            $this->redrawControl('shippingOptionsTable');
-            $this->redrawControl('flashes');
-        } else {
-            $this->redirect('shipping');
-        }
+public function shippingOptionEditFormSucceeded(Form $form, array $values): void
+{
+    try {
+        $this->orderFacade->updateShippingOption(
+            (int)$values['id'],
+            $values['vendor_id'],
+            $values['name'],
+            (float)$values['cost'],
+            (float)$values['cost_eur']
+        );
+        $this->flashMessage('Možnost dopravy byla úspěšně upravena!', 'success');
+    } catch (\Exception $e) {
+        $this->flashMessage($e->getMessage(), 'error');
     }
+
+    if ($this->isAjax()) {
+        $this->template->shippingOptions = $this->orderFacade->getAllShippingOptions();
+        $this->redrawControl('shippingOptionsTable');
+        $this->redrawControl('flashes');
+    } else {
+        $this->redirect('shipping');
+    }
+}
 
     public function handleEditShippingOption(int $shippingOptionId): void
     {
@@ -965,6 +988,7 @@ public function handleEditVendor(int $vendorId): void
             'vendor_id' => $option->vendor_id,
             'name' => $option->name,
             'cost' => $option->cost,
+            'cost_eur' => $option->cost_eur,
         ]);
 
         if ($this->isAjax()) {
@@ -990,32 +1014,36 @@ public function handleEditVendor(int $vendorId): void
         }
     }
 
-public function createComponentPaymentMethodForm(): Form
-{
-    $form = new Form;
-    $lang = $this->template->lang ?? 'cs';
-    $form->addSelect('vendor_id', 'Dopravce:', $this->orderFacade->getVendors($lang))
-        ->setRequired('Prosím, vyberte dopravce.');
-    $form->addText('code', 'Kód platby:')
-        ->setRequired('Prosím, zadejte kód platby, stejné jako název, bez diakritiky.')
-        ->addRule($form::PATTERN, 'Kód může obsahovat pouze písmena, čísla a podtržítko.', '[a-zA-Z0-9_]+');
-    $form->addText('name', 'Název platební metody:')
-        ->setRequired('Prosím, zadejte název platební metody.');
-    $form->addText('price', 'Cena (CZK):')
-        ->setRequired('Prosím, zadejte cenu.')
-        ->addRule($form::FLOAT, 'Cena musí být platné číslo.')
-        ->setDefaultValue('0.00');
-    $shippingOptions = $this->orderFacade->getAllShippingOptions($lang)->fetchAll();
-    $shippingOptionsArray = [];
-    foreach ($shippingOptions as $option) {
-        $vendorName = $this->orderFacade->getVendorNameById($option->vendor_id, $lang);
-        $shippingOptionsArray[$option->id] = "$vendorName: $option->name";
+    public function createComponentPaymentMethodForm(): Form
+    {
+        $form = new Form;
+        $lang = $this->template->lang ?? 'cs';
+        $form->addSelect('vendor_id', 'Dopravce:', $this->orderFacade->getVendors($lang))
+            ->setRequired('Prosím, vyberte dopravce.');
+        $form->addText('code', 'Kód platby:')
+            ->setRequired('Prosím, zadejte kód platby, stejné jako název, bez diakritiky.')
+            ->addRule($form::PATTERN, 'Kód může obsahovat pouze písmena, čísla a podtržítko.', '[a-zA-Z0-9_]+');
+        $form->addText('name', 'Název platební metody:')
+            ->setRequired('Prosím, zadejte název platební metody.');
+        $form->addText('price', 'Cena (CZK):')
+            ->setRequired('Prosím, zadejte cenu.')
+            ->addRule($form::FLOAT, 'Cena musí být platné číslo.')
+            ->setDefaultValue('0.00');
+        $form->addText('price_eur', 'Cena (EUR):')
+            ->setRequired('Prosím, zadejte cenu v EUR.')
+            ->addRule($form::FLOAT, 'Cena musí být platné číslo.')
+            ->setDefaultValue('0.00');
+        $shippingOptions = $this->orderFacade->getAllShippingOptions($lang)->fetchAll();
+        $shippingOptionsArray = [];
+        foreach ($shippingOptions as $option) {
+            $vendorName = $this->orderFacade->getVendorNameById($option->vendor_id, $lang);
+            $shippingOptionsArray[$option->id] = "$vendorName: $option->name";
+        }
+        $form->addMultiSelect('shipping_option_ids', 'Platné u:', $shippingOptionsArray);
+        $form->addSubmit('save', 'Přidat platební metodu');
+        $form->onSuccess[] = [$this, 'paymentMethodFormSucceeded'];
+        return $form;
     }
-    $form->addMultiSelect('shipping_option_ids', 'Platné u:', $shippingOptionsArray);
-    $form->addSubmit('save', 'Přidat platební metodu');
-    $form->onSuccess[] = [$this, 'paymentMethodFormSucceeded'];
-    return $form;
-}
 
     public function paymentMethodFormSucceeded(Form $form, array $values): void
     {
@@ -1025,7 +1053,8 @@ public function createComponentPaymentMethodForm(): Form
                 $values['code'],
                 $values['name'],
                 (float)$values['price'],
-                $values['shipping_option_ids'] ?? []
+                $values['shipping_option_ids'] ?? [],
+                (float)$values['price_eur']
             );
             $this->flashMessage('Platební metoda byla úspěšně přidána!', 'success');
         } catch (\Exception $e) {
@@ -1042,32 +1071,36 @@ public function createComponentPaymentMethodForm(): Form
     }
 
     public function createComponentPaymentMethodEditForm(): Form
-{
-    $form = new Form;
-    $lang = $this->template->lang ?? 'cs';
-    $form->addHidden('id');
-    $form->addSelect('vendor_id', 'Dopravce:', $this->orderFacade->getVendors($lang))
-        ->setRequired('Prosím, vyberte dopravce.');
-    $form->addText('code', 'Kód platby:')
-        ->setRequired('Prosím, zadejte kód platby.')
-        ->addRule($form::PATTERN, 'Kód může obsahovat pouze písmena, čísla a podtržítko.', '[a-zA-Z0-9_]+');
-    $form->addText('name', 'Název platební metody:')
-        ->setRequired('Prosím, zadejte název platební metody.');
-    $form->addText('price', 'Cena (CZK):')
-        ->setRequired('Prosím, zadejte cenu.')
-        ->addRule($form::FLOAT, 'Cena musí být platné číslo.')
-        ->setDefaultValue('0.00');
-    $shippingOptions = $this->orderFacade->getAllShippingOptions($lang)->fetchAll();
-    $shippingOptionsArray = [];
-    foreach ($shippingOptions as $option) {
-        $vendorName = $this->orderFacade->getVendorNameById($option->vendor_id, $lang);
-        $shippingOptionsArray[$option->id] = "$vendorName: $option->name";
+    {
+        $form = new Form;
+        $lang = $this->template->lang ?? 'cs';
+        $form->addHidden('id');
+        $form->addSelect('vendor_id', 'Dopravce:', $this->orderFacade->getVendors($lang))
+            ->setRequired('Prosím, vyberte dopravce.');
+        $form->addText('code', 'Kód platby:')
+            ->setRequired('Prosím, zadejte kód platby.')
+            ->addRule($form::PATTERN, 'Kód může obsahovat pouze písmena, čísla a podtržítko.', '[a-zA-Z0-9_]+');
+        $form->addText('name', 'Název platební metody:')
+            ->setRequired('Prosím, zadejte název platební metody.');
+        $form->addText('price', 'Cena (CZK):')
+            ->setRequired('Prosím, zadejte cenu.')
+            ->addRule($form::FLOAT, 'Cena musí být platné číslo.')
+            ->setDefaultValue('0.00');
+        $form->addText('price_eur', 'Cena (EUR):')
+            ->setRequired('Prosím, zadejte cenu v EUR.')
+            ->addRule($form::FLOAT, 'Cena musí být platné číslo.')
+            ->setDefaultValue('0.00');
+        $shippingOptions = $this->orderFacade->getAllShippingOptions($lang)->fetchAll();
+        $shippingOptionsArray = [];
+        foreach ($shippingOptions as $option) {
+            $vendorName = $this->orderFacade->getVendorNameById($option->vendor_id, $lang);
+            $shippingOptionsArray[$option->id] = "$vendorName: $option->name";
+        }
+        $form->addMultiSelect('shipping_option_ids', 'Možnosti dopravy:', $shippingOptionsArray);
+        $form->addSubmit('save', 'Upravit platební metodu');
+        $form->onSuccess[] = [$this, 'paymentMethodEditFormSucceeded'];
+        return $form;
     }
-    $form->addMultiSelect('shipping_option_ids', 'Možnosti dopravy:', $shippingOptionsArray);
-    $form->addSubmit('save', 'Upravit platební metodu');
-    $form->onSuccess[] = [$this, 'paymentMethodEditFormSucceeded'];
-    return $form;
-}
 
     public function paymentMethodEditFormSucceeded(Form $form, array $values): void
     {
@@ -1078,7 +1111,8 @@ public function createComponentPaymentMethodForm(): Form
                 $values['code'],
                 $values['name'],
                 (float)$values['price'],
-                $values['shipping_option_ids'] ?? []
+                $values['shipping_option_ids'] ?? [],
+                (float)$values['price_eur']
             );
             $this->flashMessage('Platební metoda byla úspěšně upravena!', 'success');
         } catch (\Exception $e) {
@@ -1108,6 +1142,7 @@ public function createComponentPaymentMethodForm(): Form
             'code' => $method->code,
             'name' => $method->name,
             'price' => $method->price,
+            'price_eur' => $method->price_eur,
             'shipping_option_ids' => $this->orderFacade->getShippingOptionsForPaymentMethod($method->id),
         ]);
 

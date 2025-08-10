@@ -581,24 +581,24 @@ final class OrderFacade
             ->delete();
     }
 
-    public function addShippingOption(int $vendorId, string $name, float $cost): void
+    public function addShippingOption(int $vendorId, string $name, float $cost, float $costEur): void
     {
         $this->database->table('shipping_options')->insert([
             'vendor_id' => $vendorId,
             'name' => $name,
             'cost' => $cost,
+            'cost_eur' => $costEur,
         ]);
     }
 
-    public function updateShippingOption(int $optionId, int $vendorId, string $name, float $cost): void
+    public function updateShippingOption(int $id, int $vendorId, string $name, float $cost, float $costEur): void
     {
-        $this->database->table('shipping_options')
-            ->where('id', $optionId)
-            ->update([
-                'vendor_id' => $vendorId,
-                'name' => $name,
-                'cost' => $cost,
-            ]);
+        $this->database->table('shipping_options')->where('id', $id)->update([
+            'vendor_id' => $vendorId,
+            'name' => $name,
+            'cost' => $cost,
+            'cost_eur' => $costEur,
+        ]);
     }
 
     public function deleteShippingOption(int $optionId): void
@@ -689,29 +689,30 @@ final class OrderFacade
         return $this->database->table('vendor_payment_methods')->get($paymentMethodId);
     }
 
-    public function addPaymentMethod(int $vendorId, string $code, string $name, float $price, array $shippingOptionIds = []): void
-    {
-        $this->database->beginTransaction();
-        try {
-            $paymentMethod = $this->database->table('vendor_payment_methods')->insert([
-                'vendor_id' => $vendorId,
-                'code' => $code,
-                'name' => $name,
-                'price' => $price,
-            ]);
+public function addPaymentMethod(int $vendorId, string $code, string $name, float $price, array $shippingOptionIds, float $priceEur): void
+{
+    $this->database->beginTransaction();
+    try {
+        $paymentMethod = $this->database->table('vendor_payment_methods')->insert([
+            'vendor_id' => $vendorId,
+            'code' => $code,
+            'name' => $name,
+            'price' => $price,
+            'price_eur' => $priceEur,
+        ]);
 
-            foreach ($shippingOptionIds as $shippingOptionId) {
-                $this->database->table('shipping_payment_methods')->insert([
-                    'shipping_option_id' => $shippingOptionId,
-                    'payment_method_id' => $paymentMethod->id,
-                ]);
-            }
-            $this->database->commit();
-        } catch (\Exception $e) {
-            $this->database->rollBack();
-            throw $e;
+        foreach ($shippingOptionIds as $shippingOptionId) {
+            $this->database->table('shipping_payment_methods')->insert([
+                'shipping_option_id' => $shippingOptionId,
+                'payment_method_id' => $paymentMethod->id,
+            ]);
         }
+        $this->database->commit();
+    } catch (\Exception $e) {
+        $this->database->rollBack();
+        throw $e;
     }
+}
 
     public function updatePaymentMethod(int $paymentMethodId, int $vendorId, string $code, string $name, float $price, array $shippingOptionIds = []): void
     {
