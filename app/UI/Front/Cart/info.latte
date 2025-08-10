@@ -245,7 +245,6 @@
     margin-bottom: 1rem;
 }
 </style>
-
 <div class="progress-bar bg-[var(--color-background)] p-4 mb-8 rounded-lg shadow">
     <div class="flex justify-between items-center">
         <div class="step completed">
@@ -307,7 +306,6 @@
             <div class="form-field">
                 <input type="submit" n:name="submit">
             </div>
-
         </form>
     </div>
 
@@ -334,6 +332,16 @@
                             <p class="text-sm">{$quantities[$case->id] ?? 1}</p>
                         </div>
                     </div>
+                    <div>
+                        <h3 class="text-base font-semibold">{_'cart.price'}</h3>
+                        <p class="text-sm">
+                            {if $lang == 'en'}
+                                {($case->total_price_eur * ($quantities[$case->id] ?? 1))|number:2,',',' '} {$currency}
+                            {else}
+                                {($case->total_price * ($quantities[$case->id] ?? 1))|number:2,',',' '} {$currency}
+                            {/if}
+                        </p>
+                    </div>
                     {if !empty($case->features)}
                         <div class="features-list">
                             <h3 class="text-base font-semibold mt-2">{_'cart.features'}</h3>
@@ -350,16 +358,16 @@
                 <div class="cost-breakdown">
                     <div class="cost-item">
                         <span>{_'cart.items_subtotal'}:</span>
-                        <span>{number_format($itemsSubtotal, 2, ',', ' ')} Kč</span>
+                        <span>{$itemsSubtotal|number:2,',',' '} {$currency}</span>
                     </div>
                     <div class="cost-item">
                         <span>{_'cart.shipping_cost'} ({$shipping}):</span>
-                        <span>{number_format($shippingCost, 2, ',', ' ')} Kč</span>
+                        <span>{$shippingCost|number:2,',',' '} {$currency}</span>
                     </div>
                     {if $paymentCost > 0}
                         <div class="cost-item">
                             <span>{_'cart.payment_fee'}:</span>
-                            <span>{number_format($paymentCost, 2, ',', ' ')} Kč</span>
+                            <span>{$paymentCost|number:2,',',' '} {$currency}</span>
                         </div>
                     {/if}
                     {if $delivery_point !== 'Není zadáno'}
@@ -370,12 +378,11 @@
                     {/if}
                     <div class="cost-item total">
                         <span>{_'cart.total_cost'}:</span>
-                        <span class="text-[var(--color-primary)]">{number_format($totalCartValue, 2, ',', ' ')} Kč</span>
+                        <span class="text-[var(--color-primary)]">{$totalCartValue|number:2,',',' '} {$currency}</span>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
 {/block}

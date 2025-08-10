@@ -29,7 +29,7 @@ final class OrderFacade
     /**
      * Calculate additional cost based on shipping option and payment method IDs
      */
-    public function calculateAdditionalCost(int $shippingOptionId, int $paymentMethodId): float
+    public function calculateAdditionalCost(int $shippingOptionId, int $paymentMethodId, string $lang = 'cs'): float
     {
         $shippingOption = $this->database->table('shipping_options')->get($shippingOptionId);
         $paymentMethod = $this->database->table('vendor_payment_methods')->get($paymentMethodId);
@@ -38,8 +38,8 @@ final class OrderFacade
             throw new \InvalidArgumentException("Shipping option ID $shippingOptionId not found.");
         }
 
-        $shippingCost = (float)$shippingOption->cost;
-        $paymentCost = $paymentMethod ? (float)$paymentMethod->price : 0.0;
+        $shippingCost = $lang === 'en' ? (float)$shippingOption->cost_eur : (float)$shippingOption->cost;
+        $paymentCost = $paymentMethod ? ($lang === 'en' ? (float)$paymentMethod->price_eur : (float)$paymentMethod->price) : 0.0;
         return $shippingCost + $paymentCost;
     }
 
@@ -357,10 +357,14 @@ final class OrderFacade
         }
     }
 
-        public function getShippingInfo(int $shippingOptionId): ?array
+    public function getShippingInfo(int $shippingOptionId, string $lang = 'cs'): ?array
     {
         $shippingOption = $this->database->table('shipping_options')->get($shippingOptionId);
-        return $shippingOption ? ['cost' => (float)$shippingOption->cost, 'name' => $shippingOption->name] : null;
+        return $shippingOption ? [
+            'cost' => $lang === 'en' ? (float)$shippingOption->cost_eur : (float)$shippingOption->cost,
+            'name' => $shippingOption->name,
+            'currency' => $lang === 'en' ? '€' : 'Kč'
+        ] : null;
     }
 
     public function getOrdersByUserId(int $userId): array
@@ -414,7 +418,7 @@ final class OrderFacade
             ->order('created_at DESC');
     }
 
-        public function createCase(array $data, ?int $userId = null): ActiveRow
+       public function createCase(array $data, ?int $userId = null): ActiveRow
     {
         $coreData = [
             'user_id' => $userId,
@@ -422,6 +426,7 @@ final class OrderFacade
             'model' => $data['model'] ?? null,
             'color' => $data['color'] ?? null,
             'total_price' => $data['total_price'] ?? 0.0,
+            'total_price_eur' => $data['total_price_eur'] ?? 0.0,
             'state' => 'KOSIK',
             'created_at' => new \DateTime(),
             'user_upload_id' => $data['user_upload_id'] ?? null,
@@ -429,7 +434,7 @@ final class OrderFacade
 
         $features = [];
         foreach ($data as $key => $value) {
-            if (!in_array($key, ['manufacturer', 'model', 'color', 'total_price', 'user_upload_id'])) {
+            if (!in_array($key, ['manufacturer', 'model', 'color', 'total_price', 'total_price_eur', 'user_upload_id'])) {
                 $features[$key] = $value;
             }
         }
@@ -520,9 +525,11 @@ final class OrderFacade
         return $vendor ? $vendor->name : 'Unknown';
     }
 
-    public function getVendors(): array
+    public function getVendors(string $lang = 'cs'): array
     {
-        return $this->database->table('vendors')->fetchPairs('id', 'name');
+        return $this->database->table('vendors')
+            ->where('supported_lang LIKE ?', "%$lang%")
+            ->fetchPairs('id', 'name');
     }
 
     public function getAllShippingOptions()
@@ -588,7 +595,7 @@ final class OrderFacade
             ->delete();
     }
 
-    public function getShippingOptionsByVendor(int $vendorId): array
+    public function getShippingOptionsByVendor(int $vendorId, string $lang = 'cs'): array
     {
         $options = $this->database->table('shipping_options')
             ->where('vendor_id', $vendorId)
@@ -597,13 +604,15 @@ final class OrderFacade
 
         $result = [];
         foreach ($options as $option) {
-            $result[$option->id] = sprintf('%s (%s Kč)', $option->name, number_format($option->cost, 2, ',', ' '));
+            $cost = $lang === 'en' ? (float)$option->cost_eur : (float)$option->cost;
+            $currency = $lang === 'en' ? '€' : 'Kč';
+            $result[$option->id] = sprintf('%s (%s %s)', $option->name, number_format($cost, 2, ',', ' '), $currency);
         }
 
         return $result;
     }
 
-    public function getPaymentMethodsByVendor(int $vendorId): array
+    public function getPaymentMethodsByVendor(int $vendorId, string $lang = 'cs'): array
     {
         $methods = $this->database->table('vendor_payment_methods')
             ->where('vendor_id', $vendorId)
@@ -612,7 +621,9 @@ final class OrderFacade
 
         $result = [];
         foreach ($methods as $method) {
-            $result[$method->id] = sprintf('%s (%s CZK)', $method->name, number_format($method->price, 2));
+            $price = $lang === 'en' ? (float)$method->price_eur : (float)$method->price;
+            $currency = $lang === 'en' ? '€' : 'Kč';
+            $result[$method->id] = sprintf('%s (%s %s)', $method->name, number_format($price, 2, ',', ' '), $currency);
         }
 
         return $result;
@@ -633,10 +644,14 @@ final class OrderFacade
         return $this->database->table('vendor_payment_methods')->get($paymentMethodId) !== null;
     }
 
-    public function getPaymentInfo(int $paymentMethodId): ?array
+    public function getPaymentInfo(int $paymentMethodId, string $lang = 'cs'): ?array
     {
         $method = $this->database->table('vendor_payment_methods')->get($paymentMethodId);
-        return $method ? ['name' => $method->name, 'price' => (float)$method->price] : null;
+        return $method ? [
+            'name' => $method->name,
+            'price' => $lang === 'en' ? (float)$method->price_eur : (float)$method->price,
+            'currency' => $lang === 'en' ? '€' : 'Kč'
+        ] : null;
     }
 
     public function getVendorNameByShippingOptionId(int $shippingOptionId): string

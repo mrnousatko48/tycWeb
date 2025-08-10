@@ -1,4 +1,3 @@
-DROP TABLE IF EXISTS `banner`;
 CREATE TABLE `banner` (
   `id` int NOT NULL AUTO_INCREMENT,
   `content_type` enum('title','description','image','button_text','button_link') NOT NULL,
@@ -24,6 +23,7 @@ CREATE TABLE `cases` (
   `model` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `color` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
   `total_price` decimal(10,2) DEFAULT '0.00',
+  `total_price_eur` decimal(10,2) DEFAULT '0.00' COMMENT 'Total price of the case in EUR',
   `features` json DEFAULT NULL,
   `state` enum('KOSIK','OBJEDNANO','ZAPLACENO','ODESLANO','DORUCENO','VYZVEDNUTO') CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci DEFAULT NULL,
   `user_id` int unsigned DEFAULT NULL,
@@ -35,35 +35,63 @@ CREATE TABLE `cases` (
   CONSTRAINT `cases_ibfk_2` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL ON UPDATE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-INSERT INTO `cases` (`id`, `manufacturer`, `model`, `color`, `total_price`, `features`, `state`, `user_id`, `created_at`, `user_upload_id`) VALUES
-(98,	'Apple',	'iPhone 13',	'Bílá',	719.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\",\\\"vlastní_motiv\\\":\\\"Ano\\\"}\"}',	'KOSIK',	NULL,	'2025-07-25 12:10:41',	13),
-(99,	'Apple',	'iPhone 13',	'Bílá',	719.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\",\\\"vlastní_motiv\\\":\\\"Ano\\\"}\"}',	'KOSIK',	NULL,	'2025-07-25 12:13:54',	14),
-(100,	'Apple',	'iPhone 13',	'Bílá',	559.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\",\\\"vlastní_motiv\\\":\\\"Ne\\\"}\"}',	'KOSIK',	NULL,	'2025-07-25 12:16:58',	NULL),
-(101,	'Apple',	'iPhone 13',	'Modrá',	559.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\",\\\"vlastní_motiv\\\":\\\"Ne\\\"}\"}',	'KOSIK',	NULL,	'2025-07-25 12:19:15',	NULL),
-(102,	'Apple',	'iPhone 13',	'Bílá',	644.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ne\\\",\\\"vlastní_motiv\\\":\\\"Ano\\\"}\"}',	'KOSIK',	NULL,	'2025-07-25 12:27:57',	15),
-(103,	'Apple',	'iPhone 13',	'Bílá',	589.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\",\\\"vlastní_motiv\\\":\\\"Ne\\\"}\"}',	'KOSIK',	NULL,	'2025-07-25 12:29:44',	NULL),
-(104,	'Apple',	'iPhone 13',	'Bílá',	529.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ne\\\",\\\"vlastní_motiv\\\":\\\"Ne\\\"}\"}',	'KOSIK',	NULL,	'2025-07-25 12:44:19',	NULL),
-(105,	'Apple',	'iPhone 13',	'Modrá',	529.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ne\\\",\\\"vlastní_motiv\\\":\\\"Ne\\\"}\"}',	'KOSIK',	NULL,	'2025-07-25 13:32:29',	NULL),
-(106,	'Apple',	'iPhone 13',	'Černá',	529.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ne\\\",\\\"vlastní_motiv\\\":\\\"Ne\\\"}\"}',	'KOSIK',	NULL,	'2025-07-25 13:35:23',	NULL),
-(107,	'Apple',	'iPhone 13',	'Černá',	529.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ne\\\",\\\"vlastní_motiv\\\":\\\"Ne\\\"}\"}',	'KOSIK',	NULL,	'2025-07-25 13:38:22',	NULL),
-(108,	'Apple',	'iPhone 13',	'Černá',	529.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ne\\\",\\\"vlastní_motiv\\\":\\\"Ne\\\"}\"}',	'KOSIK',	NULL,	'2025-07-25 13:39:35',	NULL),
-(109,	'Samsung',	'Galaxy S22',	'Modrá',	500.00,	'{\"features\": \"{\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"vlastní_motiv\\\":\\\"Ne\\\"}\"}',	'KOSIK',	NULL,	'2025-07-25 13:43:28',	NULL),
-(110,	'Apple',	'iPhone 13',	'Černá',	574.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ne\\\",\\\"vlastní_motiv\\\":\\\"Ne\\\"}\"}',	'KOSIK',	NULL,	'2025-07-25 13:44:36',	NULL),
-(111,	'Apple',	'iPhone 13',	'Modrá',	529.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ne\\\",\\\"vlastní_motiv\\\":\\\"Ne\\\"}\"}',	'KOSIK',	NULL,	'2025-07-25 13:48:09',	NULL),
-(113,	'Apple',	'iPhone 13',	'Bílá',	614.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ne\\\",\\\"vlastní_motiv\\\":\\\"Ano\\\"}\"}',	'OBJEDNANO',	9,	'2025-07-25 14:30:22',	17),
-(114,	'Apple',	'iPhone 13',	'Červená',	719.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\",\\\"vlastní_motiv\\\":\\\"Ano\\\"}\"}',	'OBJEDNANO',	9,	'2025-07-25 14:30:37',	18),
-(115,	'Apple',	'iPhone 13',	'Bílá',	614.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ne\\\",\\\"vlastní_motiv\\\":\\\"Ano\\\"}\"}',	'KOSIK',	NULL,	'2025-07-25 20:36:00',	NULL),
-(116,	'Apple',	'iPhone 13',	'Bílá',	614.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ne\\\",\\\"vlastní_motiv\\\":\\\"Ano\\\"}\"}',	'KOSIK',	NULL,	'2025-07-25 21:00:46',	23),
-(117,	'Apple',	'iPhone 13',	'Černá',	604.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\",\\\"vlastní_motiv\\\":\\\"Ne\\\"}\"}',	'KOSIK',	9,	'2025-08-03 21:35:39',	NULL),
-(118,	'Samsung',	'Galaxy S22',	'Black',	500.00,	'{\"features\": \"{\\\"front_camera_cover\\\":\\\"No\\\"}\"}',	'KOSIK',	NULL,	'2025-08-05 13:24:40',	NULL),
-(119,	'Samsung',	'Galaxy S22',	'Bílá',	500.00,	'{\"features\": \"{\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"vlastní_motiv\\\":\\\"Ne\\\"}\"}',	'KOSIK',	NULL,	'2025-08-05 14:21:36',	NULL),
-(120,	'Samsung',	'Galaxy S22',	'Black',	500.00,	'{\"features\": \"{\\\"front_camera_cover\\\":\\\"No\\\",\\\"custom_design\\\":\\\"No\\\"}\"}',	'KOSIK',	NULL,	'2025-08-05 15:58:45',	NULL),
-(121,	'Samsung',	'Galaxy S22',	'Black',	500.00,	'{\"features\": \"{\\\"front_camera_cover\\\":\\\"No\\\",\\\"custom_design\\\":\\\"No\\\"}\"}',	'KOSIK',	NULL,	'2025-08-05 15:58:46',	NULL),
-(122,	'Samsung',	'Galaxy S22',	'Black',	500.00,	'{\"features\": \"{\\\"front_camera_cover\\\":\\\"No\\\",\\\"custom_design\\\":\\\"No\\\"}\"}',	'KOSIK',	NULL,	'2025-08-05 15:58:46',	NULL),
-(123,	'Samsung',	'Galaxy S22',	'Black',	500.00,	'{\"features\": \"{\\\"front_camera_cover\\\":\\\"No\\\",\\\"custom_design\\\":\\\"No\\\"}\"}',	'KOSIK',	NULL,	'2025-08-05 15:58:46',	NULL),
-(124,	'Samsung',	'Galaxy S22',	'Black',	500.00,	'{\"features\": \"{\\\"front_camera_cover\\\":\\\"No\\\",\\\"custom_design\\\":\\\"No\\\"}\"}',	'KOSIK',	NULL,	'2025-08-05 15:58:46',	NULL),
-(125,	'Apple',	'iPhone 13',	'White',	559.99,	'{\"features\": \"{\\\"card_holder\\\":\\\"None\\\",\\\"front_camera_cover\\\":\\\"Yes\\\",\\\"charging_port_cover\\\":\\\"No\\\",\\\"custom_design\\\":\\\"No\\\"}\"}',	'KOSIK',	NULL,	'2025-08-05 17:07:11',	NULL),
-(126,	'Apple',	'iPhone 13',	'Černá',	634.99,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\",\\\"vlastní_motiv\\\":\\\"Ne\\\"}\"}',	'KOSIK',	NULL,	'2025-08-05 21:37:38',	NULL);
+INSERT INTO `cases` (`id`, `manufacturer`, `model`, `color`, `total_price`, `total_price_eur`, `features`, `state`, `user_id`, `created_at`, `user_upload_id`) VALUES
+(98,	'Apple',	'iPhone 13',	'Bílá',	719.99,	0.00,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\",\\\"vlastní_motiv\\\":\\\"Ano\\\"}\"}',	'KOSIK',	NULL,	'2025-07-25 12:10:41',	13),
+(99,	'Apple',	'iPhone 13',	'Bílá',	719.99,	0.00,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\",\\\"vlastní_motiv\\\":\\\"Ano\\\"}\"}',	'KOSIK',	NULL,	'2025-07-25 12:13:54',	14),
+(100,	'Apple',	'iPhone 13',	'Bílá',	559.99,	0.00,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\",\\\"vlastní_motiv\\\":\\\"Ne\\\"}\"}',	'KOSIK',	NULL,	'2025-07-25 12:16:58',	NULL),
+(101,	'Apple',	'iPhone 13',	'Modrá',	559.99,	0.00,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\",\\\"vlastní_motiv\\\":\\\"Ne\\\"}\"}',	'KOSIK',	NULL,	'2025-07-25 12:19:15',	NULL),
+(102,	'Apple',	'iPhone 13',	'Bílá',	644.99,	0.00,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ne\\\",\\\"vlastní_motiv\\\":\\\"Ano\\\"}\"}',	'KOSIK',	NULL,	'2025-07-25 12:27:57',	15),
+(103,	'Apple',	'iPhone 13',	'Bílá',	589.99,	0.00,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\",\\\"vlastní_motiv\\\":\\\"Ne\\\"}\"}',	'KOSIK',	NULL,	'2025-07-25 12:29:44',	NULL),
+(104,	'Apple',	'iPhone 13',	'Bílá',	529.99,	0.00,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ne\\\",\\\"vlastní_motiv\\\":\\\"Ne\\\"}\"}',	'KOSIK',	NULL,	'2025-07-25 12:44:19',	NULL),
+(105,	'Apple',	'iPhone 13',	'Modrá',	529.99,	0.00,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ne\\\",\\\"vlastní_motiv\\\":\\\"Ne\\\"}\"}',	'KOSIK',	NULL,	'2025-07-25 13:32:29',	NULL),
+(106,	'Apple',	'iPhone 13',	'Černá',	529.99,	0.00,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ne\\\",\\\"vlastní_motiv\\\":\\\"Ne\\\"}\"}',	'KOSIK',	NULL,	'2025-07-25 13:35:23',	NULL),
+(107,	'Apple',	'iPhone 13',	'Černá',	529.99,	0.00,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ne\\\",\\\"vlastní_motiv\\\":\\\"Ne\\\"}\"}',	'KOSIK',	NULL,	'2025-07-25 13:38:22',	NULL),
+(108,	'Apple',	'iPhone 13',	'Černá',	529.99,	0.00,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ne\\\",\\\"vlastní_motiv\\\":\\\"Ne\\\"}\"}',	'KOSIK',	NULL,	'2025-07-25 13:39:35',	NULL),
+(109,	'Samsung',	'Galaxy S22',	'Modrá',	500.00,	0.00,	'{\"features\": \"{\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"vlastní_motiv\\\":\\\"Ne\\\"}\"}',	'KOSIK',	NULL,	'2025-07-25 13:43:28',	NULL),
+(110,	'Apple',	'iPhone 13',	'Černá',	574.99,	0.00,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ne\\\",\\\"vlastní_motiv\\\":\\\"Ne\\\"}\"}',	'KOSIK',	NULL,	'2025-07-25 13:44:36',	NULL),
+(111,	'Apple',	'iPhone 13',	'Modrá',	529.99,	0.00,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ne\\\",\\\"vlastní_motiv\\\":\\\"Ne\\\"}\"}',	'KOSIK',	NULL,	'2025-07-25 13:48:09',	NULL),
+(113,	'Apple',	'iPhone 13',	'Bílá',	614.99,	0.00,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ne\\\",\\\"vlastní_motiv\\\":\\\"Ano\\\"}\"}',	'OBJEDNANO',	9,	'2025-07-25 14:30:22',	17),
+(114,	'Apple',	'iPhone 13',	'Červená',	719.99,	0.00,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\",\\\"vlastní_motiv\\\":\\\"Ano\\\"}\"}',	'OBJEDNANO',	9,	'2025-07-25 14:30:37',	18),
+(115,	'Apple',	'iPhone 13',	'Bílá',	614.99,	0.00,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ne\\\",\\\"vlastní_motiv\\\":\\\"Ano\\\"}\"}',	'KOSIK',	NULL,	'2025-07-25 20:36:00',	NULL),
+(116,	'Apple',	'iPhone 13',	'Bílá',	614.99,	0.00,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ne\\\",\\\"vlastní_motiv\\\":\\\"Ano\\\"}\"}',	'KOSIK',	NULL,	'2025-07-25 21:00:46',	23),
+(117,	'Apple',	'iPhone 13',	'Černá',	604.99,	0.00,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\",\\\"vlastní_motiv\\\":\\\"Ne\\\"}\"}',	'KOSIK',	9,	'2025-08-03 21:35:39',	NULL),
+(118,	'Samsung',	'Galaxy S22',	'Black',	500.00,	0.00,	'{\"features\": \"{\\\"front_camera_cover\\\":\\\"No\\\"}\"}',	'KOSIK',	NULL,	'2025-08-05 13:24:40',	NULL),
+(119,	'Samsung',	'Galaxy S22',	'Bílá',	500.00,	0.00,	'{\"features\": \"{\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"vlastní_motiv\\\":\\\"Ne\\\"}\"}',	'KOSIK',	NULL,	'2025-08-05 14:21:36',	NULL),
+(120,	'Samsung',	'Galaxy S22',	'Black',	500.00,	0.00,	'{\"features\": \"{\\\"front_camera_cover\\\":\\\"No\\\",\\\"custom_design\\\":\\\"No\\\"}\"}',	'KOSIK',	NULL,	'2025-08-05 15:58:45',	NULL),
+(121,	'Samsung',	'Galaxy S22',	'Black',	500.00,	0.00,	'{\"features\": \"{\\\"front_camera_cover\\\":\\\"No\\\",\\\"custom_design\\\":\\\"No\\\"}\"}',	'KOSIK',	NULL,	'2025-08-05 15:58:46',	NULL),
+(122,	'Samsung',	'Galaxy S22',	'Black',	500.00,	0.00,	'{\"features\": \"{\\\"front_camera_cover\\\":\\\"No\\\",\\\"custom_design\\\":\\\"No\\\"}\"}',	'KOSIK',	NULL,	'2025-08-05 15:58:46',	NULL),
+(123,	'Samsung',	'Galaxy S22',	'Black',	500.00,	0.00,	'{\"features\": \"{\\\"front_camera_cover\\\":\\\"No\\\",\\\"custom_design\\\":\\\"No\\\"}\"}',	'KOSIK',	NULL,	'2025-08-05 15:58:46',	NULL),
+(124,	'Samsung',	'Galaxy S22',	'Black',	500.00,	0.00,	'{\"features\": \"{\\\"front_camera_cover\\\":\\\"No\\\",\\\"custom_design\\\":\\\"No\\\"}\"}',	'KOSIK',	NULL,	'2025-08-05 15:58:46',	NULL),
+(125,	'Apple',	'iPhone 13',	'White',	559.99,	0.00,	'{\"features\": \"{\\\"card_holder\\\":\\\"None\\\",\\\"front_camera_cover\\\":\\\"Yes\\\",\\\"charging_port_cover\\\":\\\"No\\\",\\\"custom_design\\\":\\\"No\\\"}\"}',	'KOSIK',	NULL,	'2025-08-05 17:07:11',	NULL),
+(126,	'Apple',	'iPhone 13',	'Černá',	634.99,	0.00,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ano\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\",\\\"vlastní_motiv\\\":\\\"Ne\\\"}\"}',	'KOSIK',	NULL,	'2025-08-05 21:37:38',	NULL),
+(127,	'Apple',	'iPhone 13',	'Black',	24.20,	0.00,	'{\"features\": \"{\\\"card_holder\\\":\\\"2 Slots\\\",\\\"front_camera_cover\\\":\\\"No\\\",\\\"charging_port_cover\\\":\\\"Yes\\\",\\\"custom_design\\\":\\\"No\\\"}\"}',	'KOSIK',	NULL,	'2025-08-05 22:49:17',	NULL),
+(128,	'Apple',	'iPhone 13',	'Bílá',	559.99,	0.00,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\",\\\"vlastní_motiv\\\":\\\"Ne\\\"}\"}',	'KOSIK',	NULL,	'2025-08-06 14:44:01',	NULL),
+(129,	'Apple',	'iPhone 13',	'Purple',	21.20,	0.00,	'{\"features\": \"{\\\"card_holder\\\":\\\"None\\\",\\\"front_camera_cover\\\":\\\"No\\\",\\\"charging_port_cover\\\":\\\"No\\\",\\\"custom_design\\\":\\\"No\\\"}\"}',	'KOSIK',	NULL,	'2025-08-06 14:44:13',	NULL),
+(130,	'Apple',	'iPhone 13',	'Purple',	21.20,	0.00,	'{\"features\": \"{\\\"card_holder\\\":\\\"None\\\",\\\"front_camera_cover\\\":\\\"No\\\",\\\"charging_port_cover\\\":\\\"No\\\",\\\"custom_design\\\":\\\"No\\\"}\"}',	'KOSIK',	NULL,	'2025-08-06 19:28:32',	NULL),
+(131,	'Apple',	'iPhone 13',	'Blue',	21.20,	0.00,	'{\"features\": \"{\\\"card_holder\\\":\\\"None\\\",\\\"front_camera_cover\\\":\\\"No\\\",\\\"charging_port_cover\\\":\\\"No\\\",\\\"custom_design\\\":\\\"No\\\"}\"}',	'KOSIK',	NULL,	'2025-08-06 19:58:32',	NULL),
+(132,	'Apple',	'iPhone 13',	'Blue',	21.20,	0.00,	'{\"features\": \"{\\\"card_holder\\\":\\\"None\\\",\\\"front_camera_cover\\\":\\\"No\\\",\\\"charging_port_cover\\\":\\\"No\\\",\\\"custom_design\\\":\\\"No\\\"}\"}',	'KOSIK',	NULL,	'2025-08-06 20:53:21',	NULL),
+(133,	'Apple',	'iPhone 13',	'Černá',	574.99,	0.00,	'{\"features\": \"{\\\"držák_karet\\\":\\\"2 Sloty\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ne\\\",\\\"vlastní_motiv\\\":\\\"Ne\\\"}\"}',	'KOSIK',	NULL,	'2025-08-06 20:57:28',	NULL),
+(134,	'Apple',	'iPhone 13',	'Black',	21.20,	0.00,	'{\"features\": \"{\\\"card_holder\\\":\\\"None\\\",\\\"front_camera_cover\\\":\\\"No\\\",\\\"charging_port_cover\\\":\\\"No\\\",\\\"custom_design\\\":\\\"No\\\"}\"}',	'KOSIK',	NULL,	'2025-08-06 20:57:40',	NULL),
+(135,	'Samsung',	'Galaxy S22',	'Black',	20.00,	0.00,	'{\"features\": \"{\\\"front_camera_cover\\\":\\\"No\\\",\\\"custom_design\\\":\\\"No\\\"}\"}',	'KOSIK',	NULL,	'2025-08-06 21:01:54',	NULL),
+(136,	'Apple',	'iPhone 13',	'Purple',	21.20,	0.00,	'{\"features\": \"{\\\"card_holder\\\":\\\"None\\\",\\\"front_camera_cover\\\":\\\"No\\\",\\\"charging_port_cover\\\":\\\"No\\\",\\\"custom_design\\\":\\\"No\\\"}\"}',	'KOSIK',	NULL,	'2025-08-07 13:30:21',	NULL),
+(137,	'Samsung',	'Galaxy S22',	'Black',	20.00,	0.00,	'{\"features\": \"{\\\"front_camera_cover\\\":\\\"No\\\",\\\"custom_design\\\":\\\"No\\\"}\"}',	'KOSIK',	NULL,	'2025-08-07 14:22:25',	NULL),
+(138,	'Samsung',	'Galaxy S22',	'Black',	21.20,	0.00,	'{\"features\": \"{\\\"front_camera_cover\\\":\\\"Yes\\\",\\\"custom_design\\\":\\\"No\\\"}\"}',	'KOSIK',	NULL,	'2025-08-07 14:22:49',	NULL),
+(139,	'Apple',	'iPhone 13',	'Černá',	529.99,	0.00,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ne\\\",\\\"vlastní_motiv\\\":\\\"Ne\\\"}\"}',	'KOSIK',	NULL,	'2025-08-07 15:23:55',	NULL),
+(140,	'Apple',	'iPhone 13',	'Red',	21.20,	0.00,	'{\"features\": \"{\\\"card_holder\\\":\\\"None\\\",\\\"front_camera_cover\\\":\\\"No\\\",\\\"charging_port_cover\\\":\\\"No\\\",\\\"custom_design\\\":\\\"No\\\"}\"}',	'KOSIK',	NULL,	'2025-08-07 15:24:09',	NULL),
+(141,	'Apple',	'iPhone 13',	'Black',	21.20,	0.00,	'{\"features\": \"{\\\"card_holder\\\":\\\"None\\\",\\\"front_camera_cover\\\":\\\"No\\\",\\\"charging_port_cover\\\":\\\"No\\\",\\\"custom_design\\\":\\\"No\\\"}\"}',	'KOSIK',	NULL,	'2025-08-07 18:57:43',	NULL),
+(142,	'Apple',	'iPhone 13',	'Black',	21.20,	0.00,	'{\"features\": \"{\\\"card_holder\\\":\\\"None\\\",\\\"front_camera_cover\\\":\\\"No\\\",\\\"charging_port_cover\\\":\\\"No\\\",\\\"custom_design\\\":\\\"No\\\"}\"}',	'KOSIK',	NULL,	'2025-08-07 19:43:49',	NULL),
+(143,	'Apple',	'iPhone 13',	'Modrá',	529.99,	0.00,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ne\\\",\\\"vlastní_motiv\\\":\\\"Ne\\\"}\"}',	'KOSIK',	NULL,	'2025-08-07 19:58:12',	NULL),
+(144,	'Apple',	'iPhone 13',	'Black',	21.20,	0.00,	'{\"features\": \"{\\\"card_holder\\\":\\\"None\\\",\\\"front_camera_cover\\\":\\\"No\\\",\\\"charging_port_cover\\\":\\\"No\\\",\\\"custom_design\\\":\\\"No\\\"}\"}',	'KOSIK',	NULL,	'2025-08-07 20:17:05',	NULL),
+(145,	'Apple',	'iPhone 13',	'Black',	21.20,	0.00,	'{\"features\": \"{\\\"card_holder\\\":\\\"None\\\",\\\"front_camera_cover\\\":\\\"No\\\",\\\"charging_port_cover\\\":\\\"No\\\",\\\"custom_design\\\":\\\"No\\\"}\"}',	'KOSIK',	NULL,	'2025-08-08 15:14:23',	NULL),
+(146,	'Apple',	'iPhone 13',	'Black',	21.20,	0.00,	'{\"features\": \"{\\\"card_holder\\\":\\\"None\\\",\\\"front_camera_cover\\\":\\\"No\\\",\\\"charging_port_cover\\\":\\\"No\\\",\\\"custom_design\\\":\\\"No\\\"}\"}',	'KOSIK',	NULL,	'2025-08-08 15:20:34',	NULL),
+(147,	'Apple',	'iPhone 13',	'Black',	519.61,	0.00,	'{\"card_holder\": \"None\", \"custom_design\": \"No\", \"front_camera_cover\": \"No\", \"charging_port_cover\": \"No\"}',	'KOSIK',	NULL,	'2025-08-08 21:24:53',	NULL),
+(148,	'Apple',	'iPhone 13',	'Černá',	529.99,	0.00,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ne\\\",\\\"vlastní_motiv\\\":\\\"Ne\\\"}\"}',	'KOSIK',	NULL,	'2025-08-10 08:53:07',	NULL),
+(149,	'Apple',	'iPhone 13',	'Černá',	529.99,	0.00,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ne\\\",\\\"vlastní_motiv\\\":\\\"Ne\\\"}\"}',	'KOSIK',	NULL,	'2025-08-10 09:00:13',	NULL),
+(150,	'Apple',	'iPhone 13',	'Black',	22.40,	0.00,	'{\"features\": \"{\\\"card_holder\\\":\\\"None\\\",\\\"front_camera_cover\\\":\\\"No\\\",\\\"charging_port_cover\\\":\\\"Yes\\\",\\\"custom_design\\\":\\\"No\\\"}\"}',	'KOSIK',	NULL,	'2025-08-10 11:43:33',	NULL),
+(151,	'Apple',	'iPhone 13',	'Černá',	529.99,	0.00,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ne\\\",\\\"vlastní_motiv\\\":\\\"Ne\\\"}\"}',	'KOSIK',	NULL,	'2025-08-10 12:28:06',	NULL),
+(152,	'Apple',	'iPhone 13',	'Black',	529.99,	21.20,	'{\"features\": \"{\\\"card_holder\\\":\\\"None\\\",\\\"front_camera_cover\\\":\\\"No\\\",\\\"charging_port_cover\\\":\\\"No\\\",\\\"custom_design\\\":\\\"No\\\"}\"}',	'KOSIK',	NULL,	'2025-08-10 13:12:56',	NULL),
+(153,	'Apple',	'iPhone 13',	'Purple',	529.99,	21.20,	'{\"features\": \"{\\\"card_holder\\\":\\\"None\\\",\\\"front_camera_cover\\\":\\\"No\\\",\\\"charging_port_cover\\\":\\\"No\\\",\\\"custom_design\\\":\\\"No\\\"}\"}',	'KOSIK',	NULL,	'2025-08-10 13:13:28',	NULL),
+(154,	'Samsung',	'Galaxy S23',	'Black',	510.00,	20.40,	'{\"features\": \"{\\\"card_holder\\\":\\\"None\\\",\\\"front_camera_cover\\\":\\\"No\\\"}\"}',	'KOSIK',	NULL,	'2025-08-10 14:25:05',	NULL);
 
 DROP TABLE IF EXISTS `colors`;
 CREATE TABLE `colors` (
@@ -380,7 +408,8 @@ INSERT INTO `order_case` (`order_id`, `case_id`, `quantity`) VALUES
 (63,	110,	1),
 (63,	111,	1),
 (64,	114,	1),
-(64,	113,	1);
+(64,	113,	1),
+(65,	148,	1);
 
 DROP TABLE IF EXISTS `orders`;
 CREATE TABLE `orders` (
@@ -416,7 +445,8 @@ INSERT INTO `orders` (`id`, `user_id`, `firstname`, `lastname`, `email`, `phone`
 (61,	NULL,	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'666777888',	'shrekova bazina 13',	'Praha',	'53803',	6,	11,	'sokolská 799 hermanuv mestec',	79.00,	'OBJEDNANO',	'2025-07-24 20:28:15',	'202507245394'),
 (62,	9,	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'111222333',	'shrekova bazina 13',	'Praha',	'53803',	6,	11,	'sokolská 799 hermanuv mestec',	79.00,	'OBJEDNANO',	'2025-07-24 20:30:13',	'202507241828'),
 (63,	NULL,	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'666777888',	'shrekova bazina 13',	'Praha',	'53803',	6,	11,	'sokolská 799 hermanuv mestec',	79.00,	'OBJEDNANO',	'2025-07-25 13:50:33',	'202507256077'),
-(64,	9,	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'111222333',	'shrekova bazina 13',	'Praha',	'53803',	6,	11,	'sokolská 799 hermanuv mestec',	79.00,	'OBJEDNANO',	'2025-07-25 14:30:50',	'202507259712');
+(64,	9,	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'111222333',	'shrekova bazina 13',	'Praha',	'53803',	6,	11,	'sokolská 799 hermanuv mestec',	79.00,	'OBJEDNANO',	'2025-07-25 14:30:50',	'202507259712'),
+(65,	NULL,	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'666777888',	'shrekova bazina 13',	'Praha',	'53803',	6,	11,	'sokolská 799 hermanuv mestec',	79.00,	'OBJEDNANO',	'2025-08-10 08:53:35',	'202508103994');
 
 DROP TABLE IF EXISTS `shipping_options`;
 CREATE TABLE `shipping_options` (
@@ -424,16 +454,19 @@ CREATE TABLE `shipping_options` (
   `vendor_id` int NOT NULL,
   `name` varchar(255) NOT NULL,
   `cost` decimal(10,2) NOT NULL DEFAULT '0.00',
+  `cost_eur` decimal(10,2) NOT NULL DEFAULT '0.00' COMMENT 'Cost in EUR',
   PRIMARY KEY (`id`),
   KEY `vendor_id` (`vendor_id`),
   CONSTRAINT `shipping_options_ibfk_1` FOREIGN KEY (`vendor_id`) REFERENCES `vendors` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-INSERT INTO `shipping_options` (`id`, `vendor_id`, `name`, `cost`) VALUES
-(9,	7,	'Na pobočku',	89.00),
-(10,	7,	'Na adresu',	110.00),
-(11,	6,	'Na pobočku',	79.00),
-(12,	6,	'Na adresu',	100.00);
+INSERT INTO `shipping_options` (`id`, `vendor_id`, `name`, `cost`, `cost_eur`) VALUES
+(9,	7,	'Na pobočku',	89.00,	0.00),
+(10,	7,	'Na adresu',	110.00,	0.00),
+(11,	6,	'Na pobočku',	79.00,	0.00),
+(12,	6,	'Na adresu',	100.00,	0.00),
+(13,	8,	'Standard International',	250.00,	10.00),
+(14,	8,	'Express International',	500.00,	20.00);
 
 DROP TABLE IF EXISTS `shipping_payment_methods`;
 CREATE TABLE `shipping_payment_methods` (
@@ -455,7 +488,11 @@ INSERT INTO `shipping_payment_methods` (`id`, `shipping_option_id`, `payment_met
 (12,	9,	4),
 (13,	10,	4),
 (14,	11,	7),
-(15,	12,	7);
+(15,	12,	7),
+(16,	13,	8),
+(17,	13,	9),
+(18,	14,	8),
+(19,	14,	9);
 
 DROP TABLE IF EXISTS `user_uploads`;
 CREATE TABLE `user_uploads` (
@@ -528,24 +565,29 @@ CREATE TABLE `vendor_payment_methods` (
   `code` varchar(50) NOT NULL,
   `name` varchar(255) NOT NULL,
   `price` decimal(10,2) NOT NULL DEFAULT '0.00',
+  `price_eur` decimal(10,2) NOT NULL DEFAULT '0.00' COMMENT 'Price in EUR',
   PRIMARY KEY (`id`),
   KEY `vendor_id` (`vendor_id`),
   CONSTRAINT `vendor_payment_methods_ibfk_1` FOREIGN KEY (`vendor_id`) REFERENCES `vendors` (`id`) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-INSERT INTO `vendor_payment_methods` (`id`, `vendor_id`, `code`, `name`, `price`) VALUES
-(4,	7,	'prevod',	'převod',	0.00),
-(5,	7,	'dobirka',	'dobírka',	23.00),
-(6,	6,	'prevod',	'převod',	0.00),
-(7,	6,	'dobirka',	'dobírka',	12.00);
+INSERT INTO `vendor_payment_methods` (`id`, `vendor_id`, `code`, `name`, `price`, `price_eur`) VALUES
+(4,	7,	'prevod',	'převod',	0.00,	0.00),
+(5,	7,	'dobirka',	'dobírka',	23.00,	0.00),
+(6,	6,	'prevod',	'převod',	0.00,	0.00),
+(7,	6,	'dobirka',	'dobírka',	12.00,	0.00),
+(8,	8,	'credit_card',	'Credit Card',	0.00,	0.00),
+(9,	8,	'paypal',	'PayPal',	50.00,	2.00);
 
 DROP TABLE IF EXISTS `vendors`;
 CREATE TABLE `vendors` (
   `id` int NOT NULL AUTO_INCREMENT,
   `name` varchar(255) NOT NULL,
+  `supported_lang` varchar(5) DEFAULT 'cs' COMMENT 'Supported languages: cs, en, or both (comma-separated)',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-INSERT INTO `vendors` (`id`, `name`) VALUES
-(6,	'Balíkovna'),
-(7,	'Zásilkovna');
+INSERT INTO `vendors` (`id`, `name`, `supported_lang`) VALUES
+(6,	'Balíkovna',	'cs'),
+(7,	'Zásilkovna',	'cs'),
+(8,	'DHL International',	'en');

@@ -112,65 +112,92 @@ public function renderConfigurator(): void
     }
 
 public function processForm(Form $form): void
-{
-    $values = $form->getValues();
-    error_log('Form values: ' . print_r($values, true));
+    {
+        $values = $form->getValues();
+        error_log('Form values: ' . print_r($values, true));
 
-    try {
-        $manufacturerId = (int)$values['manufacturer'];
-        $modelId = (int)$values['model'];
-        $color = $values['color'];
-        $totalPrice = (float)$values['total_price'];
-        $features = json_decode($values['features'], true);
-        $userUploadId = isset($values['user_upload_id']) && $values['user_upload_id']
-            ? (int)$values['user_upload_id']
-            : null;
-        $lang = $values['lang'] ?? 'en'; // Use lang from form, default to 'en'
+        try {
+            $manufacturerId = (int)$values['manufacturer'];
+            $modelId = (int)$values['model'];
+            $color = $values['color'];
+            $features = json_decode($values['features'], true);
+            $userUploadId = isset($values['user_upload_id']) && $values['user_upload_id']
+                ? (int)$values['user_upload_id']
+                : null;
+            $lang = $values['lang'] ?? 'en';
 
-        if (!$manufacturerId || !$modelId || !$color) {
-            throw new \Exception('Missing required fields: manufacturer, model, or color.');
+            if (!$manufacturerId || !$modelId || !$color) {
+                throw new \Exception('Missing required fields: manufacturer, model, or color.');
+            }
+
+            if (!is_array($features)) {
+                throw new \Exception('Invalid features format.');
+            }
+
+            $manufacturerName = $this->modelFacade->getManufacturerNameById($manufacturerId);
+            $modelName = $this->modelFacade->getModelNameById($modelId);
+
+            if (!$manufacturerName || !$modelName) {
+                throw new \Exception('Invalid manufacturer or model selected.');
+            }
+
+            // Calculate prices using existing ModelFacade methods
+            $model = $this->modelFacade->getModelById($modelId);
+            if (!$model) {
+                throw new \Exception("Model ID $modelId not found.");
+            }
+            $basePriceCzk = (float)$model->price;
+            $basePriceEur = (float)$model->price_eur;
+
+            $featurePriceCzk = 0.00;
+            $featurePriceEur = 0.00;
+            $availableFeatures = $this->modelFacade->getFeaturesByModel($modelId, $lang);
+
+            foreach ($features as $featureId => $featureName) {
+                foreach ($availableFeatures as $featureGroup => $options) {
+                    foreach ($options as $option) {
+                        if ($option['name'] === $featureName) {
+                            $featurePriceCzk += (float)$option['price'];
+                            $featurePriceEur += (float)$option['price_eur'];
+                            break;
+                        }
+                    }
+                }
+            }
+
+            $totalPriceCzk = $basePriceCzk + $featurePriceCzk;
+            $totalPriceEur = $basePriceEur + $featurePriceEur;
+
+            $caseData = [
+                'manufacturer' => $manufacturerName,
+                'model' => $modelName,
+                'color' => $color,
+                'total_price' => $totalPriceCzk,
+                'total_price_eur' => $totalPriceEur,
+                'features' => $values['features'],
+                'user_upload_id' => $userUploadId,
+            ];
+
+            error_log('Creating case with user_upload_id: ' . ($userUploadId ?? 'NULL'));
+
+            $userId = $this->getUser()->isLoggedIn() ? $this->getUser()->getId() : null;
+            $this->orderFacade->createCase($caseData, $userId);
+
+            $this->flashMessage('Položka byla přidána do košíku.', 'success');
+            error_log('Redirecting after success.');
+            $this->redirect('Cart:default', ['lang' => $lang]);
+            return;
+
+        } catch (AbortException $e) {
+            throw $e;
+
+        } catch (\Exception $e) {
+            $this->flashMessage('Chyba při přidávání do košíku: ' . $e->getMessage(), 'error');
+            error_log('Redirecting after error: ' . $e->getMessage());
+            $this->redirect('Cart:default', ['lang' => $values['lang'] ?? 'en']);
+            return;
         }
-
-        if (!is_array($features)) {
-            throw new \Exception('Invalid features format.');
-        }
-
-        $manufacturerName = $this->modelFacade->getManufacturerNameById($manufacturerId);
-        $modelName = $this->modelFacade->getModelNameById($modelId);
-
-        if (!$manufacturerName || !$modelName) {
-            throw new \Exception('Invalid manufacturer or model selected.');
-        }
-
-        $caseData = [
-            'manufacturer' => $manufacturerName,
-            'model' => $modelName,
-            'color' => $color,
-            'total_price' => $totalPrice,
-            'features' => $values['features'],
-            'user_upload_id' => $userUploadId,
-        ];
-
-        error_log('Creating case with user_upload_id: ' . ($userUploadId ?? 'NULL'));
-
-        $userId = $this->getUser()->isLoggedIn() ? $this->getUser()->getId() : null;
-        $this->orderFacade->createCase($caseData, $userId);
-
-        $this->flashMessage('Položka byla přidána do košíku.', 'success');
-        error_log('Redirecting after success.');
-        $this->redirect('Cart:default', ['lang' => $lang]);
-        return;
-
-    } catch (AbortException $e) {
-        throw $e;
-
-    } catch (\Exception $e) {
-        $this->flashMessage('Chyba při přidávání do košíku: ' . $e->getMessage(), 'error');
-        error_log('Redirecting after error: ' . $e->getMessage());
-        $this->redirect('Cart:default', ['lang' => $values['lang'] ?? 'en']); // Use lang from form
-        return;
     }
-}
 
     public function renderGallery(): void
     {

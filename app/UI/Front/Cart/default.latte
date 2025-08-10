@@ -123,7 +123,7 @@
             <input type="hidden" name="lang" value="{$lang|escape}">
             <div class="space-y-6">
                 {foreach $cases as $case}
-                    <div class="bg-[var(--color-background-secondary)] text-[var(--color-text)] shadow transition hover:shadow-lg duration-300 rounded-2xl p-6" data-case-id="{$case->id}" data-price="{$case->total_price}">
+                    <div class="bg-[var(--color-background-secondary)] text-[var(--color-text)] shadow transition hover:shadow-lg duration-300 rounded-2xl p-6" data-case-id="{$case->id}" data-price="{$case->total_price}" data-price-eur="{$case->total_price_eur}">
                         <div class="grid grid-cols-1 md:grid-cols-6 gap-4">
                             <div>
                                 <h3 class="text-lg font-semibold mb-1">{_'cart.manufacturer'}</h3>
@@ -168,7 +168,7 @@
                 {/foreach}
                 <div class="flex justify-end mt-10">
                     <div class="mr-4 text-lg font-semibold text-[var(--color-text)]">
-                        {_'cart.total_price'} <span class="text-[var(--color-accent)] total-value">{number_format($totalCartValue, 2, ',', ' ')} Kč</span>
+                        {_'cart.total_price'} <span class="text-[var(--color-accent)] total-value">{if $lang === 'en'}{number_format($totalCartValue, 2, '.', ' ')} €{else}{number_format($totalCartValue, 2, ',', ' ')} Kč{/if}</span>
                     </div>
                     <button type="submit" class="btn px-8 py-4 rounded-2xl text-lg font-bold transition transform hover:scale-105 focus:outline-none focus:ring-4 focus:ring-[var(--color-accent)]"
                         style="background-color: var(--color-primary); color: var(--button-text);">
@@ -182,16 +182,19 @@
             document.addEventListener('DOMContentLoaded', function() {
                 const quantityInputs = document.querySelectorAll('.quantity-input');
                 const totalValueElement = document.querySelector('.total-value');
+                const lang = {$lang|escape:javascript}; // Get language from template
 
                 function updateTotal() {
                     let total = 0;
                     quantityInputs.forEach(input => {
                         const card = input.closest('[data-case-id]');
-                        const price = parseFloat(card.getAttribute('data-price'));
+                        const price = lang === 'en' ? parseFloat(card.getAttribute('data-price-eur')) : parseFloat(card.getAttribute('data-price'));
                         const quantity = parseInt(input.value) || 1;
                         total += price * quantity;
                     });
-                    totalValueElement.textContent = total.toFixed(2).replace('.', ',').replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' Kč';
+                    const currency = lang === 'en' ? '€' : 'Kč';
+                    const decimalSeparator = lang === 'en' ? '.' : ',';
+                    totalValueElement.textContent = total.toFixed(2).replace('.', decimalSeparator).replace(/\B(?=(\d{3})+(?!\d))/g, ' ') + ' ' + currency;
                 }
 
                 quantityInputs.forEach(input => {

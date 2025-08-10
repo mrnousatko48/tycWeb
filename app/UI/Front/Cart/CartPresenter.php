@@ -29,66 +29,71 @@ final class CartPresenter extends BaseFrontPresenter
     }
 
 public function renderDefault(): void
-{
-    $session = $this->getSession('order');
-    $lang = $this->getParameter('lang') ?? $session->lang ?? 'cs';
-    $this->template->lang = $lang; // Pass it to the template
-    
-    if ($this->getUser()->isLoggedIn()) {
-        $userId = (int)$this->getUser()->getId();
-        $cases = $this->orderFacade->getCartCasesByUserId($userId);
-    } else {
+    {
+        $session = $this->getSession('order');
+        $lang = $this->getParameter('lang') ?? $session->lang ?? 'cs';
+        $this->template->lang = $lang; // Pass it to the template
+
         $quantities = $session->quantities ?? [];
 
-        if (empty($quantities)) {
-            $this->template->cases = [];
-            $this->template->lang = $lang;
-            return;
+        if ($this->getUser()->isLoggedIn()) {
+            $userId = (int)$this->getUser()->getId();
+            $cases = $this->orderFacade->getCartCasesByUserId($userId);
+            $this->template->quantities = $quantities;
+        } else {
+            if (empty($quantities)) {
+                $this->template->cases = [];
+                $this->template->totalCartValue = 0;
+                $this->template->quantities = [];
+                $this->template->lang = $lang;
+                return;
+            }
+
+            $caseIds = array_keys($quantities);
+            $cases = $this->orderFacade->getCasesByIds($caseIds);
+            $this->template->quantities = $quantities;
         }
 
-        $caseIds = array_keys($quantities);
-        $cases = $this->orderFacade->getCasesByIds($caseIds);
-        $this->template->quantities = $quantities;
+        $decodedCases = [];
+        $totalCartValue = 0;
+        foreach ($cases as $case) {
+            $caseArray = $case->toArray();
+            $features = $case->features ? json_decode($case->features, true) : [];
+            if (isset($features['features']) && is_string($features['features'])) {
+                $features = json_decode($features['features'], true) ?: $features;
+            }
+
+            $cleanFeatures = [];
+            foreach ($features as $key => $value) {
+                $cleanKey = $this->cleanFeatureKey($key);
+                $cleanFeatures[$cleanKey] = $value;
+            }
+
+            $caseArray['features'] = $cleanFeatures;
+            $upload = $case->user_upload_id ? $this->orderFacade->getUserUploadById($case->user_upload_id) : null;
+            $caseArray['user_upload_filename'] = $upload ? $upload->original_filename : null;
+            $decodedCases[] = (object) $caseArray;
+
+            $quantity = $quantities[$case->id] ?? 1;
+            $price = $lang === 'en' ? (float)$case->total_price_eur : (float)$case->total_price;
+            $totalCartValue += $price * $quantity;
+        }
+
+        $this->template->cases = $decodedCases;
+        $this->template->totalCartValue = $totalCartValue;
+        $this->template->lang = $lang;
     }
-
-    $decodedCases = [];
-    $totalCartValue = 0;
-    foreach ($cases as $case) {
-        $caseArray = $case->toArray();
-        $features = $case->features ? json_decode($case->features, true) : [];
-        if (isset($features['features']) && is_string($features['features'])) {
-            $features = json_decode($features['features'], true) ?: $features;
-        }
-
-        $cleanFeatures = [];
-        foreach ($features as $key => $value) {
-            $cleanKey = $this->cleanFeatureKey($key);
-            $cleanFeatures[$cleanKey] = $value;
-        }
-
-        $caseArray['features'] = $cleanFeatures;
-        $upload = $case->user_upload_id ? $this->orderFacade->getUserUploadById($case->user_upload_id) : null;
-        $caseArray['user_upload_filename'] = $upload ? $upload->original_filename : null;
-        $decodedCases[] = (object) $caseArray;
-
-        $quantity = $this->template->quantities[$case->id] ?? 1;
-        $totalCartValue += $case->total_price * $quantity;
-    }
-
-    $this->template->cases = $decodedCases;
-    $this->template->totalCartValue = $totalCartValue;
-    $this->template->lang = $lang; // Pass language to template
-}
 
 public function renderOrder(): void
 {
     $session = $this->getSession('order');
-    $lang = $this->getHttpRequest()->getQuery('lang') ?? $session->lang ?? 'cs'; // Modified: Check URL first
+    $lang = $this->getHttpRequest()->getQuery('lang') ?? $session->lang ?? 'cs';
+    $session->lang = $lang; // Update session language
     $quantities = $session->quantities ?? [];
 
     if (empty($quantities)) {
         $this->flashMessage('Košík je prázdný.', 'warning');
-        $this->redirect('Cart:default');
+        $this->redirect('Cart:default', ['lang' => $lang]);
     }
 
     $caseIds = array_keys($quantities);
@@ -115,29 +120,31 @@ public function renderOrder(): void
         $decodedCases[] = (object) $caseArray;
 
         $quantity = $quantities[$case->id] ?? 1;
-        $totalCartValue += $case->total_price * $quantity;
+        $price = $lang === 'en' ? (float)$case->total_price_eur : (float)$case->total_price;
+        $totalCartValue += $price * $quantity;
     }
 
     $this->template->cases = $decodedCases;
     $this->template->quantities = $quantities;
     $this->template->totalCartValue = $totalCartValue;
-    $this->template->lang = $lang; // Pass language to template
+    $this->template->currency = $lang === 'en' ? '€' : 'Kč';
+    $this->template->lang = $lang;
 }
 
 public function renderInfo(): void
 {
     $session = $this->getSession('order');
-    $lang = $this->getParameter('lang') ?? $session->lang ?? 'cs'; // Added: Get language
+    $lang = $this->getParameter('lang') ?? $session->lang ?? 'cs';
     $quantities = $session->quantities ?? [];
 
     if (empty($quantities)) {
         $this->flashMessage('Košík je prázdný.', 'warning');
-        $this->redirect('Cart:default');
+        $this->redirect('Cart:default', ['lang' => $lang]);
     }
 
     if (!isset($session->vendor) || !isset($session->shippingOption) || !isset($session->paymentMethod)) {
         $this->flashMessage('Prosím, vyberte dopravce, způsob dopravy a platby.', 'warning');
-        $this->redirect('Cart:order');
+        $this->redirect('Cart:order', ['lang' => $lang]);
     }
 
     $caseIds = array_keys($quantities);
@@ -164,13 +171,14 @@ public function renderInfo(): void
         $decodedCases[] = (object) $caseArray;
 
         $quantity = $quantities[$case->id] ?? 1;
-        $itemsSubtotal += $case->total_price * $quantity;
+        $price = $lang === 'en' ? (float)$case->total_price_eur : (float)$case->total_price;
+        $itemsSubtotal += $price * $quantity;
     }
 
-    $shippingInfo = $this->orderFacade->getShippingInfo((int)$session->shippingOption);
+    $shippingInfo = $this->orderFacade->getShippingInfo((int)$session->shippingOption, $lang);
     $shippingCost = $shippingInfo ? (float)$shippingInfo['cost'] : 0.0;
     $shippingName = $shippingInfo ? $shippingInfo['name'] : 'Není vybráno';
-    $paymentInfo = $this->orderFacade->getPaymentInfo((int)$session->paymentMethod);
+    $paymentInfo = $this->orderFacade->getPaymentInfo((int)$session->paymentMethod, $lang);
     $paymentCost = $paymentInfo ? (float)$paymentInfo['price'] : 0.0;
     $paymentName = $paymentInfo ? $paymentInfo['name'] : 'Není vybráno';
     $totalCartValue = $itemsSubtotal + $shippingCost + $paymentCost;
@@ -184,26 +192,28 @@ public function renderInfo(): void
     $this->template->shipping = $shippingName;
     $this->template->payment = $paymentName;
     $this->template->delivery_point = $session->delivery_point ?? 'Není zadáno';
+    $this->template->currency = $lang === 'en' ? '€' : 'Kč';
     $this->template->lang = $lang;
 }
 
-    protected function createComponentOrderForm(): Form
+   protected function createComponentOrderForm(): Form
 {
     $form = new Form;
-    $form->setTranslator($this->translator); // Set the translator for form labels and messages
+    $form->setTranslator($this->translator);
 
-    $vendor = $form->addSelect('vendor', 'cart.vendor', $this->orderFacade->getVendors())
+    $lang = $this->getHttpRequest()->getQuery('lang') ?? $this->getSession('order')->lang ?? 'cs';
+    $vendor = $form->addSelect('vendor', 'cart.vendor', $this->orderFacade->getVendors($lang))
         ->setPrompt('----')
         ->setRequired('Zvolte dopravce');
 
     $shippingOption = $form->addSelect('shippingOption', 'cart.shipping_option')
         ->setHtmlAttribute('data-depends', $vendor->getHtmlName())
-        ->setHtmlAttribute('data-url', $this->link('Endpoint:shippingOptions', '#'))
+        ->setHtmlAttribute('data-url', $this->link('Endpoint:shippingOptions', ['vendor' => '#', 'lang' => $lang]))
         ->setRequired('Zvolte způsob dopravy');
 
     $paymentMethod = $form->addSelect('paymentMethod', 'cart.payment_method')
         ->setHtmlAttribute('data-depends', $vendor->getHtmlName())
-        ->setHtmlAttribute('data-url', $this->link('Endpoint:paymentMethods', '#'))
+        ->setHtmlAttribute('data-url', $this->link('Endpoint:paymentMethods', ['vendor' => '#', 'lang' => $lang]))
         ->setPrompt('----')
         ->setRequired('Zvolte způsob platby');
 
@@ -212,18 +222,20 @@ public function renderInfo(): void
         ->setHtmlAttribute('placeholder', 'Zadejte název Z-Boxu nebo pobočky, nebo adresa')
         ->setRequired();
 
-    $form->onAnchor[] = function () use ($vendor, $shippingOption, $paymentMethod) {
+    $form->addHidden('lang', $lang);
+
+    $form->onAnchor[] = function () use ($vendor, $shippingOption, $paymentMethod, $lang) {
         $vendorId = $vendor->getValue() ? (int)$vendor->getValue() : null;
 
         // Populate shippingOption
         $shippingItems = $vendorId
-            ? $this->orderFacade->getShippingOptionsByVendor($vendorId)
+            ? $this->orderFacade->getShippingOptionsByVendor($vendorId, $lang)
             : [];
         $shippingOption->setItems($shippingItems);
 
         // Populate paymentMethod
         $paymentItems = $vendorId
-            ? $this->orderFacade->getPaymentMethodsByVendor($vendorId)
+            ? $this->orderFacade->getPaymentMethodsByVendor($vendorId, $lang)
             : [];
         $paymentMethod->setItems($paymentItems);
     };
@@ -413,32 +425,69 @@ public function renderInfo(): void
         }
     }
 
-    public function actionCreateOrder(): void
-{
-    // Prioritize URL parameter, then POST data, then default to 'cs'
-    $lang = $this->getParameter('lang') ?? $this->getHttpRequest()->getPost('lang') ?? 'cs';
-    $quantities = $this->getHttpRequest()->getPost('quantities') ?? [];
-    $selected = [];
+   public function actionCreateOrder(): void
+    {
+        $lang = $this->getParameter('lang') ?? $this->getHttpRequest()->getPost('lang') ?? 'cs';
+        $quantities = $this->getHttpRequest()->getPost('quantities') ?? [];
+        $selected = [];
 
-    foreach ($quantities as $caseId => $data) {
-        $amount = (int)($data['amount'] ?? 0);
-        if ($amount > 0) {
-            $selected[(int)$caseId] = $amount;
+        foreach ($quantities as $caseId => $data) {
+            $amount = (int)($data['amount'] ?? 0);
+            if ($amount > 0) {
+                $selected[(int)$caseId] = $amount;
+            }
+        }
+
+        if (empty($selected)) {
+            $this->flashMessage('Košík je prázdný nebo nebylo zadáno žádné množství.', 'warning');
+            $this->redirect('Cart:default', ['lang' => $lang]);
+        }
+
+        $session = $this->getSession('order');
+        $session->quantities = $selected;
+        $session->lang = $lang;
+
+        if ($this->getUser()->isLoggedIn()) {
+            $session->quantities = $selected;
+        }
+
+        $this->redirect('Cart:order', ['lang' => $lang]);
+    }
+
+    public function handleUpdateQuantity(int $caseId, int $quantity): void
+    {
+        if ($quantity < 1) {
+            $this->flashMessage('Množství musí být alespoň 1.', 'warning');
+            $this->redirect('this');
+        }
+
+        $session = $this->getSession('order');
+        $quantities = $session->quantities ?? [];
+
+        // Update quantity in session
+        $quantities[$caseId] = $quantity;
+        $session->quantities = $quantities;
+
+        if ($this->isAjax()) {
+            // Send updated total and quantities back to the client
+            $lang = $session->lang ?? 'cs';
+            $cases = $this->getUser()->isLoggedIn()
+                ? $this->orderFacade->getCartCasesByUserId((int)$this->getUser()->getId())
+                : $this->orderFacade->getCasesByIds(array_keys($quantities));
+
+            $totalCartValue = 0;
+            foreach ($cases as $case) {
+                $quantity = $quantities[$case->id] ?? 1;
+                $price = $lang === 'en' ? (float)$case->total_price_eur : (float)$case->total_price;
+                $totalCartValue += $price * $quantity;
+            }
+
+            $this->payload->totalCartValue = number_format($totalCartValue, 2, $lang === 'en' ? '.' : ',', ' ');
+            $this->payload->currency = $lang === 'en' ? '€' : 'Kč';
+            $this->payload->quantities = $quantities;
+            $this->sendJson($this->payload);
         }
     }
-
-    if (empty($selected)) {
-        $this->flashMessage('Košík je prázdný nebo nebylo zadáno žádné množství.', 'warning');
-        $this->redirect('Cart:default', ['lang' => $lang]);
-    }
-
-    $session = $this->getSession('order');
-    $session->quantities = $selected;
-    $session->lang = $lang; // Store the language in the session
-
-    // Redirect to order page with the language parameter
-    $this->redirect('Cart:order', ['lang' => $lang]);
-}
 
     public function handleRemoveCase(int $caseId): void
     {

@@ -66,22 +66,23 @@ public function actionModelImages($modelId): void
     $this->terminate();
 }
 
-public function actionShippingOptions($vendor): void
-{
-    if (!$vendor || !is_numeric($vendor)) {
-        $this->sendJson([]); // Return empty array for invalid vendor
-        return;
-    }
-    $shippingOptions = $this->orderFacade->getShippingOptionsByVendor((int)$vendor);
-    $this->sendJson($shippingOptions);
-}
-public function actionPaymentMethods($vendor): void
+public function actionShippingOptions($vendor, string $lang = 'cs'): void
 {
     if (!$vendor || !is_numeric($vendor)) {
         $this->sendJson([]);
         return;
     }
-    $paymentMethods = $this->orderFacade->getPaymentMethodsByVendor((int)$vendor);
+    $shippingOptions = $this->orderFacade->getShippingOptionsByVendor((int)$vendor, $lang);
+    $this->sendJson($shippingOptions);
+}
+
+public function actionPaymentMethods($vendor, string $lang = 'cs'): void
+{
+    if (!$vendor || !is_numeric($vendor)) {
+        $this->sendJson([]);
+        return;
+    }
+    $paymentMethods = $this->orderFacade->getPaymentMethodsByVendor((int)$vendor, $lang);
     $this->sendJson($paymentMethods);
 }
 }
