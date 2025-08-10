@@ -84,19 +84,20 @@ public function renderEmails(): void
             $order = $orderData['order'];
             $recipientName = $order->firstname . ' ' . $order->lastname;
             $recipientEmail = $order->email;
+            $lang = $order->lang;
 
             switch ($newState) {
                 case 'ZAPLACENO':
-                    $this->mailSender->sendPaymentConfirmationEmail($recipientEmail, $recipientName, $order);
+                    $this->mailSender->sendPaymentConfirmationEmail($recipientEmail, $recipientName, $order, $lang);
                     break;
                 case 'ODESLANO':
-                    $this->mailSender->sendShippedEmail($recipientEmail, $recipientName, $order);
+                    $this->mailSender->sendShippedEmail($recipientEmail, $recipientName, $order, $lang);
                     break;
                 case 'DORUCENO':
-                    $this->mailSender->sendReadyForPickupEmail($recipientEmail, $recipientName, $order);
+                    $this->mailSender->sendReadyForPickupEmail($recipientEmail, $recipientName, $order, $lang);
                     break;
                 case 'VYZVEDNUTO':
-                    $this->mailSender->sendPickedUpEmail($recipientEmail, $recipientName, $order);
+                    $this->mailSender->sendPickedUpEmail($recipientEmail, $recipientName, $order, $lang);
                     break;
             }
 

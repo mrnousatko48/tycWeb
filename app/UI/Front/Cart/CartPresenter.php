@@ -350,7 +350,7 @@ final class CartPresenter extends BaseFrontPresenter
         return $form;
     }
 
-    public function sendOrderFormSucceeded(Form $form, \stdClass $values): void
+   public function sendOrderFormSucceeded(Form $form, \stdClass $values): void
     {
         $session = $this->getSession('order');
         $quantities = $session->quantities ?? [];
@@ -393,6 +393,7 @@ final class CartPresenter extends BaseFrontPresenter
                     $session->paymentMethod,
                     $quantities,
                     $session->shippingOption,
+                    $lang,
                     $session->delivery_point
                 );
             } else {
@@ -407,6 +408,7 @@ final class CartPresenter extends BaseFrontPresenter
                     $session->paymentMethod,
                     $quantities,
                     $session->shippingOption,
+                    $lang,
                     $session->delivery_point
                 );
             }
@@ -423,7 +425,7 @@ final class CartPresenter extends BaseFrontPresenter
             $this->flashMessage($e->getMessage(), 'danger');
             $this->redirect('Cart:default', ['lang' => $lang]);
         }
-    }
+        }
 
     public function actionCreateOrder(): void
     {

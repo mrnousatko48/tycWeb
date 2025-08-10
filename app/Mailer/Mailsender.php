@@ -184,111 +184,111 @@ class MailSender
         $this->mailer->send($mail);
     }
 
-    public function sendPaymentConfirmationEmail(string $recipientEmail, string $recipientName, \Nette\Database\Table\ActiveRow $order, string $lang = 'cs'): void
-    {
-        $latte = new Engine();
-        $template = $this->emailFacade->getTemplateByName('payment_confirmation', $lang);
-        if (!$template) {
-            throw new \Exception("Template payment_confirmation for language $lang was not found.");
-        }
-
-        $params = [
-            'recipient' => $recipientName,
-            'orderId' => $order->id,
-            'variableSymbol' => $order->variable_symbol,
-        ];
-
-        $latte->setLoader(new \Latte\Loaders\StringLoader());
-        $subject = $latte->renderToString($template['subject'], $params);
-        $html = $latte->renderToString($template['body'], $params);
-
-        $mail = new Message;
-        $mail->setFrom('opnx3d@seznam.cz')
-            ->addTo($recipientEmail)
-            ->setSubject($subject)
-            ->setHtmlBody($html);
-
-        $this->mailer->send($mail);
+public function sendPaymentConfirmationEmail(string $recipientEmail, string $recipientName, \stdClass $order, string $lang = 'cs'): void
+{
+    $latte = new Engine();
+    $template = $this->emailFacade->getTemplateByName('payment_confirmation', $lang);
+    if (!$template) {
+        throw new \Exception("Template payment_confirmation for language $lang was not found.");
     }
 
-    public function sendShippedEmail(string $recipientEmail, string $recipientName, \Nette\Database\Table\ActiveRow $order, string $lang = 'cs'): void
-    {
-        $latte = new Engine();
-        $template = $this->emailFacade->getTemplateByName('shipped', $lang);
-        if (!$template) {
-            throw new \Exception("Template shipped for language $lang was not found.");
-        }
+    $params = [
+        'recipient' => $recipientName,
+        'orderId' => $order->id,
+        'variableSymbol' => $order->variable_symbol,
+    ];
 
-        $params = [
-            'recipient' => $recipientName,
-            'orderId' => $order->id,
-        ];
+    $latte->setLoader(new \Latte\Loaders\StringLoader());
+    $subject = $latte->renderToString($template['subject'], $params);
+    $html = $latte->renderToString($template['body'], $params);
 
-        $latte->setLoader(new \Latte\Loaders\StringLoader());
-        $subject = $latte->renderToString($template['subject'], $params);
-        $html = $latte->renderToString($template['body'], $params);
+    $mail = new Message;
+    $mail->setFrom('opnx3d@seznam.cz')
+        ->addTo($recipientEmail)
+        ->setSubject($subject)
+        ->setHtmlBody($html);
 
-        $mail = new Message;
-        $mail->setFrom('opnx3d@seznam.cz')
-            ->addTo($recipientEmail)
-            ->setSubject($subject)
-            ->setHtmlBody($html);
+    $this->mailer->send($mail);
+}
 
-        $this->mailer->send($mail);
+public function sendShippedEmail(string $recipientEmail, string $recipientName, \stdClass $order, string $lang = 'cs'): void
+{
+    $latte = new Engine();
+    $template = $this->emailFacade->getTemplateByName('shipped', $lang);
+    if (!$template) {
+        throw new \Exception("Template shipped for language $lang was not found.");
     }
 
-    public function sendReadyForPickupEmail(string $recipientEmail, string $recipientName, \Nette\Database\Table\ActiveRow $order, string $lang = 'cs'): void
-    {
-        $latte = new Engine();
-        $template = $this->emailFacade->getTemplateByName('ready_for_pickup', $lang);
-        if (!$template) {
-            throw new \Exception("Template ready_for_pickup for language $lang was not found.");
-        }
+    $params = [
+        'recipient' => $recipientName,
+        'orderId' => $order->id,
+    ];
 
-        $params = [
-            'recipient' => $recipientName,
-            'orderId' => $order->id,
-            'deliveryPoint' => $order->delivery_point ?? ($lang === 'en' ? 'Not specified' : 'Není uvedeno'),
-        ];
+    $latte->setLoader(new \Latte\Loaders\StringLoader());
+    $subject = $latte->renderToString($template['subject'], $params);
+    $html = $latte->renderToString($template['body'], $params);
 
-        $latte->setLoader(new \Latte\Loaders\StringLoader());
-        $subject = $latte->renderToString($template['subject'], $params);
-        $html = $latte->renderToString($template['body'], $params);
+    $mail = new Message;
+    $mail->setFrom('opnx3d@seznam.cz')
+        ->addTo($recipientEmail)
+        ->setSubject($subject)
+        ->setHtmlBody($html);
 
-        $mail = new Message;
-        $mail->setFrom('opnx3d@seznam.cz')
-            ->addTo($recipientEmail)
-            ->setSubject($subject)
-            ->setHtmlBody($html);
+    $this->mailer->send($mail);
+}
 
-        $this->mailer->send($mail);
+public function sendReadyForPickupEmail(string $recipientEmail, string $recipientName, \stdClass $order, string $lang = 'cs'): void
+{
+    $latte = new Engine();
+    $template = $this->emailFacade->getTemplateByName('ready_for_pickup', $lang);
+    if (!$template) {
+        throw new \Exception("Template ready_for_pickup for language $lang was not found.");
     }
 
-    public function sendPickedUpEmail(string $recipientEmail, string $recipientName, \Nette\Database\Table\ActiveRow $order, string $lang = 'cs'): void
-    {
-        $latte = new Engine();
-        $template = $this->emailFacade->getTemplateByName('picked_up', $lang);
-        if (!$template) {
-            throw new \Exception("Template picked_up for language $lang was not found.");
-        }
+    $params = [
+        'recipient' => $recipientName,
+        'orderId' => $order->id,
+        'deliveryPoint' => $order->delivery_point ?? ($lang === 'en' ? 'Not specified' : 'Není uvedeno'),
+    ];
 
-        $params = [
-            'recipient' => $recipientName,
-            'orderId' => $order->id,
-        ];
+    $latte->setLoader(new \Latte\Loaders\StringLoader());
+    $subject = $latte->renderToString($template['subject'], $params);
+    $html = $latte->renderToString($template['body'], $params);
 
-        $latte->setLoader(new \Latte\Loaders\StringLoader());
-        $subject = $latte->renderToString($template['subject'], $params);
-        $html = $latte->renderToString($template['body'], $params);
+    $mail = new Message;
+    $mail->setFrom('opnx3d@seznam.cz')
+        ->addTo($recipientEmail)
+        ->setSubject($subject)
+        ->setHtmlBody($html);
 
-        $mail = new Message;
-        $mail->setFrom('opnx3d@seznam.cz')
-            ->addTo($recipientEmail)
-            ->setSubject($subject)
-            ->setHtmlBody($html);
+    $this->mailer->send($mail);
+}
 
-        $this->mailer->send($mail);
+public function sendPickedUpEmail(string $recipientEmail, string $recipientName, \stdClass $order, string $lang = 'cs'): void
+{
+    $latte = new Engine();
+    $template = $this->emailFacade->getTemplateByName('picked_up', $lang);
+    if (!$template) {
+        throw new \Exception("Template picked_up for language $lang was not found.");
     }
+
+    $params = [
+        'recipient' => $recipientName,
+        'orderId' => $order->id,
+    ];
+
+    $latte->setLoader(new \Latte\Loaders\StringLoader());
+    $subject = $latte->renderToString($template['subject'], $params);
+    $html = $latte->renderToString($template['body'], $params);
+
+    $mail = new Message;
+    $mail->setFrom('opnx3d@seznam.cz')
+        ->addTo($recipientEmail)
+        ->setSubject($subject)
+        ->setHtmlBody($html);
+
+    $this->mailer->send($mail);
+}
 
     public function sendNewOrderEmail(string $recipientName, \Nette\Database\Table\ActiveRow $order, array $orderItems, string $lang = 'cs'): void
     {

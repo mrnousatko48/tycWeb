@@ -93,6 +93,7 @@ final class OrderFacade
                     'state' => $order->state,
                     'created_at' => $order->created_at,
                     'variable_symbol' => $order->variable_symbol,
+                    'lang' => $order->lang,
                 ],
                 'cases' => $this->processCases($orderCases, $cases),
                 'user' => $user,
@@ -146,6 +147,7 @@ final class OrderFacade
                 'state' => $order->state,
                 'created_at' => $order->created_at,
                 'variable_symbol' => $order->variable_symbol,
+                'lang' => $order->lang,
             ],
             'cases' => $this->processCases($orderCases, $cases),
             'user' => $user,
@@ -242,7 +244,7 @@ final class OrderFacade
         }
     }
 
-    public function createOrder(int $userId, string $firstname, string $lastname, string $email, string $phone, string $address, string $city, string $psc, int $paymentMethodId, array $caseQuantities, int $shippingOptionId, ?string $deliveryPoint = null): ActiveRow
+    public function createOrder(int $userId, string $firstname, string $lastname, string $email, string $phone, string $address, string $city, string $psc, int $paymentMethodId, array $caseQuantities, int $shippingOptionId, string $lang = 'cs', ?string $deliveryPoint = null): ActiveRow
     {
         if (empty($caseQuantities)) {
             throw new \InvalidArgumentException('Cart cannot be empty.');
@@ -259,7 +261,7 @@ final class OrderFacade
         $this->database->beginTransaction();
 
         try {
-            $additionalCost = $this->calculateAdditionalCost($shippingOptionId, $paymentMethodId);
+            $additionalCost = $this->calculateAdditionalCost($shippingOptionId, $paymentMethodId, $lang);
             $variableSymbol = $this->generateVariableSymbol();
             $order = $this->database->table('orders')->insert([
                 'user_id' => $userId,
@@ -277,6 +279,7 @@ final class OrderFacade
                 'state' => 'OBJEDNANO',
                 'created_at' => new \DateTime(),
                 'variable_symbol' => $variableSymbol,
+                'lang' => $lang,
             ]);
 
             foreach ($caseQuantities as $caseId => $quantity) {
@@ -304,7 +307,7 @@ final class OrderFacade
         }
     }
 
-    public function createGuestOrder(string $firstname, string $lastname, string $email, string $phone, string $address, string $city, string $psc, int $paymentMethodId, array $caseQuantities, int $shippingOptionId, ?string $deliveryPoint = null): ActiveRow
+    public function createGuestOrder(string $firstname, string $lastname, string $email, string $phone, string $address, string $city, string $psc, int $paymentMethodId, array $caseQuantities, int $shippingOptionId, string $lang = 'cs', ?string $deliveryPoint = null): ActiveRow
     {
         if (empty($caseQuantities)) {
             throw new \InvalidArgumentException('Cart cannot be empty.');
@@ -321,7 +324,7 @@ final class OrderFacade
         $this->database->beginTransaction();
 
         try {
-            $additionalCost = $this->calculateAdditionalCost($shippingOptionId, $paymentMethodId);
+            $additionalCost = $this->calculateAdditionalCost($shippingOptionId, $paymentMethodId, $lang);
             $variableSymbol = $this->generateVariableSymbol();
             $order = $this->database->table('orders')->insert([
                 'user_id' => null,
@@ -339,6 +342,7 @@ final class OrderFacade
                 'state' => 'OBJEDNANO',
                 'created_at' => new \DateTime(),
                 'variable_symbol' => $variableSymbol,
+                'lang' => $lang,
             ]);
 
             foreach ($caseQuantities as $caseId => $quantity) {
