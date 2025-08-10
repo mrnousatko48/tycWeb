@@ -57,6 +57,7 @@
                         <th>Výrobce</th>
                         <th>Model</th>
                         <th>Základní cena (CZK)</th>
+                        <th>Základní cena (EUR)</th>
                         <th>Barvy</th>
                         <th>Funkce</th>
                         <th>Akce</th>
@@ -68,6 +69,7 @@
                         <td>{$model->ref('manufacturers', 'manufacturer_id')->name}</td>
                         <td>{$model->name}</td>
                         <td>{$model->price|number:2,',',' '} CZK</td>
+                        <td>{$model->price_eur|number:2,',',' '} EUR</td>
                         <td>
                             {foreach $model->related('model_colors') as $mc}
                                 {var $color = $mc->ref('colors', 'color_id')}

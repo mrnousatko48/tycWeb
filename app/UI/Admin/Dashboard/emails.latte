@@ -7,6 +7,7 @@
             <thead>
                 <tr>
                     <th>ID</th>
+                    <th>Jazyk</th>
                     <th>Název</th>
                     <th>Předmět</th>
                     <th>Příjemce</th>
@@ -17,6 +18,7 @@
                 {foreach $emailTemplates as $template}
                     <tr>
                         <td>{$template->id}</td>
+                        <td>{$template->lang}</td>
                         <td>{$template->name}</td>
                         <td>{$template->subject}</td>
                         <td>{if $template->recipient_email}{$template->recipient_email}{else}Není zadán{/if}</td>

@@ -52,7 +52,7 @@
         <div class="card-body table-responsive" n:snippet="featureOptionsTable">
             <table class="table table-striped table-hover">
                 <thead class="table-light">
-                    <tr><th>Funkce</th><th>Varianta</th><th>Cena (CZK)</th><th class="text-end">Akce</th></tr>
+                    <tr><th>Funkce</th><th>Varianta</th><th>Cena (CZK)</th><th>Cena (EUR)</th><th class="text-end">Akce</th></tr>
                 </thead>
                 <tbody>
                     {foreach $featureOptions as $option}
@@ -60,6 +60,7 @@
                             <td>{$option->ref('features','feature_id')->name}</td>
                             <td>{$option->name}</td>
                             <td>{$option->price|number:2,',',' '} Kč</td>
+                            <td>{$option->price_eur|number:2,',',' '} €</td>
                             <td class="text-end">
                                 <a href="{link editFeatureOption! $option->id}" class="btn btn-sm btn-primary ajax edit-feature-option" data-bs-toggle="modal" data-bs-target="#editFeatureOptionModal">✏️ Upravit</a>
                                 <a href="{link deleteFeatureOption! $option->id}" class="btn btn-sm btn-danger ajax">🗑 Smazat</a>

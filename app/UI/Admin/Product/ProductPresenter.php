@@ -109,44 +109,49 @@ final class ProductPresenter extends Nette\Application\UI\Presenter
     }
 
     public function createComponentModelForm(): Form
-    {
-        $form = new Form;
+{
+    $form = new Form;
 
-        $form->addSelect('manufacturer_id', 'Výrobce:', 
-            $this->modelFacade->getManufacturers()->fetchPairs('id', 'name'))
-            ->setPrompt('Vyberte výrobce')
-            ->setRequired('Prosím, vyberte výrobce.');
+    $form->addSelect('manufacturer_id', 'Výrobce:', 
+        $this->modelFacade->getManufacturers()->fetchPairs('id', 'name'))
+        ->setPrompt('Vyberte výrobce')
+        ->setRequired('Prosím, vyberte výrobce.');
 
-        $form->addText('name', 'Název modelu:')
-            ->setRequired('Prosím, zadejte název modelu.');
+    $form->addText('name', 'Název modelu:')
+        ->setRequired('Prosím, zadejte název modelu.');
 
-        $form->addText('price', 'Základní cena (CZK):')
-            ->setRequired('Prosím, zadejte základní cenu.')
-            ->addRule($form::FLOAT, 'Cena musí být platné číslo.')
-            ->setDefaultValue('0.00');
+    $form->addText('price', 'Základní cena (CZK):')
+        ->setRequired('Prosím, zadejte základní cenu.')
+        ->addRule($form::FLOAT, 'Cena musí být platné č fdeíslo.')
+        ->setDefaultValue('0.00');
 
-        $form->addMultiSelect('color_ids', 'Dostupné barvy:', 
-            $this->modelFacade->getColors()->fetchPairs('id', 'name'))
-            ->setHtmlAttribute('multiple')
-            ->setRequired('Vyberte alespoň jednu barvu.');
+    $form->addText('price_eur', 'Základní cena (EUR):')
+        ->setRequired('Prosím, zadejte základní cenu v EUR.')
+        ->addRule($form::FLOAT, 'Cena musí být platné číslo.')
+        ->setDefaultValue('0.00');
 
-        $features = $this->modelFacade->getFeatures()->fetchPairs('id', 'name');
-        $featureOptions = [];
-        foreach ($features as $featureId => $featureName) {
-            $options = $this->modelFacade->getFeatureOptions($featureId);
-            $featureOptions[$featureId] = array_combine(
-                array_map(fn($opt) => "$featureId:$opt[id]", $options),
-                array_map(fn($opt) => "$featureName: {$opt['name']}", $options)
-            );
-        }
-        $form->addMultiSelect('feature_options', 'Dostupné vlastnosti:', $featureOptions)
-            ->setHtmlAttribute('multiple');
+    $form->addMultiSelect('color_ids', 'Dostupné barvy:', 
+        $this->modelFacade->getColors()->fetchPairs('id', 'name'))
+        ->setHtmlAttribute('multiple')
+        ->setRequired('Vyberte alespoň jednu barvu.');
 
-        $form->addSubmit('save', 'Uložit model');
-
-        $form->onSuccess[] = [$this, 'modelFormSucceeded'];
-        return $form;
+    $features = $this->modelFacade->getFeatures()->fetchPairs('id', 'name');
+    $featureOptions = [];
+    foreach ($features as $featureId => $featureName) {
+        $options = $this->modelFacade->getFeatureOptions($featureId);
+        $featureOptions[$featureId] = array_combine(
+            array_map(fn($opt) => "$featureId:$opt[id]", $options),
+            array_map(fn($opt) => "$featureName: {$opt['name']}", $options)
+        );
     }
+    $form->addMultiSelect('feature_options', 'Dostupné vlastnosti:', $featureOptions)
+        ->setHtmlAttribute('multiple');
+
+    $form->addSubmit('save', 'Uložit model');
+
+    $form->onSuccess[] = [$this, 'modelFormSucceeded'];
+    return $form;
+}
 
     public function modelFormSucceeded(Form $form, array $values): void
     {
@@ -177,46 +182,51 @@ final class ProductPresenter extends Nette\Application\UI\Presenter
     }
 
     public function createComponentModelEditForm(): Form
-    {
-        $form = new Form;
+{
+    $form = new Form;
 
-        $form->addHidden('id');
+    $form->addHidden('id');
 
-        $form->addSelect('manufacturer_id', 'Výrobce:', 
-            $this->modelFacade->getManufacturers()->fetchPairs('id', 'name'))
-            ->setPrompt('Vyberte výrobce')
-            ->setRequired('Prosím, vyberte výrobce.');
+    $form->addSelect('manufacturer_id', 'Výrobce:', 
+        $this->modelFacade->getManufacturers()->fetchPairs('id', 'name'))
+        ->setPrompt('Vyberte výrobce')
+        ->setRequired('Prosím, vyberte výrobce.');
 
-        $form->addText('name', 'Název modelu:')
-            ->setRequired('Prosím, zadejte název modelu.');
+    $form->addText('name', 'Název modelu:')
+        ->setRequired('Prosím, zadejte název modelu.');
 
-        $form->addText('price', 'Základní cena (CZK):')
-            ->setRequired('Prosím, zadejte základní cenu.')
-            ->addRule($form::FLOAT, 'Cena musí být platné číslo.')
-            ->setDefaultValue('0.00');
+    $form->addText('price', 'Základní cena (CZK):')
+        ->setRequired('Prosím, zadejte základní cenu.')
+        ->addRule($form::FLOAT, 'Cena musí být platné číslo.')
+        ->setDefaultValue('0.00');
 
-        $form->addMultiSelect('color_ids', 'Dostupné barvy:', 
-            $this->modelFacade->getColors()->fetchPairs('id', 'name'))
-            ->setHtmlAttribute('multiple')
-            ->setRequired('Vyberte alespoň jednu barvu.');
+    $form->addText('price_eur', 'Základní cena (EUR):')
+        ->setRequired('Prosím, zadejte základní cenu v EUR.')
+        ->addRule($form::FLOAT, 'Cena musí být platné číslo.')
+        ->setDefaultValue('0.00');
 
-        $features = $this->modelFacade->getFeatures()->fetchPairs('id', 'name');
-        $featureOptions = [];
-        foreach ($features as $featureId => $featureName) {
-            $options = $this->modelFacade->getFeatureOptions($featureId);
-            $featureOptions[$featureId] = array_combine(
-                array_map(fn($opt) => "$featureId:$opt[id]", $options),
-                array_map(fn($opt) => "$featureName: {$opt['name']}", $options)
-            );
-        }
-        $form->addMultiSelect('feature_options', 'Dostupné vlastnosti:', $featureOptions)
-            ->setHtmlAttribute('multiple');
+    $form->addMultiSelect('color_ids', 'Dostupné barvy:', 
+        $this->modelFacade->getColors()->fetchPairs('id', 'name'))
+        ->setHtmlAttribute('multiple')
+        ->setRequired('Vyberte alespoň jednu barvu.');
 
-        $form->addSubmit('save', 'Upravit model');
-
-        $form->onSuccess[] = [$this, 'modelEditFormSucceeded'];
-        return $form;
+    $features = $this->modelFacade->getFeatures()->fetchPairs('id', 'name');
+    $featureOptions = [];
+    foreach ($features as $featureId => $featureName) {
+        $options = $this->modelFacade->getFeatureOptions($featureId);
+        $featureOptions[$featureId] = array_combine(
+            array_map(fn($opt) => "$featureId:$opt[id]", $options),
+            array_map(fn($opt) => "$featureName: {$opt['name']}", $options)
+        );
     }
+    $form->addMultiSelect('feature_options', 'Dostupné vlastnosti:', $featureOptions)
+        ->setHtmlAttribute('multiple');
+
+    $form->addSubmit('save', 'Upravit model');
+
+    $form->onSuccess[] = [$this, 'modelEditFormSucceeded'];
+    return $form;
+}
 
     public function modelEditFormSucceeded(Form $form, array $values): void
     {
@@ -247,7 +257,7 @@ final class ProductPresenter extends Nette\Application\UI\Presenter
         }
     }
 
-    public function handleEditModel(int $modelId): void
+        public function handleEditModel(int $modelId): void
     {
         $model = $this->modelFacade->getModelById($modelId);
         if (!$model) {
@@ -268,6 +278,7 @@ final class ProductPresenter extends Nette\Application\UI\Presenter
             'manufacturer_id' => $model->manufacturer_id,
             'name' => $model->name,
             'price' => $model->price,
+            'price_eur' => $model->price_eur,
             'color_ids' => $colorIds,
             'feature_options' => $featureOptions,
         ]);
@@ -426,116 +437,144 @@ final class ProductPresenter extends Nette\Application\UI\Presenter
         }
     }
 
-public function createComponentFeatureOptionForm(): Form
-{
-    $form = new Form;
+    public function createComponentFeatureOptionForm(): Form
+    {
+        $form = new Form;
 
-    $form->addSelect('feature_id', 'Funkce:', 
-        $this->modelFacade->getFeatures()->fetchPairs('id', 'name'))
-        ->setPrompt('Vyberte funkci')
-        ->setRequired('Prosím, vyberte funkci.');
+        $form->addSelect('feature_id', 'Funkce:', 
+            $this->modelFacade->getFeatures()->fetchPairs('id', 'name'))
+            ->setPrompt('Vyberte funkci')
+            ->setRequired('Prosím, vyberte funkci.');
 
-    $form->addText('name', 'Název varianty:')
-        ->setRequired('Prosím, zadejte název varianty.');
+        $form->addText('name', 'Název varianty(ID):')
+            ->setRequired('Prosím, zadejte název varianty.');
 
-    $form->addText('price', 'Cena (CZK):')
-        ->setRequired('Prosím, zadejte cenu.')
-        ->addRule($form::FLOAT, 'Cena musí být platné číslo.')
-        ->setDefaultValue('0.00');
+        $form->addText('name_cs', 'Název varianty (CZ):')
+            ->setRequired('Prosím, zadejte název varianty v češtině.');
 
-    $form->addCheckbox('allow_user_upload', 'Nahrát Soubor')
-        ->setDefaultValue(false);
+        $form->addText('name_en', 'Název varianty (EN):')
+            ->setRequired('Prosím, zadejte název varianty v angličtině.');
 
-    $form->addSubmit('save', 'Přidat variantu');
+        $form->addText('price', 'Cena (CZK):')
+            ->setRequired('Prosím, zadejte cenu.')
+            ->addRule($form::FLOAT, 'Cena musí být platné číslo.')
+            ->setDefaultValue('0.00');
 
-    $form->onSuccess[] = [$this, 'featureOptionFormSucceeded'];
-    return $form;
-}
+        $form->addText('price_eur', 'Cena (EUR):')
+            ->setRequired('Prosím, zadejte cenu v EUR.')
+            ->addRule($form::FLOAT, 'Cena musí být platné číslo.')
+            ->setDefaultValue('0.00');
 
-public function featureOptionFormSucceeded(Form $form, array $values): void
-{
-    try {
-        $existingOption = $this->modelFacade->getAllFeatureOptions()
-            ->where('feature_id', $values['feature_id'])
-            ->where('name', $values['name'])
-            ->fetch();
-        
-        if ($existingOption) {
-            $this->flashMessage("Možnost '{$values['name']}' již pro tuto vlastnost existuje.", 'error');
+        $form->addCheckbox('allow_user_upload', 'Nahrát Soubor')
+            ->setDefaultValue(false);
+
+        $form->addSubmit('save', 'Přidat variantu');
+
+        $form->onSuccess[] = [$this, 'featureOptionFormSucceeded'];
+        return $form;
+    }
+
+    public function featureOptionFormSucceeded(Form $form, array $values): void
+    {
+        try {
+            $existingOption = $this->modelFacade->getAllFeatureOptions()
+                ->where('feature_id', $values['feature_id'])
+                ->where('name', $values['name'])
+                ->fetch();
+            
+            if ($existingOption) {
+                $this->flashMessage("Možnost '{$values['name']}' již pro tuto vlastnost existuje.", 'error');
+            } else {
+                $this->modelFacade->addFeatureOption(
+                    $values['feature_id'],
+                    $values['name'],
+                    (float)$values['price'],
+                    (float)$values['price_eur'],
+                    (bool)$values['allow_user_upload'],
+                    $values['name_cs'],
+                    $values['name_en']
+                );
+                $this->flashMessage('Možnost byla úspěšně přidána!', 'success');
+            }
+        } catch (\Exception $e) {
+            $this->flashMessage($e->getMessage(), 'error');
+        }
+
+        if ($this->isAjax()) {
+            $this->template->featureOptions = $this->modelFacade->getAllFeatureOptions();
+            $this->redrawControl('featureOptionsTable');
+            $this->redrawControl('featureOptionForm-feature_id');
+            $this->redrawControl('flashes');
         } else {
-            $this->modelFacade->addFeatureOption(
-                $values['feature_id'],
+            $this->redirect('features');
+        }
+    }
+
+    public function createComponentFeatureOptionEditForm(): Form
+    {
+        $form = new Form;
+
+        $form->addHidden('id');
+
+        $form->addSelect('feature_id', 'Funkce:', 
+            $this->modelFacade->getFeatures()->fetchPairs('id', 'name'))
+            ->setPrompt('Vyberte funkci')
+            ->setRequired('Prosím, vyberte funkci.');
+
+        $form->addText('name', 'Název varianty:')
+            ->setRequired('Prosím, zadejte název varianty.');
+
+        $form->addText('name_cs', 'Název varianty (CZ):')
+            ->setRequired('Prosím, zadejte název varianty v češtině.');
+
+        $form->addText('name_en', 'Název varianty (EN):')
+            ->setRequired('Prosím, zadejte název varianty v angličtině.');
+
+        $form->addText('price', 'Cena (CZK):')
+            ->setRequired('Prosím, zadejte cenu.')
+            ->addRule($form::FLOAT, 'Cena musí být platné číslo.')
+            ->setDefaultValue('0.00');
+
+        $form->addText('price_eur', 'Cena (EUR):')
+            ->setRequired('Prosím, zadejte cenu v EUR.')
+            ->addRule($form::FLOAT, 'Cena musí být platné číslo.')
+            ->setDefaultValue('0.00');
+
+        $form->addCheckbox('allow_user_upload', 'Nahrát Soubor')
+            ->setDefaultValue(false);
+
+        $form->addSubmit('save', 'Upravit variantu');
+
+        $form->onSuccess[] = [$this, 'featureOptionEditFormSucceeded'];
+        return $form;
+    }
+
+    public function featureOptionEditFormSucceeded(Form $form, array $values): void
+    {
+        try {
+            $this->modelFacade->updateFeatureOption(
+                (int)$values['id'],
                 $values['name'],
                 (float)$values['price'],
-                (bool)$values['allow_user_upload']
+                (float)$values['price_eur'],
+                (bool)$values['allow_user_upload'],
+                $values['name_cs'],
+                $values['name_en']
             );
-            $this->flashMessage('Možnost byla úspěšně přidána!', 'success');
+            $this->flashMessage('Varianta byla úspěšně upravena!', 'success');
+        } catch (\Exception $e) {
+            $this->flashMessage($e->getMessage(), 'error');
         }
-    } catch (\Exception $e) {
-        $this->flashMessage($e->getMessage(), 'error');
+
+        if ($this->isAjax()) {
+            $this->template->featureOptions = $this->modelFacade->getAllFeatureOptions();
+            $this->redrawControl('featureOptionsTable');
+            $this->redrawControl('featureOptionForm-feature_id');
+            $this->redrawControl('flashes');
+        } else {
+            $this->redirect('features');
+        }
     }
-
-    if ($this->isAjax()) {
-        $this->template->featureOptions = $this->modelFacade->getAllFeatureOptions();
-        $this->redrawControl('featureOptionsTable');
-        $this->redrawControl('featureOptionForm-feature_id');
-        $this->redrawControl('flashes');
-    } else {
-        $this->redirect('features');
-    }
-}
-
-public function createComponentFeatureOptionEditForm(): Form
-{
-    $form = new Form;
-
-    $form->addHidden('id');
-
-    $form->addSelect('feature_id', 'Funkce:', 
-        $this->modelFacade->getFeatures()->fetchPairs('id', 'name'))
-        ->setPrompt('Vyberte funkci')
-        ->setRequired('Prosím, vyberte funkci.');
-
-    $form->addText('name', 'Název varianty:')
-        ->setRequired('Prosím, zadejte název varianty.');
-
-    $form->addText('price', 'Cena (CZK):')
-        ->setRequired('Prosím, zadejte cenu.')
-        ->addRule($form::FLOAT, 'Cena musí být platné číslo.')
-        ->setDefaultValue('0.00');
-
-    $form->addCheckbox('allow_user_upload', 'Nahrát Soubor')
-        ->setDefaultValue(false);
-
-    $form->addSubmit('save', 'Upravit variantu');
-
-    $form->onSuccess[] = [$this, 'featureOptionEditFormSucceeded'];
-    return $form;
-}
-
-public function featureOptionEditFormSucceeded(Form $form, array $values): void
-{
-    try {
-        $this->modelFacade->updateFeatureOption(
-            (int)$values['id'],
-            $values['name'],
-            (float)$values['price'],
-            (bool)$values['allow_user_upload']
-        );
-        $this->flashMessage('Varianta byla úspěšně upravena!', 'success');
-    } catch (\Exception $e) {
-        $this->flashMessage($e->getMessage(), 'error');
-    }
-
-    if ($this->isAjax()) {
-        $this->template->featureOptions = $this->modelFacade->getAllFeatureOptions();
-        $this->redrawControl('featureOptionsTable');
-        $this->redrawControl('featureOptionForm-feature_id');
-        $this->redrawControl('flashes');
-    } else {
-        $this->redirect('features');
-    }
-}
 
 public function handleEditFeatureOption(int $optionId): void
 {
@@ -549,7 +588,10 @@ public function handleEditFeatureOption(int $optionId): void
         'id' => $option->id,
         'feature_id' => $option->feature_id,
         'name' => $option->name,
+        'name_cs' => $option->name_cs,
+        'name_en' => $option->name_en,
         'price' => $option->price,
+        'price_eur' => $option->price_eur,
         'allow_user_upload' => (bool)$option->allow_user_upload,
     ]);
 
@@ -727,11 +769,18 @@ public function handleEditFeatureOption(int $optionId): void
             $this->redirect('this');
         }
     }
+    
     public function createComponentVendorForm(): Form
     {
         $form = new Form;
         $form->addText('name', 'Název dopravce:')
             ->setRequired('Prosím, zadejte název dopravce.');
+        $form->addMultiSelect('supported_lang', 'Podporované jazyky:', [
+            'cs' => 'Čeština',
+            'en' => 'English',
+        ])
+            ->setRequired('Prosím, vyberte alespoň jeden jazyk.')
+            ->setHtmlAttribute('multiple');
         $form->addSubmit('save', 'Přidat dopravce');
         $form->onSuccess[] = [$this, 'vendorFormSucceeded'];
         return $form;
@@ -740,7 +789,7 @@ public function handleEditFeatureOption(int $optionId): void
     public function vendorFormSucceeded(Form $form, array $values): void
     {
         try {
-            $this->orderFacade->addVendor($values['name']);
+            $this->orderFacade->addVendor($values['name'], $values['supported_lang']);
             $this->flashMessage('Dopravce byl úspěšně přidán!', 'success');
         } catch (\Exception $e) {
             $this->flashMessage($e->getMessage(), 'error');
@@ -761,6 +810,12 @@ public function handleEditFeatureOption(int $optionId): void
         $form->addHidden('id');
         $form->addText('name', 'Název dopravce:')
             ->setRequired('Prosím, zadejte název dopravce.');
+        $form->addMultiSelect('supported_lang', 'Podporované jazyky:', [
+            'cs' => 'Čeština',
+            'en' => 'English',
+        ])
+            ->setRequired('Prosím, vyberte alespoň jeden jazyk.')
+            ->setHtmlAttribute('multiple');
         $form->addSubmit('save', 'Upravit dopravce');
         $form->onSuccess[] = [$this, 'vendorEditFormSucceeded'];
         return $form;
@@ -769,7 +824,7 @@ public function handleEditFeatureOption(int $optionId): void
     public function vendorEditFormSucceeded(Form $form, array $values): void
     {
         try {
-            $this->orderFacade->updateVendor((int)$values['id'], $values['name']);
+            $this->orderFacade->updateVendor((int)$values['id'], $values['name'], $values['supported_lang']);
             $this->flashMessage('Dopravce byl úspěšně upraven!', 'success');
         } catch (\Exception $e) {
             $this->flashMessage($e->getMessage(), 'error');
@@ -784,23 +839,25 @@ public function handleEditFeatureOption(int $optionId): void
         }
     }
 
-    public function handleEditVendor(int $vendorId): void
-    {
-        $vendor = $this->orderFacade->getVendorById($vendorId);
-        if (!$vendor) {
-            $this->flashMessage('Dopravce neexistuje.', 'error');
-            $this->redirect('shipping');
-        }
-
-        $this['vendorEditForm']->setDefaults([
-            'id' => $vendor->id,
-            'name' => $vendor->name,
-        ]);
-
-        if ($this->isAjax()) {
-            $this->redrawControl('vendorEditForm');
-        }
+public function handleEditVendor(int $vendorId): void
+{
+    $vendor = $this->orderFacade->getVendorById($vendorId);
+    if (!$vendor) {
+        $this->flashMessage('Dopravce neexistuje.', 'error');
+        $this->redirect('shipping');
     }
+
+    $supportedLang = $vendor->supported_lang ? explode(',', $vendor->supported_lang) : [];
+    $this['vendorEditForm']->setDefaults([
+        'id' => $vendor->id,
+        'name' => $vendor->name,
+        'supported_lang' => $supportedLang,
+    ]);
+
+    if ($this->isAjax()) {
+        $this->redrawControl('vendorEditForm');
+    }
+}
 
     public function handleDeleteVendor(int $vendorId): void
     {
@@ -823,7 +880,10 @@ public function handleEditFeatureOption(int $optionId): void
     public function createComponentShippingOptionForm(): Form
     {
         $form = new Form;
-        $form->addSelect('vendor_id', 'Dopravce:', $this->orderFacade->getVendors())
+        $lang = $this->template->lang ?? 'cs';
+        $vendors = $this->orderFacade->getVendors($lang);
+        $vendorOptions = array_map(fn($vendor) => $vendor->name, $vendors);
+        $form->addSelect('vendor_id', 'Dopravce:', $vendorOptions)
             ->setRequired('Prosím, vyberte dopravce.');
         $form->addText('name', 'Název dopravy:')
             ->setRequired('Prosím, zadejte název dopravy tř. "Na adresu"');
@@ -857,8 +917,11 @@ public function handleEditFeatureOption(int $optionId): void
     public function createComponentShippingOptionEditForm(): Form
     {
         $form = new Form;
+        $lang = $this->template->lang ?? 'cs';
         $form->addHidden('id');
-        $form->addSelect('vendor_id', 'Dopravce:', $this->orderFacade->getVendors())
+        $vendors = $this->orderFacade->getVendors($lang);
+        $vendorOptions = array_map(fn($vendor) => $vendor->name, $vendors);
+        $form->addSelect('vendor_id', 'Dopravce:', $vendorOptions)
             ->setRequired('Prosím, vyberte dopravce.');
         $form->addText('name', 'Název možnosti dopravy:')
             ->setRequired('Prosím, zadejte název možnosti dopravy.');
@@ -927,39 +990,29 @@ public function handleEditFeatureOption(int $optionId): void
         }
     }
 
-  public function createComponentPaymentMethodForm(): Form
+public function createComponentPaymentMethodForm(): Form
 {
     $form = new Form;
-
-    // Vendor selection
-    $form->addSelect('vendor_id', 'Dopravce:', 
-        $this->orderFacade->getVendors())
+    $lang = $this->template->lang ?? 'cs';
+    $form->addSelect('vendor_id', 'Dopravce:', $this->orderFacade->getVendors($lang))
         ->setRequired('Prosím, vyberte dopravce.');
-
-    // Basic fields
     $form->addText('code', 'Kód platby:')
         ->setRequired('Prosím, zadejte kód platby, stejné jako název, bez diakritiky.')
         ->addRule($form::PATTERN, 'Kód může obsahovat pouze písmena, čísla a podtržítko.', '[a-zA-Z0-9_]+');
-
     $form->addText('name', 'Název platební metody:')
         ->setRequired('Prosím, zadejte název platební metody.');
-
     $form->addText('price', 'Cena (CZK):')
         ->setRequired('Prosím, zadejte cenu.')
         ->addRule($form::FLOAT, 'Cena musí být platné číslo.')
         ->setDefaultValue('0.00');
-
-    // Build shipping options with vendor names
-    $shippingOptions = $this->orderFacade->getAllShippingOptions()->fetchAll();
+    $shippingOptions = $this->orderFacade->getAllShippingOptions($lang)->fetchAll();
     $shippingOptionsArray = [];
     foreach ($shippingOptions as $option) {
-        $vendorName = $this->orderFacade->getVendorNameById($option->vendor_id);
+        $vendorName = $this->orderFacade->getVendorNameById($option->vendor_id, $lang);
         $shippingOptionsArray[$option->id] = "$vendorName: $option->name";
     }
     $form->addMultiSelect('shipping_option_ids', 'Platné u:', $shippingOptionsArray);
-
     $form->addSubmit('save', 'Přidat platební metodu');
-
     $form->onSuccess[] = [$this, 'paymentMethodFormSucceeded'];
     return $form;
 }
@@ -991,38 +1044,27 @@ public function handleEditFeatureOption(int $optionId): void
     public function createComponentPaymentMethodEditForm(): Form
 {
     $form = new Form;
-
+    $lang = $this->template->lang ?? 'cs';
     $form->addHidden('id');
-
-    // Vendor selection
-    $form->addSelect('vendor_id', 'Dopravce:', 
-        $this->orderFacade->getVendors())
+    $form->addSelect('vendor_id', 'Dopravce:', $this->orderFacade->getVendors($lang))
         ->setRequired('Prosím, vyberte dopravce.');
-
-    // Basic fields
     $form->addText('code', 'Kód platby:')
         ->setRequired('Prosím, zadejte kód platby.')
         ->addRule($form::PATTERN, 'Kód může obsahovat pouze písmena, čísla a podtržítko.', '[a-zA-Z0-9_]+');
-
     $form->addText('name', 'Název platební metody:')
         ->setRequired('Prosím, zadejte název platební metody.');
-
     $form->addText('price', 'Cena (CZK):')
         ->setRequired('Prosím, zadejte cenu.')
         ->addRule($form::FLOAT, 'Cena musí být platné číslo.')
         ->setDefaultValue('0.00');
-
-    // Build shipping options with vendor names
-    $shippingOptions = $this->orderFacade->getAllShippingOptions()->fetchAll();
+    $shippingOptions = $this->orderFacade->getAllShippingOptions($lang)->fetchAll();
     $shippingOptionsArray = [];
     foreach ($shippingOptions as $option) {
-        $vendorName = $this->orderFacade->getVendorNameById($option->vendor_id);
+        $vendorName = $this->orderFacade->getVendorNameById($option->vendor_id, $lang);
         $shippingOptionsArray[$option->id] = "$vendorName: $option->name";
     }
     $form->addMultiSelect('shipping_option_ids', 'Možnosti dopravy:', $shippingOptionsArray);
-
     $form->addSubmit('save', 'Upravit platební metodu');
-
     $form->onSuccess[] = [$this, 'paymentMethodEditFormSucceeded'];
     return $form;
 }

@@ -533,9 +533,14 @@ final class OrderFacade
 
     public function getVendors(string $lang = 'cs'): array
     {
-        return $this->database->table('vendors')
+        $vendors = $this->database->table('vendors')
             ->where('supported_lang LIKE ?', "%$lang%")
-            ->fetchPairs('id', 'name');
+            ->fetchAll();
+        $result = [];
+        foreach ($vendors as $vendor) {
+            $result[$vendor->id] = $vendor;
+        }
+        return $result;
     }
 
     public function getAllShippingOptions()
@@ -553,18 +558,20 @@ final class OrderFacade
         return $this->database->table('shipping_options')->get($optionId);
     }
 
-    public function addVendor(string $name): void
+    public function addVendor(string $name, array $supportedLang): ActiveRow
     {
-        $this->database->table('vendors')->insert([
-            'name' => $name,
+        return $this->database->table('vendors')->insert([
+            'name' => trim($name),
+            'supported_lang' => implode(',', $supportedLang),
         ]);
     }
 
-    public function updateVendor(int $vendorId, string $name): void
+    public function updateVendor(int $id, string $name, array $supportedLang): void
     {
-        $this->database->table('vendors')
-            ->where('id', $vendorId)
-            ->update(['name' => $name]);
+        $this->database->table('vendors')->get($id)?->update([
+            'name' => trim($name),
+            'supported_lang' => implode(',', $supportedLang),
+        ]);
     }
 
     public function deleteVendor(int $vendorId): void
