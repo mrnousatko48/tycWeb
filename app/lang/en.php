@@ -275,4 +275,5 @@ return [
     'forgot_password.code_sent' => 'A reset code has been sent to your email.',
     'reset_password.invalid_code' => 'Invalid reset code.',
     'reset_password.success' => 'Password was successfully changed.',
+    'gallery.title' => 'Gallery',
 ];

@@ -1,4 +1,4 @@
-{block title}OPNX3D | Galerie{/block}
+{block title}OPNX3D | {_'gallery.title'}{/block}
 {block content}
 <section id="galerie" class="gallery py-5">
     <div class="container">
@@ -17,19 +17,26 @@
 
 <!-- Lightbox CSS -->
 <style>
-    h1 {
+#galerie h1 {
     font-size: 2.5rem;
     margin-bottom: 1rem;
     font-weight: 700;
     color: var(--color-text);
+    justify-content: center; /* Center grid items */
     }
-    .gallery-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-    gap: 1rem;
+    
+#galerie .container {
+    text-align: center; /* Center h1 and inline elements */
 }
 
+.gallery-grid {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center; /* Centers all items */
+    gap: 1rem;
+}
 .gallery-item {
+    flex: 0 1 250px; /* Fixed card width, wraps as needed */
     position: relative;
     overflow: hidden;
     border-radius: 10px;
@@ -37,6 +44,7 @@
     transition: transform 0.3s ease;
     background: #fff;
 }
+
 
 .gallery-item:hover {
     transform: scale(1.02);

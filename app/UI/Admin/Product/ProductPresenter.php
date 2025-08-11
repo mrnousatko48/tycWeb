@@ -376,38 +376,113 @@ final class ProductPresenter extends Nette\Application\UI\Presenter
     }
 
     public function createComponentColorForm(): Form
-    {
-        $form = new Form;
+{
+    $form = new Form;
 
-        $form->addText('name', 'Název barvy:')
-            ->setRequired('Prosím, zadejte název barvy.');
+    $form->addText('name', 'Název barvy:')
+        ->setRequired('Prosím, zadejte název barvy.');
 
-        $form->addText('hex_code', 'Hex kód (např. #FF0000):')
-            ->addRule($form::PATTERN, 'Musí být platný hex kód (např. #FF0000)', '^#[0-9A-Fa-f]{6}$')
-            ->setRequired(false);
+    $form->addText('name_cs', 'Název barvy (CZ):')
+        ->setRequired('Prosím, zadejte název barvy v češtině.');
 
-        $form->addSubmit('save', 'Přidat barvu');
+    $form->addText('name_en', 'Název barvy (EN):')
+        ->setRequired('Prosím, zadejte název barvy v angličtině.');
 
-        $form->onSuccess[] = [$this, 'colorFormSucceeded'];
-        return $form;
+    $form->addText('hex_code', 'Hex kód (např. #FF0000):')
+        ->addRule($form::PATTERN, 'Musí být platný hex kód (např. #FF0000)', '^#[0-9A-Fa-f]{6}$')
+        ->setRequired(false);
+
+    $form->addSubmit('save', 'Přidat barvu');
+
+    $form->onSuccess[] = [$this, 'colorFormSucceeded'];
+    return $form;
+}
+
+public function colorFormSucceeded(Form $form, array $values): void
+{
+    try {
+        $this->modelFacade->addColor($values['name'], $values['hex_code'] ?? null, $values['name_cs'], $values['name_en']);
+        $this->flashMessage('Barva byla úspěšně přidána!', 'success');
+    } catch (\Exception $e) {
+        $this->flashMessage($e->getMessage(), 'error');
     }
 
-    public function colorFormSucceeded(Form $form, array $values): void
-    {
-        try {
-            $this->modelFacade->addColor($values['name'], $values['hex_code'] ?? null);
-            $this->flashMessage('Barva byla úspěšně přidána!', 'success');
-        } catch (\Exception $e) {
-            $this->flashMessage($e->getMessage(), 'error');
-        }
-
-        if ($this->isAjax()) {
-            $this->redrawControl('colorsTable');
-            $this->redrawControl('flashes');
-        } else {
-            $this->redirect('colors');
-        }
+    if ($this->isAjax()) {
+        $this->redrawControl('colorsTable');
+        $this->redrawControl('flashes');
+    } else {
+        $this->redirect('colors');
     }
+}
+
+public function createComponentColorEditForm(): Form
+{
+    $form = new Form;
+
+    $form->addHidden('id');
+
+    $form->addText('name', 'Název barvy:')
+        ->setRequired('Prosím, zadejte název barvy.');
+
+    $form->addText('name_cs', 'Název barvy (CZ):')
+        ->setRequired('Prosím, zadejte název barvy v češtině.');
+
+    $form->addText('name_en', 'Název barvy (EN):')
+        ->setRequired('Prosím, zadejte název barvy v angličtině.');
+
+    $form->addText('hex_code', 'Hex kód (např. #FF0000):')
+        ->addRule($form::PATTERN, 'Musí být platný hex kód (např. #FF0000)', '^#[0-9A-Fa-f]{6}$')
+        ->setRequired(false);
+
+    $form->addSubmit('save', 'Upravit barvu');
+
+    $form->onSuccess[] = [$this, 'colorEditFormSucceeded'];
+    return $form;
+}
+
+public function colorEditFormSucceeded(Form $form, array $values): void
+{
+    try {
+        $this->modelFacade->updateColor(
+            (int)$values['id'],
+            $values['name'],
+            $values['hex_code'] ?? null,
+            $values['name_cs'],
+            $values['name_en']
+        );
+        $this->flashMessage('Barva byla úspěšně upravena!', 'success');
+    } catch (\Exception $e) {
+        $this->flashMessage($e->getMessage(), 'error');
+    }
+
+    if ($this->isAjax()) {
+        $this->redrawControl('colorsTable');
+        $this->redrawControl('flashes');
+    } else {
+        $this->redirect('colors');
+    }
+}
+
+public function handleEditColor(int $colorId): void
+{
+    $color = $this->modelFacade->getColor($colorId);
+    if (!$color) {
+        $this->flashMessage('Barva neexistuje.', 'error');
+        $this->redirect('colors');
+    }
+
+    $this['colorEditForm']->setDefaults([
+        'id' => $color->id,
+        'name' => $color->name,
+        'name_cs' => $color->name_cs,
+        'name_en' => $color->name_en,
+        'hex_code' => $color->hex_code,
+    ]);
+
+    if ($this->isAjax()) {
+        $this->redrawControl('colorEditForm');
+    }
+}
 
     public function createComponentFeatureForm(): Form
     {

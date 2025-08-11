@@ -275,5 +275,7 @@ return [
     'forgot_password.code_sent' => 'Na váš email byl odeslán resetovací kód.',
     'reset_password.invalid_code' => 'Neplatný resetovací kód.',
     'reset_password.success' => 'Heslo bylo úspěšně změněno.',
+    'gallery.title' => 'Galerie',
+    
     
 ];

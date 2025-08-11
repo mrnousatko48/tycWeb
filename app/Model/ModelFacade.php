@@ -262,11 +262,13 @@ public function getFeaturesByModel(int $modelId, string $lang): array
         return $this->database->table('colors')->get($id);
     }
 
-    public function addColor(string $name, ?string $hexCode = null): ActiveRow
+    public function addColor(string $name, ?string $hexCode = null, ?string $name_cs = null, ?string $name_en = null): ActiveRow
     {
         try {
             return $this->database->table('colors')->insert([
                 'name' => trim($name),
+                'name_cs' => $name_cs ? trim($name_cs) : trim($name),
+                'name_en' => $name_en ? trim($name_en) : trim($name),
                 'hex_code' => $hexCode,
             ]);
         } catch (UniqueConstraintViolationException $e) {
@@ -274,17 +276,19 @@ public function getFeaturesByModel(int $modelId, string $lang): array
         }
     }
 
-    public function updateColor(int $id, string $name, ?string $hexCode = null): void
-    {
-        try {
-            $this->database->table('colors')->get($id)?->update([
-                'name' => trim($name),
-                'hex_code' => $hexCode,
-            ]);
-        } catch (UniqueConstraintViolationException $e) {
-            throw new \Exception("Color '$name' already exists.");
-        }
+public function updateColor(int $id, string $name, ?string $hexCode = null, ?string $name_cs = null, ?string $name_en = null): void
+{
+    try {
+        $this->database->table('colors')->get($id)?->update([
+            'name' => trim($name),
+            'name_cs' => $name_cs ? trim($name_cs) : trim($name),
+            'name_en' => $name_en ? trim($name_en) : trim($name),
+            'hex_code' => $hexCode,
+        ]);
+    } catch (UniqueConstraintViolationException $e) {
+        throw new \Exception("Color '$name' already exists.");
     }
+}
 
     public function deleteColor(int $id): void
     {
