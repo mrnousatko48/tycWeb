@@ -160,7 +160,7 @@
             <div class="flash {$flash->type}">{_'flash.' . $flash->type . '.' . $flash->message}</div>
         {/foreach}
 
-        {form signInForm}
+        {form signInForm, lang => $lang}
             <div class="form-group">
                 <label n:name="username">{_'form.username'}</label>
                 {input username}
