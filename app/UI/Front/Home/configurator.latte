@@ -351,7 +351,7 @@
                     </div>
                 </div>
 
-                <div>
+                <div id="color-container" style="display: none;">
                     <h2 class="text-lg font-semibold mt-6">{_'configurator.color'}</h2>
                     <div id="color-buttons" class="mt-3 flex flex-wrap gap-3">
                     </div>
@@ -461,6 +461,10 @@ function checkSelections(showMessage = false) {
     const allFeaturesSelected = totalFeatures > 0 && selectedFeaturesCount === totalFeatures;
 
     const allSelected = manufacturerSelected && modelSelected && colorSelected && allFeaturesSelected && uploadConditionMet;
+
+    // Show or hide color container based on selections
+    const colorContainer = document.getElementById('color-container');
+    colorContainer.style.display = (manufacturerSelected && modelSelected) ? 'block' : 'none';
 
     // Update highlights and show popup only if showMessage is true
     if (showMessage) {

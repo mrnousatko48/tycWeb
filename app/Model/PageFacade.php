@@ -316,4 +316,34 @@ class PageFacade
             $this->database->table('legal_pages')->insert($data);
         }
     }
+
+    public function getCustomization(int $id): ?object
+{
+    $titleColumn = $this->lang === 'en' ? 'title_en' : 'title';
+    $descColumn = $this->lang === 'en' ? 'description_en' : 'description';
+    return $this->database->table('customization')
+        ->select("id, COALESCE($titleColumn, title) AS title, title_en, COALESCE($descColumn, description) AS description, description_en, image_path, ordering")
+        ->where('id', $id)
+        ->fetch();
+}
+
+public function updateCustomization(int $id, string $title, string $description, ?FileUpload $image = null, ?string $titleEn = null, ?string $descriptionEn = null): void
+{
+    $data = [
+        'title' => $title,
+        'title_en' => $titleEn,
+        'description' => $description,
+        'description_en' => $descriptionEn,
+    ];
+
+    if ($image instanceof FileUpload && $image->isOk()) {
+        $currentCustomization = $this->database->table('customization')->get($id);
+        $imagePath = ImageUploader::uploadImage($image, 'Uploads/home', $currentCustomization ? $currentCustomization->image_path : null);
+        $data['image_path'] = $imagePath;
+    }
+
+    $this->database->table('customization')
+        ->where('id', $id)
+        ->update($data);
+}
 }

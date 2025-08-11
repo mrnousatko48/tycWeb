@@ -563,10 +563,9 @@ public function createGuestOrder(string $firstname, string $lastname, string $em
         return $vendor ? $vendor->name : 'Unknown';
     }
 
-    public function getVendors(string $lang = 'cs'): array // Returns vendor name string, for cart
+    public function getVendors(): array // Returns vendor name string, for cart
     {
         $vendors = $this->database->table('vendors')
-            ->where('supported_lang LIKE ?', "%$lang%")
             ->fetchAll();
         $result = [];
         foreach ($vendors as $vendor) {

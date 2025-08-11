@@ -413,4 +413,53 @@ class EditPresenter extends Presenter
             $this->redrawControl('flashes');
         }
     }
+
+public function actionEditCustomization(int $id): void
+{
+    $customization = $this->pageFacade->getCustomization($id);
+    if (!$customization) {
+        $this->error('Funkce nenalezena', 404);
+    }
+    $this['editCustomizationForm']->setDefaults($customization->toArray());
+    $this->template->editCustomization = $customization;
+    $this->template->customizations = $this->pageFacade->getCustomizations(); // Added to set customizations
+    $this->template->setFile(__DIR__ . '/Templates/customization.latte');
+}
+
+public function createComponentEditCustomizationForm(): Form
+{
+    $customization = $this->template->customization ?? (object)[
+        'id' => null,
+        'title' => '',
+        'title_en' => '',
+        'description' => '',
+        'description_en' => '',
+        'image_path' => null
+    ];
+    $fields = [
+        'id' => ['type' => 'hidden', 'required' => true],
+        'title' => ['type' => 'text', 'label' => 'Název funkce:', 'required' => true],
+        'title_en' => ['type' => 'text', 'label' => 'Název funkce (EN):', 'required' => false],
+        'description' => ['type' => 'textArea', 'label' => 'Popis funkce:', 'required' => true],
+        'description_en' => ['type' => 'textArea', 'label' => 'Popis funkce (EN):', 'required' => false],
+        'image' => ['type' => 'upload', 'label' => 'Obrázek:', 'required' => false],
+    ];
+
+    $form = $this->createEditForm(
+        $customization,
+        $fields,
+        function ($values) {
+            $this->pageFacade->updateCustomization((int)$values['id'], $values['title'], $values['description'], $values['image'], $values['title_en'], $values['description_en']);
+        },
+        'Funkce byla úspěšně aktualizována.',
+        'Edit:customization'
+    );
+
+    $form['image']
+        ->setHtmlAttribute('class', 'form-control')
+        ->addRule(Form::IMAGE, 'Soubor musí být obrázek (JPEG, PNG, GIF, WebP).');
+
+    $form->getElementPrototype()->enctype = 'multipart/form-data';
+    return $form;
+}
 }
