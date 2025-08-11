@@ -10,11 +10,11 @@ CREATE TABLE `banner` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 INSERT INTO `banner` (`id`, `content_type`, `content_text`, `content_text_en`, `image_path`, `ordering`) VALUES
-(1,	'title',	'Odolné 3D tisknuté kryty',	'Durable 3D Printed Cases',	NULL,	1),
+(1,	'title',	'Odolné 3D tisknuté kryty',	'Durable 3D Printed Cases.',	NULL,	1),
 (2,	'description',	'Vytvořte si pevný a stylový kryt s pokročilou 3D tiskovou technologií a vlastním designem.',	'Create a sturdy and stylish case with advanced 3D printing technology and your own design.',	NULL,	2),
 (3,	'image',	NULL,	NULL,	'/www/uploads/home/6873e208e7adb_Obrazek-WhatsApp-2025-07-12-v-07.06.31-ae69212d.webp',	3),
 (4,	'button_text',	'Navrhnout kryt',	'Design Your Case',	NULL,	4),
-(5,	'button_link',	'configurator',	NULL,	NULL,	5);
+(5,	'button_link',	'configurator',	'co',	NULL,	5);
 
 DROP TABLE IF EXISTS `cases`;
 CREATE TABLE `cases` (
@@ -98,7 +98,8 @@ CREATE TABLE `customization` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 INSERT INTO `customization` (`id`, `title`, `title_en`, `description`, `description_en`, `image_path`, `ordering`) VALUES
-(8,	'test',	'Test',	'dassda',	'Test description',	'/www/uploads/home/6873e436bbb5b_r6bwd7wd.webp',	1);
+(8,	'test',	'Test',	'dassda',	'Test description',	'/www/uploads/home/6873e436bbb5b_r6bwd7wd.webp',	1),
+(9,	'test',	'Enlihss',	'jabaja',	'asdasdasdadsa',	'/www/Uploads/home/6899d48378dd1_ApplicationFrameHost-CO2sH8N1VU.webp',	2);
 
 DROP TABLE IF EXISTS `default_images`;
 CREATE TABLE `default_images` (
@@ -129,7 +130,7 @@ INSERT INTO `durability` (`id`, `content_type`, `content_text`, `content_text_en
 (1,	'title',	'Odolnost navržená pro život',	'Durability Designed for Life',	NULL,	1),
 (2,	'description1',	'Naše kryty zvládnou pád, prach i dobrodružství díky precizní 3D tiskové technologii',	'Our cases withstand drops, dust, and adventures thanks to precise 3D printing technology.',	NULL,	2),
 (3,	'description2',	'Vyrobeny z odolných, ekologických materiálů s perfektním přizpůsobením pro váš telefon.',	'Made from durable, eco-friendly materials with perfect fit for your phone.',	NULL,	3),
-(4,	'image',	NULL,	NULL,	'/www/uploads/home/6873e220ce872_Yellow-Black-Simple-Creative-Agency-Logo.webp',	4);
+(4,	'image',	NULL,	NULL,	'/www/Uploads/home/6899d46517402_msedge-936H8cO1Qo.webp',	4);
 
 DROP TABLE IF EXISTS `email_templates`;
 CREATE TABLE `email_templates` (
@@ -224,10 +225,11 @@ CREATE TABLE `gallery` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 INSERT INTO `gallery` (`id`, `image`, `alt_text`, `alt_text_en`, `ordering`) VALUES
-(15,	'/www/uploads/gallery/687945b800dec_holka-ridicak.webp',	'Autoškola Prima',	NULL,	4),
+(15,	'/www/uploads/gallery/687945b800dec_holka-ridicak.webp',	'Autoškola Prima',	NULL,	5),
 (16,	'/www/uploads/gallery/687945c42eeae_zidle.webp',	'adsads',	NULL,	3),
 (17,	'/www/uploads/gallery/687945cd88555_kluk-s-autem.webp',	'asdasdfg',	NULL,	2),
-(18,	'/www/uploads/gallery/687945d87ac49_ucebna.webp',	'gfsdf',	NULL,	1);
+(18,	'/www/uploads/gallery/687945d87ac49_ucebna.webp',	'gfsdf',	NULL,	1),
+(19,	'/www/Uploads/gallery/6899d49ea4cf8_brave-TqmX7IcFMY.webp',	'test',	'eng',	4);
 
 DROP TABLE IF EXISTS `legal_pages`;
 CREATE TABLE `legal_pages` (
@@ -236,15 +238,17 @@ CREATE TABLE `legal_pages` (
   `title` varchar(255) NOT NULL,
   `content` text NOT NULL,
   `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `title_en` varchar(255) DEFAULT NULL,
+  `content_en` text,
   PRIMARY KEY (`id`),
   UNIQUE KEY `section_name` (`section_name`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
-INSERT INTO `legal_pages` (`id`, `section_name`, `title`, `content`, `updated_at`) VALUES
-(1,	'obchodni-podminky',	'Obchodní podmínky',	'<h2>Obchodní podmínky</h2><p>Toto jsou testovací obchodní podmínky pro OPNX3D. Všechny nákupy podléhají těmto pravidlům. Prosím, přečtěte si pečlivě.</p><p>1. <strong>Předmět smlouvy</strong>: Prodáváme obaly na telefony dle specifikací zákazníka.</p><p>2. <strong>Ceny</strong>: Všechny ceny jsou uvedeny v Kč včetně DPH.</p>',	'2025-07-17 09:46:17'),
-(2,	'ochrana-osobnich-udaju',	'Ochrana osobních údajů',	'<h2>Ochrana osobních údajů</h2><p>OPNX3D chrání vaše osobní údaje dle GDPR. Zde je testovací obsah.</p><p>1. <strong>Shromažďování údajů</strong>: Shromažďujeme pouze nezbytné údaje pro zpracování objednávek.</p><p>2. <strong>Použití údajů</strong>: Údaje jsou použity výhradně pro účely doručení a komunikace.</p>',	'2025-07-17 09:08:46'),
-(3,	'reklamacni-rad',	'Reklamační řád',	'<h2>Reklamační řád</h2><p>Tento testovací reklamační řád popisuje postup při reklamaci zboží.</p><p>1. <strong>Lhůta pro reklamaci</strong>: Zboží lze reklamovat do 24 měsíců od nákupu.</p><p>2. <strong>Postup</strong>: Kontaktujte nás na opnx3d@gmail.com.</p>',	'2025-07-17 09:08:46'),
-(4,	'odstoupeni-od-smlouvy',	'Odstoupení od smlouvy',	'<h2>Odstoupení od smlouvy</h2><p>Testovací obsah pro odstoupení od smlouvy.</p><p>1. <strong>Lhůta</strong>: Od smlouvy lze odstoupit do 14 dnů bez udání důvodu.</p><p>2. <strong>Vrácení zboží</strong>: Zboží musí být vráceno nepoškozené na naši adresu.</p>',	'2025-07-17 09:08:46');
+INSERT INTO `legal_pages` (`id`, `section_name`, `title`, `content`, `updated_at`, `title_en`, `content_en`) VALUES
+(1,	'obchodni-podminky',	'Obchodní podmínky',	'<h2>Obchodní podmínky</h2><p>Toto jsou testovací obchodní podmínky pro OPNX3D. Všechny nákupy podléhají těmto pravidlům. Prosím, přečtěte si pečlivě.</p><p>1. <strong>Předmět smlouvy</strong>: Prodáváme obaly na telefony dle specifikací zákazníka.</p><p>2. <strong>Ceny</strong>: Všechny ceny jsou uvedeny v Kč včetně DPH.</p>',	'2025-08-11 12:17:05',	'Terms and conditions',	'<h2>Terms and Conditions</h2><p>These are the test terms and conditions for OPNX3D. All purchases are subject to these rules. Please read carefully.</p><p>1. <strong>Subject of the contract</strong>: We sell phone cases according to customer specifications.</p><p>2. <strong>Prices</strong>: All prices are in CZK including VAT.</p>'),
+(2,	'ochrana-osobnich-udaju',	'Ochrana osobních údajů',	'<h2>Ochrana osobních údajů</h2><p>OPNX3D chrání vaše osobní údaje dle GDPR. Zde je testovací obsah.</p><p>1. <strong>Shromažďování údajů</strong>: Shromažďujeme pouze nezbytné údaje pro zpracování objednávek.</p><p>2. <strong>Použití údajů</strong>: Údaje jsou použity výhradně pro účely doručení a komunikace.</p>',	'2025-07-17 09:08:46',	'Privacy Policy',	'<h2>Privacy Policy</h2><p>OPNX3D protects your personal data according to GDPR. Here is the test content.</p><p>1. <strong>Data Collection</strong>: We only collect the necessary data to process orders.</p><p>2. <strong>Data Use</strong>: The data is used exclusively for delivery and communication purposes.</p>'),
+(3,	'reklamacni-rad',	'Reklamační řád',	'<h2>Reklamační řád</h2><p>Tento testovací reklamační řád popisuje postup při reklamaci zboží.</p><p>1. <strong>Lhůta pro reklamaci</strong>: Zboží lze reklamovat do 24 měsíců od nákupu.</p><p>2. <strong>Postup</strong>: Kontaktujte nás na opnx3d@gmail.com.</p>',	'2025-07-17 09:08:46',	'Returns Policy',	'<h2>Complaints Policy</h2><p>This test complaint policy describes the procedure for claiming goods.</p><p>1. <strong>Complaint period</strong>: Goods can be claimed within 24 months of purchase.</p><p>2. <strong>Procedure</strong>: Contact us at opnx3d@gmail.com.</p>'),
+(4,	'odstoupeni-od-smlouvy',	'Odstoupení od smlouvy',	'<h2>Odstoupení od smlouvy</h2><p>Testovací obsah pro odstoupení od smlouvy.</p><p>1. <strong>Lhůta</strong>: Od smlouvy lze odstoupit do 14 dnů bez udání důvodu.</p><p>2. <strong>Vrácení zboží</strong>: Zboží musí být vráceno nepoškozené na naši adresu.</p>',	'2025-07-17 09:08:46',	'Contract Withdrawal',	'<h2>Withdrawal from the contract</h2><p>Test content for withdrawal from the contract.</p><p>1. <strong>Term</strong>: You can withdraw from the contract within 14 days without giving any reason.</p><p>2. <strong>Return of goods</strong>: The goods must be returned undamaged to our address.</p>');
 
 DROP TABLE IF EXISTS `logos`;
 CREATE TABLE `logos` (

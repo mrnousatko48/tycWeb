@@ -23,21 +23,24 @@
 {block scripts}
 <script n:syntax=off>
     document.addEventListener('DOMContentLoaded', () => {
-        ClassicEditor
-            .create(document.querySelector('.wysiwyg-editor'), {
-                toolbar: {
-                    items: [
-                        'heading', '|',
-                        'bold', 'italic', 'link', 'bulletedList', 'numberedList', '|',
-                        'undo', 'redo'
-                    ]
-                },
-                language: 'cs',
-                licenseKey: ''
-            })
-            .catch(error => {
-                console.error('CKEditor initialization error:', error);
-            });
+        const editors = document.querySelectorAll('.wysiwyg-editor');
+        editors.forEach(editor => {
+            ClassicEditor
+                .create(editor, {
+                    toolbar: {
+                        items: [
+                            'heading', '|',
+                            'bold', 'italic', 'link', 'bulletedList', 'numberedList', '|',
+                            'undo', 'redo'
+                        ]
+                    },
+                    language: editor.classList.contains('content') ? 'cs' : 'en',
+                    licenseKey: ''
+                })
+                .catch(error => {
+                    console.error('CKEditor initialization error:', error);
+                });
+        });
     });
 </script>
 {/block}

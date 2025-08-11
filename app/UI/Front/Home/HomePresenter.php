@@ -40,22 +40,32 @@ public function renderConfigurator(): void
 }
 
     public function renderLegal(string $section): void
-    {
-        $page = $this->pageFacade->getLegalPage($section);
-        if (!$page) {
-            $this->error('Stránka nenalezena', 404);
-        }
+{
+    $lang = $this->getParameter('lang', 'cs');
+    $this->pageFacade->setLang($lang);
+    $page = $this->pageFacade->getLegalPage($section);
+    if (!$page) {
+        $this->error('Page not found', 404);
+    }
 
-        $titles = [
+    $titles = [
+        'cs' => [
             'obchodni-podminky' => 'OPNX3D | Obchodní podmínky',
             'ochrana-osobnich-udaju' => 'OPNX3D | Ochrana osobních údajů',
             'reklamacni-rad' => 'OPNX3D | Reklamační řád',
             'odstoupeni-od-smlouvy' => 'OPNX3D | Odstoupení od smlouvy',
-        ];
+        ],
+        'en' => [
+            'obchodni-podminky' => 'OPNX3D | Terms and Conditions',
+            'ochrana-osobnich-udaju' => 'OPNX3D | Privacy Policy',
+            'reklamacni-rad' => 'OPNX3D | Complaints Procedure',
+            'odstoupeni-od-smlouvy' => 'OPNX3D | Withdrawal from Contract',
+        ],
+    ];
 
-        $this->template->title = $titles[$section] ?? 'OPNX3D | Právní informace';
-        $this->template->page = $page;
-    }
+    $this->template->title = $titles[$lang][$section] ?? 'OPNX3D | Legal Information';
+    $this->template->page = $page;
+}
 
     protected function createComponentCaseForm(): Form
     {

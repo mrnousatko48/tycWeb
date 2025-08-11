@@ -9,7 +9,7 @@ use App\Model\PageFacade;
 use Nette\Http\FileUpload;
 use App\Utils\ImageUploader;
 
-final class EditPresenter extends Presenter
+class EditPresenter extends Presenter
 {
     private PageFacade $pageFacade;
 
@@ -373,12 +373,18 @@ final class EditPresenter extends Presenter
             ->setHtmlAttribute('class', 'form-control')
             ->setHtmlAttribute('readonly', true);
 
-        $form->addText('title', 'Titulek:')
+        $form->addText('title', 'Titulek (CZ):')
             ->setRequired('Zadejte titulek.')
             ->setHtmlAttribute('class', 'form-control');
 
-        $form->addTextArea('content', 'Obsah:')
+        $form->addText('title_en', 'Titulek (EN):')
+            ->setHtmlAttribute('class', 'form-control');
+
+        $form->addTextArea('content', 'Obsah (CZ):')
             ->setRequired('Zadejte obsah.')
+            ->setHtmlAttribute('class', 'form-control wysiwyg-editor');
+
+        $form->addTextArea('content_en', 'Obsah (EN):')
             ->setHtmlAttribute('class', 'form-control wysiwyg-editor');
 
         $form->addSubmit('save', 'Uložit')
@@ -391,15 +397,14 @@ final class EditPresenter extends Presenter
 
     public function processLegalForm(Form $form, \stdClass $values): void
     {
-        // Validace obsahu – není výjimka, jen běžná kontrola
         if (empty(trim($values->content))) {
-            $form->addError('Obsah nesmí být prázdný.');
+            $form->addError('Obsah (CZ) nesmí být prázdný.');
             $this->redrawControl('flashes');
             return;
         }
 
         try {
-            $this->pageFacade->updateLegalPage($values->section_name, $values->title, $values->content);
+            $this->pageFacade->updateLegalPage($values->section_name, $values->title, $values->content, $values->title_en, $values->content_en);
             $this->flashMessage('Stránka byla úspěšně aktualizována.', 'success');
             $this->redirect('legalPages');
         } catch (\Exception $e) {

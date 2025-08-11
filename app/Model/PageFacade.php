@@ -5,9 +5,6 @@ use Nette\Database\Explorer;
 use Nette\Http\FileUpload;
 use App\Utils\ImageUploader;
 
-/**
- * PageFacade handles all data operations for page content, including database interactions and image uploads.
- */
 class PageFacade
 {
     private Explorer $database; 
@@ -46,9 +43,6 @@ class PageFacade
         return $result;
     }
 
-    /**
-     * Update logo for a specific theme.
-     */
     public function updateLogo(string $theme, ?FileUpload $image = null): void
     {
         if ($image instanceof FileUpload && $image->isOk()) {
@@ -65,9 +59,6 @@ class PageFacade
         }
     }
     
-    /**
-     * Update or insert content for a specific section and content type.
-     */
     public function updateSectionContent(string $section, string $contentType, ?string $contentText = null, ?string $contentTextEn = null, ?string $imagePath = null, ?int $ordering = null): void
     {
         $data = array_filter([
@@ -92,9 +83,6 @@ class PageFacade
         }
     }
 
-    /**
-     * Fetch banner section data.
-     */
     public function getBannerSection(): object
     {
         $banner = $this->getSectionContent('banner');
@@ -116,9 +104,6 @@ class PageFacade
         return (object)$result;
     }
 
-    /**
-     * Update banner section with form values, including image upload.
-     */
     public function updateBannerSection(array $values): void
     {
         if (!empty($values['image']) && $values['image'] instanceof FileUpload && $values['image']->isOk()) {
@@ -141,9 +126,6 @@ class PageFacade
         }
     }
 
-    /**
-     * Fetch durability section data.
-     */
     public function getDurabilitySection(): object
     {
         $durability = $this->getSectionContent('durability');
@@ -163,9 +145,6 @@ class PageFacade
         return (object)$result;
     }
 
-    /**
-     * Update durability section with form values, including image upload.
-     */
     public function updateDurabilitySection(array $values): void
     {
         $image = $values['image'] ?? null;
@@ -186,9 +165,6 @@ class PageFacade
         }
     }
 
-    /**
-     * Fetch all customizations.
-     */
     public function getCustomizations(): array
     {
         $titleColumn = $this->lang === 'en' ? 'title_en' : 'title';
@@ -199,9 +175,6 @@ class PageFacade
             ->fetchAll();
     }
 
-    /**
-     * Add a new customization with title, description, and image.
-     */
     public function addCustomization(string $title, string $description, FileUpload $image, ?string $titleEn = null, ?string $descriptionEn = null): void
     {
         if (!$image->isOk()) {
@@ -224,9 +197,6 @@ class PageFacade
         ]);
     }
 
-    /**
-     * Delete a customization by ID.
-     */
     public function deleteCustomization(int $id): void
     {
         $customization = $this->database->table('customization')->get($id);
@@ -238,9 +208,6 @@ class PageFacade
         }
     }
 
-    /**
-     * Fetch gallery images.
-     */
     public function getGalleryImages(): array
     {
         $altTextColumn = $this->lang === 'en' ? 'alt_text_en' : 'alt_text';
@@ -250,9 +217,6 @@ class PageFacade
             ->fetchAll();
     }
 
-    /**
-     * Add a new gallery image with form values, including image upload.
-     */
     public function addGalleryImage(array $values): void
     {
         $image = $values['image'] ?? null;
@@ -276,9 +240,6 @@ class PageFacade
         ]);
     }
 
-    /**
-     * Delete a gallery image.
-     */
     public function deleteGalleryImage(int $id): void
     {
         $image = $this->database->table('gallery')->get($id);
@@ -290,9 +251,6 @@ class PageFacade
         }
     }
 
-    /**
-     * Update gallery image order.
-     */
     public function updateGalleryOrder(array $order): void
     {
         foreach ($order as $index => $id) {
@@ -302,9 +260,6 @@ class PageFacade
         }
     }
 
-    /**
-     * Fetch contact information.
-     */
     public function getContactInfo(): ?object
     {
         $nameColumn = $this->lang === 'en' ? 'name_en' : 'name';
@@ -314,9 +269,6 @@ class PageFacade
             ->fetch();
     }
 
-    /**
-     * Update contact information.
-     */
     public function updateContactInfo(int $id, array $values): void
     {
         $this->database->table('contact_info')->get($id)->update($values);
@@ -324,30 +276,32 @@ class PageFacade
 
     public function getLegalPage(string $sectionName): ?object
     {
+        $titleColumn = $this->lang === 'en' ? 'title_en' : 'title';
+        $contentColumn = $this->lang === 'en' ? 'content_en' : 'content';
         return $this->database->table('legal_pages')
+            ->select("id, section_name, COALESCE($titleColumn, title) AS title, title_en, COALESCE($contentColumn, content) AS content, content_en, updated_at")
             ->where('section_name', $sectionName)
             ->fetch();
     }
 
-    /**
-     * Fetch all legal pages.
-     */
     public function getLegalPages(): array
     {
+        $titleColumn = $this->lang === 'en' ? 'title_en' : 'title';
+        $contentColumn = $this->lang === 'en' ? 'content_en' : 'content';
         return $this->database->table('legal_pages')
+            ->select("id, section_name, COALESCE($titleColumn, title) AS title, title_en, COALESCE($contentColumn, content) AS content, content_en, updated_at")
             ->order('title ASC')
             ->fetchAll();
     }
 
-    /**
-     * Update or insert legal page content.
-     */
-    public function updateLegalPage(string $sectionName, string $title, string $content): void
+    public function updateLegalPage(string $sectionName, string $title, string $content, ?string $titleEn = null, ?string $contentEn = null): void
     {
         $data = [
             'section_name' => $sectionName,
             'title' => $title,
-            'content' => $content
+            'content' => $content,
+            'title_en' => $titleEn,
+            'content_en' => $contentEn
         ];
 
         $existing = $this->database->table('legal_pages')
