@@ -866,7 +866,7 @@ function renderImages(images) {
     images.forEach((image, index) => {
         const img = document.createElement('img');
         img.src = image.image_path;
-        img.className = 'w-full flex-shrink-0 object-cover h-full cursor-pointer rounded-xl';
+        img.className = 'w-full flex-shrink-0 object-contain h-full cursor-pointer rounded-xl';
         img.alt = image.alt_text || `${translations.product_image} ${index + 1}`;
         img.setAttribute('data-lightbox', 'gallery');
         img.setAttribute('data-alt', image.alt_text || `${translations.product_image} ${index + 1}`);
