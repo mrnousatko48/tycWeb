@@ -1,17 +1,73 @@
+<!-- Trigger button -->
+<div style="text-align: center; margin: 20px;">
+    <button id="openViewerBtn">Open 3D Viewer</button>
+</div>
+
+<!-- Modal overlay -->
+<div id="viewerModal" style="
+    display: none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.7);
+    z-index: 1000;
+    align-items: center;
+    justify-content: center;
+">
+    <!-- Modal content -->
+    <div style="
+        background: white;
+        padding: 10px;
+        border-radius: 10px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        position: relative;
+        width: 80%;
+        height: 80%;
+        display: flex;
+        flex-direction: column;
+    ">
+        <!-- Close button -->
+        <button id="closeViewerBtn" style="
+            position: absolute;
+            top: 10px; right: 10px;
+            background: #ff4444;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            cursor: pointer;
+            border-radius: 5px;
+        ">✖</button>
+
+        <!-- Viewer container -->
+        <div id="container" style="flex: 1; background: #eaeaea;"></div>
+    </div>
+</div>
+
+
 <!-- Buttons to change color -->
 <div style="text-align: center; margin-bottom: 20px;">
     <button id="redBtn">Red</button>
     <button id="blueBtn">Blue</button>
     <button id="greenBtn">Green</button>
 </div>
+
+<!-- Part visibility toggles -->
 <div style="text-align: center; margin-bottom: 10px;">
     <label>
         <input type="checkbox" id="togglePart9" checked>
-        Show Part 9
+        Krytka nabíjecího portu
+    </label>
+    <br>
+    <label>
+        <input type="checkbox" id="togglePart2" checked>
+        přední kameryclona
+    </label>
+    <br>
+    <label>
+        <input type="checkbox" id="togglePart3" checked>
+        redukce fotoaparátu
     </label>
 </div>
-
-
 
 <!-- 3D Viewer Container -->
 <div style="
@@ -32,12 +88,12 @@
 
 <!-- Import map -->
 <script type="importmap">
-	{
-		"imports": {
-			"three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
-			"three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
-		}
-	}
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+        }
+    }
 </script>
 
 <!-- ES Module -->
@@ -47,7 +103,10 @@ import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
 
 const width = 800, height = 500;
-let targetMesh = null; // Reference to mesh we'll recolor
+let targetMesh = null;
+let part9Mesh = null;
+let part2Mesh = null;
+let part3Mesh = null;
 
 // Scene setup
 const scene = new THREE.Scene();
@@ -59,10 +118,42 @@ renderer.setSize(width, height);
 document.getElementById('container').appendChild(renderer.domElement);
 
 // Lights
-scene.add(new THREE.AmbientLight(0xffffff, 0.5));
-const dirLight = new THREE.DirectionalLight(0xffffff, 0.5);
-dirLight.position.set(1, 1, 1);
-scene.add(dirLight);
+// Renderer tweaks for better realism & contrast
+renderer.physicallyCorrectLights = true;
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.25; // Slightly brighter
+
+scene.background = new THREE.Color(0xdadada); // soft grey for more pop
+
+// Softer fill to preserve shadows but keep details visible
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.25);
+scene.add(ambientLight);
+
+// Key light – strong & warm
+const keyLight = new THREE.DirectionalLight(0xffffff, 1.3);
+keyLight.position.set(3, 2, 4);
+keyLight.castShadow = true;
+keyLight.shadow.bias = -0.0001; // reduces shadow acne
+keyLight.shadow.mapSize.width = 2048;
+keyLight.shadow.mapSize.height = 2048;
+scene.add(keyLight);
+
+// Fill light – cool tone for contrast with key light
+const fillLight = new THREE.DirectionalLight(0x99ccff, 0.5);
+fillLight.position.set(-2, 1, -3);
+scene.add(fillLight);
+
+// Rim light – brighter for strong edge separation
+const rimLight = new THREE.DirectionalLight(0xffffff, 0.8);
+rimLight.position.set(-3, 3, 5);
+scene.add(rimLight);
+
+// Optional: subtle top light for more definition
+const topLight = new THREE.DirectionalLight(0xffffff, 0.3);
+topLight.position.set(0, 5, 0);
+scene.add(topLight);
+
 
 // Controls
 const controls = new OrbitControls(camera, renderer.domElement);
@@ -70,8 +161,7 @@ controls.enableDamping = true;
 
 // Load model
 const loader = new GLTFLoader();
-const gltfPath = {$gltfPath}; // Output Nette variable directly without quotes
-let part9Mesh = null;
+const gltfPath = {$gltfPath};
 
 loader.load(
     gltfPath,
@@ -81,26 +171,33 @@ loader.load(
         scene.add(model);
 
         // Find a main part to color
-        targetMesh = model.getObjectByName('Frame');
-        if (!targetMesh) {
-            model.traverse((child) => {
-                if (child.isMesh && !targetMesh) {
-                    targetMesh = child;
-                }
-            });
-        }
+        targetMesh = model.getObjectByName('Frame') || model.children.find(c => c.isMesh);
 
-        // 🎯 Find "Part 9" by name
-        part9Mesh = model.getObjectByName('Part 9');
-        if (part9Mesh) {
-            part9Mesh.visible = true; // Show by default
-        } else {
-            console.warn('Part 9 not found in model');
-        }
+        // Find parts by name (placeholder names for now)
+        part9Mesh = model.getObjectByName('krytka');
+        part2Mesh = model.getObjectByName('clona'); // Change later
+        part3Mesh = model.getObjectByName('drzak'); // Change later
+
+        [part9Mesh, part2Mesh, part3Mesh].forEach(p => {
+            if (p) p.visible = true;
+        });
     }
-
-
 );
+
+const modal = document.getElementById('viewerModal');
+document.getElementById('openViewerBtn').addEventListener('click', () => {
+    modal.style.display = 'flex';
+    renderer.setSize(
+        document.getElementById('container').clientWidth,
+        document.getElementById('container').clientHeight
+    );
+    camera.aspect = document.getElementById('container').clientWidth /
+                    document.getElementById('container').clientHeight;
+    camera.updateProjectionMatrix();
+});
+document.getElementById('closeViewerBtn').addEventListener('click', () => {
+    modal.style.display = 'none';
+});
 
 
 // Animate
@@ -109,7 +206,7 @@ renderer.setAnimationLoop(() => {
     renderer.render(scene, camera);
 });
 
-// Button logic
+// Color change buttons
 document.getElementById('redBtn').addEventListener('click', () => {
     if (targetMesh) targetMesh.material.color.set('#ff0000');
 });
@@ -119,11 +216,15 @@ document.getElementById('blueBtn').addEventListener('click', () => {
 document.getElementById('greenBtn').addEventListener('click', () => {
     if (targetMesh) targetMesh.material.color.set('#00ff00');
 });
+
+// Visibility toggles
 document.getElementById('togglePart9').addEventListener('change', (e) => {
-    if (part9Mesh) {
-        part9Mesh.visible = e.target.checked;
-    }
+    if (part9Mesh) part9Mesh.visible = e.target.checked;
 });
-
-
+document.getElementById('togglePart2').addEventListener('change', (e) => {
+    if (part2Mesh) part2Mesh.visible = e.target.checked;
+});
+document.getElementById('togglePart3').addEventListener('change', (e) => {
+    if (part3Mesh) part3Mesh.visible = e.target.checked;
+});
 </script>

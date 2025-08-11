@@ -7,6 +7,6 @@ class HomePresenter extends Nette\Application\UI\Presenter
 {
     public function renderDefault(): void
     {
-        $this->template->gltfPath = '/www/uploads/test/bez.gltf';
+        $this->template->gltfPath = '/www/uploads/test/correct.gltf';
     }
 }
