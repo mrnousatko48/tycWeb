@@ -38,6 +38,7 @@
                         <tr>
                             <td>{$feature->name}</td>
                             <td class="text-end">
+                                <a href="{link editFeature! $feature->id}" class="btn btn-sm btn-primary ajax edit-feature" data-bs-toggle="modal" data-bs-target="#editFeatureModal">✏️ Upravit</a>
                                 <a href="{link deleteFeature! $feature->id}" class="btn btn-sm btn-danger ajax">🗑 Smazat</a>
                             </td>
                         </tr>
@@ -72,6 +73,21 @@
         </div>
     </div>
 
+    <!-- Modal for editing features -->
+    <div class="modal fade" id="editFeatureModal" tabindex="-1" aria-labelledby="editFeatureModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="editFeatureModalLabel">Upravit funkci</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Zavřít"></button>
+                </div>
+                <div class="modal-body" n:snippet="featureEditForm">
+                    {control featureEditForm}
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal for editing feature options -->
     <div class="modal fade" id="editFeatureOptionModal" tabindex="-1" aria-labelledby="editFeatureOptionModalLabel" aria-hidden="true">
         <div class="modal-dialog">
@@ -86,7 +102,7 @@
             </div>
         </div>
     </div>
-            <div class="mt-4 text-center">
+    <div class="mt-4 text-center">
         <a href="{link default}" class="btn btn-secondary">Zpět na produkty</a>
     </div>
 </div>
@@ -122,6 +138,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 for (let snip in json.snippets) {
                     document.getElementById(snip).innerHTML = json.snippets[snip];
                 }
+                if (form.closest('#editFeatureModal')) {
+                    bootstrap.Modal.getInstance(document.getElementById('editFeatureModal')).hide();
+                }
                 if (form.closest('#editFeatureOptionModal')) {
                     bootstrap.Modal.getInstance(document.getElementById('editFeatureOptionModal')).hide();
                 }
@@ -151,17 +170,19 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // Initialize Select2 for all selects in the modal
-    $('#editFeatureOptionModal').on('shown.bs.modal', function () {
-        $(this).find('select').select2({
-            dropdownParent: $(this),
-            width: '100%'
+    // Initialize Select2 for all selects in the modals
+    ['#editFeatureModal', '#editFeatureOptionModal'].forEach(modalId => {
+        $(modalId).on('shown.bs.modal', function () {
+            $(this).find('select').select2({
+                dropdownParent: $(this),
+                width: '100%'
+            });
         });
-    });
 
-    // Destroy Select2 when modal is hidden to prevent memory leaks
-    $('#editFeatureOptionModal').on('hidden.bs.modal', function () {
-        $(this).find('select').select2('destroy');
+        // Destroy Select2 when modal is hidden to prevent memory leaks
+        $(modalId).on('hidden.bs.modal', function () {
+            $(this).find('select').select2('destroy');
+        });
     });
 });
 </script>

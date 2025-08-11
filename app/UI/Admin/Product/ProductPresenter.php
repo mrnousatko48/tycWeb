@@ -413,8 +413,11 @@ final class ProductPresenter extends Nette\Application\UI\Presenter
     {
         $form = new Form;
 
-        $form->addText('name', 'Název funkci:')
+        $form->addText('name', 'Název funkce:')
             ->setRequired('Prosím, zadejte název funkce.');
+
+        $form->addText('name_en', 'Název funkce (EN):')
+            ->setRequired(false);
 
         $form->addSubmit('save', 'Přidat funkci');
 
@@ -425,8 +428,49 @@ final class ProductPresenter extends Nette\Application\UI\Presenter
     public function featureFormSucceeded(Form $form, array $values): void
     {
         try {
-            $this->modelFacade->addFeature($values['name']);
+            $this->modelFacade->addFeature($values['name'], $values['name_en'] ?? null);
             $this->flashMessage('Funkce byla úspěšně přidána!', 'success');
+        } catch (\Exception $e) {
+            $this->flashMessage($e->getMessage(), 'error');
+        }
+
+        if ($this->isAjax()) {
+            $this->template->features = $this->modelFacade->getFeatures();
+            $this->redrawControl('featuresTable');
+            $this->redrawControl('featureOptionForm-feature_id');
+            $this->redrawControl('flashes');
+        } else {
+            $this->redirect('features');
+        }
+    }
+
+    public function createComponentFeatureEditForm(): Form
+    {
+        $form = new Form;
+
+        $form->addHidden('id');
+
+        $form->addText('name', 'Název funkce:')
+            ->setRequired('Prosím, zadejte název funkce.');
+
+        $form->addText('name_en', 'Název funkce (EN):')
+            ->setRequired(false);
+
+        $form->addSubmit('save', 'Upravit funkci');
+
+        $form->onSuccess[] = [$this, 'featureEditFormSucceeded'];
+        return $form;
+    }
+
+        public function featureEditFormSucceeded(Form $form, array $values): void
+    {
+        try {
+            $this->modelFacade->updateFeature(
+                (int)$values['id'],
+                $values['name'],
+                $values['name_en'] ?? null
+            );
+            $this->flashMessage('Funkce byla úspěšně upravena!', 'success');
         } catch (\Exception $e) {
             $this->flashMessage($e->getMessage(), 'error');
         }
@@ -618,6 +662,25 @@ public function handleEditFeatureOption(int $optionId): void
             $this->redrawControl('flashes');
         } else {
             $this->redirect('colors');
+        }
+    }
+
+        public function handleEditFeature(int $featureId): void
+    {
+        $feature = $this->modelFacade->getFeature($featureId);
+        if (!$feature) {
+            $this->flashMessage('Funkce neexistuje.', 'error');
+            $this->redirect('features');
+        }
+
+        $this['featureEditForm']->setDefaults([
+            'id' => $feature->id,
+            'name' => $feature->name,
+            'name_en' => $feature->name_en,
+        ]);
+
+        if ($this->isAjax()) {
+            $this->redrawControl('featureEditForm');
         }
     }
 
@@ -881,28 +944,28 @@ public function handleEditVendor(int $vendorId): void
         }
     }
 
-    public function createComponentShippingOptionForm(): Form
-    {
-        $form = new Form;
-        $lang = $this->template->lang ?? 'cs';
-        $vendors = $this->orderFacade->getVendors($lang);
-        $vendorOptions = array_map(fn($vendor) => $vendor->name, $vendors);
-        $form->addSelect('vendor_id', 'Dopravce:', $vendorOptions)
-            ->setRequired('Prosím, vyberte dopravce.');
-        $form->addText('name', 'Název dopravy:')
-            ->setRequired('Prosím, zadejte název dopravy tř. "Na adresu"');
-        $form->addText('cost', 'Cena (CZK):')
-            ->setRequired('Prosím, zadejte cenu.')
-            ->addRule($form::FLOAT, 'Cena musí být platné číslo.')
-            ->setDefaultValue('0.00');
-        $form->addText('cost_eur', 'Cena (EUR):')
-            ->setRequired('Prosím, zadejte cenu v EUR.')
-            ->addRule($form::FLOAT, 'Cena musí být platné číslo.')
-            ->setDefaultValue('0.00');
-        $form->addSubmit('save', 'Způsob dopravy');
-        $form->onSuccess[] = [$this, 'shippingOptionFormSucceeded'];
-        return $form;
-    }
+public function createComponentShippingOptionForm(): Form
+{
+    $form = new Form;
+    $lang = $this->template->lang ?? 'cs';
+    $vendors = $this->orderFacade->getVendors($lang);
+    $vendorOptions = array_combine(array_keys($vendors), array_values($vendors));
+    $form->addSelect('vendor_id', 'Dopravce:', $vendorOptions)
+        ->setRequired('Prosím, vyberte dopravce.');
+    $form->addText('name', 'Název dopravy:')
+        ->setRequired('Prosím, zadejte název dopravy tř. "Na adresu"');
+    $form->addText('cost', 'Cena (CZK):')
+        ->setRequired('Prosím, zadejte cenu.')
+        ->addRule($form::FLOAT, 'Cena musí být platné číslo.')
+        ->setDefaultValue('0.00');
+    $form->addText('cost_eur', 'Cena (EUR):')
+        ->setRequired('Prosím, zadejte cenu v EUR.')
+        ->addRule($form::FLOAT, 'Cena musí být platné číslo.')
+        ->setDefaultValue('0.00');
+    $form->addSubmit('save', 'Způsob dopravy');
+    $form->onSuccess[] = [$this, 'shippingOptionFormSucceeded'];
+    return $form;
+}
 
     public function shippingOptionFormSucceeded(Form $form, array $values): void
     {
@@ -928,28 +991,28 @@ public function handleEditVendor(int $vendorId): void
     }
 
     public function createComponentShippingOptionEditForm(): Form
-    {
-        $form = new Form;
-        $lang = $this->template->lang ?? 'cs';
-        $form->addHidden('id');
-        $vendors = $this->orderFacade->getVendors($lang);
-        $vendorOptions = array_map(fn($vendor) => $vendor->name, $vendors);
-        $form->addSelect('vendor_id', 'Dopravce:', $vendorOptions)
-            ->setRequired('Prosím, vyberte dopravce.');
-        $form->addText('name', 'Název možnosti dopravy:')
-            ->setRequired('Prosím, zadejte název možnosti dopravy.');
-        $form->addText('cost', 'Cena (CZK):')
-            ->setRequired('Prosím, zadejte cenu.')
-            ->addRule($form::FLOAT, 'Cena musí být platné číslo.')
-            ->setDefaultValue('0.00');
-        $form->addText('cost_eur', 'Cena (EUR):')
-            ->setRequired('Prosím, zadejte cenu v EUR.')
-            ->addRule($form::FLOAT, 'Cena musí být platné číslo.')
-            ->setDefaultValue('0.00');
-        $form->addSubmit('save', 'Upravit možnost dopravy');
-        $form->onSuccess[] = [$this, 'shippingOptionEditFormSucceeded'];
-        return $form;
-    }
+{
+    $form = new Form;
+    $lang = $this->template->lang ?? 'cs';
+    $form->addHidden('id');
+    $vendors = $this->orderFacade->getVendors($lang);
+    $vendorOptions = array_combine(array_keys($vendors), array_values($vendors));
+    $form->addSelect('vendor_id', 'Dopravce:', $vendorOptions)
+        ->setRequired('Prosím, vyberte dopravce.');
+    $form->addText('name', 'Název možnosti dopravy:')
+        ->setRequired('Prosím, zadejte název možnosti dopravy.');
+    $form->addText('cost', 'Cena (CZK):')
+        ->setRequired('Prosím, zadejte cenu.')
+        ->addRule($form::FLOAT, 'Cena musí být platné číslo.')
+        ->setDefaultValue('0.00');
+    $form->addText('cost_eur', 'Cena (EUR):')
+        ->setRequired('Prosím, zadejte cenu v EUR.')
+        ->addRule($form::FLOAT, 'Cena musí být platné číslo.')
+        ->setDefaultValue('0.00');
+    $form->addSubmit('save', 'Upravit možnost dopravy');
+    $form->onSuccess[] = [$this, 'shippingOptionEditFormSucceeded'];
+    return $form;
+}
 
 public function shippingOptionEditFormSucceeded(Form $form, array $values): void
 {

@@ -309,27 +309,29 @@ public function getFeaturesByModel(int $modelId, string $lang): array
         return $this->database->table('features')->get($id);
     }
 
-    public function addFeature(string $name): ActiveRow
+   public function addFeature(string $name, ?string $name_en = null): ActiveRow
     {
         try {
             return $this->database->table('features')->insert([
                 'name' => trim($name),
+                'name_en' => $name_en ? trim($name_en) : null,
             ]);
         } catch (UniqueConstraintViolationException $e) {
             throw new \Exception("Feature '$name' already exists.");
         }
     }
 
-    public function updateFeature(int $id, string $name): void
+    public function updateFeature(int $id, string $name, ?string $name_en = null): void
     {
         try {
             $this->database->table('features')->get($id)?->update([
                 'name' => trim($name),
+                'name_en' => $name_en ? trim($name_en) : null,
             ]);
         } catch (UniqueConstraintViolationException $e) {
             throw new \Exception("Feature '$name' already exists.");
         }
-    }
+        }
 
     public function deleteFeature(int $id): void
     {
