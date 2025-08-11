@@ -44,7 +44,8 @@ INSERT INTO `cases` (`id`, `manufacturer`, `model`, `color`, `total_price`, `tot
 (155,	'Apple',	'iPhone 13',	'Black',	529.99,	21.20,	'{\"features\": \"{\\\"card_holder\\\":\\\"None\\\",\\\"front_camera_cover\\\":\\\"No\\\",\\\"charging_port_cover\\\":\\\"No\\\",\\\"custom_design\\\":\\\"No\\\"}\"}',	'OBJEDNANO',	9,	'2025-08-10 15:30:20',	NULL),
 (156,	'Apple',	'iPhone 13',	'Black',	529.99,	21.20,	'{\"features\": \"{\\\"card_holder\\\":\\\"None\\\",\\\"front_camera_cover\\\":\\\"No\\\",\\\"charging_port_cover\\\":\\\"No\\\",\\\"custom_design\\\":\\\"No\\\"}\"}',	'OBJEDNANO',	9,	'2025-08-10 15:40:02',	NULL),
 (157,	'Apple',	'iPhone 13',	'Černá',	674.99,	27.00,	'{\"features\": \"{\\\"držák_karet\\\":\\\"Žádný\\\",\\\"clona_přední_kamery\\\":\\\"Ne\\\",\\\"krytka_nabíjecího_portu\\\":\\\"Ano\\\",\\\"vlastní_motiv\\\":\\\"Ne\\\"}\"}',	'KOSIK',	NULL,	'2025-08-10 16:09:59',	NULL),
-(158,	'Samsung',	'Galaxy S23',	'Black',	540.00,	21.60,	'{\"features\": \"{\\\"card_holder\\\":\\\"None\\\",\\\"front_camera_cover\\\":\\\"Yes\\\"}\"}',	'ODESLANO',	9,	'2025-08-10 17:35:55',	NULL);
+(158,	'Samsung',	'Galaxy S23',	'Black',	540.00,	21.60,	'{\"features\": \"{\\\"card_holder\\\":\\\"None\\\",\\\"front_camera_cover\\\":\\\"Yes\\\"}\"}',	'ODESLANO',	9,	'2025-08-10 17:35:55',	NULL),
+(159,	'Apple',	'iPhone 13',	'Purple',	674.99,	27.00,	'{\"features\": \"{\\\"card_holder\\\":\\\"None\\\",\\\"front_camera_cover\\\":\\\"No\\\",\\\"charging_port_cover\\\":\\\"Yes\\\",\\\"custom_design\\\":\\\"No\\\"}\"}',	'OBJEDNANO',	9,	'2025-08-10 20:18:00',	NULL);
 
 DROP TABLE IF EXISTS `colors`;
 CREATE TABLE `colors` (
@@ -370,7 +371,8 @@ INSERT INTO `order_case` (`order_id`, `case_id`, `quantity`) VALUES
 (68,	156,	2),
 (69,	156,	2),
 (70,	157,	1),
-(71,	158,	1);
+(71,	158,	1),
+(72,	159,	2);
 
 DROP TABLE IF EXISTS `orders`;
 CREATE TABLE `orders` (
@@ -391,6 +393,8 @@ CREATE TABLE `orders` (
   `created_at` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `variable_symbol` varchar(20) COLLATE utf8mb4_unicode_ci NOT NULL,
   `lang` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'cs',
+  `total_price` decimal(10,2) DEFAULT '0.00' COMMENT 'Total price of the order in CZK',
+  `total_price_eur` decimal(10,2) DEFAULT '0.00' COMMENT 'Total price of the order in EUR',
   PRIMARY KEY (`id`),
   UNIQUE KEY `variable_symbol` (`variable_symbol`),
   KEY `user_id` (`user_id`),
@@ -401,20 +405,21 @@ CREATE TABLE `orders` (
   CONSTRAINT `orders_shipping_fk` FOREIGN KEY (`shipping`) REFERENCES `shipping_options` (`id`) ON DELETE RESTRICT
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-INSERT INTO `orders` (`id`, `user_id`, `firstname`, `lastname`, `email`, `phone`, `address`, `city`, `psc`, `payment`, `shipping`, `delivery_point`, `additional_cost`, `state`, `created_at`, `variable_symbol`, `lang`) VALUES
-(59,	9,	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'111222333',	'shrekova bazina 13',	'Praha',	'53803',	7,	11,	'sokolská 799 hermanuv mestec',	91.00,	'ZAPLACENO',	'2025-07-24 16:39:56',	'202507247157',	'cs'),
-(60,	9,	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'111222333',	'shrekova bazina 13',	'Praha',	'53803',	6,	11,	'sokolská 799 hermanuv mestec',	79.00,	'OBJEDNANO',	'2025-07-24 17:14:25',	'202507249841',	'cs'),
-(61,	NULL,	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'666777888',	'shrekova bazina 13',	'Praha',	'53803',	6,	11,	'sokolská 799 hermanuv mestec',	79.00,	'OBJEDNANO',	'2025-07-24 20:28:15',	'202507245394',	'cs'),
-(62,	9,	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'111222333',	'shrekova bazina 13',	'Praha',	'53803',	6,	11,	'sokolská 799 hermanuv mestec',	79.00,	'OBJEDNANO',	'2025-07-24 20:30:13',	'202507241828',	'cs'),
-(63,	NULL,	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'666777888',	'shrekova bazina 13',	'Praha',	'53803',	6,	11,	'sokolská 799 hermanuv mestec',	79.00,	'OBJEDNANO',	'2025-07-25 13:50:33',	'202507256077',	'cs'),
-(64,	9,	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'111222333',	'shrekova bazina 13',	'Praha',	'53803',	6,	11,	'sokolská 799 hermanuv mestec',	79.00,	'OBJEDNANO',	'2025-07-25 14:30:50',	'202507259712',	'cs'),
-(65,	NULL,	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'666777888',	'shrekova bazina 13',	'Praha',	'53803',	6,	11,	'sokolská 799 hermanuv mestec',	79.00,	'OBJEDNANO',	'2025-08-10 08:53:35',	'202508103994',	'cs'),
-(66,	9,	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'111222333',	'shrekova bazina 13',	'Praha',	'53803',	8,	14,	'sokolská 799 hermanuv mestec',	500.00,	'OBJEDNANO',	'2025-08-10 15:30:34',	'202508103936',	'cs'),
-(67,	9,	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'111222333',	'shrekova bazina 13',	'Praha',	'53803',	8,	13,	'sokolská 799 hermanuv mestec',	250.00,	'OBJEDNANO',	'2025-08-10 15:40:20',	'202508103632',	'cs'),
-(68,	9,	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'111222333',	'shrekova bazina 13',	'Praha',	'53803',	8,	13,	'sokolská 799 hermanuv mestec',	250.00,	'OBJEDNANO',	'2025-08-10 15:47:23',	'202508105487',	'cs'),
-(69,	9,	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'111222333',	'shrekova bazina 13',	'Praha',	'53803',	8,	13,	'sokolská 799 hermanuv mestec',	250.00,	'OBJEDNANO',	'2025-08-10 15:51:03',	'202508101706',	'cs'),
-(70,	NULL,	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'666777888',	'shrekova bazina 13',	'Praha',	'53803',	6,	11,	'sokolská 799 hermanuv mestec',	79.00,	'OBJEDNANO',	'2025-08-10 16:10:16',	'202508106341',	'cs'),
-(71,	9,	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'111222333',	'shrekova bazina 13',	'Praha',	'53803',	9,	13,	'sokolská 799 hermanuv mestec',	12.00,	'ODESLANO',	'2025-08-10 17:36:16',	'202508107471',	'en');
+INSERT INTO `orders` (`id`, `user_id`, `firstname`, `lastname`, `email`, `phone`, `address`, `city`, `psc`, `payment`, `shipping`, `delivery_point`, `additional_cost`, `state`, `created_at`, `variable_symbol`, `lang`, `total_price`, `total_price_eur`) VALUES
+(59,	9,	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'111222333',	'shrekova bazina 13',	'Praha',	'53803',	7,	11,	'sokolská 799 hermanuv mestec',	91.00,	'ZAPLACENO',	'2025-07-24 16:39:56',	'202507247157',	'cs',	0.00,	0.00),
+(60,	9,	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'111222333',	'shrekova bazina 13',	'Praha',	'53803',	6,	11,	'sokolská 799 hermanuv mestec',	79.00,	'OBJEDNANO',	'2025-07-24 17:14:25',	'202507249841',	'cs',	0.00,	0.00),
+(61,	NULL,	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'666777888',	'shrekova bazina 13',	'Praha',	'53803',	6,	11,	'sokolská 799 hermanuv mestec',	79.00,	'OBJEDNANO',	'2025-07-24 20:28:15',	'202507245394',	'cs',	0.00,	0.00),
+(62,	9,	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'111222333',	'shrekova bazina 13',	'Praha',	'53803',	6,	11,	'sokolská 799 hermanuv mestec',	79.00,	'OBJEDNANO',	'2025-07-24 20:30:13',	'202507241828',	'cs',	0.00,	0.00),
+(63,	NULL,	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'666777888',	'shrekova bazina 13',	'Praha',	'53803',	6,	11,	'sokolská 799 hermanuv mestec',	79.00,	'OBJEDNANO',	'2025-07-25 13:50:33',	'202507256077',	'cs',	0.00,	0.00),
+(64,	9,	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'111222333',	'shrekova bazina 13',	'Praha',	'53803',	6,	11,	'sokolská 799 hermanuv mestec',	79.00,	'OBJEDNANO',	'2025-07-25 14:30:50',	'202507259712',	'cs',	0.00,	0.00),
+(65,	NULL,	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'666777888',	'shrekova bazina 13',	'Praha',	'53803',	6,	11,	'sokolská 799 hermanuv mestec',	79.00,	'OBJEDNANO',	'2025-08-10 08:53:35',	'202508103994',	'cs',	0.00,	0.00),
+(66,	9,	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'111222333',	'shrekova bazina 13',	'Praha',	'53803',	8,	14,	'sokolská 799 hermanuv mestec',	500.00,	'OBJEDNANO',	'2025-08-10 15:30:34',	'202508103936',	'cs',	0.00,	0.00),
+(67,	9,	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'111222333',	'shrekova bazina 13',	'Praha',	'53803',	8,	13,	'sokolská 799 hermanuv mestec',	250.00,	'OBJEDNANO',	'2025-08-10 15:40:20',	'202508103632',	'cs',	0.00,	0.00),
+(68,	9,	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'111222333',	'shrekova bazina 13',	'Praha',	'53803',	8,	13,	'sokolská 799 hermanuv mestec',	250.00,	'OBJEDNANO',	'2025-08-10 15:47:23',	'202508105487',	'cs',	0.00,	0.00),
+(69,	9,	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'111222333',	'shrekova bazina 13',	'Praha',	'53803',	8,	13,	'sokolská 799 hermanuv mestec',	250.00,	'OBJEDNANO',	'2025-08-10 15:51:03',	'202508101706',	'cs',	0.00,	0.00),
+(70,	NULL,	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'666777888',	'shrekova bazina 13',	'Praha',	'53803',	6,	11,	'sokolská 799 hermanuv mestec',	79.00,	'OBJEDNANO',	'2025-08-10 16:10:16',	'202508106341',	'cs',	0.00,	0.00),
+(71,	9,	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'111222333',	'shrekova bazina 13',	'Praha',	'53803',	9,	13,	'sokolská 799 hermanuv mestec',	12.00,	'ODESLANO',	'2025-08-10 17:36:16',	'202508107471',	'en',	0.00,	0.00),
+(72,	9,	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'111222333',	'shrekova bazina 13',	'Praha',	'53803',	8,	13,	'sokolská 799 hermanuv mestec',	10.00,	'OBJEDNANO',	'2025-08-11 08:54:42',	'202508117062',	'en',	1359.98,	64.00);
 
 DROP TABLE IF EXISTS `shipping_options`;
 CREATE TABLE `shipping_options` (
@@ -523,8 +528,9 @@ INSERT INTO `users` (`id`, `username`, `firstname`, `lastname`, `email`, `passwo
 (6,	'dostals',	'',	'',	'dostals64@gmail.com',	'$2y$10$RJhN6zE1eZqpGLSBTyFI/OApvmXrcaobEVeOjzfvYmLePRuqrMBRG',	'ADMIN',	NULL,	NULL,	NULL,	'2025-06-24 19:27:29',	241712,	'2025-06-30 21:04:00',	NULL),
 (7,	'bakub',	'Kuba',	'Syč',	'bakua@mail.com',	'$2y$10$ZVF9RfycPsVhpryvQf50zePtoXVFCl4.6bUzZKxiSIdpdCguW4Eri',	'UZIVATEL',	NULL,	NULL,	NULL,	'2025-06-24 19:29:28',	NULL,	NULL,	NULL),
 (8,	'igor',	'igor',	'rucicka',	'igor@mail.com',	'$2y$10$bEiEpKsd.RXoA7yvEk9QdOZ9LC9zdlX7MpgYnGDJ7S52QVI5U5Flm',	'UZIVATEL',	NULL,	NULL,	NULL,	'2025-06-29 14:10:39',	NULL,	NULL,	NULL),
-(9,	'martin',	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'$2y$10$GWyEYwqs8lnAKXVZaQNLpuYPZXCFmFsTNPNe2YWkhogfgg5NNBLUK',	'ADMIN',	'shrekova bazina 13',	'Praha',	'53803',	'2025-07-03 16:48:05',	NULL,	NULL,	'111222333'),
-(18,	'repair_david',	'Martin',	'Burda',	'xmanmartinburda@seznam.cz',	'$2y$10$6QIsB0QVOzPfZISNK4rmdebwELRagskrhX13LkaQufEOcqJsoaLIG',	'UZIVATEL',	NULL,	NULL,	NULL,	'2025-08-10 17:24:30',	NULL,	NULL,	NULL);
+(9,	'martin',	'Martin',	'Burda',	'burdadko.cz@gmail.com',	'$2y$10$GWyEYwqs8lnAKXVZaQNLpuYPZXCFmFsTNPNe2YWkhogfgg5NNBLUK',	'ADMIN',	'shrekova bazina 13',	'Praha',	'53803',	'2025-07-03 16:48:05',	146472,	'2025-08-11 10:40:44',	'111222333'),
+(18,	'repair_david',	'Martin',	'Burda',	'xmanmartinburda@seznam.cz',	'$2y$10$./dag8joMFDQREOVQ0kEIuWsMI8C1o9XdlCj7t2wIpGNjlxRcm57m',	'UZIVATEL',	NULL,	NULL,	NULL,	'2025-08-10 17:24:30',	NULL,	NULL,	NULL),
+(19,	'martinj569',	'karel',	'Jegej',	'john.s@gmail.com',	'$2y$10$nRHzitWC/nzSvtcwyUBzTOUyp6stFhi.bm6RSOhcxkxC3RF7tQXcO',	'UZIVATEL',	NULL,	NULL,	NULL,	'2025-08-11 10:26:28',	NULL,	NULL,	NULL);
 
 DROP TABLE IF EXISTS `vendor_payment_methods`;
 CREATE TABLE `vendor_payment_methods` (

@@ -13,6 +13,8 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
     <style>
+@import url('https://fonts.googleapis.com/css2?family=Century+Gothic:ital@1&display=swap');
+
 :root {
     /* Light mode */
     --color-text: #1F2937;         /* Tmavě šedá pro text */
@@ -38,15 +40,11 @@
 }
 
 body {
-    font-family: 'IBM Plex Sans', sans-serif;
+    font-family: 'IBM Plex Sans', 'Century Gothic';
+    font-style: italic; /* Apply italic style to use Century Gothic's italic variant */
     background-color: var(--color-background);
     color: var(--color-text);
     transition: background-color 0.3s ease, color 0.3s ease;
-}
-.code-style {
-    font-family: 'IBM Plex Mono', monospace;
-    font-size: 0.95em;
-    color: var(--color-accent);
 }
 
 footer {
