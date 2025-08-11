@@ -139,8 +139,11 @@ final class EditPresenter extends Presenter
         $banner = $this->pageFacade->getBannerSection();
         $fields = [
             'title' => ['type' => 'text', 'label' => 'Nadpis:', 'required' => true],
+            'title_en' => ['type' => 'text', 'label' => 'Nadpis (EN):', 'required' => false],
             'description' => ['type' => 'textArea', 'label' => 'Popis:', 'required' => true],
+            'description_en' => ['type' => 'textArea', 'label' => 'Popis (EN):', 'required' => false],
             'button_text' => ['type' => 'text', 'label' => 'Text tlačítka:', 'required' => true],
+            'button_text_en' => ['type' => 'text', 'label' => 'Text tlačítka (EN):', 'required' => false],
             'button_link' => ['type' => 'text', 'label' => 'Odkaz tlačítka:', 'required' => true],
             'image' => [
                 'type' => 'upload',
@@ -172,8 +175,11 @@ final class EditPresenter extends Presenter
         $durability = $this->pageFacade->getDurabilitySection();
         $fields = [
             'title' => ['type' => 'text', 'label' => 'Nadpis:', 'required' => true],
+            'title_en' => ['type' => 'text', 'label' => 'Nadpis (EN):', 'required' => false],
             'description1' => ['type' => 'textArea', 'label' => 'Popis 1:', 'required' => true],
+            'description1_en' => ['type' => 'textArea', 'label' => 'Popis 1 (EN):', 'required' => false],
             'description2' => ['type' => 'textArea', 'label' => 'Popis 2:', 'required' => true],
+            'description2_en' => ['type' => 'textArea', 'label' => 'Popis 2 (EN):', 'required' => false],
             'image' => [
                 'type' => 'upload',
                 'label' => 'Obrázek:',
@@ -205,8 +211,12 @@ final class EditPresenter extends Presenter
         $form->addText('title', 'Název funkce:')
              ->setRequired('Zadejte název funkce.')
              ->setHtmlAttribute('class', 'form-control');
+        $form->addText('title_en', 'Název funkce (EN):')
+             ->setHtmlAttribute('class', 'form-control');
         $form->addTextArea('description', 'Popis funkce:')
              ->setRequired('Zadejte popis funkce.')
+             ->setHtmlAttribute('class', 'form-control');
+        $form->addTextArea('description_en', 'Popis funkce (EN):')
              ->setHtmlAttribute('class', 'form-control');
         $form->addUpload('image', 'Obrázek:')
              ->setRequired('Vyberte obrázek.')
@@ -217,7 +227,7 @@ final class EditPresenter extends Presenter
 
         $form->onSuccess[] = function (Form $form, $values) {
             try {
-                $this->pageFacade->addCustomization($values->title, $values->description, $values->image);
+                $this->pageFacade->addCustomization($values->title, $values->description, $values->image, $values->title_en, $values->description_en);
                 $this->flashMessage('Funkce byla úspěšně přidána.', 'success');
             } catch (\Exception $e) {
                 $this->flashMessage('Chyba při přidávání funkce: ' . $e->getMessage(), 'danger');
@@ -238,6 +248,8 @@ final class EditPresenter extends Presenter
              ->setHtmlAttribute('class', 'form-control');
         $form->addText('alt_text', 'Alternativní text:')
              ->setRequired('Zadejte alternativní text.')
+             ->setHtmlAttribute('class', 'form-control');
+        $form->addText('alt_text_en', 'Alternativní text (EN):')
              ->setHtmlAttribute('class', 'form-control');
         $form->addText('ordering', 'Pořadí:')
              ->setRequired('Zadejte pořadí.')
@@ -288,7 +300,9 @@ final class EditPresenter extends Presenter
         $contact = $this->pageFacade->getContactInfo();
         $fields = [
             'name' => ['type' => 'text', 'label' => 'Jméno:', 'required' => true],
+            'name_en' => ['type' => 'text', 'label' => 'Jméno (EN):', 'required' => false],
             'address' => ['type' => 'text', 'label' => 'Adresa:', 'required' => true],
+            'address_en' => ['type' => 'text', 'label' => 'Adresa (EN):', 'required' => false],
             'ico' => ['type' => 'text', 'label' => 'IČO:', 'required' => true],
             'phone' => ['type' => 'text', 'label' => 'Telefon:', 'required' => true],
             'email' => ['type' => 'email', 'label' => 'Email:', 'required' => true],
@@ -298,7 +312,9 @@ final class EditPresenter extends Presenter
         $form = $this->createEditForm(
             $contact ?? (object)[
                 'name' => '',
+                'name_en' => '',
                 'address' => '',
+                'address_en' => '',
                 'ico' => '',
                 'phone' => '',
                 'email' => '',
@@ -346,52 +362,50 @@ final class EditPresenter extends Presenter
         $form->getElementPrototype()->enctype = 'multipart/form-data';
         return $form;
     }
+
     public function createComponentLegalForm(): Form
-{
-    $form = new Form;
+    {
+        $form = new Form;
 
-    $form->addText('section_name', 'Název sekce:')
-        ->setRequired('Zadejte název sekce.')
-        ->addRule(Form::PATTERN, 'Pouze malá písmena a pomlčky.', '^[a-z-]+$')
-        ->setHtmlAttribute('class', 'form-control')
-        ->setHtmlAttribute('readonly', true);
+        $form->addText('section_name', 'Název sekce:')
+            ->setRequired('Zadejte název sekce.')
+            ->addRule(Form::PATTERN, 'Pouze malá písmena a pomlčky.', '^[a-z-]+$')
+            ->setHtmlAttribute('class', 'form-control')
+            ->setHtmlAttribute('readonly', true);
 
-    $form->addText('title', 'Titulek:')
-        ->setRequired('Zadejte titulek.')
-        ->setHtmlAttribute('class', 'form-control');
+        $form->addText('title', 'Titulek:')
+            ->setRequired('Zadejte titulek.')
+            ->setHtmlAttribute('class', 'form-control');
 
-    $form->addTextArea('content', 'Obsah:')
-        ->setRequired('Zadejte obsah.')
-        ->setHtmlAttribute('class', 'form-control wysiwyg-editor');
+        $form->addTextArea('content', 'Obsah:')
+            ->setRequired('Zadejte obsah.')
+            ->setHtmlAttribute('class', 'form-control wysiwyg-editor');
 
-    $form->addSubmit('save', 'Uložit')
-        ->getControlPrototype()->addClass('btn btn-primary');
+        $form->addSubmit('save', 'Uložit')
+            ->getControlPrototype()->addClass('btn btn-primary');
 
-    $form->onSuccess[] = [$this, 'processLegalForm'];
+        $form->onSuccess[] = [$this, 'processLegalForm'];
 
-    return $form;
-}
-
-
-public function processLegalForm(Form $form, \stdClass $values): void
-{
-    // Validace obsahu – není výjimka, jen běžná kontrola
-    if (empty(trim($values->content))) {
-        $form->addError('Obsah nesmí být prázdný.');
-        $this->redrawControl('flashes');
-        return;
+        return $form;
     }
 
-    try {
-        $this->pageFacade->updateLegalPage($values->section_name, $values->title, $values->content);
-        $this->flashMessage('Stránka byla úspěšně aktualizována.', 'success');
-        $this->redirect('legalPages');
-    } catch (\Exception $e) {
-        error_log('LegalForm error: ' . $e->getMessage());
-        $form->addError('Nepodařilo se uložit změny: ' . $e->getMessage());
-        $this->redrawControl('flashes');
+    public function processLegalForm(Form $form, \stdClass $values): void
+    {
+        // Validace obsahu – není výjimka, jen běžná kontrola
+        if (empty(trim($values->content))) {
+            $form->addError('Obsah nesmí být prázdný.');
+            $this->redrawControl('flashes');
+            return;
+        }
+
+        try {
+            $this->pageFacade->updateLegalPage($values->section_name, $values->title, $values->content);
+            $this->flashMessage('Stránka byla úspěšně aktualizována.', 'success');
+            $this->redirect('legalPages');
+        } catch (\Exception $e) {
+            error_log('LegalForm error: ' . $e->getMessage());
+            $form->addError('Nepodařilo se uložit změny: ' . $e->getMessage());
+            $this->redrawControl('flashes');
+        }
     }
-}
-
-
 }

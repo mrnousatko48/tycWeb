@@ -25,13 +25,13 @@ class PageFacade
     }
 
     public function getSectionContent(string $sectionName): array
-{
-    $contentColumn = $this->lang === 'en' ? 'content_text_en' : 'content_text';
-    return $this->database->table($sectionName)
-        ->select("id, content_type, COALESCE($contentColumn, content_text) AS content_text, image_path, ordering")
-        ->order('ordering')
-        ->fetchAll();
-}
+    {
+        $contentColumn = $this->lang === 'en' ? 'content_text_en' : 'content_text';
+        return $this->database->table($sectionName)
+            ->select("id, content_type, COALESCE($contentColumn, content_text) AS content_text, content_text_en, image_path, ordering")
+            ->order('ordering')
+            ->fetchAll();
+    }
 
     public function getLogos(): array
     {
@@ -68,10 +68,11 @@ class PageFacade
     /**
      * Update or insert content for a specific section and content type.
      */
-    public function updateSectionContent(string $section, string $contentType, ?string $contentText = null, ?string $imagePath = null, ?int $ordering = null): void
+    public function updateSectionContent(string $section, string $contentType, ?string $contentText = null, ?string $contentTextEn = null, ?string $imagePath = null, ?int $ordering = null): void
     {
         $data = array_filter([
             'content_text' => $contentText,
+            'content_text_en' => $contentTextEn,
             'image_path' => $imagePath,
             'ordering' => $ordering,
         ]);
@@ -99,13 +100,18 @@ class PageFacade
         $banner = $this->getSectionContent('banner');
         $result = [
             'title' => '',
+            'title_en' => '',
             'description' => '',
+            'description_en' => '',
             'button_text' => '',
+            'button_text_en' => '',
             'button_link' => '',
+            'button_link_en' => '',
             'image' => null
         ];
         foreach ($banner as $item) {
             $result[$item->content_type] = $item->content_text ?? $item->image_path;
+            $result[$item->content_type . '_en'] = $item->content_text_en ?? '';
         }
         return (object)$result;
     }
@@ -117,15 +123,20 @@ class PageFacade
     {
         if (!empty($values['image']) && $values['image'] instanceof FileUpload && $values['image']->isOk()) {
             $currentImage = $this->getBannerSection()->image ?? null;
-            $imagePath = ImageUploader::uploadImage($values['image'], 'uploads/home', $currentImage);
+            $imagePath = ImageUploader::uploadImage($values['image'], 'Uploads/home', $currentImage);
             if ($imagePath) {
-                $this->updateSectionContent('banner', 'image', null, $imagePath);
+                $this->updateSectionContent('banner', 'image', null, null, $imagePath);
             }
         }
-        $fields = ['title', 'description', 'button_text', 'button_link'];
-        foreach ($fields as $field) {
-            if (isset($values[$field])) {
-                $this->updateSectionContent('banner', $field, $values[$field]);
+        $fields = [
+            'title' => 'title_en',
+            'description' => 'description_en',
+            'button_text' => 'button_text_en',
+            'button_link' => 'button_link_en'
+        ];
+        foreach ($fields as $field => $fieldEn) {
+            if (isset($values[$field]) || isset($values[$fieldEn])) {
+                $this->updateSectionContent('banner', $field, $values[$field] ?? null, $values[$fieldEn] ?? null);
             }
         }
     }
@@ -138,12 +149,16 @@ class PageFacade
         $durability = $this->getSectionContent('durability');
         $result = [
             'title' => '',
+            'title_en' => '',
             'description1' => '',
+            'description1_en' => '',
             'description2' => '',
+            'description2_en' => '',
             'image' => null
         ];
         foreach ($durability as $item) {
             $result[$item->content_type] = $item->content_text ?? $item->image_path;
+            $result[$item->content_type . '_en'] = $item->content_text_en ?? '';
         }
         return (object)$result;
     }
@@ -157,12 +172,16 @@ class PageFacade
         if ($image instanceof FileUpload && $image->isOk()) {
             $currentImage = $this->getDurabilitySection()->image ?? null;
             $imagePath = ImageUploader::uploadImage($image, 'Uploads/home', $currentImage);
-            $this->updateSectionContent('durability', 'image', null, $imagePath);
+            $this->updateSectionContent('durability', 'image', null, null, $imagePath);
         }
-        $fields = ['title', 'description1', 'description2'];
-        foreach ($fields as $field) {
-            if (isset($values[$field])) {
-                $this->updateSectionContent('durability', $field, $values[$field]);
+        $fields = [
+            'title' => 'title_en',
+            'description1' => 'description1_en',
+            'description2' => 'description2_en'
+        ];
+        foreach ($fields as $field => $fieldEn) {
+            if (isset($values[$field]) || isset($values[$fieldEn])) {
+                $this->updateSectionContent('durability', $field, $values[$field] ?? null, $values[$fieldEn] ?? null);
             }
         }
     }
@@ -183,7 +202,7 @@ class PageFacade
     /**
      * Add a new customization with title, description, and image.
      */
-    public function addCustomization(string $title, string $description, FileUpload $image): void
+    public function addCustomization(string $title, string $description, FileUpload $image, ?string $titleEn = null, ?string $descriptionEn = null): void
     {
         if (!$image->isOk()) {
             throw new \Exception('Musíte nahrát platný obrázek.');
@@ -197,7 +216,9 @@ class PageFacade
 
         $this->database->table('customization')->insert([
             'title' => $title,
+            'title_en' => $titleEn,
             'description' => $description,
+            'description_en' => $descriptionEn,
             'image_path' => $imagePath,
             'ordering' => $maxOrdering + 1
         ]);
@@ -224,7 +245,7 @@ class PageFacade
     {
         $altTextColumn = $this->lang === 'en' ? 'alt_text_en' : 'alt_text';
         return $this->database->table('gallery')
-            ->select("id, image, COALESCE($altTextColumn, alt_text) AS alt_text, ordering")
+            ->select("id, image, COALESCE($altTextColumn, alt_text) AS alt_text, alt_text_en, ordering")
             ->order('ordering ASC')
             ->fetchAll();
     }
@@ -240,6 +261,7 @@ class PageFacade
         }
         $imagePath = ImageUploader::uploadImage($image, 'Uploads/gallery', null);
         $altText = $values['alt_text'] ?? null;
+        $altTextEn = $values['alt_text_en'] ?? null;
         $ordering = (int)($values['ordering'] ?? 0);
 
         $this->database->table('gallery')
@@ -249,6 +271,7 @@ class PageFacade
         $this->database->table('gallery')->insert([
             'image' => $imagePath,
             'alt_text' => $altText,
+            'alt_text_en' => $altTextEn,
             'ordering' => $ordering,
         ]);
     }
@@ -287,7 +310,7 @@ class PageFacade
         $nameColumn = $this->lang === 'en' ? 'name_en' : 'name';
         $addressColumn = $this->lang === 'en' ? 'address_en' : 'address';
         return $this->database->table('contact_info')
-            ->select("id, COALESCE($nameColumn, name) AS name, COALESCE($addressColumn, address) AS address, ico, phone, email, map_embed")
+            ->select("id, COALESCE($nameColumn, name) AS name, name_en, COALESCE($addressColumn, address) AS address, address_en, ico, phone, email, map_embed")
             ->fetch();
     }
 
