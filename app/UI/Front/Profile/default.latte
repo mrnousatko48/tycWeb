@@ -1,54 +1,54 @@
-{block title}OPNX3D | Účet{/block}
+{block title}OPNX3D | {_'nav.profile'}{/block}
 {block content}
 <section class="max-w-3xl mx-auto my-8 px-4 sm:px-6 py-8 rounded-2xl bg-[var(--color-background)] border border-[var(--color-secondary)] shadow-md transition-all duration-300 profile-card sm:hover:shadow-lg">
-  <h1 class="text-3xl sm:text-4xl font-bold mb-6 text-[var(--color-text)] text-center tracking-tight">Profil</h1>
+  <h1 class="text-3xl sm:text-4xl font-bold mb-6 text-[var(--color-text)] text-center tracking-tight">{_'profile.title'}</h1>
 
   <dl class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
     <div class="flex flex-col px-4 py-2">
-      <dt class="font-semibold text-[var(--color-primary)] text-xs sm:text-sm uppercase tracking-wide">Uživatelské jméno</dt>
+      <dt class="font-semibold text-[var(--color-primary)] text-xs sm:text-sm uppercase tracking-wide">{_'form.username'}</dt>
       <dd class="mt-1 text-[var(--color-text)] text-base sm:text-lg">{$profileUser->username}</dd>
     </div>
 
     <div class="flex flex-col px-4 py-2">
-      <dt class="font-semibold text-[var(--color-primary)] text-xs sm:text-sm uppercase tracking-wide">Jméno</dt>
+      <dt class="font-semibold text-[var(--color-primary)] text-xs sm:text-sm uppercase tracking-wide">{_'form.firstname'}</dt>
       <dd class="mt-1 text-[var(--color-text)] text-base sm:text-lg">{$profileUser->firstname}</dd>
     </div>
 
     <div class="flex flex-col px-4 py-2">
-      <dt class="font-semibold text-[var(--color-primary)] text-xs sm:text-sm uppercase tracking-wide">Příjmení</dt>
+      <dt class="font-semibold text-[var(--color-primary)] text-xs sm:text-sm uppercase tracking-wide">{_'form.lastname'}</dt>
       <dd class="mt-1 text-[var(--color-text)] text-base sm:text-lg">{$profileUser->lastname}</dd>
     </div>
 
     <div class="flex flex-col px-4 py-2">
-      <dt class="font-semibold text-[var(--color-primary)] text-xs sm:text-sm uppercase tracking-wide">Email</dt>
+      <dt class="font-semibold text-[var(--color-primary)] text-xs sm:text-sm uppercase tracking-wide">{_'form.email'}</dt>
       <dd class="mt-1 text-[var(--color-text)] text-base sm:text-lg">{$profileUser->email}</dd>
     </div>
 
     <div class="flex flex-col px-4 py-2">
-      <dt class="font-semibold text-[var(--color-primary)] text-xs sm:text-sm uppercase tracking-wide">Telefon</dt>
+      <dt class="font-semibold text-[var(--color-primary)] text-xs sm:text-sm uppercase tracking-wide">{_'form.phone'}</dt>
       <dd class="mt-1 text-[var(--color-text)] text-base sm:text-lg">{$profileUser->phone}</dd>
     </div>
 
     <div class="flex flex-col px-4 py-2">
-      <dt class="font-semibold text-[var(--color-primary)] text-xs sm:text-sm uppercase tracking-wide">Adresa</dt>
+      <dt class="font-semibold text-[var(--color-primary)] text-xs sm:text-sm uppercase tracking-wide">{_'form.address'}</dt>
       <dd class="mt-1 text-[var(--color-text)] text-base sm:text-lg">{$profileUser->address}</dd>
     </div>
 
     <div class="flex flex-col px-4 py-2">
-      <dt class="font-semibold text-[var(--color-primary)] text-xs sm:text-sm uppercase tracking-wide">Město</dt>
+      <dt class="font-semibold text-[var(--color-primary)] text-xs sm:text-sm uppercase tracking-wide">{_'form.city'}</dt>
       <dd class="mt-1 text-[var(--color-text)] text-base sm:text-lg">{$profileUser->city}</dd>
     </div>
 
     <div class="flex flex-col px-4 py-2">
-      <dt class="font-semibold text-[var(--color-primary)] text-xs sm:text-sm uppercase tracking-wide">PSČ</dt>
+      <dt class="font-semibold text-[var(--color-primary)] text-xs sm:text-sm uppercase tracking-wide">{_'form.psc'}</dt>
       <dd class="mt-1 text-[var(--color-text)] text-base sm:text-lg">{$profileUser->psc}</dd>
     </div>
   </dl>
 
   <div class="mt-8 flex flex-col sm:flex-row justify-center gap-4 sm:gap-6 flex-wrap">
-    <a n:href="edit" class="btn btn-outline-primary px-6 py-3 text-sm sm:text-base font-medium rounded-lg hover:shadow-md hover:bg-[var(--color-primary)] hover:text-[var(--button-text)] transition-all duration-200 w-full sm:w-auto text-center">Upravit profil</a>
-    <a n:href="changePassword" class="btn btn-outline-primary px-6 py-3 text-sm sm:text-base font-medium rounded-lg hover:shadow-md hover:bg-[var(--color-primary)] hover:text-[var(--button-text)] transition-all duration-200 w-full sm:w-auto text-center">Změna hesla</a>
-    <a n:href="orders" class="btn btn-outline-primary px-6 py-3 text-sm sm:text-base font-medium rounded-lg hover:shadow-md hover:bg-[var(--color-primary)] hover:text-[var(--button-text)] transition-all duration-200 w-full sm:w-auto text-center">Objednávky</a>
+    <a n:href="edit, lang => $lang" class="btn btn-outline-primary px-6 py-3 text-sm sm:text-base font-medium rounded-lg hover:shadow-md hover:bg-[var(--color-primary)] hover:text-[var(--button-text)] transition-all duration-200 w-full sm:w-auto text-center">{_'profile.edit'}</a>
+    <a n:href="changePassword, lang => $lang" class="btn btn-outline-primary px-6 py-3 text-sm sm:text-base font-medium rounded-lg hover:shadow-md hover:bg-[var(--color-primary)] hover:text-[var(--button-text)] transition-all duration-200 w-full sm:w-auto text-center">{_'profile.change_password'}</a>
+    <a n:href="orders, lang => $lang" class="btn btn-outline-primary px-6 py-3 text-sm sm:text-base font-medium rounded-lg hover:shadow-md hover:bg-[var(--color-primary)] hover:text-[var(--button-text)] transition-all duration-200 w-full sm:w-auto text-center">{_'profile.orders'}</a>
   </div>
 </section>
 {/block}

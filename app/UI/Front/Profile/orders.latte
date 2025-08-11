@@ -1,215 +1,150 @@
-{block title}OPNX3D | Objednávky{/block}
+{block title}OPNX3D | {_'profile.orders_title'}{/block}
 {block content}
 <style>
-/* General styles */
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
     line-height: 1.6;
     color: var(--color-text);
 }
 
-.alert-info {
-    background: linear-gradient(135deg, var(--color-secondary) 0%, var(--color-accent) 10%);
-    color: var(--color-text);
-    border: 1px solid var(--color-accent);
-    padding: 1.5rem;
-    border-radius: 1rem;
-    text-align: center;
-    font-size: 1.1rem;
-    font-weight: 500;
-    position: relative;
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-    margin: 1.5rem auto;
-    max-width: 800px;
-}
-
-.alert-info::before {
-    content: '\f05a'; /* Font Awesome info-circle */
-    font-family: 'Font Awesome 5 Free';
-    font-weight: 900;
-    font-size: 1.4rem;
-    margin-right: 0.75rem;
-    vertical-align: middle;
-}
-
 .table-container {
     max-width: 1200px;
     margin: 0 auto;
-    padding: 1rem;
-}
-
-.table {
-    background-color: var(--color-background); /* Use theme background */
-    color: var(--color-text);
-    border-radius: 1rem;
-    overflow: hidden;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-    border-collapse: separate;
-    border-spacing: 0;
-}
-
-.table-light {
-    background: linear-gradient(to right, var(--color-secondary), var(--color-accent) 100%);
-    color: var(--color-text);
-    font-weight: 600;
-    font-size: 1.1rem;
-}
-
-.table th {
-    padding: 1.25rem;
-    position: relative;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-}
-
-.table th::before {
-    font-family: 'Font Awesome 5 Free';
-    font-weight: 900;
-    margin-right: 0.5rem;
-    color: var(--color-text-secondary);
-}
-
-.table th:nth-child(1)::before { content: '\f0a3'; } /* ID icon */
-.table th:nth-child(2)::before { content: '\f3c5'; } /* Address icon */
-.table th:nth-child(3)::before { content: '\f058'; } /* Status icon */
-.table th:nth-child(4)::before { content: '\f3d1'; } /* Payment icon */
-.table th:nth-child(5)::before { content: '\f073'; } /* Date icon */
-.table th:nth-child(6)::before { content: '\f0c9'; } /* Items icon */
-.table th:nth-child(7)::before { content: '\f53a'; } /* Price icon */
-
-.table td {
-    padding: 1.25rem;
-    font-size: 1rem;
-    border-bottom: 1px solid var(--color-secondary);
-}
-
-.table tbody tr:nth-child(even) {
-    background-color: rgba(var(--color-secondary), 0.2);
-}
-
-.table-hover tbody tr:hover {
-    background-color: rgba(var(--color-accent), 0.1);
-    transition: background-color 0.3s ease, transform 0.2s ease;
-    transform: translateY(-2px);
-}
-
-.badge {
-    font-size: 0.9rem;
-    padding: 0.5rem 1rem;
-    border-radius: 2rem;
-    font-weight: 600;
-    text-transform: uppercase;
-    position: relative;
-    cursor: help;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
-}
-
-.badge:hover {
-    transform: scale(1.05);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
-}
-
-.badge::after {
-    content: attr(data-tooltip);
-    position: absolute;
-    bottom: 125%;
-    left: 50%;
-    transform: translateX(-50%);
-    background-color: var(--color-dark, #111827);
-    color: white;
-    padding: 0.5rem 1rem;
-    border-radius: 0.5rem;
-    font-size: 0.8rem;
-    white-space: nowrap;
-    opacity: 0;
-    visibility: hidden;
-    transition: opacity 0.2s ease, visibility 0.2s ease;
-    z-index: 10;
-}
-
-.badge:hover::after {
-    opacity: 1;
-    visibility: visible;
-}
-
-.badge.bg-secondary { background-color: #6b7280; }
-.badge.bg-warning { background-color: #f59e0b; }
-.badge.bg-success { background-color: #22c55e; }
-.badge.bg-info { background-color: #06b6d4; }
-.badge.bg-primary { background-color: var(--color-primary); }
-.badge.bg-dark { background-color: #111827; }
-.badge.bg-light { background-color: var(--color-secondary); }
-
-.badge.bg-secondary::after { content: 'V košíku'; }
-.badge.bg-warning::after { content: 'Čeká na zpracování'; }
-.badge.bg-success::after { content: 'Zaplaceno'; }
-.badge.bg-info::after { content: 'Odesláno'; }
-.badge.bg-primary::after { content: 'Doručeno'; }
-.badge.bg-dark::after { content: 'Vyzvednuto'; }
-.badge.bg-light::after { content: 'Neznámý stav'; }
-
-.btn-primary {
-    display: inline-flex;
-    align-items: center;
-    padding: 0.75rem 1.5rem;
-    font-size: 1rem;
-    font-weight: 600;
-    border-radius: 0.75rem;
-    background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-accent) 100%);
-    color: var(--button-text);
-    border: none;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.3s ease;
-}
-
-.btn-primary:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
-    background: linear-gradient(135deg, var(--color-accent) 0%, var(--color-primary) 100%);
-}
-
-.btn-primary::before {
-    content: '\f060'; /* Back arrow icon */
-    font-family: 'Font Awesome 5 Free';
-    font-weight: 900;
-    margin-right: 0.5rem;
+    padding: 1.5rem;
 }
 
 h1 {
-    font-size: 2.25rem;
-    font-weight: 800;
-    margin-bottom: 2rem;
-    text-align: center;
+    font-size: 1.75rem;
+    font-weight: 600;
     color: var(--color-text);
-    letter-spacing: -0.025em;
+    margin-bottom: 1.5rem;
+    text-align: left;
 }
 
-/* Mobile-specific styles */
+.btn-primary {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    border-radius: 0.375rem;
+    background-color: var(--color-primary);
+    color: var(--button-text);
+    border: none;
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+    margin-bottom: 1rem; /* Added for spacing below button */
+}
+
+.btn-primary:hover {
+    background-color: var(--color-accent);
+}
+
+.alert-info {
+    background-color: var(--color-background);
+    border: 1px solid var(--color-secondary);
+    color: var(--color-text);
+    padding: 1rem;
+    border-radius: 0.5rem;
+    text-align: center;
+    font-size: 0.875rem;
+    font-weight: 500;
+    margin-bottom: 1.5rem;
+}
+
+.table {
+    width: 100%;
+    background-color: var(--color-background);
+    border-collapse: collapse;
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.table thead {
+    background-color: var(--color-secondary);
+    color: var(--color-text);
+}
+
+.table th {
+    padding: 0.75rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    text-align: left;
+    text-transform: uppercase;
+}
+
+.table td {
+    padding: 1rem;
+    font-size: 0.875rem;
+    border-bottom: 1px solid var(--color-secondary);
+}
+
+.table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+.table-hover tbody tr:hover {
+    background-color: rgba(var(--color-secondary), 0.05);
+}
+
+.badge {
+    display: inline-block;
+    padding: 0.25rem 0.75rem;
+    font-size: 0.75rem;
+    font-weight: 500;
+    border-radius: 1rem;
+    text-transform: uppercase;
+}
+
+.badge.bg-secondary { background-color: #e5e7eb; color: #374151; }
+.badge.bg-warning { background-color: #fef3c7; color: #d97706; }
+.badge.bg-success { background-color: #d1fae5; color: #059669; }
+.badge.bg-info { background-color: #cffafe; color: #0e7490; }
+.badge.bg-primary { background-color: var(--color-primary); color: var(--button-text); }
+.badge.bg-dark { background-color: #1f2937; color: white; }
+.badge.bg-light { background-color: #f3f4f6; color: #6b7280; }
+
+.table td ul {
+    padding-left: 1rem;
+    margin: 0;
+}
+
+.table td ul li {
+    font-size: 0.875rem;
+    margin-bottom: 0.25rem;
+}
+
+.table td ul li small {
+    font-size: 0.75rem;
+}
+
+.table td ul.list-disc {
+    list-style-type: disc;
+    padding-left: 1.5rem;
+}
+
+/* Mobile styles */
 @media (max-width: 640px) {
+    .table-container {
+        padding: 1rem;
+    }
+
     h1 {
-        font-size: 1.75rem;
-        margin-bottom: 1.5rem;
+        font-size: 1.5rem;
     }
 
     .btn-primary {
-        padding: 0.6rem 1.25rem;
-        font-size: 0.95rem;
+        font-size: 0.8125rem;
+        padding: 0.5rem 0.75rem;
+        margin-bottom: 0.75rem; /* Adjusted for mobile */
     }
 
     .alert-info {
-        font-size: 1rem;
-        padding: 1.25rem;
-        margin: 1rem;
-    }
-
-    .table-container {
-        padding: 0.5rem;
+        font-size: 0.8125rem;
+        padding: 0.75rem;
     }
 
     .table {
         display: block;
-        width: 100%;
-        border: none;
     }
 
     .table thead {
@@ -222,94 +157,78 @@ h1 {
 
     .table tr {
         display: block;
-        margin-bottom: 1.5rem;
+        margin-bottom: 1rem;
         border: 1px solid var(--color-secondary);
-        border-radius: 1rem;
-        padding: 1.25rem;
+        border-radius: 0.5rem;
         background-color: var(--color-background);
-        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
-        transition: transform 0.2s ease;
-    }
-
-    .table tr:hover {
-        transform: translateY(-2px);
+        padding: 0.75rem;
     }
 
     .table td {
         display: block;
-        text-align: left;
-        padding: 0.75rem 0;
+        padding: 0.5rem 0;
         border: none;
-        font-size: 0.95rem;
     }
 
     .table td:before {
         content: attr(data-label);
-        font-weight: 600;
+        font-weight: 500;
         color: var(--color-text-secondary);
         display: block;
-        margin-bottom: 0.5rem;
-        font-size: 0.9rem;
+        font-size: 0.75rem;
         text-transform: uppercase;
+        margin-bottom: 0.25rem;
     }
 
-    .table td ul {
-        padding-left: 1.25rem;
-    }
-
-    .table td strong, .table td small {
-        font-size: 0.95rem;
-    }
-
-    .badge {
-        font-size: 0.85rem;
-        padding: 0.5rem 1rem;
+    .table td:last-child {
+        border-bottom: none;
     }
 }
 </style>
-
 <div class="table-container">
-    <a n:href="default" class="btn btn-primary">Zpět</a>
-    <h1 class="text-3xl font-bold mb-5">Objednávky</h1>
+    <div class="button-container">
+        <a n:href="default, lang => $lang" class="btn btn-primary">{_'profile.back'}</a>
+    </div>
+    <h1>{_'profile.orders_title'}</h1>
 
     {if !$orders || count($orders) === 0}
-        <div class="alert alert-info">Nemáte žádné objednávky.</div>
+        <div class="alert alert-info">{_'profile.no_orders'}</div>
     {else}
         <div class="table-responsive">
             <table class="table table-hover align-middle">
-                <thead class="table-light">
+                <thead>
                 <tr>
-                    <th>ID</th>
-                    <th>Adresa</th>
-                    <th>Stav</th>
-                    <th>Platba</th>
-                    <th>Datum</th>
-                    <th>Položky</th>
-                    <th>Celková cena</th>
+                    <th>{_'orders.id'}</th>
+                    <th>{_'orders.address'}</th>
+                    <th>{_'orders.state'}</th>
+                    <th>{_'orders.payment'}</th>
+                    <th>{_'orders.date'}</th>
+                    <th>{_'orders.items'}</th>
+                    <th>{_'orders.total_price'}</th>
                 </tr>
                 </thead>
                 <tbody>
                 {foreach $orders as $orderData}
                     <tr>
-                        <td data-label="ID">{$orderData['order']->id}</td>
-                        <td data-label="Adresa">
+                        <td data-label="{_'orders.id'}">{$orderData['order']->id}</td>
+                        <td data-label="{_'orders.address'}">
                             {$orderData['order']->address}<br>
                             {$orderData['order']->city}, {$orderData['order']->psc}
                         </td>
-                        <td data-label="Stav">
+                        <td data-label="{_'orders.state'}">
                             {switch $orderData['order']->state}
-                                {case 'KOSIK'} <span class="badge bg-secondary">Košík</span>
-                                {case 'OBJEDNANO'} <span class="badge bg-warning text-dark">Objednáno</span>
-                                {case 'ZAPLACENO'} <span class="badge bg-success">Zaplaceno</span>
-                                {case 'ODESLANO'} <span class="badge bg-info text-dark">Odesláno</span>
-                                {case 'DORUCENO'} <span class="badge bg-primary">Doručeno</span>
-                                {case 'VYZVEDNUTO'} <span class="badge bg-dark">Vyzvednuto</span>
-                                {default} <span class="badge bg-light text-muted">Neznámý</span>
+                                {case 'KOSIK'} <span class="badge bg-secondary">{_'orders.state.cart'}</span>
+                                {case 'OBJEDNANO'} <span class="badge bg-warning">{_'orders.state.ordered'}</span>
+                                {case 'ZAPLACENO'} <span class="badge bg-success">{_'orders.state.paid'}</span>
+                                {case 'ODESLANO'} <span class="badge bg-info">{_'orders.state.shipped'}</span>
+                                {case 'DORUCENO'} <span class="badge bg-primary">{_'orders.state.delivered'}</span>
+                                {case 'VYZVEDNUTO'} <span class="badge bg-dark">{_'orders.state.picked_up'}</span>
+                                {default} <span class="badge bg-light">{_'orders.state.unknown'}</span>
                             {/switch}
                         </td>
-                        <td data-label="Platba">{$orderData['order']->payment ?? '—'}</td>
-                        <td data-label="Datum">{$orderData['order']->created_at|date:'j. n. Y H:i'}</td>
-                        <td data-label="Položky">
+                        <td data-label="{_'orders.payment'}">{$orderData['order']->payment ?? '—'}</td>
+                        <td data-label="{_'orders.date'}">{$orderData['order']->created_at|date:'j. n. Y H:i'}</td>
+                        <td data-label="{_'orders.items'}">
                             {if count($orderData['cases']) > 0}
                                 <ul class="mb-0 ps-3">
                                     {foreach $orderData['cases'] as $case}
@@ -326,21 +245,17 @@ h1 {
                                                     {/foreach}
                                                 </ul>
                                             {else}
-                                                <small class="text-muted">Žádné vlastnosti</small>
+                                                <small class="text-muted">{_'orders.no_features'}</small>
                                             {/if}
                                         </li>
                                     {/foreach}
                                 </ul>
                             {else}
-                                <em>Žádné položky</em>
+                                <em>{_'orders.no_items'}</em>
                             {/if}
                         </td>
-                        <td data-label="Celková cena">
-                            {var $total = 0}
-                            {foreach $orderData['cases'] as $case}
-                                {do $total += $case->total_price}
-                            {/foreach}
-                            <strong>{number_format($total, 2, ',', ' ')} Kč</strong>
+                        <td data-label="{_'orders.total_price'}">
+                            <strong>{if $lang === 'en'}{$orderData['order']->total_price_eur|number:2,',',' '} €{else}{$orderData['order']->total_price|number:2,',',' '} Kč{/if}</strong>
                         </td>
                     </tr>
                 {/foreach}

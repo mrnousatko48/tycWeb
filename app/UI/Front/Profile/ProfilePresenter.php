@@ -36,7 +36,7 @@ final class ProfilePresenter extends BaseFrontPresenter
         $userRow = $this->userFacade->getUserById($userId);
 
         if (!$userRow) {
-            $this->error('Uživatel nebyl nalezen.');
+            $this->error($this->translator->translate('profile.user_not_found'));
         }
 
         $this->template->profileUser = $userRow;
@@ -45,33 +45,34 @@ final class ProfilePresenter extends BaseFrontPresenter
     protected function createComponentEditProfileForm(): Form
     {
         $form = new Form;
+        $form->setTranslator($this->translator); // Enable translation for form labels and errors
 
-        $form->addText('username', 'Uživatelské jméno:')
-            ->setRequired();
+        $form->addText('username', 'form.username')
+            ->setRequired('form.username.required');
 
-        $form->addText('firstname', 'Jméno:')
-            ->setRequired();
+        $form->addText('firstname', 'form.firstname')
+            ->setRequired('form.firstname.required');
 
-        $form->addText('lastname', 'Příjmení:')
-            ->setRequired();
+        $form->addText('lastname', 'form.lastname')
+            ->setRequired('form.lastname.required');
 
-        $form->addEmail('email', 'Email:')
-            ->setRequired();
-        
-        $form->addText('phone', 'Telefon:')
+        $form->addEmail('email', 'form.email')
+            ->setRequired('form.email.required');
+
+        $form->addText('phone', 'form.phone')
             ->setNullable();
 
-        $form->addText('address', 'Adresa:')
+        $form->addText('address', 'form.address')
             ->setNullable();
 
-        $form->addText('city', 'Město:')
+        $form->addText('city', 'form.city')
             ->setNullable();
 
-        $form->addText('psc', 'PSČ:')
+        $form->addText('psc', 'form.psc')
             ->setNullable()
-            ->addRule($form::PATTERN, 'Zadejte platné PSČ (např. 12345 nebo 123 45)', '^\d{3}\s?\d{2}$');
+            ->addRule($form::PATTERN, 'form.psc.pattern', '^\d{3}\s?\d{2}$');
 
-        $form->addSubmit('save', 'Uložit změny');
+        $form->addSubmit('save', 'form.save');
 
         $form->onSuccess[] = [$this, 'editProfileFormSucceeded'];
 
@@ -84,7 +85,7 @@ final class ProfilePresenter extends BaseFrontPresenter
         return $form;
     }
 
-    public function editProfileFormSucceeded(Form $form, \stdClass $values): void
+        public function editProfileFormSucceeded(Form $form, \stdClass $values): void
     {
         $userId = $this->user->getId();
 
@@ -99,9 +100,9 @@ final class ProfilePresenter extends BaseFrontPresenter
             'psc' => $values->psc,
         ]));
 
-        $this->flashMessage('Profil byl úspěšně aktualizován.', 'success');
-        $this->redirect('default');
-    }
+        $this->flashMessage($this->translator->translate('flash.success.profile_updated'), 'success');
+        }
+       
 
     public function renderOrders(): void
     {
@@ -113,42 +114,43 @@ final class ProfilePresenter extends BaseFrontPresenter
     protected function createComponentChangePasswordForm(): Form
     {
         $form = new Form;
+        $form->setTranslator($this->translator); // Enable translation for form labels and errors
 
-        $form->addPassword('currentPassword', 'Aktuální heslo:')
-            ->setRequired('Zadejte aktuální heslo.');
+        $form->addPassword('currentPassword', 'form.current_password')
+            ->setRequired('form.current_password.required');
 
-        $form->addPassword('newPassword', 'Nové heslo:')
-            ->setRequired('Zadejte nové heslo.')
-            ->addRule($form::MIN_LENGTH, 'Heslo musí mít alespoň %d znaků.', 6);
+        $form->addPassword('newPassword', 'form.new_password')
+            ->setRequired('form.new_password.required')
+            ->addRule($form::MIN_LENGTH, 'form.new_password.min_length', 6);
 
-        $form->addPassword('newPasswordConfirm', 'Potvrďte nové heslo:')
-            ->setRequired('Potvrďte nové heslo.')
-            ->addRule($form::EQUAL, 'Hesla se musí shodovat.', $form['newPassword']);
+        $form->addPassword('newPasswordConfirm', 'form.confirm_password')
+            ->setRequired('form.confirm_password.required')
+            ->addRule($form::EQUAL, 'form.passwords_not_matching', $form['newPassword']);
 
-        $form->addSubmit('save', 'Změnit heslo');
+        $form->addSubmit('save', 'form.change_password');
 
         $form->onSuccess[] = [$this, 'changePasswordFormSucceeded'];
 
         return $form;
     }
 
-    public function changePasswordFormSucceeded(Form $form, \stdClass $values): void
+     public function changePasswordFormSucceeded(Form $form, \stdClass $values): void
     {
         $userId = $this->user->getId();
 
         $userRow = $this->userFacade->getUserById($userId);
         if (!$userRow) {
-            $this->error('Uživatel nebyl nalezen.');
+            $this->error($this->translator->translate('profile.user_not_found'));
         }
 
         if (!$this->userFacade->verifyPassword($userId, $values->currentPassword)) {
-            $form->addError('Aktuální heslo je nesprávné.');
+            $form->addError($this->translator->translate('form.current_password.invalid'));
             return;
         }
 
         $this->userFacade->updatePassword($userId, $values->newPassword);
 
-        $this->flashMessage('Heslo bylo úspěšně změněno.', 'success');
-        $this->redirect('this');
+        $this->flashMessage($this->translator->translate('flash.success.reset_password.success'), 'success');
+        $this->redirect('this', ['lang' => $this->lang]);
     }
 }

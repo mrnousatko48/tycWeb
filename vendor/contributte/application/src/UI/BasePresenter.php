@@ -8,14 +8,14 @@ use App\Model\PageFacade;
 use App\Model\OrderFacade;
 use App\Model\UserFacade;
 use App\Utils\ArrayTranslator;
-use Nette\Localization\ITranslator;
+use Nette\Localization\Translator;
 
 abstract class BaseFrontPresenter extends Presenter
 {
     protected OrderFacade $orderFacade;
     protected PageFacade $pageFacade;
     protected UserFacade $userFacade;
-    protected ITranslator $translator;
+    protected Translator $translator;
 
     public function injectDependencies(OrderFacade $orderFacade, PageFacade $pageFacade, UserFacade $userFacade): void
     {

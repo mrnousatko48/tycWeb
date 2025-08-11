@@ -245,122 +245,154 @@ final class OrderFacade
     }
 
     public function createOrder(int $userId, string $firstname, string $lastname, string $email, string $phone, string $address, string $city, string $psc, int $paymentMethodId, array $caseQuantities, int $shippingOptionId, string $lang = 'cs', ?string $deliveryPoint = null): ActiveRow
-    {
-        if (empty($caseQuantities)) {
-            throw new \InvalidArgumentException('Cart cannot be empty.');
-        }
-
-        if (!$this->isValidShippingOption($shippingOptionId)) {
-            throw new \InvalidArgumentException('Invalid shipping option.');
-        }
-
-        if (!$this->isValidPaymentMethod($paymentMethodId)) {
-            throw new \InvalidArgumentException('Invalid payment method.');
-        }
-
-        $this->database->beginTransaction();
-
-        try {
-            $additionalCost = $this->calculateAdditionalCost($shippingOptionId, $paymentMethodId, $lang);
-            $variableSymbol = $this->generateVariableSymbol();
-            $order = $this->database->table('orders')->insert([
-                'user_id' => $userId,
-                'firstname' => $firstname,
-                'lastname' => $lastname,
-                'email' => $email,
-                'phone' => $phone,
-                'address' => $address,
-                'city' => $city,
-                'psc' => $psc,
-                'payment' => $paymentMethodId,
-                'shipping' => $shippingOptionId,
-                'delivery_point' => $deliveryPoint,
-                'additional_cost' => $additionalCost,
-                'state' => 'OBJEDNANO',
-                'created_at' => new \DateTime(),
-                'variable_symbol' => $variableSymbol,
-                'lang' => $lang,
-            ]);
-
-            foreach ($caseQuantities as $caseId => $quantity) {
-                $this->database->table('order_case')->insert([
-                    'order_id' => $order->id,
-                    'case_id' => $caseId,
-                    'quantity' => $quantity,
-                ]);
-
-                $this->database->table('cases')
-                    ->where('id', $caseId)
-                    ->where('user_id', $userId)
-                    ->where('state', 'KOSIK')
-                    ->update([
-                        'state' => 'OBJEDNANO',
-                    ]);
-            }
-
-            $this->database->commit();
-            return $order;
-        } catch (\Throwable $e) {
-            $this->database->rollBack();
-            error_log("Error creating order: " . $e->getMessage());
-            throw $e;
-        }
+{
+    if (empty($caseQuantities)) {
+        throw new \InvalidArgumentException('Cart cannot be empty.');
     }
 
-    public function createGuestOrder(string $firstname, string $lastname, string $email, string $phone, string $address, string $city, string $psc, int $paymentMethodId, array $caseQuantities, int $shippingOptionId, string $lang = 'cs', ?string $deliveryPoint = null): ActiveRow
-    {
-        if (empty($caseQuantities)) {
-            throw new \InvalidArgumentException('Cart cannot be empty.');
+    if (!$this->isValidShippingOption($shippingOptionId)) {
+        throw new \InvalidArgumentException('Invalid shipping option.');
+    }
+
+    if (!$this->isValidPaymentMethod($paymentMethodId)) {
+        throw new \InvalidArgumentException('Invalid payment method.');
+    }
+
+    $this->database->beginTransaction();
+
+    try {
+        $additionalCost = $this->calculateAdditionalCost($shippingOptionId, $paymentMethodId, $lang);
+
+        // Calculate total price
+        $totalPrice = 0.0;
+        $totalPriceEur = 0.0;
+        $caseIds = array_keys($caseQuantities);
+        $cases = $this->database->table('cases')->where('id', $caseIds)->fetchAll();
+        foreach ($cases as $case) {
+            $quantity = $caseQuantities[$case->id] ?? 1;
+            $totalPrice += (float)$case->total_price * $quantity;
+            $totalPriceEur += (float)$case->total_price_eur * $quantity;
         }
+        $totalPrice += $additionalCost; // Add shipping and payment fees (in CZK)
+        $totalPriceEur += $additionalCost; // Add shipping and payment fees (in EUR, assuming calculateAdditionalCost handles currency)
 
-        if (!$this->isValidShippingOption($shippingOptionId)) {
-            throw new \InvalidArgumentException('Invalid shipping option.');
-        }
+        $variableSymbol = $this->generateVariableSymbol();
+        $order = $this->database->table('orders')->insert([
+            'user_id' => $userId,
+            'firstname' => $firstname,
+            'lastname' => $lastname,
+            'email' => $email,
+            'phone' => $phone,
+            'address' => $address,
+            'city' => $city,
+            'psc' => $psc,
+            'payment' => $paymentMethodId,
+            'shipping' => $shippingOptionId,
+            'delivery_point' => $deliveryPoint,
+            'additional_cost' => $additionalCost,
+            'total_price' => $totalPrice,
+            'total_price_eur' => $totalPriceEur,
+            'state' => 'OBJEDNANO',
+            'created_at' => new \DateTime(),
+            'variable_symbol' => $variableSymbol,
+            'lang' => $lang,
+        ]);
 
-        if (!$this->isValidPaymentMethod($paymentMethodId)) {
-            throw new \InvalidArgumentException('Invalid payment method.');
-        }
-
-        $this->database->beginTransaction();
-
-        try {
-            $additionalCost = $this->calculateAdditionalCost($shippingOptionId, $paymentMethodId, $lang);
-            $variableSymbol = $this->generateVariableSymbol();
-            $order = $this->database->table('orders')->insert([
-                'user_id' => null,
-                'firstname' => $firstname,
-                'lastname' => $lastname,
-                'email' => $email,
-                'phone' => $phone,
-                'address' => $address,
-                'city' => $city,
-                'psc' => $psc,
-                'payment' => $paymentMethodId,
-                'shipping' => $shippingOptionId,
-                'delivery_point' => $deliveryPoint,
-                'additional_cost' => $additionalCost,
-                'state' => 'OBJEDNANO',
-                'created_at' => new \DateTime(),
-                'variable_symbol' => $variableSymbol,
-                'lang' => $lang,
+        foreach ($caseQuantities as $caseId => $quantity) {
+            $this->database->table('order_case')->insert([
+                'order_id' => $order->id,
+                'case_id' => $caseId,
+                'quantity' => $quantity,
             ]);
 
-            foreach ($caseQuantities as $caseId => $quantity) {
-                $this->database->table('order_case')->insert([
-                    'order_id' => $order->id,
-                    'case_id' => $caseId,
-                    'quantity' => $quantity,
+            $this->database->table('cases')
+                ->where('id', $caseId)
+                ->where('user_id', $userId)
+                ->where('state', 'KOSIK')
+                ->update([
+                    'state' => 'OBJEDNANO',
                 ]);
-            }
-
-            $this->database->commit();
-            return $order;
-        } catch (\Throwable $e) {
-            $this->database->rollBack();
-            error_log("Error creating guest order: " . $e->getMessage());
-            throw $e;
         }
+
+        $this->database->commit();
+        return $order;
+    } catch (\Throwable $e) {
+        $this->database->rollBack();
+        error_log("Error creating order: " . $e->getMessage());
+        throw $e;
     }
+}
+
+public function createGuestOrder(string $firstname, string $lastname, string $email, string $phone, string $address, string $city, string $psc, int $paymentMethodId, array $caseQuantities, int $shippingOptionId, string $lang = 'cs', ?string $deliveryPoint = null): ActiveRow
+{
+    if (empty($caseQuantities)) {
+        throw new \InvalidArgumentException('Cart cannot be empty.');
+    }
+
+    if (!$this->isValidShippingOption($shippingOptionId)) {
+        throw new \InvalidArgumentException('Invalid shipping option.');
+    }
+
+    if (!$this->isValidPaymentMethod($paymentMethodId)) {
+        throw new \InvalidArgumentException('Invalid payment method.');
+    }
+
+    $this->database->beginTransaction();
+
+    try {
+        $additionalCost = $this->calculateAdditionalCost($shippingOptionId, $paymentMethodId, $lang);
+
+        // Calculate total price
+        $totalPrice = 0.0;
+        $totalPriceEur = 0.0;
+        $caseIds = array_keys($caseQuantities);
+        $cases = $this->database->table('cases')->where('id', $caseIds)->fetchAll();
+        foreach ($cases as $case) {
+            $quantity = $caseQuantities[$case->id] ?? 1;
+            $totalPrice += (float)$case->total_price * $quantity;
+            $totalPriceEur += (float)$case->total_price_eur * $quantity;
+        }
+        $totalPrice += $additionalCost; // Add shipping and payment fees (in CZK)
+        $totalPriceEur += $additionalCost; // Add shipping and payment fees (in EUR, assuming calculateAdditionalCost handles currency)
+
+        $variableSymbol = $this->generateVariableSymbol();
+        $order = $this->database->table('orders')->insert([
+            'user_id' => null,
+            'firstname' => $firstname,
+            'lastname' => $lastname,
+            'email' => $email,
+            'phone' => $phone,
+            'address' => $address,
+            'city' => $city,
+            'psc' => $psc,
+            'payment' => $paymentMethodId,
+            'shipping' => $shippingOptionId,
+            'delivery_point' => $deliveryPoint,
+            'additional_cost' => $additionalCost,
+            'total_price' => $totalPrice,
+            'total_price_eur' => $totalPriceEur,
+            'state' => 'OBJEDNANO',
+            'created_at' => new \DateTime(),
+            'variable_symbol' => $variableSymbol,
+            'lang' => $lang,
+        ]);
+
+        foreach ($caseQuantities as $caseId => $quantity) {
+            $this->database->table('order_case')->insert([
+                'order_id' => $order->id,
+                'case_id' => $caseId,
+                'quantity' => $quantity,
+            ]);
+        }
+
+        $this->database->commit();
+        return $order;
+    } catch (\Throwable $e) {
+        $this->database->rollBack();
+        error_log("Error creating guest order: " . $e->getMessage());
+        throw $e;
+    }
+}
 
     public function getShippingInfo(int $shippingOptionId, string $lang = 'cs'): ?array
     {
@@ -531,14 +563,24 @@ final class OrderFacade
         return $vendor ? $vendor->name : 'Unknown';
     }
 
-    public function getVendors(string $lang = 'cs'): array
+    public function getVendors(string $lang = 'cs'): array // Returns vendor name string, for cart
     {
         $vendors = $this->database->table('vendors')
             ->where('supported_lang LIKE ?', "%$lang%")
             ->fetchAll();
         $result = [];
         foreach ($vendors as $vendor) {
-            $result[$vendor->id] = $vendor;
+            $result[$vendor->id] = $vendor->name; 
+        }
+        return $result;
+    }
+
+        public function getAllVendors(): array // returns active row for admin
+    {
+        $vendors = $this->database->table('vendors')->fetchAll();
+        $result = [];
+        foreach ($vendors as $vendor) {
+            $result[$vendor->id] = $vendor; 
         }
         return $result;
     }

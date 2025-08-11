@@ -67,9 +67,9 @@ final class ProductPresenter extends Nette\Application\UI\Presenter
 
     public function renderShipping(): void
     {
-        $vendors = $this->orderFacade->getVendors('');
+        $vendors = $this->orderFacade->getAllVendors();
         $this->template->vendors = array_combine(
-            array_column($vendors, 'id'),
+            array_column(iterator_to_array($vendors), 'id'),
             $vendors
         );
         $this->template->shippingOptions = $this->orderFacade->getAllShippingOptions();
