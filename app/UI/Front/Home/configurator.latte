@@ -307,9 +307,131 @@
     .ring-red-500 { outline-color: var(--color-error); }
     .p-1 { padding: 0.25rem; }
     .text-red-500 { color: var(--color-error); }
+
+    /* Updated styles for the 3D viewer modal */
+    #viewerModal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        z-index: 1000;
+        overflow: auto;
+    }
+
+    #viewerModal .modal-content {
+        background: var(--color-background);
+        padding: 1rem;
+        border-radius: 0.75rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        position: relative;
+        width: 90%;
+        max-width: 1000px;
+        height: auto;
+        max-height: 90vh;
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+        margin: 1rem auto; /* Center with top margin */
+    }
+
+    #viewerModal .close-button {
+        position: absolute;
+        top: 0.75rem;
+        right: 0.75rem;
+        background: var(--color-error);
+        color: white;
+        border: none;
+        padding: 0.5rem 0.75rem;
+        cursor: pointer;
+        border-radius: 0.5rem;
+        font-size: 1rem;
+        line-height: 1;
+        z-index: 10;
+        transition: background-color 0.3s ease;
+    }
+
+    #viewerModal .close-button:hover {
+        background: #dc2626;
+    }
+
+    #viewerModal .viewer-container {
+        flex: 1;
+        background: #eaeaea;
+        border-radius: 0.5rem;
+        width: 100%;
+        height: 50vh;
+        min-height: 300px;
+    }
+
+    #viewerModal .side-panel {
+        flex: 0 1 auto;
+        display: flex;
+        flex-direction: column;
+        padding: 1rem;
+        gap: 1rem;
+        background: var(--color-background);
+        border-radius: 0.5rem;
+        overflow-y: auto; /* Enable scrolling for side panel */
+        max-height: 40vh; /* Limit height to prevent overflow */
+    }
+
+    @media (min-width: 640px) {
+        #viewerModal {
+            align-items: center;
+            justify-content: center;
+        }
+
+        #viewerModal .modal-content {
+            flex-direction: row;
+            gap: 1.5rem;
+            margin: 0 auto; /* Center without top margin on larger screens */
+        }
+
+        #viewerModal .viewer-container {
+            height: 70vh;
+            min-height: 400px;
+        }
+
+        #viewerModal .side-panel {
+            border-left: 1px solid var(--color-secondary);
+            max-width: 300px;
+            max-height: 70vh; /* Adjust for larger screens */
+        }
+    }
+
+    @media (max-width: 639px) {
+        #viewerModal {
+            align-items: flex-start; /* Align to top on mobile */
+            justify-content: flex-start;
+        }
+
+        #viewerModal .modal-content {
+            width: 95%;
+            max-height: 95vh;
+            margin: 0.5rem auto; /* Smaller top margin for mobile */
+        }
+
+        #viewerModal .viewer-container {
+            height: 40vh;
+            min-height: 250px;
+        }
+
+        #viewerModal .side-panel {
+            padding: 0.5rem;
+            max-height: 35vh; /* Slightly smaller to fit mobile screens */
+        }
+    }
 </style>
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 grid grid-cols-1 md:grid-cols-2 gap-8 items-start animate-fade-in-up carousel-container">
     <div class="w-full">
+        <!-- Trigger button for 3D viewer -->
+        <div class="text-center mb-5">
+            <button id="openViewerBtn" class="px-4 py-2 bg-[var(--color-primary)] text-white rounded hover:bg-[var(--color-accent)]">Open 3D Viewer</button>
+        </div>
+        <!-- Carousel -->
         <div class="relative carousel-wrapper">
             <div class="overflow-hidden rounded-xl shadow-lg h-[500px]">
                 <div class="flex h-full transition-transform duration-700 ease-in-out" id="carousel-track">
@@ -327,6 +449,29 @@
         </div>
         <div class="flex justify-center mt-4 space-x-2" id="carousel-dots">
             <!-- Dots will be inserted here by JavaScript -->
+        </div>
+        <!-- Modal overlay for 3D viewer -->
+        <div id="viewerModal">
+            <!-- Modal content -->
+            <div class="modal-content">
+                <!-- Close button -->
+                <button id="closeViewerBtn" class="close-button">✖</button>
+
+                <!-- 3D Viewer container -->
+                <div id="viewerContainer" class="viewer-container"></div>
+
+                <!-- Side panel -->
+                <div class="side-panel">
+                    <!-- Color controls -->
+                    <div id="color-container-3d" style="display: none;">
+                        <h2 class="text-lg font-semibold">{_'configurator.color'}</h2>
+                        <div id="color-buttons-3d" class="mt-3 flex flex-wrap gap-3"></div>
+                    </div>
+
+                    <!-- Features controls -->
+                    <div id="features-3d"></div>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -392,7 +537,18 @@
     </div>
 </div>
 
+<!-- Import map for Three.js -->
+<script type="importmap">
+{
+    "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+    }
+}
+</script>
+
 <script>
+    const threeDUrl = {$threeDUrl};
     const uploadUrl = {$uploadUrl};
     const defaultImagesUrl = {$defaultImagesUrl};
     const translations = {
@@ -400,7 +556,7 @@
         upload_success: '{_'configurator.upload_success' | noescape}',
         select_device: '{_'configurator.select_device' | noescape}',
         select_manufacturer: '{_'form.manufacturer' | noescape}',
-        select_model: '{_'form.model' | noescape}',
+        select_model: '{_'configurator.select_model' | noescape}',
         select_color: '{_'configurator.color' | noescape}',
         select_features: '{_'configurator.features' | noescape}',
         select_upload: '{_'configurator.upload_image' | noescape}',
@@ -428,6 +584,10 @@ let currentImages = [];
 let currentSlide = 0;
 let totalSlides = currentImages.length || 1;
 let fileUploadSuccess = false;
+
+// 3D Viewer variables
+let targetMesh = null;
+let scene, camera, renderer, controls, model = null;
 
 // Initialize popup event listeners and currency
 document.addEventListener('DOMContentLoaded', function() {
@@ -464,13 +624,16 @@ function checkSelections(showMessage = false) {
 
     // Show or hide color container based on selections
     const colorContainer = document.getElementById('color-container');
+    const colorContainer3D = document.getElementById('color-container-3d');
     colorContainer.style.display = (manufacturerSelected && modelSelected) ? 'block' : 'none';
+    colorContainer3D.style.display = (manufacturerSelected && modelSelected) ? 'block' : 'none';
 
     // Update highlights and show popup only if showMessage is true
     if (showMessage) {
         // Clear highlights
         document.getElementById('color-buttons').classList.remove('ring-2', 'ring-red-500', 'p-1');
-        document.querySelectorAll('#features h2').forEach(h2 => h2.classList.remove('text-red-500'));
+        document.getElementById('color-buttons-3d').classList.remove('ring-2', 'ring-red-500', 'p-1');
+        document.querySelectorAll('#features h2, #features-3d h2').forEach(h2 => h2.classList.remove('text-red-500'));
         document.getElementById('user-upload-container').classList.remove('ring-2', 'ring-red-500', 'p-1');
 
         // If manufacturer or model is missing, show only that message without checking other fields
@@ -487,6 +650,7 @@ function checkSelections(showMessage = false) {
         if (!colorSelected) {
             missingFields.push(translations.select_color);
             document.getElementById('color-buttons').classList.add('ring-2', 'ring-red-500', 'p-1');
+            document.getElementById('color-buttons-3d').classList.add('ring-2', 'ring-red-500', 'p-1');
         }
         if (!allFeaturesSelected && totalFeatures > 0) {
             // Identify specific missing feature groups
@@ -495,7 +659,7 @@ function checkSelections(showMessage = false) {
                 if (!selectedFeatures[featureId]) {
                     missingFeatureGroups.push(featureName);
                     // Highlight the specific feature group header
-                    const featureHeader = Array.from(document.querySelectorAll('#features h2')).find(h2 => h2.textContent === featureName);
+                    const featureHeader = Array.from(document.querySelectorAll('#features h2, #features-3d h2')).find(h2 => h2.textContent === featureName);
                     if (featureHeader) {
                         featureHeader.classList.add('text-red-500');
                     }
@@ -515,7 +679,8 @@ function checkSelections(showMessage = false) {
     } else {
         // Clear highlights during normal interaction
         document.getElementById('color-buttons').classList.remove('ring-2', 'ring-red-500', 'p-1');
-        document.querySelectorAll('#features h2').forEach(h2 => h2.classList.remove('text-red-500'));
+        document.getElementById('color-buttons-3d').classList.remove('ring-2', 'ring-red-500', 'p-1');
+        document.querySelectorAll('#features h2, #features-3d h2').forEach(h2 => h2.classList.remove('text-red-500'));
         document.getElementById('user-upload-container').classList.remove('ring-2', 'ring-red-500', 'p-1');
     }
 
@@ -563,7 +728,6 @@ function updateSelectbox(select, items) {
     defaultOption.setAttribute('value', '');
     defaultOption.setAttribute('disabled', 'disabled');
     defaultOption.setAttribute('selected', 'selected');
-    // Use translations.select_option + translations.select_model for model dropdown, else translations.select_option
     defaultOption.innerText = select.id === 'frm-caseForm-model' 
         ? `${translations.select_option} ${translations.select_model.toLowerCase()}`
         : (select.dataset.prompt || translations.select_option);
@@ -581,20 +745,29 @@ function updateSelectbox(select, items) {
 function toggleSelection(button) {
     const featureId = button.dataset.feature;
     const group = button.parentElement.parentElement.querySelectorAll(`button[data-feature="${featureId}"]`);
+    const group3D = document.querySelectorAll(`#features-3d button[data-feature="${featureId}"]`);
 
     group.forEach(btn => {
         btn.classList.remove('ring-2', 'ring-[var(--color-accent)]', 'ring-offset-2');
     });
+    group3D.forEach(btn => {
+        btn.classList.remove('ring-2', 'ring-[var(--color-accent)]', 'ring-offset-2');
+    });
 
     button.classList.add('ring-2', 'ring-[var(--color-accent)]', 'ring-offset-2');
+    document.querySelector(`#features-3d button[data-feature="${featureId}"][data-value="${button.dataset.value}"]`)?.classList.add('ring-2', 'ring-[var(--color-accent)]', 'ring-offset-2');
+
     selectedFeatures[featureId] = {
         name: button.dataset.value,
         price: parseFloat(button.dataset.price) || 0,
         price_eur: parseFloat(button.dataset.priceEur) || 0,
-        allow_user_upload: button.dataset.allowUserUpload === 'true'
+        allow_user_upload: button.dataset.allowUserUpload === 'true',
+        mesh: button.dataset.mesh || null,
+        visible: button.dataset.visible ? button.dataset.visible === 'true' : null
     };
 
     updateFeaturesInput();
+    updateFeatureVisibility();
     updateTotalPrice();
     updateUserUploadVisibility();
     checkSelections();
@@ -629,6 +802,16 @@ function updateUserUploadVisibility() {
         hideCustomPopup();
     }
     checkSelections();
+}
+
+function updateFeatureVisibility() {
+    if (!model) return;
+    for (const data of Object.values(selectedFeatures)) {
+        if (data.mesh && data.visible !== null) {
+            const mesh = model.getObjectByName(data.mesh);
+            if (mesh) mesh.visible = data.visible;
+        }
+    }
 }
 
 document.getElementById('frm-caseForm-manufacturer').addEventListener('change', function () {
@@ -731,26 +914,35 @@ document.getElementById('frm-caseForm-model').addEventListener('change', functio
 
 function updateColorButtons(colors) {
     const container = document.getElementById('color-buttons');
+    const container3D = document.getElementById('color-buttons-3d');
     container.innerHTML = '';
+    container3D.innerHTML = '';
     colors.forEach(color => {
-        const button = document.createElement('button');
-        button.setAttribute('type', 'button');
-        button.setAttribute('data-color', color.name);
-        button.className = `color-button w-10 h-10 rounded-full bg-[${color.hex_code}]`;
-        button.title = color.name;
-        button.addEventListener('click', function () {
-            document.querySelectorAll('#color-buttons button').forEach(btn => {
-                btn.classList.remove('ring-2', 'ring-[var(--color-accent)]', 'ring-offset-2');
+        [container, container3D].forEach(cont => {
+            const button = document.createElement('button');
+            button.setAttribute('type', 'button');
+            button.setAttribute('data-color', color.name);
+            button.setAttribute('data-hex', color.hex_code);
+            button.className = `color-button w-10 h-10 rounded-full bg-[${color.hex_code}]`;
+            button.title = color.name;
+            button.addEventListener('click', function () {
+                document.querySelectorAll('#color-buttons button, #color-buttons-3d button').forEach(btn => {
+                    btn.classList.remove('ring-2', 'ring-[var(--color-accent)]', 'ring-offset-2');
+                });
+                this.classList.add('ring-2', 'ring-[var(--color-accent)]', 'ring-offset-2');
+                document.querySelector(`#${cont.id === 'color-buttons' ? 'color-buttons-3d' : 'color-buttons'} button[data-color="${this.dataset.color}"]`)?.classList.add('ring-2', 'ring-[var(--color-accent)]', 'ring-offset-2');
+                document.getElementById('frm-caseForm-color').value = this.dataset.color;
+                if (window.targetMesh) window.setMeshColor(window.targetMesh, this.dataset.hex);
+                checkSelections();
             });
-            this.classList.add('ring-2', 'ring-[var(--color-accent)]', 'ring-offset-2');
-            document.getElementById('frm-caseForm-color').value = this.dataset.color;
-            checkSelections();
+            cont.appendChild(button);
         });
-        container.appendChild(button);
     });
     if (colors.length > 0) {
         container.firstChild.classList.add('ring-2', 'ring-[var(--color-accent)]', 'ring-offset-2');
+        container3D.firstChild.classList.add('ring-2', 'ring-[var(--color-accent)]', 'ring-offset-2');
         document.getElementById('frm-caseForm-color').value = colors[0].name;
+        if (window.targetMesh) window.setMeshColor(window.targetMesh, colors[0].hex_code);
         checkSelections();
     }
 }
@@ -758,56 +950,59 @@ function updateColorButtons(colors) {
 function updateFeatureButtons(features) {
     availableFeatures = features;
     const container = document.getElementById('features');
+    const container3D = document.getElementById('features-3d');
     container.innerHTML = '';
+    container3D.innerHTML = '';
     featurePrices = {};
     selectedFeatures = {};
 
     for (const [featureName, options] of Object.entries(features)) {
         const featureId = featureName.replace(/\s+/g, '_').toLowerCase();
-        const featureDiv = document.createElement('div');
-        featureDiv.className = 'mt-6 animate-fade-in-up';
+        [container, container3D].forEach(cont => {
+            const featureDiv = document.createElement('div');
+            featureDiv.className = 'mt-6 animate-fade-in-up';
 
-        const h2 = document.createElement('h2');
-        h2.className = 'text-lg font-semibold';
-        h2.innerText = featureName;
-        featureDiv.appendChild(h2);
+            const h2 = document.createElement('h2');
+            h2.className = 'text-lg font-semibold';
+            h2.innerText = featureName;
+            featureDiv.appendChild(h2);
 
-        const buttonDiv = document.createElement('div');
-        buttonDiv.className = 'mt-3 flex flex-wrap gap-3';
+            const buttonDiv = document.createElement('div');
+            buttonDiv.className = 'mt-3 flex flex-wrap gap-3';
 
-        options.forEach(option => {
-            const optionDiv = document.createElement('div');
-            optionDiv.className = 'flex flex-col items-center';
+            options.forEach(option => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'flex flex-col items-center';
 
-            const button = document.createElement('button');
-            button.setAttribute('type', 'button');
-            button.setAttribute('data-feature', featureId);
-            button.setAttribute('data-value', option.name);
-            button.setAttribute('data-price', option.price);
-            button.setAttribute('data-price-eur', option.price_eur);
-            button.setAttribute('data-allow-user-upload', option.allow_user_upload);
-            button.className = 'feature-button';
-            button.innerText = option.name;
-            button.addEventListener('click', function () { toggleSelection(this); });
+                const button = document.createElement('button');
+                button.setAttribute('type', 'button');
+                button.setAttribute('data-feature', featureId);
+                button.setAttribute('data-value', option.name);
+                button.setAttribute('data-price', option.price);
+                button.setAttribute('data-price-eur', option.price_eur);
+                button.setAttribute('data-allow-user-upload', option.allow_user_upload);
+                if (option.mesh_name) button.setAttribute('data-mesh', option.mesh_name);
+                if (option.visible !== null) button.setAttribute('data-visible', option.visible ? 'true' : 'false');
+                button.className = 'feature-button';
+                button.innerText = option.name;
+                button.addEventListener('click', function () { toggleSelection(this); });
 
-            optionDiv.appendChild(button);
+                optionDiv.appendChild(button);
 
-            const priceToShow = translations.lang === 'cs' ? option.price : option.price_eur;
-            if (priceToShow > 0) {
-                const priceSpan = document.createElement('span');
-                priceSpan.className = 'text-sm text-[var(--color-secondary)] mt-1 animate-fade-in-up';
-                priceSpan.innerText = `+${priceToShow.toFixed(2)} ${translations.currency_symbol}`;
-                optionDiv.appendChild(priceSpan);
-            }
+                const priceToShow = translations.lang === 'cs' ? option.price : option.price_eur;
+                if (priceToShow > 0) {
+                    const priceSpan = document.createElement('span');
+                    priceSpan.className = 'text-sm text-[var(--color-secondary)] mt-1 animate-fade-in-up';
+                    priceSpan.innerText = `+${priceToShow.toFixed(2)} ${translations.currency_symbol}`;
+                    optionDiv.appendChild(priceSpan);
+                }
 
-            buttonDiv.appendChild(optionDiv);
+                buttonDiv.appendChild(optionDiv);
+            });
 
-            featurePrices[featureId] = featurePrices[featureId] || {};
-            featurePrices[featureId][option.name] = translations.lang === 'cs' ? option.price : option.price_eur;
+            featureDiv.appendChild(buttonDiv);
+            cont.appendChild(featureDiv);
         });
-
-        featureDiv.appendChild(buttonDiv);
-        container.appendChild(featureDiv);
     }
 
     updateUserUploadVisibility();
@@ -1056,5 +1251,156 @@ document.addEventListener('DOMContentLoaded', function() {
         console.error('Form or submit button not found');
     }
 });
+</script>
+
+<!-- 3D Viewer Script -->
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+scene = new THREE.Scene();
+scene.background = new THREE.Color(0xdadada);
+
+camera = new THREE.PerspectiveCamera(70, 1, 0.01, 100);
+camera.position.set(0, 0, 2);
+
+renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.physicallyCorrectLights = true;
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.25;
+
+// Lighting setup
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.25);
+scene.add(ambientLight);
+
+const keyLight = new THREE.DirectionalLight(0xffffff, 1.3);
+keyLight.position.set(3, 2, 4);
+keyLight.castShadow = true;
+scene.add(keyLight);
+
+const fillLight = new THREE.DirectionalLight(0x99ccff, 0.5);
+fillLight.position.set(-2, 1, -3);
+scene.add(fillLight);
+
+const rimLight = new THREE.DirectionalLight(0xffffff, 0.8);
+rimLight.position.set(-3, 3, 5);
+scene.add(rimLight);
+
+const topLight = new THREE.DirectionalLight(0xffffff, 0.3);
+topLight.position.set(0, 5, 0);
+scene.add(topLight);
+
+controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.enablePan = false; // Disable panning for better mobile experience
+controls.minDistance = 1; // Set minimum zoom distance
+controls.maxDistance = 5; // Set maximum zoom distance
+controls.enableZoom = true; // Enable pinch-to-zoom
+controls.enableRotate = true; // Enable rotation
+controls.autoRotate = false; // Disable auto-rotation for manual control
+
+const loader = new GLTFLoader();
+
+function loadModel(path) {
+    loader.load(path, (gltf) => {
+        if (model) scene.remove(model);
+        model = gltf.scene;
+        model.scale.set(15, 15, 15);
+        scene.add(model);
+        targetMesh = model.getObjectByName('Frame');
+        // Reapply color
+        const selectedColorBtn = document.querySelector('#color-buttons-3d button.ring-2') || document.querySelector('#color-buttons button.ring-2');
+        if (selectedColorBtn && targetMesh) setMeshColor(targetMesh, selectedColorBtn.dataset.hex);
+        // Reapply visibility
+        updateFeatureVisibility();
+    });
+}
+
+const modal = document.getElementById('viewerModal');
+const container = document.getElementById('viewerContainer');
+
+// Handle window resize for responsive canvas
+function resizeRenderer() {
+    const w = container.clientWidth;
+    const h = container.clientHeight;
+    renderer.setSize(w, h);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+}
+
+document.getElementById('openViewerBtn').addEventListener('click', () => {
+    const modelId = document.getElementById('frm-caseForm-model').value;
+    if (!modelId) {
+        showCustomPopup(translations.select_model);
+        return;
+    }
+    fetch(threeDUrl.replace('#', encodeURIComponent(modelId)))
+        .then(response => response.json())
+        .then(data => {
+            if (!data.path) {
+                showCustomPopup('No 3D model available.');
+                return;
+            }
+            loadModel(data.path);
+            modal.style.display = 'flex';
+            container.appendChild(renderer.domElement);
+            resizeRenderer();
+            // Add touch event listeners for mobile
+            container.addEventListener('touchstart', handleTouchStart, { passive: false });
+            container.addEventListener('touchmove', handleTouchMove, { passive: false });
+            // Scroll to top of modal on open
+            modal.scrollTop = 0;
+        })
+        .catch(error => console.error('Error fetching 3D path:', error));
+});
+
+// Handle touch events for better mobile interaction
+let touchStartX = 0;
+let touchStartY = 0;
+
+function handleTouchStart(event) {
+    if (event.touches.length === 1) {
+        touchStartX = event.touches[0].clientX;
+        touchStartY = event.touches[0].clientY;
+    }
+}
+
+function handleTouchMove(event) {
+    if (event.touches.length === 1) {
+        event.preventDefault(); // Prevent scrolling
+        const deltaX = event.touches[0].clientX - touchStartX;
+        const deltaY = event.touches[0].clientY - touchStartY;
+        controls.rotateLeft(deltaX * 0.005);
+        controls.rotateUp(deltaY * 0.005);
+        touchStartX = event.touches[0].clientX;
+        touchStartY = event.touches[0].clientY;
+    }
+}
+
+document.getElementById('closeViewerBtn').addEventListener('click', () => {
+    modal.style.display = 'none';
+    // Remove touch event listeners when closing
+    container.removeEventListener('touchstart', handleTouchStart);
+    container.removeEventListener('touchmove', handleTouchMove);
+});
+
+// Animate
+renderer.setAnimationLoop(() => {
+    controls.update();
+    renderer.render(scene, camera);
+});
+
+// Add resize event listener
+window.addEventListener('resize', resizeRenderer);
+
+function setMeshColor(mesh, color) {
+    mesh.traverse((child) => {
+        if (child.isMesh && child.material) {
+            child.material.color.set(color);
+        }
+    });
+}
 </script>
 {/block}

@@ -215,7 +215,7 @@ public function getFeaturesByModel(int $modelId, string $lang): array
             ->fetchPairs('id', 'name');
 
         $options = $this->database->table('feature_options')
-            ->select('id, feature_id, name_' . $lang . ' AS name, price, price_eur, image_path, allow_user_upload')
+            ->select('id, feature_id, name_' . $lang . ' AS name, price, price_eur, image_path, allow_user_upload, mesh_name, visible')
             ->where('feature_id', array_keys($features))
             ->order('feature_id')
             ->fetchAll();
@@ -227,7 +227,9 @@ public function getFeaturesByModel(int $modelId, string $lang): array
                 'name' => $option->name,
                 'price' => (float)$option->price,
                 'price_eur' => (float)$option->price_eur,
-                'allow_user_upload' => (bool)$option->allow_user_upload
+                'allow_user_upload' => (bool)$option->allow_user_upload,
+                'mesh_name' => $option->mesh_name,
+                'visible' => $option->visible !== null ? (bool)$option->visible : null
             ];
         }
 
