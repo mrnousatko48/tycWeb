@@ -112,50 +112,53 @@ final class ProductPresenter extends Nette\Application\UI\Presenter
         }
     }
 
-    public function createComponentModelForm(): Form
-{
-    $form = new Form;
+public function createComponentModelForm(): Form
+    {
+        $form = new Form;
 
-    $form->addSelect('manufacturer_id', 'Výrobce:', 
-        $this->modelFacade->getManufacturers()->fetchPairs('id', 'name'))
-        ->setPrompt('Vyberte výrobce')
-        ->setRequired('Prosím, vyberte výrobce.');
+        $form->addSelect('manufacturer_id', 'Výrobce:', 
+            $this->modelFacade->getManufacturers()->fetchPairs('id', 'name'))
+            ->setPrompt('Vyberte výrobce')
+            ->setRequired('Prosím, vyberte výrobce.');
 
-    $form->addText('name', 'Název modelu:')
-        ->setRequired('Prosím, zadejte název modelu.');
+        $form->addText('name', 'Název modelu:')
+            ->setRequired('Prosím, zadejte název modelu.');
 
-    $form->addText('price', 'Základní cena (CZK):')
-        ->setRequired('Prosím, zadejte základní cenu.')
-        ->addRule($form::FLOAT, 'Cena musí být platné č fdeíslo.')
-        ->setDefaultValue('0.00');
+        $form->addText('price', 'Základní cena (CZK):')
+            ->setRequired('Prosím, zadejte základní cenu.')
+            ->addRule($form::FLOAT, 'Cena musí být platné číslo.')
+            ->setDefaultValue('0.00');
 
-    $form->addText('price_eur', 'Základní cena (EUR):')
-        ->setRequired('Prosím, zadejte základní cenu v EUR.')
-        ->addRule($form::FLOAT, 'Cena musí být platné číslo.')
-        ->setDefaultValue('0.00');
+        $form->addText('price_eur', 'Základní cena (EUR):')
+            ->setRequired('Prosím, zadejte základní cenu v EUR.')
+            ->addRule($form::FLOAT, 'Cena musí být platné číslo.')
+            ->setDefaultValue('0.00');
 
-    $form->addMultiSelect('color_ids', 'Dostupné barvy:', 
-        $this->modelFacade->getColors()->fetchPairs('id', 'name'))
-        ->setHtmlAttribute('multiple')
-        ->setRequired('Vyberte alespoň jednu barvu.');
+        $form->addMultiSelect('color_ids', 'Dostupné barvy:', 
+            $this->modelFacade->getColors()->fetchPairs('id', 'name'))
+            ->setHtmlAttribute('multiple')
+            ->setRequired('Vyberte alespoň jednu barvu.');
 
-    $features = $this->modelFacade->getFeatures()->fetchPairs('id', 'name');
-    $featureOptions = [];
-    foreach ($features as $featureId => $featureName) {
-        $options = $this->modelFacade->getFeatureOptions($featureId);
-        $featureOptions[$featureId] = array_combine(
-            array_map(fn($opt) => "$featureId:$opt[id]", $options),
-            array_map(fn($opt) => "$featureName: {$opt['name']}", $options)
-        );
+        $features = $this->modelFacade->getFeatures()->fetchPairs('id', 'name');
+        $featureOptions = [];
+        foreach ($features as $featureId => $featureName) {
+            $options = $this->modelFacade->getFeatureOptions($featureId);
+            $featureOptions[$featureId] = array_combine(
+                array_map(fn($opt) => "$featureId:$opt[id]", $options),
+                array_map(fn($opt) => "$featureName: {$opt['name']}", $options)
+            );
+        }
+        $form->addMultiSelect('feature_options', 'Dostupné vlastnosti:', $featureOptions)
+            ->setHtmlAttribute('multiple');
+
+        $form->addUpload('model_3d_file', '3D soubor (.gltf):')
+            ->setRequired(false);
+
+        $form->addSubmit('save', 'Uložit model');
+
+        $form->onSuccess[] = [$this, 'modelFormSucceeded'];
+        return $form;
     }
-    $form->addMultiSelect('feature_options', 'Dostupné vlastnosti:', $featureOptions)
-        ->setHtmlAttribute('multiple');
-
-    $form->addSubmit('save', 'Uložit model');
-
-    $form->onSuccess[] = [$this, 'modelFormSucceeded'];
-    return $form;
-}
 
     public function modelFormSucceeded(Form $form, array $values): void
     {
@@ -185,52 +188,55 @@ final class ProductPresenter extends Nette\Application\UI\Presenter
         }
     }
 
-    public function createComponentModelEditForm(): Form
-{
-    $form = new Form;
+   public function createComponentModelEditForm(): Form
+    {
+        $form = new Form;
 
-    $form->addHidden('id');
+        $form->addHidden('id');
 
-    $form->addSelect('manufacturer_id', 'Výrobce:', 
-        $this->modelFacade->getManufacturers()->fetchPairs('id', 'name'))
-        ->setPrompt('Vyberte výrobce')
-        ->setRequired('Prosím, vyberte výrobce.');
+        $form->addSelect('manufacturer_id', 'Výrobce:', 
+            $this->modelFacade->getManufacturers()->fetchPairs('id', 'name'))
+            ->setPrompt('Vyberte výrobce')
+            ->setRequired('Prosím, vyberte výrobce.');
 
-    $form->addText('name', 'Název modelu:')
-        ->setRequired('Prosím, zadejte název modelu.');
+        $form->addText('name', 'Název modelu:')
+            ->setRequired('Prosím, zadejte název modelu.');
 
-    $form->addText('price', 'Základní cena (CZK):')
-        ->setRequired('Prosím, zadejte základní cenu.')
-        ->addRule($form::FLOAT, 'Cena musí být platné číslo.')
-        ->setDefaultValue('0.00');
+        $form->addText('price', 'Základní cena (CZK):')
+            ->setRequired('Prosím, zadejte základní cenu.')
+            ->addRule($form::FLOAT, 'Cena musí být platné číslo.')
+            ->setDefaultValue('0.00');
 
-    $form->addText('price_eur', 'Základní cena (EUR):')
-        ->setRequired('Prosím, zadejte základní cenu v EUR.')
-        ->addRule($form::FLOAT, 'Cena musí být platné číslo.')
-        ->setDefaultValue('0.00');
+        $form->addText('price_eur', 'Základní cena (EUR):')
+            ->setRequired('Prosím, zadejte základní cenu v EUR.')
+            ->addRule($form::FLOAT, 'Cena musí být platné číslo.')
+            ->setDefaultValue('0.00');
 
-    $form->addMultiSelect('color_ids', 'Dostupné barvy:', 
-        $this->modelFacade->getColors()->fetchPairs('id', 'name'))
-        ->setHtmlAttribute('multiple')
-        ->setRequired('Vyberte alespoň jednu barvu.');
+        $form->addMultiSelect('color_ids', 'Dostupné barvy:', 
+            $this->modelFacade->getColors()->fetchPairs('id', 'name'))
+            ->setHtmlAttribute('multiple')
+            ->setRequired('Vyberte alespoň jednu barvu.');
 
-    $features = $this->modelFacade->getFeatures()->fetchPairs('id', 'name');
-    $featureOptions = [];
-    foreach ($features as $featureId => $featureName) {
-        $options = $this->modelFacade->getFeatureOptions($featureId);
-        $featureOptions[$featureId] = array_combine(
-            array_map(fn($opt) => "$featureId:$opt[id]", $options),
-            array_map(fn($opt) => "$featureName: {$opt['name']}", $options)
-        );
+        $features = $this->modelFacade->getFeatures()->fetchPairs('id', 'name');
+        $featureOptions = [];
+        foreach ($features as $featureId => $featureName) {
+            $options = $this->modelFacade->getFeatureOptions($featureId);
+            $featureOptions[$featureId] = array_combine(
+                array_map(fn($opt) => "$featureId:$opt[id]", $options),
+                array_map(fn($opt) => "$featureName: {$opt['name']}", $options)
+            );
+        }
+        $form->addMultiSelect('feature_options', 'Dostupné vlastnosti:', $featureOptions)
+            ->setHtmlAttribute('multiple');
+
+        $form->addUpload('model_3d_file', '3D soubor (.gltf):')
+            ->setRequired(false);
+
+        $form->addSubmit('save', 'Upravit model');
+
+        $form->onSuccess[] = [$this, 'modelEditFormSucceeded'];
+        return $form;
     }
-    $form->addMultiSelect('feature_options', 'Dostupné vlastnosti:', $featureOptions)
-        ->setHtmlAttribute('multiple');
-
-    $form->addSubmit('save', 'Upravit model');
-
-    $form->onSuccess[] = [$this, 'modelEditFormSucceeded'];
-    return $form;
-}
 
     public function modelEditFormSucceeded(Form $form, array $values): void
     {
@@ -261,7 +267,7 @@ final class ProductPresenter extends Nette\Application\UI\Presenter
         }
     }
 
-        public function handleEditModel(int $modelId): void
+    public function handleEditModel(int $modelId): void
     {
         $model = $this->modelFacade->getModelById($modelId);
         if (!$model) {
@@ -560,7 +566,7 @@ public function handleEditColor(int $colorId): void
         }
     }
 
-    public function createComponentFeatureOptionForm(): Form
+   public function createComponentFeatureOptionForm(): Form
     {
         $form = new Form;
 
@@ -588,7 +594,13 @@ public function handleEditColor(int $colorId): void
             ->addRule($form::FLOAT, 'Cena musí být platné číslo.')
             ->setDefaultValue('0.00');
 
-        $form->addCheckbox('allow_user_upload', 'Nahrát Soubor')
+        $form->addText('mesh_name', 'Mesh Name:')
+            ->setRequired(false);
+
+        $form->addCheckbox('visible', 'Mesh je vidět při vybrání')
+            ->setDefaultValue(true);
+        
+            $form->addCheckbox('allow_user_upload', 'Povolit nahrání souboru')
             ->setDefaultValue(false);
 
         $form->addSubmit('save', 'Přidat variantu');
@@ -615,7 +627,9 @@ public function handleEditColor(int $colorId): void
                     (float)$values['price_eur'],
                     (bool)$values['allow_user_upload'],
                     $values['name_cs'],
-                    $values['name_en']
+                    $values['name_en'],
+                    $values['mesh_name'] ?? null,
+                    $values['visible'] ?? null
                 );
                 $this->flashMessage('Možnost byla úspěšně přidána!', 'success');
             }
@@ -666,6 +680,12 @@ public function handleEditColor(int $colorId): void
         $form->addCheckbox('allow_user_upload', 'Nahrát Soubor')
             ->setDefaultValue(false);
 
+        $form->addText('mesh_name', 'Mesh Name:')
+            ->setRequired(false);
+
+        $form->addCheckbox('visible', 'Viditelnost')
+            ->setDefaultValue(true);
+
         $form->addSubmit('save', 'Upravit variantu');
 
         $form->onSuccess[] = [$this, 'featureOptionEditFormSucceeded'];
@@ -682,7 +702,9 @@ public function handleEditColor(int $colorId): void
                 (float)$values['price_eur'],
                 (bool)$values['allow_user_upload'],
                 $values['name_cs'],
-                $values['name_en']
+                $values['name_en'],
+                $values['mesh_name'] ?? null,
+                $values['visible'] ?? null
             );
             $this->flashMessage('Varianta byla úspěšně upravena!', 'success');
         } catch (\Exception $e) {
@@ -699,29 +721,31 @@ public function handleEditColor(int $colorId): void
         }
     }
 
-public function handleEditFeatureOption(int $optionId): void
-{
-    $option = $this->modelFacade->getAllFeatureOptions()->get($optionId);
-    if (!$option) {
-        $this->flashMessage('Možnost neexistuje.', 'error');
-        $this->redirect('features');
-    }
+    public function handleEditFeatureOption(int $optionId): void
+        {
+            $option = $this->modelFacade->getAllFeatureOptions()->get($optionId);
+            if (!$option) {
+                $this->flashMessage('Možnost neexistuje.', 'error');
+                $this->redirect('features');
+            }
 
-    $this['featureOptionEditForm']->setDefaults([
-        'id' => $option->id,
-        'feature_id' => $option->feature_id,
-        'name' => $option->name,
-        'name_cs' => $option->name_cs,
-        'name_en' => $option->name_en,
-        'price' => $option->price,
-        'price_eur' => $option->price_eur,
-        'allow_user_upload' => (bool)$option->allow_user_upload,
-    ]);
+            $this['featureOptionEditForm']->setDefaults([
+                'id' => $option->id,
+                'feature_id' => $option->feature_id,
+                'name' => $option->name,
+                'name_cs' => $option->name_cs,
+                'name_en' => $option->name_en,
+                'price' => $option->price,
+                'price_eur' => $option->price_eur,
+                'allow_user_upload' => (bool)$option->allow_user_upload,
+                'mesh_name' => $option->mesh_name,
+                'visible' => $option->visible !== null ? (bool)$option->visible : true,
+            ]);
 
-    if ($this->isAjax()) {
-        $this->redrawControl('featureOptionEditForm');
-    }
-}
+            if ($this->isAjax()) {
+                $this->redrawControl('featureOptionEditForm');
+            }
+        }
 
     public function handleDeleteColor(int $colorId): void
     {

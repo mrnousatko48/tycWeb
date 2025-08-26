@@ -18,7 +18,6 @@ class FileUploader
             throw new \Exception('Failed to create upload directory.');
         }
 
-
         $allowedExtensions = ['png', 'jpg', 'jpeg'];
         $ext = strtolower(pathinfo($file->getSanitizedName(), PATHINFO_EXTENSION));
 
@@ -45,6 +44,49 @@ class FileUploader
             return '/www/' . ltrim($filePath, '/');
         } catch (\Exception $e) {
             error_log('Error moving file: ' . $e->getMessage());
+            throw $e;
+        }
+    }
+
+    public static function uploadGltfFile(FileUpload $file, string $uploadDir): ?string
+    {
+        if (!$file->isOk()) {
+            error_log('GLTF file upload failed: ' . $file->getError());
+            return null;
+        }
+
+        $basePath = __DIR__ . '/../../www/' . ltrim($uploadDir, '/');
+        if (!is_dir($basePath) && !mkdir($basePath, 0777, true)) {
+            error_log('Failed to create directory: ' . $basePath);
+            throw new \Exception('Failed to create upload directory.');
+        }
+
+        $allowedExtension = 'gltf';
+        $ext = strtolower(pathinfo($file->getSanitizedName(), PATHINFO_EXTENSION));
+
+        $maxFileSize = 50 * 1024 * 1024; // 50MB in bytes
+        if ($file->getSize() > $maxFileSize) {
+            throw new \Exception('Soubor nesmí přesahovat velikost 50MB.');
+        }
+
+        if ($ext !== $allowedExtension) {
+            throw new \Exception('Invalid file type. Allowed type: gltf');
+        }
+
+        $filename = '3Dfile.gltf';
+        $filePath = $uploadDir . '/' . $filename;
+        $fullPath = __DIR__ . '/../../www/' . ltrim($filePath, '/');
+
+        try {
+            $file->move($fullPath);
+            if (!file_exists($fullPath)) {
+                error_log('GLTF file move failed: ' . $fullPath);
+                throw new \Exception('Failed to move GLTF file to destination.');
+            }
+            error_log('GLTF file moved successfully to: ' . $fullPath);
+            return '/www/' . ltrim($filePath, '/');
+        } catch (\Exception $e) {
+            error_log('Error moving GLTF file: ' . $e->getMessage());
             throw $e;
         }
     }

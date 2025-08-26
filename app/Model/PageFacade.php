@@ -47,7 +47,7 @@ class PageFacade
     {
         if ($image instanceof FileUpload && $image->isOk()) {
             $currentLogo = $this->database->table('logos')->where('theme', $theme)->fetch();
-            $imagePath = ImageUploader::uploadImage($image, 'Uploads/logo', $currentLogo ? $currentLogo->image_path : null);
+            $imagePath = ImageUploader::uploadImage($image, 'uploads/logo', $currentLogo ? $currentLogo->image_path : null);
             $data = ['image_path' => $imagePath];
 
             $existing = $this->database->table('logos')->where('theme', $theme)->fetch();
@@ -108,7 +108,7 @@ class PageFacade
     {
         if (!empty($values['image']) && $values['image'] instanceof FileUpload && $values['image']->isOk()) {
             $currentImage = $this->getBannerSection()->image ?? null;
-            $imagePath = ImageUploader::uploadImage($values['image'], 'Uploads/home', $currentImage);
+            $imagePath = ImageUploader::uploadImage($values['image'], 'uploads/home', $currentImage);
             if ($imagePath) {
                 $this->updateSectionContent('banner', 'image', null, null, $imagePath);
             }
@@ -150,7 +150,7 @@ class PageFacade
         $image = $values['image'] ?? null;
         if ($image instanceof FileUpload && $image->isOk()) {
             $currentImage = $this->getDurabilitySection()->image ?? null;
-            $imagePath = ImageUploader::uploadImage($image, 'Uploads/home', $currentImage);
+            $imagePath = ImageUploader::uploadImage($image, 'uploads/home', $currentImage);
             $this->updateSectionContent('durability', 'image', null, null, $imagePath);
         }
         $fields = [
@@ -180,7 +180,7 @@ class PageFacade
         if (!$image->isOk()) {
             throw new \Exception('Musíte nahrát platný obrázek.');
         }
-        $imagePath = ImageUploader::uploadImage($image, 'Uploads/home', null);
+        $imagePath = ImageUploader::uploadImage($image, 'uploads/home', null);
 
         $maxOrdering = $this->database->table('customization')
             ->select('MAX(ordering) AS max_ordering')
@@ -223,7 +223,7 @@ class PageFacade
         if (!$image instanceof FileUpload || !$image->isOk()) {
             throw new \Exception('Valid image file is required.');
         }
-        $imagePath = ImageUploader::uploadImage($image, 'Uploads/gallery', null);
+        $imagePath = ImageUploader::uploadImage($image, 'uploads/gallery', null);
         $altText = $values['alt_text'] ?? null;
         $altTextEn = $values['alt_text_en'] ?? null;
         $ordering = (int)($values['ordering'] ?? 0);
@@ -338,7 +338,7 @@ public function updateCustomization(int $id, string $title, string $description,
 
     if ($image instanceof FileUpload && $image->isOk()) {
         $currentCustomization = $this->database->table('customization')->get($id);
-        $imagePath = ImageUploader::uploadImage($image, 'Uploads/home', $currentCustomization ? $currentCustomization->image_path : null);
+        $imagePath = ImageUploader::uploadImage($image, 'uploads/home', $currentCustomization ? $currentCustomization->image_path : null);
         $data['image_path'] = $imagePath;
     }
 
