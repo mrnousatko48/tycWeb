@@ -1515,30 +1515,26 @@ function resizeRenderer() {
     camera.updateProjectionMatrix();
 }
 
-document.getElementById('openViewerBtn').addEventListener('click', () => {
-    const modelId = document.getElementById('frm-caseForm-model').value;
-    if (!modelId) {
-        showCustomPopup(translations.select_model);
-        return;
+document.getElementById('frm-caseForm-model').addEventListener('change', function () {
+    const modelId = this.value;
+    if (modelId) {
+        fetch(threeDUrl.replace('#', encodeURIComponent(modelId)))
+            .then(response => response.json())
+            .then(data => {
+                if (data.path) {
+                    loadModel(data.path);
+                    document.getElementById('viewerModal').style.display = 'flex';
+                    document.getElementById('viewerContainer').appendChild(renderer.domElement);
+                    resizeRenderer();
+                    // Add touch event listeners for mobile
+                    document.getElementById('viewerContainer').addEventListener('touchstart', handleTouchStart, { passive: false });
+                    document.getElementById('viewerContainer').addEventListener('touchmove', handleTouchMove, { passive: false });
+                    // Scroll to top of modal
+                    document.getElementById('viewerModal').scrollTop = 0;
+                }
+            })
+            .catch(error => console.error('Error fetching 3D path:', error));
     }
-    fetch(threeDUrl.replace('#', encodeURIComponent(modelId)))
-        .then(response => response.json())
-        .then(data => {
-            if (!data.path) {
-                showCustomPopup('No 3D model available.');
-                return;
-            }
-            loadModel(data.path);
-            modal.style.display = 'flex';
-            container.appendChild(renderer.domElement);
-            resizeRenderer();
-            // Add touch event listeners for mobile
-            container.addEventListener('touchstart', handleTouchStart, { passive: false });
-            container.addEventListener('touchmove', handleTouchMove, { passive: false });
-            // Scroll to top of modal on open
-            modal.scrollTop = 0;
-        })
-        .catch(error => console.error('Error fetching 3D path:', error));
 });
 
 // Handle touch events for better mobile interaction
