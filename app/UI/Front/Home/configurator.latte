@@ -598,10 +598,6 @@
 </style>
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 grid grid-cols-1 md:grid-cols-2 gap-8 items-start animate-fade-in-up carousel-container">
     <div class="w-full">
-        <!-- Trigger button for 3D viewer -->
-        <div class="text-center mb-5">
-            <button id="openViewerBtn" style="display: none;" class="px-4 py-2 bg-[var(--color-primary)] text-white rounded hover:bg-[var(--color-accent)]">Open 3D Viewer</button>
-        </div>
         <!-- Carousel -->
         <div class="relative carousel-wrapper">
             <div class="overflow-hidden rounded-xl shadow-lg h-[500px]">
@@ -668,6 +664,10 @@
                         {input model class => 'form-select w-full sm:w-1/2', data-colors-url => $colorsUrl, data-features-url => $featuresUrl, data-price-url => $priceUrl, data-images-url => $imagesUrl}
                     </div>
                 </div>
+                <!-- Trigger button for 3D viewer -->
+                <div class="text-center my-6">
+                    <button id="openViewerBtn" style="display: none;" class="px-4 py-2 bg-[var(--color-primary)] text-white rounded hover:bg-[var(--color-accent)]">Open 3D Viewer</button>
+                </div>
 
                 <div id="color-container" style="display: none;">
                     <h2 class="text-lg font-semibold mt-6">{_'configurator.color'}</h2>
@@ -724,28 +724,6 @@
     const threeDUrl = {$threeDUrl};
     const uploadUrl = {$uploadUrl};
     const defaultImagesUrl = {$defaultImagesUrl};
-    const translations = {
-        upload_required: '{_'configurator.upload_required' | noescape}',
-        upload_success: '{_'configurator.upload_success' | noescape}',
-        select_device: '{_'configurator.select_device' | noescape}',
-        select_manufacturer: '{_'form.manufacturer' | noescape}',
-        select_model: '{_'configurator.select_model' | noescape}',
-        select_color: '{_'configurator.color' | noescape}',
-        select_features: '{_'configurator.features' | noescape}',
-        select_upload: '{_'configurator.upload_image' | noescape}',
-        missing_manufacturer_model: '{_'configurator.missing_manufacturer_model' | noescape}',
-        missing_fields: '{_'configurator.missing_fields' | noescape}',
-        select_file: '{_'configurator.select_file' | noescape}',
-        upload_failed: '{_'configurator.upload_failed' | noescape}',
-        upload_failed_unknown: '{_'configurator.upload_failed_unknown' | noescape}',
-        base_price: '{_'configurator.base_price' | noescape}',
-        select_model_for_price: '{_'configurator.select_model_for_price' | noescape}',
-        no_images_available: '{_'configurator.no_images_available' | noescape}',
-        product_image: '{_'configurator.product_image' | noescape}',
-        select_option: '{if $lang == "cs"}Vyberte{else}Select{/if}',
-        currency_symbol: '{if $lang == "cs"}Kč{else}€{/if}',
-        lang: {$lang}
-    };
 </script>
 
 <script n:syntax=off>
