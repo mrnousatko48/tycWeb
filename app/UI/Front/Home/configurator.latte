@@ -308,36 +308,36 @@
     .p-1 { padding: 0.25rem; }
     .text-red-500 { color: var(--color-error); }
 
-    #viewerModal {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.9);
-        z-index: 1000;
-        overflow-y: auto; /* Changed to allow vertical scrolling */
-        backdrop-filter: blur(5px);
-        -webkit-backdrop-filter: blur(5px);
-        padding: 0; /* Remove padding to use full height */
-    }
+   #viewerModal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 1000;
+    overflow-y: auto;
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    padding: 0;
+}
 
     #viewerModal .modal-content {
-        background: var(--color-background);
-        padding: 1.5rem;
-        border-radius: 1rem;
-        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
-        position: relative;
-        width: 95%;
-        max-width: 1200px;
-        min-height: 80vh; /* Minimum height to ensure visibility */
-        display: flex;
-        flex-direction: column;
-        gap: 1.5rem;
-        margin: 2rem auto;
-        border: 1px solid rgba(255, 255, 255, 0.1);
-    }
+    background: var(--color-background);
+    padding: 1.5rem;
+    border-radius: 1rem;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+    position: relative;
+    width: 95%;
+    max-width: 1200px;
+    min-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin: 2rem auto;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
 
     #viewerModal .close-button {
         position: absolute;
@@ -379,19 +379,17 @@
         height: 100%;
     }
 
-    #viewerModal .side-panel {
-        flex: 0 1 auto;
-        display: flex;
-        flex-direction: column;
-        padding: 1.25rem;
-        gap: 1.25rem;
-        background: var(--color-button-bg);
-        border-radius: 0.75rem;
-        overflow-y: visible; /* Changed to allow natural content flow */
-        max-height: none; /* Remove height restriction */
-        scrollbar-width: thin;
-        scrollbar-color: var(--color-primary) transparent;
-    }
+#viewerModal .side-panel {
+    flex: 0 1 auto;
+    display: flex;
+    flex-direction: column;
+    padding: 1.25rem;
+    gap: 1.25rem;
+    background: var(--color-button-bg);
+    border-radius: 0.75rem;
+    overflow-y: visible; /* Changed to allow natural content flow */
+    max-height: none; /* Remove height restriction */
+}
 
     #viewerModal .side-panel::-webkit-scrollbar {
         width: 6px;
@@ -466,7 +464,7 @@
     }
 
 
-    @media (min-width: 768px) {
+   @media (min-width: 768px) { 
         #viewerModal .modal-content {
             flex-direction: row;
             gap: 2rem;
@@ -481,9 +479,7 @@
 
         #viewerModal .side-panel {
             max-width: 350px;
-            max-height: 70vh; /* Keep height restriction on desktop */
             padding: 1.5rem;
-            overflow-y: auto; /* Re-enable scrolling for desktop */
         }
     }
 
@@ -604,7 +600,7 @@
     <div class="w-full">
         <!-- Trigger button for 3D viewer -->
         <div class="text-center mb-5">
-            <button id="openViewerBtn" class="px-4 py-2 bg-[var(--color-primary)] text-white rounded hover:bg-[var(--color-accent)]">Open 3D Viewer</button>
+            <button id="openViewerBtn" style="display: none;" class="px-4 py-2 bg-[var(--color-primary)] text-white rounded hover:bg-[var(--color-accent)]">Open 3D Viewer</button>
         </div>
         <!-- Carousel -->
         <div class="relative carousel-wrapper">
@@ -786,6 +782,15 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('Translations:', translations);
 });
 
+document.getElementById('openViewerBtn').addEventListener('click', () => {
+    if (model) {
+        document.getElementById('viewerModal').style.display = 'flex';
+        document.getElementById('viewerContainer').addEventListener('touchstart', handleTouchStart, { passive: false });
+        document.getElementById('viewerContainer').addEventListener('touchmove', handleTouchMove, { passive: false });
+        document.getElementById('viewerModal').scrollTop = 0;
+    }
+});
+
 // Function to check if all required selections are made
 function checkSelections(showMessage = false) {
     const manufacturerSelected = document.getElementById('frm-caseForm-manufacturer').value !== '';
@@ -863,6 +868,7 @@ function checkSelections(showMessage = false) {
 
     return allSelected;
 }
+
 
 function showCustomPopup(message) {
     const popup = document.getElementById('custom-popup');
@@ -1069,6 +1075,7 @@ document.getElementById('frm-caseForm-model').addEventListener('change', functio
             } else {
                 selectedDevice.textContent = translations.select_device;
             }
+            document.getElementById('openViewerBtn').style.display = 'block';
             checkSelections();
         }).catch(error => console.error('Error fetching data:', error));
     } else {
@@ -1085,6 +1092,8 @@ document.getElementById('frm-caseForm-model').addEventListener('change', functio
         document.getElementById('frm-caseForm-features').value = '';
         document.getElementById('frm-caseForm-total_price').value = '';
         document.getElementById('selected-device').textContent = translations.select_device;
+        document.getElementById('openViewerBtn').style.display = 'none';
+        document.getElementById('viewerModal').style.display = 'none';
         checkSelections();
     }
 });
@@ -1526,14 +1535,17 @@ document.getElementById('frm-caseForm-model').addEventListener('change', functio
                     document.getElementById('viewerModal').style.display = 'flex';
                     document.getElementById('viewerContainer').appendChild(renderer.domElement);
                     resizeRenderer();
-                    // Add touch event listeners for mobile
                     document.getElementById('viewerContainer').addEventListener('touchstart', handleTouchStart, { passive: false });
                     document.getElementById('viewerContainer').addEventListener('touchmove', handleTouchMove, { passive: false });
-                    // Scroll to top of modal
                     document.getElementById('viewerModal').scrollTop = 0;
+                    // Show button after successful load
+                    document.getElementById('openViewerBtn').style.display = 'block';
                 }
             })
             .catch(error => console.error('Error fetching 3D path:', error));
+    } else {
+        // Hide button if no model
+        document.getElementById('openViewerBtn').style.display = 'none';
     }
 });
 
