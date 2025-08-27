@@ -1009,7 +1009,6 @@ document.addEventListener('DOMContentLoaded', function() {
                     document.getElementById('frm-caseForm-user_upload_id').value = data.upload_id;
                     fileUploadSuccess = true;
                     showCustomPopup(translations.upload_success);
-                    fileInputs.forEach(input => input.value = '');
                 } else {
                     showCustomPopup(`${translations.upload_failed}: ${data.error || translations.upload_failed_unknown}`);
                     fileUploadSuccess = false;
@@ -1593,12 +1592,12 @@ function setMeshColor(mesh, color) {
 }
 
 document.getElementById('zoomInBtn').addEventListener('click', () => {
-    camera.position.addScaledVector(camera.getWorldDirection(new THREE.Vector3()), -0.2);
+    camera.position.addScaledVector(camera.getWorldDirection(new THREE.Vector3()), 0.2);
     controls.update();
 });
 
 document.getElementById('zoomOutBtn').addEventListener('click', () => {
-    camera.position.addScaledVector(camera.getWorldDirection(new THREE.Vector3()), 0.2);
+    camera.position.addScaledVector(camera.getWorldDirection(new THREE.Vector3()), -0.2);
     controls.update();
 });
 </script>
