@@ -96,77 +96,90 @@ class ModelFacade
     }
 
     public function addModel(array $data): ActiveRow
-{
-    $this->database->beginTransaction();
-    try {
-        $colorIds = $data['color_ids'] ?? [];
-        $featureOptions = $data['feature_options'] ?? [];
-        unset($data['color_ids'], $data['feature_options']);
+    {
+        $this->database->beginTransaction();
+        try {
+            $colorIds = $data['color_ids'] ?? [];
+            $featureOptions = $data['feature_options'] ?? [];
+            $model_3d_file = $data['model_3d_file'] ?? null;
+            unset($data['color_ids'], $data['feature_options'], $data['model_3d_file']);
 
-        $model = $this->database->table('models')->insert($data);
+            $model = $this->database->table('models')->insert($data);
 
-        foreach ($colorIds as $colorId) {
-            $this->database->table('model_colors')->insert([
-                'model_id' => $model->id,
-                'color_id' => $colorId,
-            ]);
+            if ($model_3d_file && $model_3d_file->isOk()) {
+                $uploadDir = 'uploads/models/' . $model->id;
+                $data['model_3d_path'] = FileUploader::uploadGltfFile($model_3d_file, $uploadDir);
+                $this->database->table('models')->where('id', $model->id)->update(['model_3d_path' => $data['model_3d_path']]);
+            }
+
+            foreach ($colorIds as $colorId) {
+                $this->database->table('model_colors')->insert([
+                    'model_id' => $model->id,
+                    'color_id' => $colorId,
+                ]);
+            }
+
+            foreach ($featureOptions as $featureId => $optionId) {
+                $this->database->table('model_features')->insert([
+                    'model_id' => $model->id,
+                    'feature_id' => $featureId,
+                    'feature_option_id' => $optionId,
+                ]);
+            }
+
+            $this->database->commit();
+            return $model;
+        } catch (UniqueConstraintViolationException $e) {
+            $this->database->rollBack();
+            throw new \Exception("Model '{$data['name']}' already exists for this manufacturer.");
+        } catch (\Exception $e) {
+            $this->database->rollBack();
+            throw $e;
         }
-
-        foreach ($featureOptions as $featureId => $optionId) {
-            $this->database->table('model_features')->insert([
-                'model_id' => $model->id,
-                'feature_id' => $featureId,
-                'feature_option_id' => $optionId,
-            ]);
-        }
-
-        $this->database->commit();
-        return $model;
-    } catch (UniqueConstraintViolationException $e) {
-        $this->database->rollBack();
-        throw new \Exception("Model '{$data['name']}' already exists for this manufacturer.");
-    } catch (\Exception $e) {
-        $this->database->rollBack();
-        throw $e;
     }
-}
 
     public function updateModel(int $id, array $data): void
-{
-    $this->database->beginTransaction();
-    try {
-        $colorIds = $data['color_ids'] ?? [];
-        $featureOptions = $data['feature_options'] ?? [];
-        unset($data['color_ids'], $data['feature_options']);
+    {
+        $this->database->beginTransaction();
+        try {
+            $colorIds = $data['color_ids'] ?? [];
+            $featureOptions = $data['feature_options'] ?? [];
+            $model_3d_file = $data['model_3d_file'] ?? null;
+            unset($data['color_ids'], $data['feature_options'], $data['model_3d_file']);
 
-        $this->database->table('models')->get($id)?->update($data);
+            if ($model_3d_file && $model_3d_file->isOk()) {
+                $uploadDir = 'uploads/models/' . $id;
+                $data['model_3d_path'] = FileUploader::uploadGltfFile($model_3d_file, $uploadDir);
+            }
 
-        $this->database->table('model_colors')->where('model_id', $id)->delete();
-        foreach ($colorIds as $colorId) {
-            $this->database->table('model_colors')->insert([
-                'model_id' => $id,
-                'color_id' => $colorId,
-            ]);
+            $this->database->table('models')->get($id)?->update($data);
+
+            $this->database->table('model_colors')->where('model_id', $id)->delete();
+            foreach ($colorIds as $colorId) {
+                $this->database->table('model_colors')->insert([
+                    'model_id' => $id,
+                    'color_id' => $colorId,
+                ]);
+            }
+
+            $this->database->table('model_features')->where('model_id', $id)->delete();
+            foreach ($featureOptions as $featureId => $optionId) {
+                $this->database->table('model_features')->insert([
+                    'model_id' => $id,
+                    'feature_id' => $featureId,
+                    'feature_option_id' => $optionId,
+                ]);
+            }
+
+            $this->database->commit();
+        } catch (UniqueConstraintViolationException $e) {
+            $this->database->rollBack();
+            throw new \Exception("Model '{$data['name']}' already exists for this manufacturer.");
+        } catch (\Exception $e) {
+            $this->database->rollBack();
+            throw $e;
         }
-
-        $this->database->table('model_features')->where('model_id', $id)->delete();
-        foreach ($featureOptions as $featureId => $optionId) {
-            $this->database->table('model_features')->insert([
-                'model_id' => $id,
-                'feature_id' => $featureId,
-                'feature_option_id' => $optionId,
-            ]);
-        }
-
-        $this->database->commit();
-    } catch (UniqueConstraintViolationException $e) {
-        $this->database->rollBack();
-        throw new \Exception("Model '{$data['name']}' already exists for this manufacturer.");
-    } catch (\Exception $e) {
-        $this->database->rollBack();
-        throw $e;
     }
-}
 
     public function deleteModel(int $id): void
     {
@@ -215,7 +228,7 @@ public function getFeaturesByModel(int $modelId, string $lang): array
             ->fetchPairs('id', 'name');
 
         $options = $this->database->table('feature_options')
-            ->select('id, feature_id, name_' . $lang . ' AS name, price, price_eur, image_path, allow_user_upload')
+            ->select('id, feature_id, name_' . $lang . ' AS name, price, price_eur, allow_user_upload, mesh_name, visible')
             ->where('feature_id', array_keys($features))
             ->order('feature_id')
             ->fetchAll();
@@ -227,7 +240,9 @@ public function getFeaturesByModel(int $modelId, string $lang): array
                 'name' => $option->name,
                 'price' => (float)$option->price,
                 'price_eur' => (float)$option->price_eur,
-                'allow_user_upload' => (bool)$option->allow_user_upload
+                'allow_user_upload' => (bool)$option->allow_user_upload,
+                'mesh_name' => $option->mesh_name,
+                'visible' => $option->visible !== null ? (bool)$option->visible : null
             ];
         }
 
@@ -354,7 +369,7 @@ public function updateColor(int $id, string $name, ?string $hexCode = null, ?str
         return $this->database->table('feature_options')->order('feature_id, name');
     }
 
-    public function addFeatureOption(int $featureId, string $name, float $price = 0.00, float $price_eur = 0.00, bool $allowUserUpload = false, string $name_cs = null, string $name_en = null): ActiveRow
+    public function addFeatureOption(int $featureId, string $name, float $price = 0.00, float $price_eur = 0.00, bool $allowUserUpload = false, string $name_cs = null, string $name_en = null, ?string $mesh_name = null, ?bool $visible = null): ActiveRow
     {
         $this->database->beginTransaction();
         try {
@@ -366,6 +381,8 @@ public function updateColor(int $id, string $name, ?string $hexCode = null, ?str
                 'price' => $price,
                 'price_eur' => $price_eur,
                 'allow_user_upload' => $allowUserUpload,
+                'mesh_name' => $mesh_name,
+                'visible' => $visible,
             ]);
             $this->database->commit();
             return $option;
@@ -378,27 +395,30 @@ public function updateColor(int $id, string $name, ?string $hexCode = null, ?str
         }
     }
 
-public function updateFeatureOption(int $id, string $name, float $price, float $price_eur, bool $allowUserUpload, string $name_cs = null, string $name_en = null): void
-{
-    $this->database->beginTransaction();
-    try {
-        $this->database->table('feature_options')->get($id)->update([
-            'name' => trim($name),
-            'name_cs' => $name_cs ? trim($name_cs) : trim($name),
-            'name_en' => $name_en ? trim($name_en) : trim($name),
-            'price' => $price,
-            'price_eur' => $price_eur,
-            'allow_user_upload' => $allowUserUpload,
-        ]);
-        $this->database->commit();
-    } catch (UniqueConstraintViolationException $e) {
-        $this->database->rollBack();
-        throw new \Exception("Option '$name' already exists for this feature.");
-    } catch (\Exception $e) {
-        $this->database->rollBack();
-        throw $e;
+    public function updateFeatureOption(int $id, string $name, float $price, float $price_eur, bool $allowUserUpload, string $name_cs = null, string $name_en = null, ?string $mesh_name = null, ?bool $visible = null): void
+    {
+        $this->database->beginTransaction();
+        try {
+            $this->database->table('feature_options')->get($id)->update([
+                'name' => trim($name),
+                'name_cs' => $name_cs ? trim($name_cs) : trim($name),
+                'name_en' => $name_en ? trim($name_en) : trim($name),
+                'price' => $price,
+                'price_eur' => $price_eur,
+                'allow_user_upload' => $allowUserUpload,
+                'mesh_name' => $mesh_name,
+                'visible' => $visible,
+            ]);
+            $this->database->commit();
+        } catch (UniqueConstraintViolationException $e) {
+            $this->database->rollBack();
+            throw new \Exception("Option '$name' already exists for this feature.");
+        } catch (\Exception $e) {
+            $this->database->rollBack();
+            throw $e;
+        }
     }
-}
+
 
     public function deleteFeatureOption(int $id): void
     {

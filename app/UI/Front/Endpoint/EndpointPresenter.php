@@ -85,4 +85,11 @@ public function actionPaymentMethods($vendor, string $lang = 'cs'): void
     $paymentMethods = $this->orderFacade->getPaymentMethodsByVendor((int)$vendor, $lang);
     $this->sendJson($paymentMethods);
 }
+
+public function actionModel3DPath($modelId): void
+{
+    $model = $this->modelFacade->getModelById((int)$modelId);
+    $this->sendJson(['path' => $model ? $model->model_3d_path : null]);
+    $this->terminate();
+}
 }

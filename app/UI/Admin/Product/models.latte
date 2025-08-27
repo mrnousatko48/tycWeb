@@ -2,7 +2,6 @@
 <div class="container mt-4">
     <h2 class="mb-4">Modely telefonů</h2>
     
-
     <div class="row g-4 mb-5">
         <div class="col-md-6">
             <div class="card shadow-sm">
@@ -58,6 +57,7 @@
                         <th>Model</th>
                         <th>Základní cena (CZK)</th>
                         <th>Základní cena (EUR)</th>
+                        <th>3D Model</th>
                         <th>Barvy</th>
                         <th>Funkce</th>
                         <th>Akce</th>
@@ -70,6 +70,7 @@
                         <td>{$model->name}</td>
                         <td>{$model->price|number:2,',',' '} CZK</td>
                         <td>{$model->price_eur|number:2,',',' '} EUR</td>
+                        <td>{$model->model_3d_path ?: '—'}</td>
                         <td>
                             {foreach $model->related('model_colors') as $mc}
                                 {var $color = $mc->ref('colors', 'color_id')}
@@ -125,7 +126,7 @@
             </div>
         </div>
     </div>
-            <div class="mt-4 text-center">
+    <div class="mt-4 text-center">
         <a href="{link default}" class="btn btn-secondary">Zpět na produkty</a>
     </div>
 </div>

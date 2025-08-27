@@ -31,6 +31,7 @@ public function renderConfigurator(): void
 {
     $this->template->manufacturers = $this->modelFacade->getManufacturers();
     $lang = $this->getParameter('lang', 'en'); // Get the current language from the URL
+    $this->template->threeDUrl = $this->link('Endpoint:model3DPath') . '?modelId=#';
     $this->template->colorsUrl = $this->link('Endpoint:modelColors', ['lang' => $lang]) . '?modelId=#';
     $this->template->featuresUrl = $this->link('Endpoint:modelFeatures', ['lang' => $lang]) . '?modelId=#';
     $this->template->priceUrl = $this->link('Endpoint:modelPrice', ['lang' => $lang]) . '?modelId=#';

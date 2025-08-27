@@ -197,7 +197,7 @@
 
     .lightbox-nav:hover {
         background: rgba(0, 0, 0, 0.8);
-        transform: translateY(-50%) scale(1.1);
+        transform: translateY(-50%) scale(1.1I);
     }
 
     .lightbox-prev {
@@ -307,9 +307,298 @@
     .ring-red-500 { outline-color: var(--color-error); }
     .p-1 { padding: 0.25rem; }
     .text-red-500 { color: var(--color-error); }
+
+   #viewerModal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 1000;
+    overflow-y: auto;
+    backdrop-filter: blur(5px);
+    -webkit-backdrop-filter: blur(5px);
+    padding: 0;
+}
+
+    #viewerModal .modal-content {
+    background: var(--color-background);
+    padding: 1.5rem;
+    border-radius: 1rem;
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.5);
+    position: relative;
+    width: 95%;
+    max-width: 1200px;
+    min-height: 80vh;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+    margin: 2rem auto;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+    #viewerModal .close-button {
+        position: absolute;
+        top: 1rem;
+        right: 1rem;
+        background: var(--color-error);
+        color: white;
+        border: none;
+        padding: 0.5rem 0.75rem;
+        cursor: pointer;
+        border-radius: 0.5rem;
+        font-size: 1rem;
+        line-height: 1;
+        z-index: 10;
+        transition: all 0.3s ease;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    }
+
+    #viewerModal .close-button:hover {
+        background: #dc2626;
+        transform: scale(1.1);
+    }
+
+    #viewerModal .viewer-container {
+        flex: 1;
+        background: #f0f0f0;
+        border-radius: 0.75rem;
+        width: 100%;
+        height: 50vh;
+        min-height: 300px;
+        position: relative;
+        overflow: hidden;
+        box-shadow: inset 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    #viewerModal .viewer-container canvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+    }
+
+#viewerModal .side-panel {
+    flex: 0 1 auto;
+    display: flex;
+    flex-direction: column;
+    padding: 1.25rem;
+    gap: 1.25rem;
+    background: var(--color-button-bg);
+    border-radius: 0.75rem;
+    overflow-y: visible; /* Changed to allow natural content flow */
+    max-height: none; /* Remove height restriction */
+}
+
+    #viewerModal .side-panel::-webkit-scrollbar {
+        width: 6px;
+    }
+
+    #viewerModal .side-panel::-webkit-scrollbar-thumb {
+        background-color: var(--color-primary);
+        border-radius: 3px;
+    }
+
+    #viewerModal .side-panel h2 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        color: var(--color-text);
+        margin-bottom: 0.5rem;
+    }
+
+    #viewerModal .color-buttons-3d {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+        padding: 0.5rem 0;
+    }
+
+    #viewerModal .color-button {
+        width: 2.5rem;
+        height: 2.5rem;
+        border-radius: 50%;
+        border: 2px solid transparent;
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+
+    #viewerModal .color-button:hover {
+        transform: scale(1.1);
+    }
+
+    #viewerModal .color-button.selected {
+        border-color: var(--color-primary);
+        transform: scale(1.1);
+        box-shadow: 0 0 0 2px var(--color-background), 0 0 0 4px var(--color-primary);
+    }
+
+    #viewerModal .feature-buttons-3d {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+    }
+
+    #viewerModal .feature-button {
+        padding: 0.5rem 1rem;
+        border-radius: 0.5rem;
+        background: var(--color-button-bg);
+        border: 1px solid var(--color-secondary);
+        color: var(--color-button-text);
+        transition: all 0.2s ease;
+        cursor: pointer;
+        font-size: 0.9rem;
+        text-align: center;
+    }
+
+    #viewerModal .feature-button:hover {
+        border-color: var(--color-primary);
+        transform: translateY(-2px);
+    }
+
+    #viewerModal .feature-button.selected {
+        background: var(--color-primary);
+        color: white;
+        border-color: var(--color-primary);
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+    }
+
+
+   @media (min-width: 768px) { 
+        #viewerModal .modal-content {
+            flex-direction: row;
+            gap: 2rem;
+            padding: 2rem;
+            margin: 3rem auto;
+        }
+
+        #viewerModal .viewer-container {
+            height: 70vh;
+            min-height: 500px;
+        }
+
+        #viewerModal .side-panel {
+            max-width: 350px;
+            padding: 1.5rem;
+        }
+    }
+
+    /* Mobile-specific adjustments */
+    @media (max-width: 767px) {
+        #viewerModal {
+            align-items: flex-start; /* Align to top to allow scrolling */
+            padding-top: 1rem;
+            padding-bottom: 1rem;
+        }
+
+        #viewerModal .modal-content {
+            width: 95%;
+            min-height: auto; /* Let content determine height */
+            height: auto;
+            margin: 1rem auto;
+            padding: 1rem;
+        }
+
+        #viewerModal .viewer-container {
+            height: 50vh;
+            min-height: 250px;
+            max-height: 60vh; /* Limit viewer height to leave space for controls */
+        }
+
+        #viewerModal .side-panel {
+            max-height: none; /* Remove height restriction */
+            overflow-y: visible; /* Allow content to flow naturally */
+            padding-bottom: 2rem; /* Extra space at bottom */
+        }
+
+        #viewerModal .color-buttons-3d,
+        #viewerModal .feature-buttons-3d {
+            justify-content: center;
+            margin-bottom: 1rem; /* Add spacing between button groups */
+        }
+    }
+
+    /* Very small devices (phones) */
+    @media (max-width: 480px) {
+        #viewerModal .modal-content {
+            width: 98%;
+            margin: 0.5rem auto 2rem; /* More bottom margin for scroll space */
+        }
+
+        #viewerModal .viewer-container {
+            height: 45vh;
+            min-height: 200px;
+        }
+
+        #viewerModal .side-panel {
+            padding: 1rem;
+        }
+
+        #viewerModal .close-button {
+            top: 0.5rem;
+            right: 0.5rem;
+            padding: 0.4rem 0.6rem;
+            font-size: 0.9rem;
+        }
+
+        /* Make buttons larger for better touch targets */
+        #viewerModal .color-button {
+            width: 3rem;
+            height: 3rem;
+        }
+
+        #viewerModal .feature-button {
+            padding: 0.75rem 1rem;
+            min-width: 45%;
+        }
+    }
+
+    /* Animation for modal entrance */
+    @keyframes modalFadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
+    #viewerModal[style*="display: flex"] .modal-content {
+        animation: modalFadeIn 0.3s ease-out forwards;
+    }
+
+
+    .viewer-loading {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        background: rgba(255, 255, 255, 0.8);
+        z-index: 10;
+    }
+
+    .viewer-loading-spinner {
+        width: 40px;
+        height: 40px;
+        border: 4px solid rgba(0, 0, 0, 0.1);
+        border-radius: 50%;
+        border-top-color: var(--color-primary);
+        animation: spin 1s ease-in-out infinite;
+    }
+
+    @keyframes spin {
+        to { transform: rotate(360deg); }
+    }
 </style>
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 grid grid-cols-1 md:grid-cols-2 gap-8 items-start animate-fade-in-up carousel-container">
     <div class="w-full">
+        <!-- Carousel -->
         <div class="relative carousel-wrapper">
             <div class="overflow-hidden rounded-xl shadow-lg h-[500px]">
                 <div class="flex h-full transition-transform duration-700 ease-in-out" id="carousel-track">
@@ -327,6 +616,40 @@
         </div>
         <div class="flex justify-center mt-4 space-x-2" id="carousel-dots">
             <!-- Dots will be inserted here by JavaScript -->
+        </div>
+        <!-- Modal overlay for 3D viewer -->
+        <div id="viewerModal">
+            <!-- Modal content -->
+            <div class="modal-content">
+                <!-- Close button -->
+                <button id="closeViewerBtn" class="close-button">✖</button>
+
+                <!-- 3D Viewer container -->
+                <div id="viewerContainer" class="viewer-container"></div>
+
+                                <!-- Side panel -->
+                <div class="side-panel">
+                    <!-- Color controls -->
+                    <div id="color-container-3d" style="display: none;">
+                        <h2 class="text-lg font-semibold">{_'configurator.color'}</h2>
+                        <div id="color-buttons-3d" class="mt-3 flex flex-wrap gap-3"></div>
+                    </div>
+
+                    <!-- Features controls -->
+                    <div id="features-3d"></div>
+
+                    <!-- User upload container for 3D modal -->
+                    <div id="user-upload-container-3d" style="display: none;">
+                        <h2 class="text-lg font-semibold mt-6">{_'configurator.upload_image'}</h2>
+                        <p class="text-sm text-[var(--color-secondary)] mt-2">{_'configurator.upload_description'}</p>
+                        <div class="mt-3">
+                            <input type="file" id="frm-caseForm-user_file-3d" class="file-input w-full" accept=".png,.jpg,.jpeg">
+                        </div>
+                    </div>
+
+                    <button id="addToCartBtn" class="submit-button w-full mt-4">{_'form.submit'}</button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -350,6 +673,14 @@
                         {input model class => 'form-select w-full sm:w-1/2', data-colors-url => $colorsUrl, data-features-url => $featuresUrl, data-price-url => $priceUrl, data-images-url => $imagesUrl}
                     </div>
                 </div>
+                <!-- Trigger button for 3D viewer -->
+            <button 
+                id="openViewerBtn" 
+                type="button"
+                class="hidden px-4 py-2 bg-[var(--color-primary)] text-white rounded hover:bg-[var(--color-accent)] mt-4 mb-4">
+                {_'configurator.3d_viewer'}
+            </button>
+
 
                 <div id="color-container" style="display: none;">
                     <h2 class="text-lg font-semibold mt-6">{_'configurator.color'}</h2>
@@ -392,7 +723,18 @@
     </div>
 </div>
 
+<!-- Import map for Three.js -->
+<script type="importmap">
+{
+    "imports": {
+        "three": "https://cdn.jsdelivr.net/npm/three@0.169.0/build/three.module.js",
+        "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.169.0/examples/jsm/"
+    }
+}
+</script>
+
 <script>
+    const threeDUrl = {$threeDUrl};
     const uploadUrl = {$uploadUrl};
     const defaultImagesUrl = {$defaultImagesUrl};
     const translations = {
@@ -400,7 +742,7 @@
         upload_success: '{_'configurator.upload_success' | noescape}',
         select_device: '{_'configurator.select_device' | noescape}',
         select_manufacturer: '{_'form.manufacturer' | noescape}',
-        select_model: '{_'form.model' | noescape}',
+        select_model: '{_'configurator.select_model' | noescape}',
         select_color: '{_'configurator.color' | noescape}',
         select_features: '{_'configurator.features' | noescape}',
         select_upload: '{_'configurator.upload_image' | noescape}',
@@ -417,6 +759,7 @@
         currency_symbol: '{if $lang == "cs"}Kč{else}€{/if}',
         lang: {$lang}
     };
+    console.log('Current language:', translations.lang); // Debug language
 </script>
 
 <script n:syntax=off>
@@ -428,6 +771,10 @@ let currentImages = [];
 let currentSlide = 0;
 let totalSlides = currentImages.length || 1;
 let fileUploadSuccess = false;
+
+// 3D Viewer variables
+let targetMesh = null;
+let scene, camera, renderer, controls, model = null;
 
 // Initialize popup event listeners and currency
 document.addEventListener('DOMContentLoaded', function() {
@@ -443,10 +790,19 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-    // Set currency symbol
-    document.getElementById('currency').textContent = translations.currency_symbol;
+    // Set currency symbol with fallback
+    document.getElementById('currency').textContent = translations.currency_symbol || '€';
     // Debug translations
     console.log('Translations:', translations);
+});
+
+document.getElementById('openViewerBtn').addEventListener('click', () => {
+    if (model) {
+        document.getElementById('viewerModal').style.display = 'flex';
+        document.getElementById('viewerContainer').addEventListener('touchstart', handleTouchStart, { passive: false });
+        document.getElementById('viewerContainer').addEventListener('touchmove', handleTouchMove, { passive: false });
+        document.getElementById('viewerModal').scrollTop = 0;
+    }
 });
 
 // Function to check if all required selections are made
@@ -464,13 +820,16 @@ function checkSelections(showMessage = false) {
 
     // Show or hide color container based on selections
     const colorContainer = document.getElementById('color-container');
+    const colorContainer3D = document.getElementById('color-container-3d');
     colorContainer.style.display = (manufacturerSelected && modelSelected) ? 'block' : 'none';
+    colorContainer3D.style.display = (manufacturerSelected && modelSelected) ? 'block' : 'none';
 
     // Update highlights and show popup only if showMessage is true
     if (showMessage) {
         // Clear highlights
         document.getElementById('color-buttons').classList.remove('ring-2', 'ring-red-500', 'p-1');
-        document.querySelectorAll('#features h2').forEach(h2 => h2.classList.remove('text-red-500'));
+        document.getElementById('color-buttons-3d').classList.remove('ring-2', 'ring-red-500', 'p-1');
+        document.querySelectorAll('#features h2, #features-3d h2').forEach(h2 => h2.classList.remove('text-red-500'));
         document.getElementById('user-upload-container').classList.remove('ring-2', 'ring-red-500', 'p-1');
 
         // If manufacturer or model is missing, show only that message without checking other fields
@@ -481,27 +840,26 @@ function checkSelections(showMessage = false) {
 
         // Check other fields only if manufacturer and model are selected
         const missingFields = [];
-        const missingFeatureGroups = [];
 
         // Check for missing fields and highlight relevant sections
         if (!colorSelected) {
             missingFields.push(translations.select_color);
             document.getElementById('color-buttons').classList.add('ring-2', 'ring-red-500', 'p-1');
+            document.getElementById('color-buttons-3d').classList.add('ring-2', 'ring-red-500', 'p-1');
         }
         if (!allFeaturesSelected && totalFeatures > 0) {
             // Identify specific missing feature groups
             for (const featureName of Object.keys(availableFeatures)) {
                 const featureId = featureName.replace(/\s+/g, '_').toLowerCase();
                 if (!selectedFeatures[featureId]) {
-                    missingFeatureGroups.push(featureName);
+                    missingFields.push(featureName);
                     // Highlight the specific feature group header
-                    const featureHeader = Array.from(document.querySelectorAll('#features h2')).find(h2 => h2.textContent === featureName);
+                    const featureHeader = Array.from(document.querySelectorAll('#features h2, #features-3d h2')).find(h2 => h2.textContent === featureName);
                     if (featureHeader) {
                         featureHeader.classList.add('text-red-500');
                     }
                 }
             }
-            missingFields.push(...missingFeatureGroups);
         }
         if (requiresUpload && !fileUploadSuccess) {
             missingFields.push(translations.select_upload);
@@ -510,12 +868,14 @@ function checkSelections(showMessage = false) {
 
         // Show popup with specific missing fields
         if (missingFields.length > 0) {
-            showCustomPopup(`${translations.missing_fields}: ${missingFields.join(', ')}`);
+            const message = `${translations.select_option}: ${missingFields.join(', ')}`;
+            showCustomPopup(message);
         }
     } else {
         // Clear highlights during normal interaction
         document.getElementById('color-buttons').classList.remove('ring-2', 'ring-red-500', 'p-1');
-        document.querySelectorAll('#features h2').forEach(h2 => h2.classList.remove('text-red-500'));
+        document.getElementById('color-buttons-3d').classList.remove('ring-2', 'ring-red-500', 'p-1');
+        document.querySelectorAll('#features h2, #features-3d h2').forEach(h2 => h2.classList.remove('text-red-500'));
         document.getElementById('user-upload-container').classList.remove('ring-2', 'ring-red-500', 'p-1');
     }
 
@@ -563,9 +923,8 @@ function updateSelectbox(select, items) {
     defaultOption.setAttribute('value', '');
     defaultOption.setAttribute('disabled', 'disabled');
     defaultOption.setAttribute('selected', 'selected');
-    // Use translations.select_option + translations.select_model for model dropdown, else translations.select_option
     defaultOption.innerText = select.id === 'frm-caseForm-model' 
-        ? `${translations.select_option} ${translations.select_model.toLowerCase()}`
+        ? translations.select_model // Use only select_model translation
         : (select.dataset.prompt || translations.select_option);
     select.appendChild(defaultOption);
     for (let id in items) {
@@ -580,21 +939,33 @@ function updateSelectbox(select, items) {
 
 function toggleSelection(button) {
     const featureId = button.dataset.feature;
-    const group = button.parentElement.parentElement.querySelectorAll(`button[data-feature="${featureId}"]`);
+    const outsideButtons = document.querySelectorAll(`#features button[data-feature="${featureId}"]`);
+    const modalButtons = document.querySelectorAll(`#features-3d button[data-feature="${featureId}"]`);
 
-    group.forEach(btn => {
+    outsideButtons.forEach(btn => {
+        btn.classList.remove('ring-2', 'ring-[var(--color-accent)]', 'ring-offset-2');
+    });
+    modalButtons.forEach(btn => {
         btn.classList.remove('ring-2', 'ring-[var(--color-accent)]', 'ring-offset-2');
     });
 
     button.classList.add('ring-2', 'ring-[var(--color-accent)]', 'ring-offset-2');
+
+    const isModal = button.closest('#features-3d') !== null;
+    const counterpartContainer = isModal ? '#features' : '#features-3d';
+    document.querySelector(`${counterpartContainer} button[data-feature="${featureId}"][data-value="${button.dataset.value}"]`)?.classList.add('ring-2', 'ring-[var(--color-accent)]', 'ring-offset-2');
+
     selectedFeatures[featureId] = {
         name: button.dataset.value,
         price: parseFloat(button.dataset.price) || 0,
         price_eur: parseFloat(button.dataset.priceEur) || 0,
-        allow_user_upload: button.dataset.allowUserUpload === 'true'
+        allow_user_upload: button.dataset.allowUserUpload === 'true',
+        mesh: button.dataset.mesh || null,
+        visible: button.dataset.visible ? button.dataset.visible === 'true' : null
     };
 
     updateFeaturesInput();
+    updateFeatureVisibility();
     updateTotalPrice();
     updateUserUploadVisibility();
     checkSelections();
@@ -610,7 +981,9 @@ function updateFeaturesInput() {
 
 function updateUserUploadVisibility() {
     const userUploadContainer = document.getElementById('user-upload-container');
+    const userUploadContainer3D = document.getElementById('user-upload-container-3d');
     const userFileInput = document.getElementById('frm-caseForm-user_file');
+    const userFileInput3D = document.getElementById('frm-caseForm-user_file-3d');
     let showUpload = false;
 
     for (const data of Object.values(selectedFeatures)) {
@@ -620,15 +993,92 @@ function updateUserUploadVisibility() {
         }
     }
 
+    // Update visibility for both containers
     userUploadContainer.style.display = showUpload ? 'block' : 'none';
+    userUploadContainer3D.style.display = showUpload ? 'block' : 'none';
     userFileInput.disabled = !showUpload;
+    userFileInput3D.disabled = !showUpload;
+
     if (!showUpload) {
         userFileInput.value = '';
+        userFileInput3D.value = '';
         document.getElementById('frm-caseForm-user_upload_id').value = '';
         fileUploadSuccess = false;
         hideCustomPopup();
     }
     checkSelections();
+}
+
+// Update the file input event listener to handle both inputs
+document.addEventListener('DOMContentLoaded', function() {
+    const fileInputs = [
+        document.getElementById('frm-caseForm-user_file'),
+        document.getElementById('frm-caseForm-user_file-3d')
+    ].filter(input => input); // Filter out null inputs
+
+    fileInputs.forEach(fileInput => {
+        if (!fileInput) {
+            console.error('File input element not found:', fileInput);
+            return;
+        }
+
+        fileInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (!file) {
+                showCustomPopup(translations.select_file);
+                fileUploadSuccess = false;
+                document.getElementById('frm-caseForm-user_upload_id').value = '';
+                checkSelections();
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('user_file', file);
+
+            fetch(uploadUrl, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Upload failed');
+                return response.json();
+            })
+            .then(data => {
+                if (data.success && data.upload_id) {
+                    document.getElementById('frm-caseForm-user_upload_id').value = data.upload_id;
+                    fileUploadSuccess = true;
+                    showCustomPopup(translations.upload_success);
+                    // Clear both inputs to prevent duplicate uploads
+                    fileInputs.forEach(input => input.value = '');
+                } else {
+                    showCustomPopup(`${translations.upload_failed}: ${data.error || translations.upload_failed_unknown}`);
+                    fileUploadSuccess = false;
+                    document.getElementById('frm-caseForm-user_upload_id').value = '';
+                }
+                checkSelections();
+            })
+            .catch(error => {
+                console.error('Upload error:', error);
+                showCustomPopup(`${translations.upload_failed}: ${error.message}`);
+                fileUploadSuccess = false;
+                document.getElementById('frm-caseForm-user_upload_id').value = '';
+                checkSelections();
+            });
+        });
+    });
+});
+
+function updateFeatureVisibility() {
+    if (!model) return;
+    for (const data of Object.values(selectedFeatures)) {
+        if (data.mesh && data.visible !== null) {
+            const mesh = model.getObjectByName(data.mesh);
+            if (mesh) mesh.visible = data.visible;
+        }
+    }
 }
 
 document.getElementById('frm-caseForm-manufacturer').addEventListener('change', function () {
@@ -709,6 +1159,7 @@ document.getElementById('frm-caseForm-model').addEventListener('change', functio
             } else {
                 selectedDevice.textContent = translations.select_device;
             }
+            document.getElementById('openViewerBtn').style.display = 'block';
             checkSelections();
         }).catch(error => console.error('Error fetching data:', error));
     } else {
@@ -725,32 +1176,43 @@ document.getElementById('frm-caseForm-model').addEventListener('change', functio
         document.getElementById('frm-caseForm-features').value = '';
         document.getElementById('frm-caseForm-total_price').value = '';
         document.getElementById('selected-device').textContent = translations.select_device;
+        document.getElementById('openViewerBtn').style.display = 'none';
+        document.getElementById('viewerModal').style.display = 'none';
         checkSelections();
     }
 });
 
 function updateColorButtons(colors) {
     const container = document.getElementById('color-buttons');
+    const container3D = document.getElementById('color-buttons-3d');
     container.innerHTML = '';
+    container3D.innerHTML = '';
     colors.forEach(color => {
-        const button = document.createElement('button');
-        button.setAttribute('type', 'button');
-        button.setAttribute('data-color', color.name);
-        button.className = `color-button w-10 h-10 rounded-full bg-[${color.hex_code}]`;
-        button.title = color.name;
-        button.addEventListener('click', function () {
-            document.querySelectorAll('#color-buttons button').forEach(btn => {
-                btn.classList.remove('ring-2', 'ring-[var(--color-accent)]', 'ring-offset-2');
+        [container, container3D].forEach(cont => {
+            const button = document.createElement('button');
+            button.setAttribute('type', 'button');
+            button.setAttribute('data-color', color.name);
+            button.setAttribute('data-hex', color.hex_code);
+            button.className = `color-button w-10 h-10 rounded-full bg-[${color.hex_code}]`;
+            button.title = color.name;
+            button.addEventListener('click', function () {
+                document.querySelectorAll('#color-buttons button, #color-buttons-3d button').forEach(btn => {
+                    btn.classList.remove('ring-2', 'ring-[var(--color-accent)]', 'ring-offset-2');
+                });
+                this.classList.add('ring-2', 'ring-[var(--color-accent)]', 'ring-offset-2');
+                document.querySelector(`#${cont.id === 'color-buttons' ? 'color-buttons-3d' : 'color-buttons'} button[data-color="${this.dataset.color}"]`)?.classList.add('ring-2', 'ring-[var(--color-accent)]', 'ring-offset-2');
+                document.getElementById('frm-caseForm-color').value = this.dataset.color;
+                if (window.targetMesh) window.setMeshColor(window.targetMesh, this.dataset.hex);
+                checkSelections();
             });
-            this.classList.add('ring-2', 'ring-[var(--color-accent)]', 'ring-offset-2');
-            document.getElementById('frm-caseForm-color').value = this.dataset.color;
-            checkSelections();
+            cont.appendChild(button);
         });
-        container.appendChild(button);
     });
     if (colors.length > 0) {
         container.firstChild.classList.add('ring-2', 'ring-[var(--color-accent)]', 'ring-offset-2');
+        container3D.firstChild.classList.add('ring-2', 'ring-[var(--color-accent)]', 'ring-offset-2');
         document.getElementById('frm-caseForm-color').value = colors[0].name;
+        if (window.targetMesh) window.setMeshColor(window.targetMesh, colors[0].hex_code);
         checkSelections();
     }
 }
@@ -758,56 +1220,59 @@ function updateColorButtons(colors) {
 function updateFeatureButtons(features) {
     availableFeatures = features;
     const container = document.getElementById('features');
+    const container3D = document.getElementById('features-3d');
     container.innerHTML = '';
+    container3D.innerHTML = '';
     featurePrices = {};
     selectedFeatures = {};
 
     for (const [featureName, options] of Object.entries(features)) {
         const featureId = featureName.replace(/\s+/g, '_').toLowerCase();
-        const featureDiv = document.createElement('div');
-        featureDiv.className = 'mt-6 animate-fade-in-up';
+        [container, container3D].forEach(cont => {
+            const featureDiv = document.createElement('div');
+            featureDiv.className = 'mt-6 animate-fade-in-up';
 
-        const h2 = document.createElement('h2');
-        h2.className = 'text-lg font-semibold';
-        h2.innerText = featureName;
-        featureDiv.appendChild(h2);
+            const h2 = document.createElement('h2');
+            h2.className = 'text-lg font-semibold';
+            h2.innerText = featureName;
+            featureDiv.appendChild(h2);
 
-        const buttonDiv = document.createElement('div');
-        buttonDiv.className = 'mt-3 flex flex-wrap gap-3';
+            const buttonDiv = document.createElement('div');
+            buttonDiv.className = 'mt-3 flex flex-wrap gap-3';
 
-        options.forEach(option => {
-            const optionDiv = document.createElement('div');
-            optionDiv.className = 'flex flex-col items-center';
+            options.forEach(option => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'flex flex-col items-center';
 
-            const button = document.createElement('button');
-            button.setAttribute('type', 'button');
-            button.setAttribute('data-feature', featureId);
-            button.setAttribute('data-value', option.name);
-            button.setAttribute('data-price', option.price);
-            button.setAttribute('data-price-eur', option.price_eur);
-            button.setAttribute('data-allow-user-upload', option.allow_user_upload);
-            button.className = 'feature-button';
-            button.innerText = option.name;
-            button.addEventListener('click', function () { toggleSelection(this); });
+                const button = document.createElement('button');
+                button.setAttribute('type', 'button');
+                button.setAttribute('data-feature', featureId);
+                button.setAttribute('data-value', option.name);
+                button.setAttribute('data-price', option.price);
+                button.setAttribute('data-price-eur', option.price_eur);
+                button.setAttribute('data-allow-user-upload', option.allow_user_upload);
+                if (option.mesh_name) button.setAttribute('data-mesh', option.mesh_name);
+                if (option.visible !== null) button.setAttribute('data-visible', option.visible ? 'true' : 'false');
+                button.className = 'feature-button';
+                button.innerText = option.name;
+                button.addEventListener('click', function () { toggleSelection(this); });
 
-            optionDiv.appendChild(button);
+                optionDiv.appendChild(button);
 
-            const priceToShow = translations.lang === 'cs' ? option.price : option.price_eur;
-            if (priceToShow > 0) {
-                const priceSpan = document.createElement('span');
-                priceSpan.className = 'text-sm text-[var(--color-secondary)] mt-1 animate-fade-in-up';
-                priceSpan.innerText = `+${priceToShow.toFixed(2)} ${translations.currency_symbol}`;
-                optionDiv.appendChild(priceSpan);
-            }
+                const priceToShow = translations.lang === 'cs' ? option.price : option.price_eur;
+                if (priceToShow > 0) {
+                    const priceSpan = document.createElement('span');
+                    priceSpan.className = 'text-sm text-[var(--color-secondary)] mt-1 animate-fade-in-up';
+                    priceSpan.innerText = `+${priceToShow.toFixed(2)} ${translations.currency_symbol || '€'}`;
+                    optionDiv.appendChild(priceSpan);
+                }
 
-            buttonDiv.appendChild(optionDiv);
+                buttonDiv.appendChild(optionDiv);
+            });
 
-            featurePrices[featureId] = featurePrices[featureId] || {};
-            featurePrices[featureId][option.name] = translations.lang === 'cs' ? option.price : option.price_eur;
+            featureDiv.appendChild(buttonDiv);
+            cont.appendChild(featureDiv);
         });
-
-        featureDiv.appendChild(buttonDiv);
-        container.appendChild(featureDiv);
     }
 
     updateUserUploadVisibility();
@@ -816,17 +1281,17 @@ function updateFeatureButtons(features) {
 
 function updateTotalPrice() {
     let total = basePrice;
-    let breakdown = basePrice > 0 ? [`${translations.base_price}: ${basePrice.toFixed(2)} ${translations.currency_symbol}`] : [];
+    let breakdown = basePrice > 0 ? [`${translations.base_price}: ${basePrice.toFixed(2)} ${translations.currency_symbol || '€'}`] : [];
 
     for (const [feature, data] of Object.entries(selectedFeatures)) {
         const priceToUse = translations.lang === 'cs' ? data.price : data.price_eur;
         if (priceToUse > 0) {
             total += priceToUse;
-            breakdown.push(`${data.name}: +${priceToUse.toFixed(2)} ${translations.currency_symbol}`);
+            breakdown.push(`${data.name}: +${priceToUse.toFixed(2)} ${translations.currency_symbol || '€'}`);
         }
     }
 
-    document.getElementById('total-price').textContent = `${total.toFixed(2)} ${translations.currency_symbol}`;
+    document.getElementById('total-price').textContent = `${total.toFixed(2)} ${translations.currency_symbol || '€'}`;
     document.getElementById('frm-caseForm-total_price').value = total.toFixed(2);
     document.getElementById('price-breakdown').innerHTML = breakdown.length > 0 ? breakdown.join('<br>') : translations.select_model_for_price;
 }
@@ -1046,15 +1511,174 @@ document.addEventListener('DOMContentLoaded', function() {
 document.addEventListener('DOMContentLoaded', function() {
     const form = document.getElementById('frm-caseForm');
     const submitButton = document.getElementById('frm-caseForm-submit');
-    if (form && submitButton) {
+    const addToCartButton = document.getElementById('addToCartBtn');
+    if (form && submitButton && addToCartButton) {
         submitButton.addEventListener('click', function(event) {
             if (!checkSelections(true)) {
                 event.preventDefault(); // Prevent form submission
             }
         });
+        addToCartButton.addEventListener('click', function(event) {
+            if (!checkSelections(true)) {
+                event.preventDefault(); // Prevent form submission
+            } else {
+                form.submit(); // Submit the form if all selections are valid
+            }
+        });
     } else {
-        console.error('Form or submit button not found');
+        console.error('Form or submit button or add to cart button not found');
     }
 });
 </script>
+
+<!-- 3D Viewer Script -->
+<script type="module">
+import * as THREE from 'three';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+scene = new THREE.Scene();
+scene.background = new THREE.Color(0xdadada);
+
+camera = new THREE.PerspectiveCamera(70, 1, 0.01, 100);
+camera.position.set(0, 0, 2);
+
+renderer = new THREE.WebGLRenderer({ antialias: true });
+renderer.physicallyCorrectLights = true;
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.25;
+
+// Lighting setup
+const ambientLight = new THREE.AmbientLight(0xffffff, 0.25);
+scene.add(ambientLight);
+
+const keyLight = new THREE.DirectionalLight(0xffffff, 1.3);
+keyLight.position.set(3, 2, 4);
+keyLight.castShadow = true;
+scene.add(keyLight);
+
+const fillLight = new THREE.DirectionalLight(0x99ccff, 0.5);
+fillLight.position.set(-2, 1, -3);
+scene.add(fillLight);
+
+const rimLight = new THREE.DirectionalLight(0xffffff, 0.8);
+rimLight.position.set(-3, 3, 5);
+scene.add(rimLight);
+
+const topLight = new THREE.DirectionalLight(0xffffff, 0.3);
+topLight.position.set(0, 5, 0);
+scene.add(topLight);
+
+controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.enablePan = false; // Disable panning for better mobile experience
+controls.minDistance = 1; // Set minimum zoom distance
+controls.maxDistance = 5; // Set maximum zoom distance
+controls.enableZoom = true; // Enable pinch-to-zoom
+controls.enableRotate = true; // Enable rotation
+controls.autoRotate = false; // Disable auto-rotation for manual control
+
+const loader = new GLTFLoader();
+
+function loadModel(path) {
+    loader.load(path, (gltf) => {
+        if (model) scene.remove(model);
+        model = gltf.scene;
+        model.scale.set(15, 15, 15);
+        scene.add(model);
+        targetMesh = model.getObjectByName('Frame');
+        // Reapply color
+        const selectedColorBtn = document.querySelector('#color-buttons-3d button.ring-2') || document.querySelector('#color-buttons button.ring-2');
+        if (selectedColorBtn && targetMesh) setMeshColor(targetMesh, selectedColorBtn.dataset.hex);
+        // Reapply visibility
+        updateFeatureVisibility();
+    });
+}
+
+const modal = document.getElementById('viewerModal');
+const container = document.getElementById('viewerContainer');
+
+// Handle window resize for responsive canvas
+function resizeRenderer() {
+    const w = container.clientWidth;
+    const h = container.clientHeight;
+    renderer.setSize(w, h);
+    camera.aspect = w / h;
+    camera.updateProjectionMatrix();
+}
+
+document.getElementById('frm-caseForm-model').addEventListener('change', function () {
+    const modelId = this.value;
+    if (modelId) {
+        fetch(threeDUrl.replace('#', encodeURIComponent(modelId)))
+            .then(response => response.json())
+            .then(data => {
+                if (data.path) {
+                    loadModel(data.path);
+                    document.getElementById('viewerModal').style.display = 'flex';
+                    document.getElementById('viewerContainer').appendChild(renderer.domElement);
+                    resizeRenderer();
+                    document.getElementById('viewerContainer').addEventListener('touchstart', handleTouchStart, { passive: false });
+                    document.getElementById('viewerContainer').addEventListener('touchmove', handleTouchMove, { passive: false });
+                    document.getElementById('viewerModal').scrollTop = 0;
+                    // Show button after successful load
+                    document.getElementById('openViewerBtn').style.display = 'block';
+
+                }
+            })
+            .catch(error => console.error('Error fetching 3D path:', error));
+    } else {
+        // Hide button if no model
+        document.getElementById('openViewerBtn').style.display = 'none';
+    }
+});
+
+// Handle touch events for better mobile interaction
+let touchStartX = 0;
+let touchStartY = 0;
+
+function handleTouchStart(event) {
+    if (event.touches.length === 1) {
+        touchStartX = event.touches[0].clientX;
+        touchStartY = event.touches[0].clientY;
+    }
+}
+
+function handleTouchMove(event) {
+    if (event.touches.length === 1) {
+        event.preventDefault(); // Prevent scrolling
+        const deltaX = event.touches[0].clientX - touchStartX;
+        const deltaY = event.touches[0].clientY - touchStartY;
+        controls.rotateLeft(deltaX * 0.005);
+        controls.rotateUp(deltaY * 0.005);
+        touchStartX = event.touches[0].clientX;
+        touchStartY = event.touches[0].clientY;
+    }
+}
+
+document.getElementById('closeViewerBtn').addEventListener('click', () => {
+    modal.style.display = 'none';
+    // Remove touch event listeners when closing
+    container.removeEventListener('touchstart', handleTouchStart);
+    container.removeEventListener('touchmove', handleTouchMove);
+});
+
+// Animate
+renderer.setAnimationLoop(() => {
+    controls.update();
+    renderer.render(scene, camera);
+});
+
+// Add resize event listener
+window.addEventListener('resize', resizeRenderer);
+
+function setMeshColor(mesh, color) {
+    mesh.traverse((child) => {
+        if (child.isMesh && child.material) {
+            child.material.color.set(color);
+        }
+    });
+}
+</script> 
 {/block}
