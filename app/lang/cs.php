@@ -131,6 +131,7 @@ return [
     'configurator.upload_failed_unknown' => 'Neznámá chyba',
     'configurator.base_price' => 'Základní cena',
     'configurator.select_model' => 'Vyberte model',
+    'configurator.loading_message'=> 'Načítání 3D modelu...',
     'configurator.select_model_for_price' => 'Vyberte model pro zobrazení ceny',
     'configurator.no_images_available' => 'Žádné obrázky nejsou k dispozici',
     'configurator.product_image' => 'Obrázek produktu',

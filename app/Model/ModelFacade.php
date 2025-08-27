@@ -138,30 +138,33 @@ class ModelFacade
         }
     }
 
-    public function updateModel(int $id, array $data): void
-    {
-        $this->database->beginTransaction();
-        try {
-            $colorIds = $data['color_ids'] ?? [];
-            $featureOptions = $data['feature_options'] ?? [];
-            $model_3d_file = $data['model_3d_file'] ?? null;
-            unset($data['color_ids'], $data['feature_options'], $data['model_3d_file']);
+   public function updateModel(int $id, array $data): void
+{
+    $this->database->beginTransaction();
+    try {
+        $colorIds = $data['color_ids'] ?? [];
+        $featureOptions = $data['feature_options'] ?? [];
+        $model_3d_file = $data['model_3d_file'] ?? null;
+        unset($data['color_ids'], $data['feature_options'], $data['model_3d_file']);
 
-            if ($model_3d_file && $model_3d_file->isOk()) {
-                $uploadDir = 'uploads/models/' . $id;
-                $data['model_3d_path'] = FileUploader::uploadGltfFile($model_3d_file, $uploadDir);
-            }
+        if ($model_3d_file && $model_3d_file->isOk()) {
+            $uploadDir = 'uploads/models/' . $id;
+            $data['model_3d_path'] = FileUploader::uploadGltfFile($model_3d_file, $uploadDir);
+        }
 
-            $this->database->table('models')->get($id)?->update($data);
+        $this->database->table('models')->get($id)?->update($data);
 
-            $this->database->table('model_colors')->where('model_id', $id)->delete();
-            foreach ($colorIds as $colorId) {
-                $this->database->table('model_colors')->insert([
-                    'model_id' => $id,
-                    'color_id' => $colorId,
-                ]);
-            }
+        // Update colors
+        $this->database->table('model_colors')->where('model_id', $id)->delete();
+        foreach ($colorIds as $colorId) {
+            $this->database->table('model_colors')->insert([
+                'model_id' => $id,
+                'color_id' => $colorId,
+            ]);
+        }
 
+        // Only update features if feature_options is provided
+        if (!empty($featureOptions)) {
             $this->database->table('model_features')->where('model_id', $id)->delete();
             foreach ($featureOptions as $featureId => $optionId) {
                 $this->database->table('model_features')->insert([
@@ -170,16 +173,17 @@ class ModelFacade
                     'feature_option_id' => $optionId,
                 ]);
             }
-
-            $this->database->commit();
-        } catch (UniqueConstraintViolationException $e) {
-            $this->database->rollBack();
-            throw new \Exception("Model '{$data['name']}' already exists for this manufacturer.");
-        } catch (\Exception $e) {
-            $this->database->rollBack();
-            throw $e;
         }
+
+        $this->database->commit();
+    } catch (UniqueConstraintViolationException $e) {
+        $this->database->rollBack();
+        throw new \Exception("Model '{$data['name']}' already exists for this manufacturer.");
+    } catch (\Exception $e) {
+        $this->database->rollBack();
+        throw $e;
     }
+}
 
     public function deleteModel(int $id): void
     {

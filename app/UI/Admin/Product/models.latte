@@ -144,6 +144,21 @@ document.addEventListener('DOMContentLoaded', () => {
         width: '100%'
     });
 
+    // Initialize Select2 for edit model modal
+    $('#editModelModal').on('shown.bs.modal', function () {
+        $('#frm-modelEditForm-color_ids, #frm-modelEditForm-feature_options').select2({
+            dropdownParent: $(this),
+            placeholder: 'Vyberte',
+            allowClear: true,
+            width: '100%'
+        });
+    });
+
+    // Destroy Select2 when modals are hidden
+    $('#editModelModal, #editManufacturerModal').on('hidden.bs.modal', function () {
+        $(this).find('select').select2('destroy');
+    });
+
     // Handle form submissions and AJAX links
     document.body.addEventListener('click', async e => {
         let el = e.target.closest('button[type="submit"], a.ajax');
@@ -160,6 +175,11 @@ document.addEventListener('DOMContentLoaded', () => {
             el.innerText = 'Ukládám...';
 
             try {
+                // Ensure Select2 values are included in the form data
+                $(form).find('select').each(function () {
+                    $(this).val($(this).select2('val')); // Force Select2 to update the select element
+                });
+
                 const res = await fetch(form.action, {
                     method: 'POST',
                     body: new FormData(form),
@@ -192,27 +212,10 @@ document.addEventListener('DOMContentLoaded', () => {
                 for (let snip in json.snippets) {
                     document.getElementById(snip).innerHTML = json.snippets[snip];
                 }
-                // Handle redirect for Defaultní obrázky button if needed
-                if (el.textContent.trim() === 'Defaultní obrázky') {
-                    window.location.href = el.href; // Force full page load for now
-                }
             } catch (error) {
                 console.error('Chyba:', error);
             }
         }
-    });
-
-    // Initialize Select2 for all selects in both modals
-    $('#editModelModal, #editManufacturerModal').on('shown.bs.modal', function () {
-        $(this).find('select').select2({
-            dropdownParent: $(this),
-            width: '100%'
-        });
-    });
-
-    // Destroy Select2 when modals are hidden to prevent memory leaks
-    $('#editModelModal, #editManufacturerModal').on('hidden.bs.modal', function () {
-        $(this).find('select').select2('destroy');
     });
 });
 </script>

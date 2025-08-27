@@ -131,6 +131,7 @@ return [
     'configurator.upload_failed_unknown' => 'Unknown error',
     'configurator.base_price' => 'Base Price',
     'configurator.select_model' => 'Select model',
+    'configurator.loading_message'=> 'Loading 3D Model...',
     'configurator.select_model_for_price' => 'Select a model to display the price',
     'configurator.no_images_available' => 'No images available',
     'configurator.product_image' => 'Product Image',
