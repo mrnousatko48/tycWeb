@@ -827,7 +827,6 @@ function checkSelections(showMessage = false) {
 
         // Check other fields only if manufacturer and model are selected
         const missingFields = [];
-        const missingFeatureGroups = [];
 
         // Check for missing fields and highlight relevant sections
         if (!colorSelected) {
@@ -840,7 +839,7 @@ function checkSelections(showMessage = false) {
             for (const featureName of Object.keys(availableFeatures)) {
                 const featureId = featureName.replace(/\s+/g, '_').toLowerCase();
                 if (!selectedFeatures[featureId]) {
-                    missingFeatureGroups.push(featureName);
+                    missingFields.push(featureName);
                     // Highlight the specific feature group header
                     const featureHeader = Array.from(document.querySelectorAll('#features h2, #features-3d h2')).find(h2 => h2.textContent === featureName);
                     if (featureHeader) {
@@ -848,7 +847,6 @@ function checkSelections(showMessage = false) {
                     }
                 }
             }
-            missingFields.push(...missingFeatureGroups);
         }
         if (requiresUpload && !fileUploadSuccess) {
             missingFields.push(translations.select_upload);
@@ -857,7 +855,8 @@ function checkSelections(showMessage = false) {
 
         // Show popup with specific missing fields
         if (missingFields.length > 0) {
-            showCustomPopup(translations.missing_fields.replace('{fields}', missingFields.join(', ')));
+            const message = `${translations.select_option}: ${missingFields.join(', ')}`;
+            showCustomPopup(message);
         }
     } else {
         // Clear highlights during normal interaction
