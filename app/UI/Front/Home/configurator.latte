@@ -665,9 +665,13 @@
                     </div>
                 </div>
                 <!-- Trigger button for 3D viewer -->
-                <div class="text-center my-6">
-                    <button id="openViewerBtn" style="display: none;" class="px-4 py-2 bg-[var(--color-primary)] text-white rounded hover:bg-[var(--color-accent)]">{_'configurator.3d_viewer'}</button>
-                </div>
+            <button 
+                id="openViewerBtn" 
+                type="button"
+                class="hidden px-4 py-2 bg-[var(--color-primary)] text-white rounded hover:bg-[var(--color-accent)] mt-4 mb-4">
+                {_'configurator.3d_viewer'}
+            </button>
+
 
                 <div id="color-container" style="display: none;">
                     <h2 class="text-lg font-semibold mt-6">{_'configurator.color'}</h2>
@@ -1539,6 +1543,7 @@ document.getElementById('frm-caseForm-model').addEventListener('change', functio
                     document.getElementById('viewerModal').scrollTop = 0;
                     // Show button after successful load
                     document.getElementById('openViewerBtn').style.display = 'block';
+
                 }
             })
             .catch(error => console.error('Error fetching 3D path:', error));
