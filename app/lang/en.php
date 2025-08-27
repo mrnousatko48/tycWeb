@@ -123,7 +123,7 @@ return [
     'configurator.upload_image' => 'Upload Image',
     'configurator.upload_description' => 'Upload your own image for a personalized case (PNG, JPG).',
     'configurator.upload_required' => 'File upload required',
-    'configurator.upload_success' => 'File successfully uploaded',
+    'configurator.upload_success' => 'File uploaded successfully',
     'configurator.missing_manufacturer_model' => 'Please select a manufacturer and model.',
     'configurator.missing_fields' => 'Please select',
     'configurator.select_file' => 'Please select a file to upload.',
