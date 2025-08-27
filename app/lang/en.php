@@ -130,10 +130,12 @@ return [
     'configurator.upload_failed' => 'Upload failed',
     'configurator.upload_failed_unknown' => 'Unknown error',
     'configurator.base_price' => 'Base Price',
+    'configurator.select_model' => 'Select model',
     'configurator.select_model_for_price' => 'Select a model to display the price',
     'configurator.no_images_available' => 'No images available',
     'configurator.product_image' => 'Product Image',
     'configurator.select_option' => 'Select',
+    'configurator.3d_viewer' => 'Open 3D Viewer',
     'cart.title' => 'Carts',
     'cart.price' => 'Price',
     'cart.summary' => 'Cart Summary',
@@ -276,4 +278,5 @@ return [
     'reset_password.invalid_code' => 'Invalid reset code.',
     'reset_password.success' => 'Password was successfully changed.',
     'gallery.title' => 'Gallery',
+    
 ];

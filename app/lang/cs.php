@@ -130,10 +130,12 @@ return [
     'configurator.upload_failed' => 'Nahrání selhalo',
     'configurator.upload_failed_unknown' => 'Neznámá chyba',
     'configurator.base_price' => 'Základní cena',
+    'configurator.select_model' => 'Vyberte model',
     'configurator.select_model_for_price' => 'Vyberte model pro zobrazení ceny',
     'configurator.no_images_available' => 'Žádné obrázky nejsou k dispozici',
     'configurator.product_image' => 'Obrázek produktu',
     'configurator.select_option' => 'Vyberte',
+    'configurator.3d_viewer' => 'Otevřít 3D Prohlížeč',
     'cart.title' => 'Košík',
     'cart.price' => 'Cena',
     'cart.summary' => 'Shrnutí košíku',
@@ -276,6 +278,7 @@ return [
     'reset_password.invalid_code' => 'Neplatný resetovací kód.',
     'reset_password.success' => 'Heslo bylo úspěšně změněno.',
     'gallery.title' => 'Galerie',
+    
     
     
 ];

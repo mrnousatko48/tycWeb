@@ -197,7 +197,7 @@
 
     .lightbox-nav:hover {
         background: rgba(0, 0, 0, 0.8);
-        transform: translateY(-50%) scale(1.1);
+        transform: translateY(-50%) scale(1.1I);
     }
 
     .lightbox-prev {
@@ -666,7 +666,7 @@
                 </div>
                 <!-- Trigger button for 3D viewer -->
                 <div class="text-center my-6">
-                    <button id="openViewerBtn" style="display: none;" class="px-4 py-2 bg-[var(--color-primary)] text-white rounded hover:bg-[var(--color-accent)]">Open 3D Viewer</button>
+                    <button id="openViewerBtn" style="display: none;" class="px-4 py-2 bg-[var(--color-primary)] text-white rounded hover:bg-[var(--color-accent)]">{_'configurator.3d_viewer'}</button>
                 </div>
 
                 <div id="color-container" style="display: none;">
@@ -724,6 +724,29 @@
     const threeDUrl = {$threeDUrl};
     const uploadUrl = {$uploadUrl};
     const defaultImagesUrl = {$defaultImagesUrl};
+    const translations = {
+        upload_required: '{_'configurator.upload_required' | noescape}',
+        upload_success: '{_'configurator.upload_success' | noescape}',
+        select_device: '{_'configurator.select_device' | noescape}',
+        select_manufacturer: '{_'form.manufacturer' | noescape}',
+        select_model: '{_'configurator.select_model' | noescape}',
+        select_color: '{_'configurator.color' | noescape}',
+        select_features: '{_'configurator.features' | noescape}',
+        select_upload: '{_'configurator.upload_image' | noescape}',
+        missing_manufacturer_model: '{_'configurator.missing_manufacturer_model' | noescape}',
+        missing_fields: '{_'configurator.missing_fields' | noescape}',
+        select_file: '{_'configurator.select_file' | noescape}',
+        upload_failed: '{_'configurator.upload_failed' | noescape}',
+        upload_failed_unknown: '{_'configurator.upload_failed_unknown' | noescape}',
+        base_price: '{_'configurator.base_price' | noescape}',
+        select_model_for_price: '{_'configurator.select_model_for_price' | noescape}',
+        no_images_available: '{_'configurator.no_images_available' | noescape}',
+        product_image: '{_'configurator.product_image' | noescape}',
+        select_option: '{if $lang == "cs"}Vyberte{else}Select{/if}',
+        currency_symbol: '{if $lang == "cs"}Kč{else}€{/if}',
+        lang: {$lang}
+    };
+    console.log('Current language:', translations.lang); // Debug language
 </script>
 
 <script n:syntax=off>
@@ -754,8 +777,8 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-    // Set currency symbol
-    document.getElementById('currency').textContent = translations.currency_symbol;
+    // Set currency symbol with fallback
+    document.getElementById('currency').textContent = translations.currency_symbol || '€';
     // Debug translations
     console.log('Translations:', translations);
 });
@@ -834,7 +857,7 @@ function checkSelections(showMessage = false) {
 
         // Show popup with specific missing fields
         if (missingFields.length > 0) {
-            showCustomPopup(`${translations.missing_fields}: ${missingFields.join(', ')}`);
+            showCustomPopup(translations.missing_fields.replace('{fields}', missingFields.join(', ')));
         }
     } else {
         // Clear highlights during normal interaction
@@ -846,7 +869,6 @@ function checkSelections(showMessage = false) {
 
     return allSelected;
 }
-
 
 function showCustomPopup(message) {
     const popup = document.getElementById('custom-popup');
@@ -890,7 +912,7 @@ function updateSelectbox(select, items) {
     defaultOption.setAttribute('disabled', 'disabled');
     defaultOption.setAttribute('selected', 'selected');
     defaultOption.innerText = select.id === 'frm-caseForm-model' 
-        ? `${translations.select_option} ${translations.select_model.toLowerCase()}`
+        ? translations.select_model // Use only select_model translation
         : (select.dataset.prompt || translations.select_option);
     select.appendChild(defaultOption);
     for (let id in items) {
@@ -1157,7 +1179,7 @@ function updateFeatureButtons(features) {
                 if (priceToShow > 0) {
                     const priceSpan = document.createElement('span');
                     priceSpan.className = 'text-sm text-[var(--color-secondary)] mt-1 animate-fade-in-up';
-                    priceSpan.innerText = `+${priceToShow.toFixed(2)} ${translations.currency_symbol}`;
+                    priceSpan.innerText = `+${priceToShow.toFixed(2)} ${translations.currency_symbol || '€'}`;
                     optionDiv.appendChild(priceSpan);
                 }
 
@@ -1175,17 +1197,17 @@ function updateFeatureButtons(features) {
 
 function updateTotalPrice() {
     let total = basePrice;
-    let breakdown = basePrice > 0 ? [`${translations.base_price}: ${basePrice.toFixed(2)} ${translations.currency_symbol}`] : [];
+    let breakdown = basePrice > 0 ? [`${translations.base_price}: ${basePrice.toFixed(2)} ${translations.currency_symbol || '€'}`] : [];
 
     for (const [feature, data] of Object.entries(selectedFeatures)) {
         const priceToUse = translations.lang === 'cs' ? data.price : data.price_eur;
         if (priceToUse > 0) {
             total += priceToUse;
-            breakdown.push(`${data.name}: +${priceToUse.toFixed(2)} ${translations.currency_symbol}`);
+            breakdown.push(`${data.name}: +${priceToUse.toFixed(2)} ${translations.currency_symbol || '€'}`);
         }
     }
 
-    document.getElementById('total-price').textContent = `${total.toFixed(2)} ${translations.currency_symbol}`;
+    document.getElementById('total-price').textContent = `${total.toFixed(2)} ${translations.currency_symbol || '€'}`;
     document.getElementById('frm-caseForm-total_price').value = total.toFixed(2);
     document.getElementById('price-breakdown').innerHTML = breakdown.length > 0 ? breakdown.join('<br>') : translations.select_model_for_price;
 }
@@ -1573,5 +1595,5 @@ function setMeshColor(mesh, color) {
         }
     });
 }
-</script>
+</script> 
 {/block}
