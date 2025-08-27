@@ -227,6 +227,12 @@ public function processForm(Form $form): void
                 throw new \RuntimeException('File upload failed: ' . ($file ? $file->getError() : 'No file uploaded.'));
             }
 
+            // Delete previous upload if it exists
+            $previousUploadId = $this->getHttpRequest()->getPost('previous_upload_id');
+            if ($previousUploadId) {
+                $this->modelFacade->deleteUserUpload((int)$previousUploadId);
+            }
+
             $upload = $this->modelFacade->addUserUpload($file, $file->getSanitizedName());
             if (!$upload || !isset($upload->id)) {
                 throw new \RuntimeException('Failed to process file upload: missing ID');

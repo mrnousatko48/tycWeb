@@ -993,6 +993,11 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             const formData = new FormData();
             formData.append('user_file', file);
+            // Include the previous upload_id if it exists
+            const previousUploadId = document.getElementById('frm-caseForm-user_upload_id').value;
+            if (previousUploadId) {
+                formData.append('previous_upload_id', previousUploadId);
+            }
             fetch(uploadUrl, {
                 method: 'POST',
                 body: formData,
