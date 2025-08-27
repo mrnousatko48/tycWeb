@@ -627,7 +627,7 @@
                 <!-- 3D Viewer container -->
                 <div id="viewerContainer" class="viewer-container"></div>
 
-                <!-- Side panel -->
+                                <!-- Side panel -->
                 <div class="side-panel">
                     <!-- Color controls -->
                     <div id="color-container-3d" style="display: none;">
@@ -637,6 +637,15 @@
 
                     <!-- Features controls -->
                     <div id="features-3d"></div>
+
+                    <!-- User upload container for 3D modal -->
+                    <div id="user-upload-container-3d" style="display: none;">
+                        <h2 class="text-lg font-semibold mt-6">{_'configurator.upload_image'}</h2>
+                        <p class="text-sm text-[var(--color-secondary)] mt-2">{_'configurator.upload_description'}</p>
+                        <div class="mt-3">
+                            <input type="file" id="frm-caseForm-user_file-3d" class="file-input w-full" accept=".png,.jpg,.jpeg">
+                        </div>
+                    </div>
 
                     <button id="addToCartBtn" class="submit-button w-full mt-4">{_'form.submit'}</button>
                 </div>
@@ -969,7 +978,9 @@ function updateFeaturesInput() {
 
 function updateUserUploadVisibility() {
     const userUploadContainer = document.getElementById('user-upload-container');
+    const userUploadContainer3D = document.getElementById('user-upload-container-3d');
     const userFileInput = document.getElementById('frm-caseForm-user_file');
+    const userFileInput3D = document.getElementById('frm-caseForm-user_file-3d');
     let showUpload = false;
 
     for (const data of Object.values(selectedFeatures)) {
@@ -979,16 +990,83 @@ function updateUserUploadVisibility() {
         }
     }
 
+    // Update visibility for both containers
     userUploadContainer.style.display = showUpload ? 'block' : 'none';
+    userUploadContainer3D.style.display = showUpload ? 'block' : 'none';
     userFileInput.disabled = !showUpload;
+    userFileInput3D.disabled = !showUpload;
+
     if (!showUpload) {
         userFileInput.value = '';
+        userFileInput3D.value = '';
         document.getElementById('frm-caseForm-user_upload_id').value = '';
         fileUploadSuccess = false;
         hideCustomPopup();
     }
     checkSelections();
 }
+
+// Update the file input event listener to handle both inputs
+document.addEventListener('DOMContentLoaded', function() {
+    const fileInputs = [
+        document.getElementById('frm-caseForm-user_file'),
+        document.getElementById('frm-caseForm-user_file-3d')
+    ].filter(input => input); // Filter out null inputs
+
+    fileInputs.forEach(fileInput => {
+        if (!fileInput) {
+            console.error('File input element not found:', fileInput);
+            return;
+        }
+
+        fileInput.addEventListener('change', function() {
+            const file = this.files[0];
+            if (!file) {
+                showCustomPopup(translations.select_file);
+                fileUploadSuccess = false;
+                document.getElementById('frm-caseForm-user_upload_id').value = '';
+                checkSelections();
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('user_file', file);
+
+            fetch(uploadUrl, {
+                method: 'POST',
+                body: formData,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                }
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Upload failed');
+                return response.json();
+            })
+            .then(data => {
+                if (data.success && data.upload_id) {
+                    document.getElementById('frm-caseForm-user_upload_id').value = data.upload_id;
+                    fileUploadSuccess = true;
+                    showCustomPopup(translations.upload_success);
+                    // Clear both inputs to prevent duplicate uploads
+                    fileInputs.forEach(input => input.value = '');
+                } else {
+                    showCustomPopup(`${translations.upload_failed}: ${data.error || translations.upload_failed_unknown}`);
+                    fileUploadSuccess = false;
+                    document.getElementById('frm-caseForm-user_upload_id').value = '';
+                }
+                checkSelections();
+            })
+            .catch(error => {
+                console.error('Upload error:', error);
+                showCustomPopup(`${translations.upload_failed}: ${error.message}`);
+                fileUploadSuccess = false;
+                document.getElementById('frm-caseForm-user_upload_id').value = '';
+                checkSelections();
+            });
+        });
+    });
+});
 
 function updateFeatureVisibility() {
     if (!model) return;
