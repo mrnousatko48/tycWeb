@@ -939,18 +939,21 @@ function updateSelectbox(select, items) {
 
 function toggleSelection(button) {
     const featureId = button.dataset.feature;
-    const group = button.parentElement.parentElement.querySelectorAll(`button[data-feature="${featureId}"]`);
-    const group3D = document.querySelectorAll(`#features-3d button[data-feature="${featureId}"]`);
+    const outsideButtons = document.querySelectorAll(`#features button[data-feature="${featureId}"]`);
+    const modalButtons = document.querySelectorAll(`#features-3d button[data-feature="${featureId}"]`);
 
-    group.forEach(btn => {
+    outsideButtons.forEach(btn => {
         btn.classList.remove('ring-2', 'ring-[var(--color-accent)]', 'ring-offset-2');
     });
-    group3D.forEach(btn => {
+    modalButtons.forEach(btn => {
         btn.classList.remove('ring-2', 'ring-[var(--color-accent)]', 'ring-offset-2');
     });
 
     button.classList.add('ring-2', 'ring-[var(--color-accent)]', 'ring-offset-2');
-    document.querySelector(`#features-3d button[data-feature="${featureId}"][data-value="${button.dataset.value}"]`)?.classList.add('ring-2', 'ring-[var(--color-accent)]', 'ring-offset-2');
+
+    const isModal = button.closest('#features-3d') !== null;
+    const counterpartContainer = isModal ? '#features' : '#features-3d';
+    document.querySelector(`${counterpartContainer} button[data-feature="${featureId}"][data-value="${button.dataset.value}"]`)?.classList.add('ring-2', 'ring-[var(--color-accent)]', 'ring-offset-2');
 
     selectedFeatures[featureId] = {
         name: button.dataset.value,
