@@ -31,12 +31,14 @@
         <div class="card-body table-responsive" n:snippet="featuresTable">
             <table class="table table-striped table-hover">
                 <thead class="table-light">
-                    <tr><th>Název</th><th class="text-end">Akce</th></tr>
+                    <tr><th>Název</th><th>Vysvětlivka</th><th>Zobrazit vysvětlivku</th><th class="text-end">Akce</th></tr>
                 </thead>
                 <tbody>
                     {foreach $features as $feature}
                         <tr>
                             <td>{$feature->name}</td>
+                            <td>{if $feature->explanation_mark}{$feature->explanation_mark|truncate:50}{else}—{/if}</td>
+                            <td>{if $feature->explanation_mark_enabled}Ano{else}Ne{/if}</td>
                             <td class="text-end">
                                 <a href="{link editFeature! $feature->id}" class="btn btn-sm btn-primary ajax edit-feature" data-bs-toggle="modal" data-bs-target="#editFeatureModal">✏️ Upravit</a>
                                 <a href="{link deleteFeature! $feature->id}" class="btn btn-sm btn-danger ajax">🗑 Smazat</a>

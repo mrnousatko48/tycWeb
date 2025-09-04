@@ -500,16 +500,28 @@ public function handleEditColor(int $colorId): void
         $form->addText('name_en', 'Název funkce (EN):')
             ->setRequired(false);
 
+        $form->addTextArea('explanation_mark', 'Vysvětlivka:')
+            ->setRequired(false);
+
+        $form->addCheckbox('explanation_mark_enabled', 'Zobrazit vysvětlivku')
+            ->setDefaultValue(false);
+
         $form->addSubmit('save', 'Přidat funkci');
 
         $form->onSuccess[] = [$this, 'featureFormSucceeded'];
         return $form;
     }
 
+
     public function featureFormSucceeded(Form $form, array $values): void
     {
         try {
-            $this->modelFacade->addFeature($values['name'], $values['name_en'] ?? null);
+            $this->modelFacade->addFeature(
+                $values['name'],
+                $values['name_en'] ?? null,
+                $values['explanation_mark'] ?? null,
+                $values['explanation_mark_enabled'] ?? false
+            );
             $this->flashMessage('Funkce byla úspěšně přidána!', 'success');
         } catch (\Exception $e) {
             $this->flashMessage($e->getMessage(), 'error');
@@ -537,19 +549,27 @@ public function handleEditColor(int $colorId): void
         $form->addText('name_en', 'Název funkce (EN):')
             ->setRequired(false);
 
+        $form->addTextArea('explanation_mark', 'Vysvětlivka:')
+            ->setRequired(false);
+
+        $form->addCheckbox('explanation_mark_enabled', 'Zobrazit vysvětlivku')
+            ->setDefaultValue(false);
+
         $form->addSubmit('save', 'Upravit funkci');
 
         $form->onSuccess[] = [$this, 'featureEditFormSucceeded'];
         return $form;
     }
 
-        public function featureEditFormSucceeded(Form $form, array $values): void
+    public function featureEditFormSucceeded(Form $form, array $values): void
     {
         try {
             $this->modelFacade->updateFeature(
                 (int)$values['id'],
                 $values['name'],
-                $values['name_en'] ?? null
+                $values['name_en'] ?? null,
+                $values['explanation_mark'] ?? null,
+                $values['explanation_mark_enabled'] ?? false
             );
             $this->flashMessage('Funkce byla úspěšně upravena!', 'success');
         } catch (\Exception $e) {
@@ -764,7 +784,7 @@ public function handleEditColor(int $colorId): void
         }
     }
 
-        public function handleEditFeature(int $featureId): void
+         public function handleEditFeature(int $featureId): void
     {
         $feature = $this->modelFacade->getFeature($featureId);
         if (!$feature) {
@@ -776,6 +796,8 @@ public function handleEditColor(int $colorId): void
             'id' => $feature->id,
             'name' => $feature->name,
             'name_en' => $feature->name_en,
+            'explanation_mark' => $feature->explanation_mark,
+            'explanation_mark_enabled' => (bool)$feature->explanation_mark_enabled,
         ]);
 
         if ($this->isAjax()) {

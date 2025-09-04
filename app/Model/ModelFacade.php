@@ -225,9 +225,9 @@ public function getFeaturesByModel(int $modelId, string $lang): array
         }
 
         $featureData = $this->database->table('features')
-            ->select('id, name_' . $lang . ' AS name')
+            ->select('id, name_' . $lang . ' AS name, explanation_mark, explanation_mark_enabled')
             ->where('id', array_keys($features))
-            ->fetchPairs('id', 'name');
+            ->fetchPairs('id', null);
 
         $options = $this->database->table('feature_options')
             ->select('id, feature_id, name_' . $lang . ' AS name, price, price_eur, allow_user_upload, mesh_name, visible')
@@ -237,14 +237,20 @@ public function getFeaturesByModel(int $modelId, string $lang): array
 
         $result = [];
         foreach ($options as $option) {
-            $featureName = $featureData[$option->feature_id] ?? 'Unknown Feature';
-            $result[$featureName][] = [
+            $feature = $featureData[$option->feature_id] ?? null;
+            $featureName = $feature ? $feature->name : 'Unknown Feature';
+            $result[$featureName] = [
+                'options' => $result[$featureName]['options'] ?? [],
+                'explanation_mark' => $feature->explanation_mark ?? null,
+                'explanation_mark_enabled' => $feature->explanation_mark_enabled ?? false,
+            ];
+            $result[$featureName]['options'][] = [
                 'name' => $option->name,
                 'price' => (float)$option->price,
                 'price_eur' => (float)$option->price_eur,
                 'allow_user_upload' => (bool)$option->allow_user_upload,
                 'mesh_name' => $option->mesh_name,
-                'visible' => $option->visible !== null ? (bool)$option->visible : null
+                'visible' => $option->visible !== null ? (bool)$option->visible : null,
             ];
         }
 
@@ -330,29 +336,33 @@ public function updateColor(int $id, string $name, ?string $hexCode = null, ?str
         return $this->database->table('features')->get($id);
     }
 
-   public function addFeature(string $name, ?string $name_en = null): ActiveRow
+    public function addFeature(string $name, ?string $name_en = null, ?string $explanation_mark = null, bool $explanation_mark_enabled = false): ActiveRow
     {
         try {
             return $this->database->table('features')->insert([
                 'name' => trim($name),
                 'name_en' => $name_en ? trim($name_en) : null,
+                'explanation_mark' => $explanation_mark,
+                'explanation_mark_enabled' => $explanation_mark_enabled,
             ]);
         } catch (UniqueConstraintViolationException $e) {
             throw new \Exception("Feature '$name' already exists.");
         }
     }
 
-    public function updateFeature(int $id, string $name, ?string $name_en = null): void
+    public function updateFeature(int $id, string $name, ?string $name_en = null, ?string $explanation_mark = null, bool $explanation_mark_enabled = false): void
     {
         try {
             $this->database->table('features')->get($id)?->update([
                 'name' => trim($name),
                 'name_en' => $name_en ? trim($name_en) : null,
+                'explanation_mark' => $explanation_mark,
+                'explanation_mark_enabled' => $explanation_mark_enabled,
             ]);
         } catch (UniqueConstraintViolationException $e) {
             throw new \Exception("Feature '$name' already exists.");
         }
-        }
+    }
 
     public function deleteFeature(int $id): void
     {
