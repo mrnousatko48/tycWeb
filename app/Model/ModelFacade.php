@@ -148,7 +148,7 @@ class ModelFacade
         unset($data['color_ids'], $data['feature_options'], $data['model_3d_file']);
 
         if ($model_3d_file && $model_3d_file->isOk()) {
-            $uploadDir = 'uploads/models/' . $id;
+            $uploadDir = 'Uploads/models/' . $id;
             $data['model_3d_path'] = FileUploader::uploadGltfFile($model_3d_file, $uploadDir);
         }
 
@@ -163,16 +163,14 @@ class ModelFacade
             ]);
         }
 
-        // Only update features if feature_options is provided
-        if (!empty($featureOptions)) {
-            $this->database->table('model_features')->where('model_id', $id)->delete();
-            foreach ($featureOptions as $featureId => $optionId) {
-                $this->database->table('model_features')->insert([
-                    'model_id' => $id,
-                    'feature_id' => $featureId,
-                    'feature_option_id' => $optionId,
-                ]);
-            }
+        // Update features (always clear and update, even if featureOptions is empty)
+        $this->database->table('model_features')->where('model_id', $id)->delete();
+        foreach ($featureOptions as $featureId => $optionId) {
+            $this->database->table('model_features')->insert([
+                'model_id' => $id,
+                'feature_id' => $featureId,
+                'feature_option_id' => $optionId,
+            ]);
         }
 
         $this->database->commit();
