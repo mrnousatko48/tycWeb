@@ -148,7 +148,7 @@ class ModelFacade
         unset($data['color_ids'], $data['feature_options'], $data['model_3d_file']);
 
         if ($model_3d_file && $model_3d_file->isOk()) {
-            $uploadDir = 'Uploads/models/' . $id;
+            $uploadDir = 'uploads/models/' . $id;
             $data['model_3d_path'] = FileUploader::uploadGltfFile($model_3d_file, $uploadDir);
         }
 
@@ -163,14 +163,16 @@ class ModelFacade
             ]);
         }
 
-        // Update features (always clear and update, even if featureOptions is empty)
-        $this->database->table('model_features')->where('model_id', $id)->delete();
-        foreach ($featureOptions as $featureId => $optionId) {
-            $this->database->table('model_features')->insert([
-                'model_id' => $id,
-                'feature_id' => $featureId,
-                'feature_option_id' => $optionId,
-            ]);
+        // Only update features if feature_options is provided
+        if (!empty($featureOptions)) {
+            $this->database->table('model_features')->where('model_id', $id)->delete();
+            foreach ($featureOptions as $featureId => $optionId) {
+                $this->database->table('model_features')->insert([
+                    'model_id' => $id,
+                    'feature_id' => $featureId,
+                    'feature_option_id' => $optionId,
+                ]);
+            }
         }
 
         $this->database->commit();
@@ -225,9 +227,9 @@ public function getFeaturesByModel(int $modelId, string $lang): array
         }
 
         $featureData = $this->database->table('features')
-            ->select('id, name_' . $lang . ' AS name, explanation_mark, explanation_mark_enabled')
+            ->select('id, name_' . $lang . ' AS name')
             ->where('id', array_keys($features))
-            ->fetchPairs('id', null);
+            ->fetchPairs('id', 'name');
 
         $options = $this->database->table('feature_options')
             ->select('id, feature_id, name_' . $lang . ' AS name, price, price_eur, allow_user_upload, mesh_name, visible')
@@ -237,20 +239,14 @@ public function getFeaturesByModel(int $modelId, string $lang): array
 
         $result = [];
         foreach ($options as $option) {
-            $feature = $featureData[$option->feature_id] ?? null;
-            $featureName = $feature ? $feature->name : 'Unknown Feature';
-            $result[$featureName] = [
-                'options' => $result[$featureName]['options'] ?? [],
-                'explanation_mark' => $feature->explanation_mark ?? null,
-                'explanation_mark_enabled' => $feature->explanation_mark_enabled ?? false,
-            ];
-            $result[$featureName]['options'][] = [
+            $featureName = $featureData[$option->feature_id] ?? 'Unknown Feature';
+            $result[$featureName][] = [
                 'name' => $option->name,
                 'price' => (float)$option->price,
                 'price_eur' => (float)$option->price_eur,
                 'allow_user_upload' => (bool)$option->allow_user_upload,
                 'mesh_name' => $option->mesh_name,
-                'visible' => $option->visible !== null ? (bool)$option->visible : null,
+                'visible' => $option->visible !== null ? (bool)$option->visible : null
             ];
         }
 
