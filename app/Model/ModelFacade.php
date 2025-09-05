@@ -217,41 +217,43 @@ class ModelFacade
     }
 
 public function getFeaturesByModel(int $modelId, string $lang): array
-    {
-        $features = $this->database->table('model_features')
-            ->where('model_id', $modelId)
-            ->fetchPairs('feature_id', null);
+{
+    $features = $this->database->table('model_features')
+        ->where('model_id', $modelId)
+        ->fetchPairs('feature_id', null);
 
-        if (!$features) {
-            return [];
-        }
-
-        $featureData = $this->database->table('features')
-            ->select('id, name_' . $lang . ' AS name')
-            ->where('id', array_keys($features))
-            ->fetchPairs('id', 'name');
-
-        $options = $this->database->table('feature_options')
-            ->select('id, feature_id, name_' . $lang . ' AS name, price, price_eur, allow_user_upload, mesh_name, visible')
-            ->where('feature_id', array_keys($features))
-            ->order('feature_id')
-            ->fetchAll();
-
-        $result = [];
-        foreach ($options as $option) {
-            $featureName = $featureData[$option->feature_id] ?? 'Unknown Feature';
-            $result[$featureName][] = [
-                'name' => $option->name,
-                'price' => (float)$option->price,
-                'price_eur' => (float)$option->price_eur,
-                'allow_user_upload' => (bool)$option->allow_user_upload,
-                'mesh_name' => $option->mesh_name,
-                'visible' => $option->visible !== null ? (bool)$option->visible : null
-            ];
-        }
-
-        return $result;
+    if (!$features) {
+        return [];
     }
+
+    $featureData = $this->database->table('features')
+        ->select('id, name_' . $lang . ' AS name, explanation_mark, explanation_mark_enabled')
+        ->where('id', array_keys($features))
+        ->fetchPairs('id', null);
+
+    $options = $this->database->table('feature_options')
+        ->select('id, feature_id, name_' . $lang . ' AS name, price, price_eur, allow_user_upload, mesh_name, visible')
+        ->where('feature_id', array_keys($features))
+        ->order('feature_id')
+        ->fetchAll();
+
+    $result = [];
+    foreach ($options as $option) {
+        $featureName = $featureData[$option->feature_id]['name'] ?? 'Unknown Feature';
+        $result[$featureName][] = [
+            'name' => $option->name,
+            'price' => (float)$option->price,
+            'price_eur' => (float)$option->price_eur,
+            'allow_user_upload' => (bool)$option->allow_user_upload,
+            'mesh_name' => $option->mesh_name,
+            'visible' => $option->visible !== null ? (bool)$option->visible : null,
+            'explanation_mark' => $featureData[$option->feature_id]['explanation_mark'] ?? null,
+            'explanation_mark_enabled' => (bool)$featureData[$option->feature_id]['explanation_mark_enabled']
+        ];
+    }
+
+    return $result;
+}
 
     public function getImagesByModel(int $modelId): array
     {

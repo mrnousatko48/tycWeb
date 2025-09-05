@@ -644,6 +644,26 @@
     .hidden {
         display: none;
     }
+    .explanation-button {
+    background-color: var(--color-button-bg);
+    color: var(--color-button-text);
+    border: 1px solid var(--color-secondary);
+    border-radius: 50%;
+    width: 1.5rem;
+    height: 1.5rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-left: 0.5rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+.explanation-button:hover {
+    background-color: var(--color-primary);
+    color: #ffffff;
+    transform: scale(1.1);
+}
 </style>
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 grid grid-cols-1 md:grid-cols-2 gap-8 items-start animate-fade-in-up carousel-container">
     <div class="w-full">
@@ -1180,13 +1200,26 @@ function updateFeatureButtons(features) {
     selectedFeatures = {};
     for (const [featureName, options] of Object.entries(features)) {
         const featureId = featureName.replace(/\s+/g, '_').toLowerCase();
+        const explanationMark = options[0]?.explanation_mark || null; // Assuming explanation_mark is same for all options in a feature
+        const explanationMarkEnabled = options[0]?.explanation_mark_enabled || false;
         [container, container3D].forEach(cont => {
             const featureDiv = document.createElement('div');
             featureDiv.className = 'mt-6 animate-fade-in-up';
+            const headerDiv = document.createElement('div');
+            headerDiv.className = 'flex items-center';
             const h2 = document.createElement('h2');
             h2.className = 'text-lg font-semibold';
             h2.innerText = featureName;
-            featureDiv.appendChild(h2);
+            headerDiv.appendChild(h2);
+            if (explanationMarkEnabled && explanationMark) {
+                const explanationBtn = document.createElement('button');
+                explanationBtn.className = 'explanation-button';
+                explanationBtn.innerText = '?';
+                explanationBtn.title = 'Explanation';
+                explanationBtn.addEventListener('click', () => showCustomPopup(explanationMark));
+                headerDiv.appendChild(explanationBtn);
+            }
+            featureDiv.appendChild(headerDiv);
             const buttonDiv = document.createElement('div');
             buttonDiv.className = 'mt-3 flex flex-wrap gap-3';
             options.forEach(option => {
