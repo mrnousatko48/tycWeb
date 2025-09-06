@@ -303,6 +303,58 @@
         background: rgba(0, 0, 0, 0.4);
     }
 
+    .explanation-button {
+        background-color: var(--color-button-bg);
+        color: var(--color-button-text);
+        border: 1px solid var(--color-secondary);
+        border-radius: 50%;
+        width: 1.5rem;
+        height: 1.5rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        margin-left: 0.5rem;
+        cursor: pointer;
+        transition: background-color 0.3s ease, transform 0.2s ease;
+        position: relative;
+        z-index: 50;
+    }
+
+    .explanation-button:hover {
+        background-color: var(--color-primary);
+        color: #ffffff;
+        transform: scale(1.1);
+    }
+
+.explanation-tooltip {
+    position: absolute;
+    top: calc(100% + 0.5rem);
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: var(--color-button-bg);
+    color: var(--color-button-text);
+    padding: 0.5rem 1rem;
+    border-radius: 0.5rem;
+    border: 1px solid var(--color-secondary);
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2); 
+    font-size: 0.9rem;
+
+    max-width: 300px;
+    width: max-content;  
+    white-space: normal;     
+    word-wrap: break-word;   
+
+    text-align: left;
+    display: none;
+    pointer-events: none;
+}
+
+
+    .explanation-button:hover .explanation-tooltip,
+    .explanation-button.active .explanation-tooltip {
+        display: block;
+    }
+
     .ring-2 { outline: 2px solid; outline-offset: 2px; }
     .ring-red-500 { outline-color: var(--color-error); }
     .p-1 { padding: 0.25rem; }
@@ -636,34 +688,9 @@
         animation: spin 1s linear infinite;
     }
 
-    @keyframes spin {
-        0% { transform: rotate(0deg); }
-        100% { transform: rotate(360deg); }
-    }
-
     .hidden {
         display: none;
     }
-    .explanation-button {
-    background-color: var(--color-button-bg);
-    color: var(--color-button-text);
-    border: 1px solid var(--color-secondary);
-    border-radius: 50%;
-    width: 1.5rem;
-    height: 1.5rem;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-left: 0.5rem;
-    cursor: pointer;
-    transition: background-color 0.3s ease, transform 0.2s ease;
-}
-
-.explanation-button:hover {
-    background-color: var(--color-primary);
-    color: #ffffff;
-    transform: scale(1.1);
-}
 </style>
 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 grid grid-cols-1 md:grid-cols-2 gap-8 items-start animate-fade-in-up carousel-container">
     <div class="w-full">
@@ -1013,7 +1040,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             const formData = new FormData();
             formData.append('user_file', file);
-            // Include the previous upload_id if it exists
             const previousUploadId = document.getElementById('frm-caseForm-user_upload_id').value;
             if (previousUploadId) {
                 formData.append('previous_upload_id', previousUploadId);
@@ -1200,7 +1226,7 @@ function updateFeatureButtons(features) {
     selectedFeatures = {};
     for (const [featureName, options] of Object.entries(features)) {
         const featureId = featureName.replace(/\s+/g, '_').toLowerCase();
-        const explanationMark = options[0]?.explanation_mark || null; // Assuming explanation_mark is same for all options in a feature
+        const explanationMark = options[0]?.explanation_mark || null;
         const explanationMarkEnabled = options[0]?.explanation_mark_enabled || false;
         [container, container3D].forEach(cont => {
             const featureDiv = document.createElement('div');
@@ -1216,7 +1242,23 @@ function updateFeatureButtons(features) {
                 explanationBtn.className = 'explanation-button';
                 explanationBtn.innerText = '?';
                 explanationBtn.title = 'Explanation';
-                explanationBtn.addEventListener('click', () => showCustomPopup(explanationMark));
+                const tooltip = document.createElement('div');
+                tooltip.className = 'explanation-tooltip';
+                tooltip.innerText = explanationMark;
+                explanationBtn.appendChild(tooltip);
+                explanationBtn.addEventListener('mouseenter', () => {
+                    tooltip.style.display = 'block';
+                });
+                explanationBtn.addEventListener('mouseleave', () => {
+                    tooltip.style.display = 'none';
+                });
+                explanationBtn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    tooltip.style.display = 'block';
+                    setTimeout(() => {
+                        tooltip.style.display = 'none';
+                    }, 2000);
+                });
                 headerDiv.appendChild(explanationBtn);
             }
             featureDiv.appendChild(headerDiv);
@@ -1471,7 +1513,7 @@ const loader = new GLTFLoader();
 
 function loadModel(path) {
     const loadingScreen = document.getElementById('loadingScreen');
-    loadingScreen.classList.remove('hidden'); // Ensure loading screen is visible
+    loadingScreen.classList.remove('hidden');
     loader.load(path, (gltf) => {
         if (model) scene.remove(model);
         model = gltf.scene;
@@ -1481,14 +1523,13 @@ function loadModel(path) {
         const selectedColorBtn = document.querySelector('#color-buttons-3d button.ring-2') || document.querySelector('#color-buttons button.ring-2');
         if (selectedColorBtn && targetMesh) setMeshColor(targetMesh, selectedColorBtn.dataset.hex);
         updateFeatureVisibility();
-        // Wait for the next frame to ensure rendering
         requestAnimationFrame(() => {
             renderer.render(scene, camera);
-            loadingScreen.classList.add('hidden'); // Hide loading screen after rendering
+            loadingScreen.classList.add('hidden');
         });
     }, undefined, (error) => {
         console.error('Error loading model:', error);
-        loadingScreen.classList.add('hidden'); // Hide on error
+        loadingScreen.classList.add('hidden');
     });
 }
 

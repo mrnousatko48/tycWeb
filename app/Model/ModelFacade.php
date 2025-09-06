@@ -227,7 +227,7 @@ public function getFeaturesByModel(int $modelId, string $lang): array
     }
 
     $featureData = $this->database->table('features')
-        ->select('id, name_' . $lang . ' AS name, explanation_mark, explanation_mark_enabled')
+        ->select('id, name_' . $lang . ' AS name, explanation_mark_' . $lang . ' AS explanation_mark, explanation_mark_enabled')
         ->where('id', array_keys($features))
         ->fetchPairs('id', null);
 
