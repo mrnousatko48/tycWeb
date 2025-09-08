@@ -334,13 +334,14 @@ public function updateColor(int $id, string $name, ?string $hexCode = null, ?str
         return $this->database->table('features')->get($id);
     }
 
-    public function addFeature(string $name, ?string $name_en = null, ?string $explanation_mark = null, bool $explanation_mark_enabled = false): ActiveRow
+public function addFeature(string $name, ?string $name_en = null, ?string $explanation_mark_cs = null, ?string $explanation_mark_en = null, bool $explanation_mark_enabled = false): ActiveRow
     {
         try {
             return $this->database->table('features')->insert([
                 'name' => trim($name),
                 'name_en' => $name_en ? trim($name_en) : null,
-                'explanation_mark' => $explanation_mark,
+                'explanation_mark_cs' => $explanation_mark_cs,
+                'explanation_mark_en' => $explanation_mark_en,
                 'explanation_mark_enabled' => $explanation_mark_enabled,
             ]);
         } catch (UniqueConstraintViolationException $e) {
@@ -348,13 +349,14 @@ public function updateColor(int $id, string $name, ?string $hexCode = null, ?str
         }
     }
 
-    public function updateFeature(int $id, string $name, ?string $name_en = null, ?string $explanation_mark = null, bool $explanation_mark_enabled = false): void
+    public function updateFeature(int $id, string $name, ?string $name_en = null, ?string $explanation_mark_cs = null, ?string $explanation_mark_en = null, bool $explanation_mark_enabled = false): void
     {
         try {
             $this->database->table('features')->get($id)?->update([
                 'name' => trim($name),
                 'name_en' => $name_en ? trim($name_en) : null,
-                'explanation_mark' => $explanation_mark,
+                'explanation_mark_cs' => $explanation_mark_cs,
+                'explanation_mark_en' => $explanation_mark_en,
                 'explanation_mark_enabled' => $explanation_mark_enabled,
             ]);
         } catch (UniqueConstraintViolationException $e) {

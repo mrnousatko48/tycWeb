@@ -500,7 +500,10 @@ public function handleEditColor(int $colorId): void
         $form->addText('name_en', 'Název funkce (EN):')
             ->setRequired(false);
 
-        $form->addTextArea('explanation_mark', 'Vysvětlivka:')
+        $form->addTextArea('explanation_mark_cs', 'Vysvětlivka (CZ):')
+            ->setRequired(false);
+
+        $form->addTextArea('explanation_mark_en', 'Vysvětlivka (EN):')
             ->setRequired(false);
 
         $form->addCheckbox('explanation_mark_enabled', 'Zobrazit vysvětlivku')
@@ -512,14 +515,14 @@ public function handleEditColor(int $colorId): void
         return $form;
     }
 
-
     public function featureFormSucceeded(Form $form, array $values): void
     {
         try {
             $this->modelFacade->addFeature(
                 $values['name'],
                 $values['name_en'] ?? null,
-                $values['explanation_mark'] ?? null,
+                $values['explanation_mark_cs'] ?? null,
+                $values['explanation_mark_en'] ?? null,
                 $values['explanation_mark_enabled'] ?? false
             );
             $this->flashMessage('Funkce byla úspěšně přidána!', 'success');
@@ -549,7 +552,10 @@ public function handleEditColor(int $colorId): void
         $form->addText('name_en', 'Název funkce (EN):')
             ->setRequired(false);
 
-        $form->addTextArea('explanation_mark', 'Vysvětlivka:')
+        $form->addTextArea('explanation_mark_cs', 'Vysvětlivka (CZ):')
+            ->setRequired(false);
+
+        $form->addTextArea('explanation_mark_en', 'Vysvětlivka (EN):')
             ->setRequired(false);
 
         $form->addCheckbox('explanation_mark_enabled', 'Zobrazit vysvětlivku')
@@ -568,7 +574,8 @@ public function handleEditColor(int $colorId): void
                 (int)$values['id'],
                 $values['name'],
                 $values['name_en'] ?? null,
-                $values['explanation_mark'] ?? null,
+                $values['explanation_mark_cs'] ?? null,
+                $values['explanation_mark_en'] ?? null,
                 $values['explanation_mark_enabled'] ?? false
             );
             $this->flashMessage('Funkce byla úspěšně upravena!', 'success');
@@ -585,7 +592,6 @@ public function handleEditColor(int $colorId): void
             $this->redirect('features');
         }
     }
-
    public function createComponentFeatureOptionForm(): Form
     {
         $form = new Form;
@@ -784,7 +790,7 @@ public function handleEditColor(int $colorId): void
         }
     }
 
-         public function handleEditFeature(int $featureId): void
+           public function handleEditFeature(int $featureId): void
     {
         $feature = $this->modelFacade->getFeature($featureId);
         if (!$feature) {
@@ -796,7 +802,8 @@ public function handleEditColor(int $colorId): void
             'id' => $feature->id,
             'name' => $feature->name,
             'name_en' => $feature->name_en,
-            'explanation_mark' => $feature->explanation_mark,
+            'explanation_mark_cs' => $feature->explanation_mark_cs,
+            'explanation_mark_en' => $feature->explanation_mark_en,
             'explanation_mark_enabled' => (bool)$feature->explanation_mark_enabled,
         ]);
 
