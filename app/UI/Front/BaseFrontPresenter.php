@@ -76,6 +76,12 @@ abstract class BaseFrontPresenter extends Presenter
 
         // Fetch logo paths for light and dark themes
         $this->template->logos = $this->pageFacade->getLogos();
+
+        $shutdown = $this->userFacade->getSetting('shutdown');
+            if ($shutdown === '1' && $this->getAction() !== 'shutdown') {
+                echo 'Aplikace byla vypnuta vývojářem.';
+                $this->terminate();
+}
     }
 
     protected function detectPreferredLanguage(string $acceptLanguage): string

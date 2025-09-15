@@ -25,6 +25,20 @@ final class UserFacade implements Authenticator
         $this->database = $database;
     }
 
+    
+        public function getSetting(string $name): string
+        {
+            $row = $this->database->table('settings')->where('name', $name)->fetch();
+            return $row ? $row->value : '0';
+        }
+
+    public function setSetting(string $name, string $value): void
+    {
+        $this->database->table('settings')->update([
+            'name' => $name,
+            'value' => $value,
+        ]);
+    }
 
     /**
      * Adds a new user or throws exception if duplicate.
@@ -87,10 +101,10 @@ final class UserFacade implements Authenticator
             ]
         );
     }
-    public function getUsers(): \Nette\Database\Table\Selection
-    {
-        return $this->database->table('users');
-    }
+        public function getUsers(): \Nette\Database\Table\Selection
+        {
+            return $this->database->table('users')->where('role != ?', 'DEVELOPER');
+        }
 
     public function getUserById(int $id): ?\Nette\Database\Table\ActiveRow
     {

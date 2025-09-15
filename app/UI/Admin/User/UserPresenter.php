@@ -24,7 +24,7 @@ final class UserPresenter extends Presenter
             $this->redirect(':Front:Sign:in', ['backlink' => $this->storeRequest()]);
         }
 
-        if (!$this->getUser()->isInRole('ADMIN')) {
+        if (!$this->getUser()->isInRole('ADMIN') && !$this->getUser()->isInRole('DEVELOPER')) {
             $this->flashMessage('Nemáš oprávnění.', 'warning');
             $this->redirect(':Front:Sign:in');
         }
@@ -109,4 +109,33 @@ final class UserPresenter extends Presenter
 
         return $form;
     }
+
+    public function actionShutdown(): void
+{
+    if (!$this->getUser()->isInRole('DEVELOPER')) {
+        $this->error('Nemáš oprávnění.');
+    }
+}
+
+public function renderShutdown(): void
+{
+    $this->template->shutdown = $this->userFacade->getSetting('shutdown') === '1';
+}
+
+protected function createComponentShutdownForm(): \Nette\Application\UI\Form
+{
+    $form = new \Nette\Application\UI\Form;
+
+    $form->addSubmit('toggle', 'Přepnout vypnutí');
+
+    $form->onSuccess[] = function ($form): void {
+        $current = $this->userFacade->getSetting('shutdown');
+        $new = $current === '0' ? '1' : '0';
+        $this->userFacade->setSetting('shutdown', $new);
+        $this->flashMessage('Stav aplikace aktualizován.', 'success');
+        $this->redirect('this');
+    };
+
+    return $form;
+}
 }
